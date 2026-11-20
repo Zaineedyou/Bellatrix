@@ -8,6 +8,7 @@
 
     <string name="linux_step_download">Downloading Void Linux</string>
     <string name="linux_step_configure">Configuring the system</string>
+    <string name="linux_step_foot">Preparing the terminal config</string>
     <string name="linux_step_forks">Checking that programs can start</string>
     <string name="linux_step_keyring">Initializing xbps keyring</string>
     <string name="linux_step_no_kernel">Removing kernel packages</string>

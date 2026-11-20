@@ -189,6 +189,18 @@ class Bootstrap(
         listOf(
             Step("rootfs", Stage.Download, R.string.linux_step_download, network = true) { installRootfs() },
             Step("etc-2", Stage.Configure, R.string.linux_step_configure, network = false) { configure() },
+            // foot aborts if either include is missing. Omarchy's theme isn't part of
+            // this port, so seed both targets; existing installs get this as an update.
+            Step(
+                "foot-includes-1",
+                Stage.Configure,
+                R.string.linux_step_foot,
+                network = false,
+                isDone = {
+                    File(proot.home, ".local/state/omarchy/current/theme/foot.ini").isFile &&
+                        File(proot.home, TerminalFont.PATH.removePrefix("~/")).isFile
+                },
+            ) { ensureFootIncludes() },
             Step("forks-1", Stage.Configure, R.string.linux_step_forks, network = false, isDone = { journal.setupComplete }) { checkForks() },
             Step("packages-${distro.id}-1", Stage.Packages, R.string.linux_step_packages, network = true) { guest(distro.installScript()) },
             Step("keymap-1", Stage.Packages, R.string.linux_step_keymap, network = false, isDone = { proot.keymap.exists() }) { compileKeymap() },
@@ -579,6 +591,17 @@ class Bootstrap(
             parentFile?.mkdirs()
             writeText(FOOT_INI)
         }
+        ensureFootIncludes()
+    }
+
+    /** Create both files referenced by FOOT_INI; foot exits at startup when an include is absent. */
+    private fun ensureFootIncludes() {
+        val theme = File(proot.home, ".local/state/omarchy/current/theme/foot.ini")
+        val font = File(proot.home, TerminalFont.PATH.removePrefix("~/"))
+        theme.parentFile?.mkdirs()
+        if (!theme.isFile) theme.writeText("# Bellatrix: no Omarchy theme is installed.\n")
+        font.parentFile?.mkdirs()
+        if (!font.isFile) font.writeText("[main]\nfont=JetBrains Mono:size=8.0\n")
     }
 
     private fun compileKeymap() {
