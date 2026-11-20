@@ -94,6 +94,13 @@
         </activity>
 
         <activity
+            android:name=".OwlHomeActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:exported="false"
+            android:theme="@style/Theme.Bellatrix"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation"
             android:exported="true"

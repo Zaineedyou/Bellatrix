@@ -381,7 +381,11 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         // The terminal no longer opens a placeholder tile: launch foot directly
         // and let its toplevel arrive as a floating UILinuxWindow below.
         if (str == "UITerminal" && str2.isEmpty()) {
-            LinuxRuntime.get(this).terminal(null, "Terminal")
+            if (com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
+                (application as App).runtime.terminal(null, "Terminal")
+            } else {
+                LinuxRuntime.get(this).terminal(null, "Terminal")
+            }
             return
         }
         val callbackA = { s: String -> IntentApps.b(this.W ?: this, s, item, this) }
@@ -987,22 +991,24 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         var bByte: Byte = 6
         val i3 = 4
         super.onCreate(bundle)
-        LinuxRuntime.get(this).apply {
-            onLinuxUnavailable = { this@MainActivity.c0("UISettings", "9") }
-            // Terminals live inside the launcher now. Other guest apps keep the
-            // existing full-window task path; foot windows become floating tiles.
-            val openGuestWindow = wm.openAppWindow
-            wm.openAppWindow = { handle ->
-                val guest = wm.windowByHandle(handle)
-                // foot windows (the shell and every coding agent) are terminals,
-                // so they all get the same desktop-style floating treatment.
-                if (guest != null && (guest.appId.startsWith("omarchy.") || displayName(guest.appId, guest.title) == "Terminal")) {
-                    this@MainActivity.c0("UILinuxWindow", handle)
-                } else {
-                    openGuestWindow(handle)
+        if (!com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
+            LinuxRuntime.get(this).apply {
+                onLinuxUnavailable = { this@MainActivity.c0("UISettings", "9") }
+                // Terminals live inside the launcher now. Other guest apps keep the
+                // existing full-window task path; foot windows become floating tiles.
+                val openGuestWindow = wm.openAppWindow
+                wm.openAppWindow = { handle ->
+                    val guest = wm.windowByHandle(handle)
+                    // foot windows (the shell and every coding agent) are terminals,
+                    // so they all get the same desktop-style floating treatment.
+                    if (guest != null && (guest.appId.startsWith("omarchy.") || displayName(guest.appId, guest.title) == "Terminal")) {
+                        this@MainActivity.c0("UILinuxWindow", handle)
+                    } else {
+                        openGuestWindow(handle)
+                    }
                 }
+                start()
             }
-            start()
         }
 
         s1 = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
@@ -1444,11 +1450,15 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
                 onVolumeChangeListener?.X(streamVolume, streamMaxVolume)
             }
         }
-        LinuxRuntime.get(this).screenStarted()
+        if (!com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
+            LinuxRuntime.get(this).screenStarted()
+        }
     }
 
     override fun onStop() {
-        LinuxRuntime.get(this).screenStopped()
+        if (!com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
+            LinuxRuntime.get(this).screenStopped()
+        }
         super.onStop()
         val volumeObserver = this.r1
         try {

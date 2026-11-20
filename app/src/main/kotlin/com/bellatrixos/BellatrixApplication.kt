@@ -35,9 +35,11 @@ class BellatrixApplication : App() {
         super.onCreate()
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler(CrashClipboardHandler(this, previous))
-        // Owns proot, Wayland and the GPU state for the whole process. Starting is idempotent and
-        // never blocks: MainActivity only wires the "Linux isn't installed" callback on top of it.
-        LinuxRuntime.get(this).start()
+        // Legacy home owns proot, Wayland and the GPU here. In OWL mode the full Runtime owns
+        // them instead, so only one compositor listens on wayland-0 per process.
+        if (!com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
+            LinuxRuntime.get(this).start()
+        }
         // Seed the guest-side widget plumbing (AGENTS.md, owl-check, owl-send) without starting
         // the whole OWL engine. The proot binds already point these files at filesDir.
         runCatching {

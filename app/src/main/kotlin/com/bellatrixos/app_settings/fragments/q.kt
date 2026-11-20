@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.bellatrixos.LauncherActivity
 import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.interfaces.MainActivityIn
+import com.bellatrixos.storage.LauncherData
 import com.bellatrixos.variables.Global
 
 /** Check listener bersama untuk pengaturan perangkat, tampilan, home dan taskbar. */
@@ -51,6 +52,11 @@ class q(@JvmField val f4720a: Int, @JvmField val b: Fragment) : CompoundButton.O
                     )
                     fragment.t0?.isEnabled = true
                 }
+            }
+            3 -> {
+                val fragment = b as? UIHome ?: return
+                val context = fragment.s0 ?: return
+                LauncherData.setOwlHome(context, z)
             }
             else -> {
                 val fragment = b as? UITaskbar ?: return

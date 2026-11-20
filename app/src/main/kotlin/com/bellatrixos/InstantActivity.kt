@@ -35,6 +35,7 @@ import com.bellatrixos.ui.SystemBarsEffect
 import com.bellatrixos.ui.applySystemBars
 import java.util.Collections
 import java.util.WeakHashMap
+import com.bellatrixos.storage.LauncherData
 import com.bellatrixos.system.AppLanguage
 
 /**
@@ -49,6 +50,14 @@ abstract class InstantActivity : ComponentActivity() {
     private var background: Drawable? = null
 
     protected val runtime get() = (application as App).runtime
+
+    /** OWL screens must not start a second compositor while the legacy home owns Linux. */
+    protected fun requireOwlHome(): Boolean {
+        if (LauncherData.useOwlHome(this)) return true
+        startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        finish()
+        return false
+    }
 
     /** In the language picked in settings. */
     override fun attachBaseContext(newBase: Context) {
