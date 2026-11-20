@@ -104,13 +104,27 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
     @JvmField var F: Boolean = false
 
     init {
-        // Migrate the old "built-in apps only" value (2) that hid every installed APK.
-        val savedView = SharedPrefs.f4755a?.getInt("start_menu_apps_view", 0) ?: 0
-        Global.f4842k = if (savedView == 2) 0 else savedView
-        Global.l = SharedPrefs.f4755a?.getInt("start_menu_apps_order", 0) ?: 0
+        val prefs = SharedPrefs.f4755a
+        val savedView = prefs?.getInt("start_menu_apps_view", 0) ?: 0
         try {
             val userManager = B.getSystemService(Context.USER_SERVICE) as? UserManager
             H = (userManager?.userProfiles?.size ?: 0) > 1
+        } catch (_: RuntimeException) {
+        }
+        // Mode 2 hid every APK; mode 3 shows ONLY work-profile apps and hides all
+        // built-ins when there is no second profile. Collapse both to "all apps".
+        val effectiveView = when {
+            savedView == 2 -> 0
+            savedView == 3 && !H -> 0
+            savedView !in 0..3 -> 0
+            else -> savedView
+        }
+        if (effectiveView != savedView) {
+            prefs?.edit()?.putInt("start_menu_apps_view", effectiveView)?.apply()
+        }
+        Global.f4842k = effectiveView
+        Global.l = prefs?.getInt("start_menu_apps_order", 0) ?: 0
+        try {
             B()
         } catch (_: RuntimeException) {
         }

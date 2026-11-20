@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
+import android.os.Process
 import android.os.UserHandle
 import android.net.Uri
 import android.util.Log
@@ -63,21 +64,34 @@ object IntentApps {
             }
             val handle: UserHandle? = startMenuItem?.b
             val component: ComponentName? = startMenuItem?.f4786a
-            if (handle != null && component != null) {
-                val launcher = context.getSystemService("launcherapps") as? LauncherApps
-                launcher?.startMainActivity(component, handle, null, null)
-                return
+            val launcher = context.getSystemService("launcherapps") as? LauncherApps
+            if (handle != null) {
+                val resolved = component ?: launcher?.getActivityList(str, handle)?.firstOrNull()?.componentName
+                if (resolved != null) {
+                    launcher?.startMainActivity(resolved, handle, null, null)
+                    return
+                }
             }
             val intent = packageManager.getLaunchIntentForPackage(str)
             if (intent != null) {
+                // Context may be a bridge/activity wrapper; NEW_TASK keeps the launch
+                // alive even when the Start Menu sheet is being dismissed.
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
-            } else {
-                UINotification.a(
-                    context,
-                    context.getString(R.string.not_found_app),
-                    context.getString(R.string.st_menu_apps_title)
-                )
+                return
             }
+            // Package visibility can hide getLaunchIntentForPackage on API 30+ even
+            // when the launcher activity was visible to queryIntentActivities.
+            val fallback = launcher?.getActivityList(str, Process.myUserHandle())?.firstOrNull()
+            if (fallback != null) {
+                launcher.startMainActivity(fallback.componentName, Process.myUserHandle(), null, null)
+                return
+            }
+            UINotification.a(
+                context,
+                context.getString(R.string.not_found_app),
+                context.getString(R.string.st_menu_apps_title)
+            )
         } catch (e: Exception) {
             Log.w(TAG, "cannot launch $str", e)
             UINotification.a(

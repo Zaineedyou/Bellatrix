@@ -497,32 +497,54 @@ class Bootstrap(
         val decompressed = if (xz) XZCompressorInputStream(raw) else GZIPInputStream(raw, 1 shl 16)
         TarArchiveInputStream(decompressed).use { tar ->
             var count = 0
+            var lastReport = counter.count
             while (true) {
                 checkCancelled()
-                val entry = tar.nextEntry ?: break
+                val entry = try {
+                    tar.nextEntry ?: break
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    throw NoRetry("tar archive error: ${e.message ?: e.javaClass.simpleName}", e)
+                }
                 val name = entry.name.removePrefix("./").trimEnd('/')
                 if (name.isEmpty() || skipEntry(name)) continue
                 val file = File(root, name)
-                file.parentFile?.mkdirs()
-                when {
-                    entry.isDirectory -> file.mkdirs()
-                    entry.isSymbolicLink -> {
-                        file.delete()
-                        Os.symlink(entry.linkName, file.path)
+                runCatching {
+                    file.parentFile?.mkdirs()
+                    when {
+                        entry.isDirectory -> file.mkdirs()
+                        entry.isSymbolicLink -> {
+                            file.delete()
+                            runCatching { Os.symlink(entry.linkName, file.path) }.onFailure {
+                                log.add("$name: symlink skipped (${it.message ?: it.javaClass.simpleName})")
+                            }
+                        }
+                        entry.isLink -> {
+                            val target = File(root, entry.linkName.removePrefix("./"))
+                            if (target.exists()) target.copyTo(file, overwrite = true)
+                            else file.createNewFile()
+                        }
+                        entry.isFile -> file.outputStream().use { tar.copyTo(it) }
+                        else -> Unit
                     }
-                    entry.isLink -> {
-                        val target = File(root, entry.linkName.removePrefix("./"))
-                        if (target.exists()) target.copyTo(file, overwrite = true)
-                    }
-                    entry.isFile -> file.outputStream().use { tar.copyTo(it) }
-                    else -> continue
+                    if (!entry.isSymbolicLink) runCatching { Os.chmod(file.path, entry.mode and 0x1ff or 0x180) }
+                }.onFailure { e ->
+                    log.add("$name: ${e.message ?: e.javaClass.simpleName}")
                 }
-                if (!entry.isSymbolicLink) runCatching { Os.chmod(file.path, entry.mode and 0x1ff or 0x180) }
-                if (++count % 500 == 0) {
-                    report(Stage.Extract, context.resources.getQuantityString(R.plurals.linux_step_extracted, count, count), counter.count.toFloat() / total)
+                count++
+                // Report by compressed bytes too: a single large file can take a long
+                // time and must not look like the unpack froze at 0%.
+                if (count % 100 == 0 || counter.count - lastReport >= (4L shl 20)) {
+                    lastReport = counter.count
+                    report(
+                        Stage.Extract,
+                        context.resources.getQuantityString(R.plurals.linux_step_extracted, count, count),
+                        counter.count.toFloat() / total,
+                    )
                 }
             }
         }
+        report(Stage.Extract, text(R.string.linux_step_extract_start), 1f)
     }
 
     private fun skipEntry(name: String) =

@@ -284,29 +284,14 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     fun A0(z: Boolean) {
         this.b0 = z
         if (!z) {
-            val desktopAdapter = this.p0!!
-            desktopAdapter.y = false
-            DesktopDB.c(desktopAdapter.E)
-        }
-        val mainActivity = this.W!!
-        val linearLayout = this.A0!!
-        val textView = this.s0!!
-        val animationLoadAnimation = AnimationUtils.loadAnimation(mainActivity, R.anim.taskbar_rearrange_slide_show)
-        val animationLoadAnimation2 = AnimationUtils.loadAnimation(mainActivity, R.anim.taskbar_rearrange_slide_hide)
-        Handler(Looper.getMainLooper()).postDelayed({
-            val z2 = z
-            if (z2) {
-                linearLayout.startAnimation(animationLoadAnimation2)
-                textView.startAnimation(animationLoadAnimation)
-                linearLayout.visibility = 8
-                textView.visibility = 0
-            } else {
-                textView.startAnimation(animationLoadAnimation2)
-                linearLayout.startAnimation(animationLoadAnimation)
-                textView.visibility = 8
-                linearLayout.visibility = 0
+            this.p0?.let { adapter ->
+                adapter.y = false
+                DesktopDB.c(adapter.E)
             }
-        }, 500L)
+        }
+        // "Done re-arrange" dihapus: posisi sudah disimpan saat drop, taskbar tetap terlihat.
+        this.A0?.visibility = View.VISIBLE
+        this.s0?.visibility = View.GONE
     }
 
     override fun C(str: String, str2: String, str3: String) {
