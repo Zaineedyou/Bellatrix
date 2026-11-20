@@ -13,6 +13,7 @@ import com.bellatrixos.app_settings.UISettings
 import com.bellatrixos.app_terminal.UITerminal
 import com.bellatrixos.app_video_player.UIVideo
 import com.bellatrixos.app_webapp.UIWebApp
+import com.bellatrixos.linux.UILinuxWindow
 
 /** Registry aplikasi: menerjemahkan tag string menjadi instance [UIFragment]. */
 object WindowManager {
@@ -44,6 +45,7 @@ object WindowManager {
         "UIPhotos" -> UIImageViewer()
         "UIBrowser" -> UIBrowser()
         "UITerminal" -> UITerminal()
+        "UILinuxWindow" -> UILinuxWindow()
         else -> when {
             str2 == null -> null
             str2.startsWith("http") || str2.startsWith("www") -> UIWebApp()

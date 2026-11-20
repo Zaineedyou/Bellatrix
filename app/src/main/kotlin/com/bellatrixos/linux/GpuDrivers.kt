@@ -8,7 +8,7 @@ import java.nio.file.LinkOption
  * The pinned Vulkan drivers [Gpu] can install. Detection and the guest
  * scripts live here, with no Android types, so they can be tested on the JVM.
  *
- * Ported 1:1 from Bellatrix's `dev.omalauncher.linux.GpuDrivers`: every URL,
+ * Ported 1:1 from Omalauncher's `linux.GpuDrivers`: every URL,
  * hash, path, environment variable and shell command is unchanged so the
  * generated scripts and the installed files are identical.
  */

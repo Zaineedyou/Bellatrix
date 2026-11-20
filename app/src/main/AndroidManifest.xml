@@ -126,6 +126,227 @@
             android:targetActivity=".LinuxWindowActivity"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Each coding agent (Agent.windowAlias), with its logo: Recents shows the activity's icon too. -->
+        <activity-alias
+            android:name=".ClaudeWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_claude"
+            android:label="Claude Code"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".OpencodeWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_opencode"
+            android:label="OpenCode"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".CodexWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_codex"
+            android:label="Codex"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".GrokWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_grok"
+            android:label="Grok"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".CopilotWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_copilot"
+            android:label="GitHub Copilot"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".CrushWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_crush"
+            android:label="Crush"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".CursorAgentWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_cursor_agent"
+            android:label="Cursor CLI"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".AgyWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_agy"
+            android:label="Antigravity"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".PiWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_pi"
+            android:label="Pi"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".HermesWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_hermes"
+            android:label="Hermes"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".OmpWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_omp"
+            android:label="Oh My Pi"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".OriWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_ori"
+            android:label="Ori"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".MuseWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_muse"
+            android:label="Muse Code"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".KimiWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_kimi"
+            android:label="Kimi"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".QwenWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_qwen"
+            android:label="Qwen Code"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".McodeWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_mcode"
+            android:label="MiniMax Code"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".KiroCliWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_kiro_cli"
+            android:label="Kiro CLI"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".KiloWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_kilo"
+            android:label="Kilo"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".DevinWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_devin"
+            android:label="Devin CLI"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".AmpWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_amp"
+            android:label="Amp"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".ClaudiaWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_claudia"
+            android:label="C.L.A.U.D.I.A"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".CommandcodeWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:icon="@drawable/agent_commandcode"
+            android:label="Command Code"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
         <service
             android:name=".LinuxService"
             android:exported="false"
@@ -148,6 +369,116 @@
         <provider
             android:name=".app_browser.MySuggestionProvider"
             android:authorities="${applicationId}.app_browser.MySuggestionProvider"
+            android:exported="false" />
+
+        <!-- OWL widget screens and the guest bridges they open. -->
+        <activity
+            android:name=".SpeakNowActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name=".PickActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name=".PinShortcutActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.content.pm.action.CONFIRM_PIN_SHORTCUT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".OwlAppActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:documentLaunchMode="intoExisting"
+            android:exported="false"
+            android:label="@string/activity_app"
+            android:resizeableActivity="true"
+            android:theme="@style/Theme.Bellatrix"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".FilesActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:exported="false"
+            android:icon="@drawable/files"
+            android:label="@string/activity_files"
+            android:launchMode="singleTask"
+            android:resizeableActivity="true"
+            android:taskAffinity="${applicationId}.files"
+            android:theme="@style/Theme.Bellatrix"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".VoiceActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:exported="false"
+            android:icon="@drawable/voice"
+            android:label="@string/activity_voice"
+            android:launchMode="singleTask"
+            android:resizeableActivity="true"
+            android:taskAffinity="${applicationId}.voice"
+            android:theme="@style/Theme.Bellatrix" />
+        <activity
+            android:name=".SettingsActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:exported="false"
+            android:label="@string/activity_settings"
+            android:launchMode="singleTask"
+            android:resizeableActivity="true"
+            android:taskAffinity="${applicationId}.settings"
+            android:theme="@style/Theme.Bellatrix"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".EditorActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
+            android:documentLaunchMode="intoExisting"
+            android:exported="false"
+            android:icon="@drawable/editor"
+            android:label="@string/editor_title"
+            android:resizeableActivity="true"
+            android:theme="@style/Theme.Bellatrix"
+            android:windowSoftInputMode="adjustResize" />
+
+        <service
+            android:name=".theme.OmarchyWallpaperService"
+            android:exported="true"
+            android:label="@string/wallpaper_label"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/wallpaper" />
+        </service>
+        <service
+            android:name=".widgets.runtime.MediaListener"
+            android:exported="true"
+            android:label="@string/notification_listener"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+        <activity
+            android:name=".widgets.runtime.AudioPermissionActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <service
+            android:name=".widgets.runtime.AudioCaptureService"
             android:exported="false" />
 
         <meta-data

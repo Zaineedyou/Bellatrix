@@ -378,6 +378,12 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     override fun M(str: String, item: StartMenuItem?, str2: String) {
+        // The terminal no longer opens a placeholder tile: launch foot directly
+        // and let its toplevel arrive as a floating UILinuxWindow below.
+        if (str == "UITerminal" && str2.isEmpty()) {
+            LinuxRuntime.get(this).terminal(null, "Terminal")
+            return
+        }
         val callbackA = { s: String -> IntentApps.b(this.W ?: this, s, item, this) }
         val callbackB = { s1: String, s2: String? -> c0(s1, s2) }
         if (AppsDatabase.b.containsKey(str)) {
@@ -982,7 +988,20 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         val i3 = 4
         super.onCreate(bundle)
         LinuxRuntime.get(this).apply {
-            onLinuxUnavailable = { c0("UISettings", "9") }
+            onLinuxUnavailable = { this@MainActivity.c0("UISettings", "9") }
+            // Terminals live inside the launcher now. Other guest apps keep the
+            // existing full-window task path; foot windows become floating tiles.
+            val openGuestWindow = wm.openAppWindow
+            wm.openAppWindow = { handle ->
+                val guest = wm.windowByHandle(handle)
+                // foot windows (the shell and every coding agent) are terminals,
+                // so they all get the same desktop-style floating treatment.
+                if (guest != null && (guest.appId.startsWith("omarchy.") || displayName(guest.appId, guest.title) == "Terminal")) {
+                    this@MainActivity.c0("UILinuxWindow", handle)
+                } else {
+                    openGuestWindow(handle)
+                }
+            }
             start()
         }
 

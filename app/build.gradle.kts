@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 // Signing material is deliberately not stored in this repository.
@@ -51,8 +52,8 @@ android {
         applicationId = "com.bellatrixos"
         minSdk = 23
         targetSdk = 36
-        versionCode = 32
-        versionName = "2.8.0"
+        versionCode = 33
+        versionName = "2.9.0"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
@@ -149,6 +150,11 @@ android {
         checkReleaseBuilds = false
     }
 
+    // android.util.Log and friends are no-ops in JVM tests instead of throwing.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         buildConfig = true
         viewBinding = false
@@ -158,6 +164,19 @@ android {
 dependencies {
     implementation(project(":owl"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+
+    // OWL's Compose renderer and the UI composables it shares with the launcher.
+    // Coordinates and versions match Omalauncher's gradle/libs.versions.toml.
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("org.jetbrains.compose.runtime:runtime:1.12.2")
+    implementation("org.jetbrains.compose.foundation:foundation:1.12.2")
+    implementation("org.jetbrains.compose.ui:ui:1.12.2")
+    implementation("com.caverock:androidsvg-aar:1.4")
+    implementation("com.google.zxing:core:3.5.4")
+    testImplementation("junit:junit:4.13.2")
+    // android.jar only has stubs of org.json.
+    testImplementation("org.json:json:20260814")
+
     // Rootfs tarball extraction, as in Omalauncher.
     implementation("org.apache.commons:commons-compress:1.26.2")
     // commons-compress only delegates XZ to this library. Without it the Void

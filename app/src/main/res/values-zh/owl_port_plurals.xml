@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="files_delete_items">
+        <item quantity="other">删除 %1$d 项？</item>
+    </plurals>
+    <plurals name="files_items">
+        <item quantity="other">%1$d 项</item>
+    </plurals>
+    <plurals name="home_file_problems">
+        <item quantity="other">%1$s：%2$d 个问题</item>
+    </plurals>
+    <plurals name="home_file_problems_more">
+        <item quantity="other">errors.txt 中还有 %1$d 个 · 点按隐藏</item>
+    </plurals>
+    <plurals name="linux_install_with_agents">
+        <item quantity="other">安装 linux 和 %d 个智能体</item>
+    </plurals>
+    <plurals name="packages_results">
+        <item quantity="other">%d 个结果</item>
+    </plurals>
+    <plurals name="settings_pages_subtitle">
+        <item quantity="other">%1$d 个页面 · 排列、编辑、移除</item>
+    </plurals>
+    <plurals name="store_pages">
+        <item quantity="other">%1$d 页</item>
+    </plurals>
+    <plurals name="store_add_missing_pages">
+        <item quantity="other">添加缺少的 %1$d 页</item>
+    </plurals>
+    <plurals name="style_terminal_size">
+        <item quantity="other">%1$s pt · 竖屏 %2$d 列</item>
+    </plurals>
+    <plurals name="pages_apps">
+        <item quantity="other">%1$d 个应用</item>
+    </plurals>
+    <plurals name="voice_steps">
+        <item quantity="other">%1$d 步</item>
+    </plurals>
+</resources>

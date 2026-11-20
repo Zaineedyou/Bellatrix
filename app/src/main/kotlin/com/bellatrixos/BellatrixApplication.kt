@@ -1,6 +1,5 @@
 package com.bellatrixos
 
-import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -11,6 +10,9 @@ import android.os.Looper
 import android.os.Process
 import android.util.Log
 import com.bellatrixos.linux.LinuxRuntime
+import com.bellatrixos.linux.Proot
+import com.bellatrixos.upgrade.ManagedFiles
+import com.bellatrixos.widgets.WidgetEngine
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -26,7 +28,7 @@ private const val TAG = "BellatrixCrash"
  * Saat ada exception yang tidak tertangkap, log error langsung disalin ke clipboard
  * sebelum proses mati, jadi bisa ditempel tanpa harus lewat logcat PC.
  */
-class BellatrixApplication : Application() {
+class BellatrixApplication : App() {
 
     override fun onCreate() {
         super.onCreate()
@@ -35,6 +37,13 @@ class BellatrixApplication : Application() {
         // Owns proot, Wayland and the GPU state for the whole process. Starting is idempotent and
         // never blocks: MainActivity only wires the "Linux isn't installed" callback on top of it.
         LinuxRuntime.get(this).start()
+        // Seed the guest-side widget plumbing (AGENTS.md, owl-check, owl-send) without starting
+        // the whole OWL engine. The proot binds already point these files at filesDir.
+        runCatching {
+            val proot = Proot(this)
+            ManagedFiles(proot.filesDir, File(proot.filesDir, "owl-guest-managed.json"))
+                .sync(WidgetEngine.guestManaged(this, proot))
+        }.onFailure { Log.w(TAG, "could not seed guest widget files", it) }
     }
 
     private class CrashClipboardHandler(
@@ -73,7 +82,7 @@ class BellatrixApplication : Application() {
             sb.append("--- logcat ---\n")
 
             try {
-                val process = Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-t", "300"))
+                val process = java.lang.Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-t", "300"))
                 val reader = BufferedReader(InputStreamReader(process.inputStream))
                 var count = 0
                 while (count < 300) {

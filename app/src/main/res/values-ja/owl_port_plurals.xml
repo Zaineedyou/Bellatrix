@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="files_delete_items">
+        <item quantity="other">%1$d 件を削除しますか？</item>
+    </plurals>
+    <plurals name="files_items">
+        <item quantity="other">%1$d 件</item>
+    </plurals>
+    <plurals name="home_file_problems">
+        <item quantity="other">%1$s：問題 %2$d 件</item>
+    </plurals>
+    <plurals name="home_file_problems_more">
+        <item quantity="other">errors.txt にほか %1$d 件 · タップで非表示</item>
+    </plurals>
+    <plurals name="linux_install_with_agents">
+        <item quantity="other">linux とエージェント %d 個をインストール</item>
+    </plurals>
+    <plurals name="packages_results">
+        <item quantity="other">%d 件</item>
+    </plurals>
+    <plurals name="settings_pages_subtitle">
+        <item quantity="other">%1$d ページ · 並べ替え、編集、削除</item>
+    </plurals>
+    <plurals name="store_pages">
+        <item quantity="other">%1$d ページ</item>
+    </plurals>
+    <plurals name="store_add_missing_pages">
+        <item quantity="other">足りない %1$d ページを追加</item>
+    </plurals>
+    <plurals name="style_terminal_size">
+        <item quantity="other">%1$s pt · 縦向きで %2$d 桁</item>
+    </plurals>
+    <plurals name="pages_apps">
+        <item quantity="other">アプリ %1$d 個</item>
+    </plurals>
+    <plurals name="voice_steps">
+        <item quantity="other">%1$d ステップ</item>
+    </plurals>
+</resources>

@@ -17,7 +17,7 @@ data class RootfsSource(
  * folder and state and another could be added next to it; today there is one. Everything that would
  * differ between systems lives here: where the rootfs comes from, and the commands of the package manager.
  *
- * Ported 1:1 from Bellatrix `dev.omalauncher.linux.Distro`; the only change is that Compose's
+ * Ported 1:1 from Omalauncher `linux.Distro`; the only change is that Compose's
  * `mutableStateOf` is replaced by a plain volatile field (Bellatrix does not depend on Compose).
  */
 enum class Distro(

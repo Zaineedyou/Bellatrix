@@ -14,10 +14,10 @@ private const val FAST_LANE = "/usr/local/lib/libfastpath.so"
 /**
  * Paths and process launching for the proot'd Linux rootfs.
  *
- * Ported 1:1 from Bellatrix's `dev.omalauncher.linux.Proot`: the proot command
+ * Ported 1:1 from Omalauncher's `linux.Proot`: the proot command
  * line, the environment, the binds, the temporary-directory handling and the
- * process bookkeeping are unchanged. The launcher-specific binds for widgets
- * and themes are dropped because Bellatrix has no OWL/widget data directory.
+ * process bookkeeping are unchanged. The launcher-specific binds for widgets,
+ * style and home point at Bellatrix's OWL directories under ~/.config/bellatrix.
  */
 class Proot(
     private val context: Context,
@@ -122,6 +122,9 @@ class Proot(
 
     /** Whether [real], a canonical host file, is one the guest can see. */
     fun guestVisible(real: File) = visible.any { real.startsWith(it) }
+
+    /** The guest's files as it sees them; see [GuestFs]. */
+    val guestFs by lazy { GuestFs(::hostFile, ::guestVisible) }
 
     /** The empty directory in the rootfs that the phone's storage is bound over. */
     private val storageMount get() = File(rootfs, GUEST_SDCARD.removePrefix("/"))

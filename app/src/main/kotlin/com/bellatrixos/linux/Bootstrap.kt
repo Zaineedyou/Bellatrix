@@ -182,6 +182,10 @@ class Bootstrap(
         choiceFile.writeText(picked.joinToString("") { it + "\n" })
     }
 
+    /** The coding agents picked for setup, in the order they were listed. */
+    val chosenAgents: List<Agent>
+        get() = runCatching { choiceFile.readLines() }.getOrDefault(emptyList()).mapNotNull { bin -> AGENTS.find { it.bin == bin } }
+
     private var stage = Stage.Download
     private var step = ""
 

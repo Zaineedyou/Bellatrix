@@ -63,7 +63,17 @@ class LinuxRuntime private constructor(
                 CoroutineExceptionHandler { _, e -> Log.e(TAG, "background job failed", e) },
         )
 
+    /** Installed coding agents and the one picked for prompts; its state is read from the guest home off the UI thread. */
+    val agents: AgentStore by lazy {
+        AgentStore(
+            proot,
+            text = { id, arg -> context.getString(id, arg) },
+            onChanged = { scope.launch { onStateChanged() } },
+        ).also { store -> scope.launch(Dispatchers.IO) { store.load() } }
+    }
+
     private val launchedNames = ConcurrentHashMap<String, String>()
+    private val launchedAgents = ConcurrentHashMap<String, Agent>()
     private val prefs = context.getSharedPreferences("bellatrix_linux", Context.MODE_PRIVATE)
 
     @Volatile
@@ -256,21 +266,32 @@ class LinuxRuntime private constructor(
         if (screens == 0) proot.procShim.setActive(false)
     }
 
-    /** Opens [command] in a terminal named [name], with its own foot app_id and Recents entry. */
+    /**
+     * Opens [command] in a terminal named [name], with its own foot app_id.
+     * An [agent] session keeps its own id even when two sessions share a title.
+     */
     fun terminal(
         command: String?,
         name: String,
+        agent: Agent? = null,
     ) {
         if (!linux) {
             onLinuxUnavailable()
             return
         }
-        val slug = name.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-')
-        val appId = "omarchy.$slug"
+        val slug = if (agent == null || agent.name == name) name else "${agent.bin} $name"
+        val appId = "omarchy." + slug.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-')
         launchedNames[appId] = name
+        if (agent != null) launchedAgents[appId] = agent
         val args = command?.let { " -e bash -c " + shellQuote(it) }.orEmpty()
         launch("foot --app-id=$appId${terminalFont.optionFor(appId, command)}$args")
     }
+
+    /** The coding agent behind a Linux window, if it was started for one. */
+    fun agentOf(
+        appId: String,
+        name: String?,
+    ): Agent? = launchedAgents[appId] ?: AGENTS.firstOrNull { it.name == name }
 
     /** The label to show for a Linux window: the launch name, then its title. */
     fun displayName(

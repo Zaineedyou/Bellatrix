@@ -59,4 +59,29 @@
     <string name="home_job_failed">the last job failed</string>
     <string name="home_job_whole_log">whole log</string>
     <string name="linux_gpu_unsupported">not supported on this device</string>
+
+    <!-- One line under each coding agent's name in the agent lists. -->
+    <string name="linux_agent_claude">Anthropic\'s coding agent</string>
+    <string name="linux_agent_opencode">Open source agent, any model provider</string>
+    <string name="linux_agent_codex">OpenAI\'s coding agent</string>
+    <string name="linux_agent_grok">xAI\'s coding agent</string>
+    <string name="linux_agent_copilot">GitHub\'s coding agent</string>
+    <string name="linux_agent_crush">Charm\'s agent for the terminal</string>
+    <string name="linux_agent_cursor">Cursor\'s agent for the terminal</string>
+    <string name="linux_agent_antigravity">Google\'s Gemini coding agent</string>
+    <string name="linux_agent_pi">Minimal, extensible coding agent</string>
+    <string name="linux_agent_hermes">Nous Research\'s agent, about 2.5 GB</string>
+    <string name="linux_agent_omp">Pi with tools and plugins built in</string>
+    <string name="linux_agent_ori">OpenRouter\'s coding agent</string>
+    <string name="linux_agent_muse">Meta\'s coding agent</string>
+    <string name="linux_agent_kimi">Moonshot AI\'s coding agent</string>
+    <string name="linux_agent_qwen">Alibaba\'s Qwen coding agent</string>
+    <string name="linux_agent_mcode">MiniMax\'s coding agent</string>
+    <string name="linux_agent_kiro">Amazon\'s coding agent</string>
+    <string name="linux_agent_kilo">Open-source agent built on OpenCode</string>
+    <string name="linux_agent_devin">Cognition\'s coding agent</string>
+    <string name="linux_agent_amp">Coding agent from ampcode.com</string>
+    <string name="linux_agent_commandcode">Coding agent from commandcode.ai</string>
+    <string name="linux_agent_claudia" translatable="false">Chat AI TUI, any OpenAI-compatible provider</string>
+    <string name="agents_still_running">%1$s is still running: close it, then remove it again</string>
 </resources>

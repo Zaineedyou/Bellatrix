@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="files_delete_items">
+        <item quantity="one">¿eliminar %1$d elemento?</item>
+        <item quantity="many">¿eliminar %1$d elementos?</item>
+        <item quantity="other">¿eliminar %1$d elementos?</item>
+    </plurals>
+    <plurals name="files_items">
+        <item quantity="one">%1$d elemento</item>
+        <item quantity="many">%1$d elementos</item>
+        <item quantity="other">%1$d elementos</item>
+    </plurals>
+    <plurals name="home_file_problems">
+        <item quantity="one">%1$s: %2$d problema</item>
+        <item quantity="many">%1$s: %2$d problemas</item>
+        <item quantity="other">%1$s: %2$d problemas</item>
+    </plurals>
+    <plurals name="home_file_problems_more">
+        <item quantity="one">%1$d más en errors.txt · toca para ocultar</item>
+        <item quantity="many">%1$d más en errors.txt · toca para ocultar</item>
+        <item quantity="other">%1$d más en errors.txt · toca para ocultar</item>
+    </plurals>
+    <plurals name="linux_install_with_agents">
+        <item quantity="one">instalar linux y %d agente</item>
+        <item quantity="many">instalar linux y %d agentes</item>
+        <item quantity="other">instalar linux y %d agentes</item>
+    </plurals>
+    <plurals name="packages_results">
+        <item quantity="one">%d resultado</item>
+        <item quantity="many">%d resultados</item>
+        <item quantity="other">%d resultados</item>
+    </plurals>
+    <plurals name="settings_pages_subtitle">
+        <item quantity="one">%1$d página · ordenar, editar, quitar</item>
+        <item quantity="many">%1$d páginas · ordenar, editar, quitar</item>
+        <item quantity="other">%1$d páginas · ordenar, editar, quitar</item>
+    </plurals>
+    <plurals name="store_pages">
+        <item quantity="one">%1$d página</item>
+        <item quantity="many">%1$d páginas</item>
+        <item quantity="other">%1$d páginas</item>
+    </plurals>
+    <plurals name="store_add_missing_pages">
+        <item quantity="one">agregar su página faltante</item>
+        <item quantity="many">agregar sus %1$d páginas faltantes</item>
+        <item quantity="other">agregar sus %1$d páginas faltantes</item>
+    </plurals>
+    <plurals name="style_terminal_size">
+        <item quantity="one">%1$s pt · %2$d columna en vertical</item>
+        <item quantity="many">%1$s pt · %2$d columnas en vertical</item>
+        <item quantity="other">%1$s pt · %2$d columnas en vertical</item>
+    </plurals>
+    <plurals name="pages_apps">
+        <item quantity="one">%1$d app</item>
+        <item quantity="many">%1$d apps</item>
+        <item quantity="other">%1$d apps</item>
+    </plurals>
+    <plurals name="voice_steps">
+        <item quantity="one">%1$d paso</item>
+        <item quantity="many">%1$d pasos</item>
+        <item quantity="other">%1$d pasos</item>
+    </plurals>
+</resources>
