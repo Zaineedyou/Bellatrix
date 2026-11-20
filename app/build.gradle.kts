@@ -51,8 +51,8 @@ android {
         applicationId = "com.bellatrixos"
         minSdk = 23
         targetSdk = 36
-        versionCode = 29
-        versionName = "2.7.8"
+        versionCode = 30
+        versionName = "2.7.9"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
@@ -159,6 +159,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     // Rootfs tarball extraction, as in Omalauncher.
     implementation("org.apache.commons:commons-compress:1.26.2")
+    // commons-compress only delegates XZ to this library. Without it the Void
+    // rootfs extract dies at "unpack the system" with NoClassDefFoundError.
+    implementation("org.tukaani:xz:1.10")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.appcompat:appcompat-resources:1.7.1")

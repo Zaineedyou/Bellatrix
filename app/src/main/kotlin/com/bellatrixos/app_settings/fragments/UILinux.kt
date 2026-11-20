@@ -230,19 +230,28 @@ class UILinux : Fragment() {
     /** Bottom terminal box: live output of the Linux install/process job. */
     private fun updateProcessLog() {
         val state = runtime.bootstrap.state.value
-        val lines =
+        val rendered =
             when (state) {
-                is LinuxState.Installing -> state.log
-                is LinuxState.Failed -> state.log
+                is LinuxState.Installing -> {
+                    val percent = state.progress?.let { " ${(it * 100).toInt()}%" }.orEmpty()
+                    val header = "› ${getString(state.stage.label)}$percent"
+                    // report() already appended the current step to the log; don't print it twice.
+                    val tail =
+                        if (state.log.lastOrNull() == state.step) state.log.dropLast(1) else state.log
+                    listOf(header) + tail.takeLast(199).map { "$ $it" }
+                }
+                is LinuxState.Failed ->
+                    listOf("✗ ${getString(state.stage.label)}: ${state.message}") +
+                        state.log.takeLast(199).map { "$ $it" }
                 else -> emptyList()
             }
-        if (lines.isEmpty()) {
+        if (rendered.isEmpty()) {
             processLogText.text = getString(R.string.linux_process_log_empty)
             processLogText.setTextColor(Color.parseColor("#7A9B80"))
             return
         }
         processLogText.setTextColor(Color.parseColor("#D6FFD9"))
-        processLogText.text = lines.takeLast(200).joinToString("\n") { "$ $it" }
+        processLogText.text = rendered.joinToString("\n")
         processLogText.post { processLogText.scrollTo(0, processLogText.lineCount * processLogText.lineHeight) }
     }
 

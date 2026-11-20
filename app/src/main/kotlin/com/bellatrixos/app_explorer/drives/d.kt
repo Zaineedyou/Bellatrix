@@ -194,7 +194,12 @@ class d : DriveAdapter.OnItemClickListener, UIContextMenu.OnMenuItemClickListene
         val mainActivityIn = y as MainActivityIn
         when (i2) {
             0 -> IntentApps.b(context, str, x as StartMenuItem, mainActivityIn)
-            4 -> mainActivityIn.j(1, str, AppsDatabase.a(str))
+            4 -> {
+                // Save the real app name on the desktop shortcut. AppsDatabase.a(str)
+                // alone falls back to "App" for APKs that aren't in our prefs yet.
+                val fromItem = (x as? StartMenuItem)?.b()?.takeIf { it.isNotBlank() }
+                mainActivityIn.j(1, str, fromItem ?: AppsDatabase.a(context, str))
+            }
             23 -> mainActivityIn.s(str)
             24 -> {
                 val title = StartMenuAdapter.G[str] as? String ?: "App"

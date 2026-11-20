@@ -83,6 +83,8 @@ class OutputTail(
 
     fun toList() = lines.toList()
 
+    fun lastOrNull() = lines.lastOrNull()
+
     fun clear() {
         lines.clear()
         dropped = 0

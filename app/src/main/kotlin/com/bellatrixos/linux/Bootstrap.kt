@@ -229,7 +229,9 @@ class Bootstrap(
             } catch (e: Throwable) {
                 if (cancelled) return@withContext
                 Log.e(TAG, "setup failed", e)
-                _state.value = LinuxState.Failed(stage, e.message ?: e.toString(), log.toList())
+                val message = e.message ?: e.toString()
+                log.add(message)
+                _state.value = LinuxState.Failed(stage, message, log.toList())
             }
         }
 
@@ -262,7 +264,9 @@ class Bootstrap(
     fun fail(e: Throwable) {
         if (cancelled) return
         Log.e(TAG, "setup failed before a step", e)
-        _state.value = LinuxState.Failed(stage, e.message ?: e.toString(), log.toList())
+        val message = e.message ?: e.toString()
+        log.add(message)
+        _state.value = LinuxState.Failed(stage, message, log.toList())
     }
 
     suspend fun remove() =
@@ -352,6 +356,9 @@ class Bootstrap(
         this.stage = stage
         this.step = step
         if (journal.setupComplete && _state.value == LinuxState.Installed) return
+        // Keep a live, terminal-like history of every step so the process log
+        // updates while download/unpack are running, not only on failure.
+        if (log.lastOrNull() != step) log.add(step)
         _state.value = LinuxState.Installing(stage, step, progress, log.toList())
     }
 
@@ -494,7 +501,12 @@ class Bootstrap(
         val total = tarball.length()
         val counter = CountingInputStream(tarball.inputStream())
         val raw = BufferedInputStream(counter, 1 shl 16)
-        val decompressed = if (xz) XZCompressorInputStream(raw) else GZIPInputStream(raw, 1 shl 16)
+        val decompressed =
+            try {
+                if (xz) XZCompressorInputStream(raw) else GZIPInputStream(raw, 1 shl 16)
+            } catch (e: Throwable) {
+                throw NoRetry("can't open the Linux archive (${e.message ?: e.javaClass.simpleName})", e)
+            }
         TarArchiveInputStream(decompressed).use { tar ->
             var count = 0
             var lastReport = counter.count

@@ -24,6 +24,23 @@ object AppsDatabase {
         return startMenuNames[str] ?: f4953a
     }
 
+    /** Label with a live PackageManager fallback for APKs not yet in our prefs. */
+    @JvmStatic
+    fun a(
+        context: Context,
+        str: String,
+    ): String {
+        b[str]?.let { return it }
+        f4954d[str]?.customName?.let { return it }
+        startMenuNames[str]?.let { return it }
+        return try {
+            val pm = context.packageManager
+            pm.getApplicationLabel(pm.getApplicationInfo(str, 0)).toString().ifBlank { f4953a }
+        } catch (_: Exception) {
+            f4953a
+        }
+    }
+
     @JvmStatic
     fun b(context: Context) {
         f4953a = context.getString(R.string.app_default_title)
