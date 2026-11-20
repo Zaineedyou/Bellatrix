@@ -22,7 +22,7 @@ private const val WHEEL_STEP = 15f
  */
 class LinuxWindowInputView(
     context: Context,
-    private val wm: LinuxWindowManager,
+    private val wm: WindowViewManager,
     private val window: XdgToplevel,
 ) : View(context) {
     var onCursorTap: () -> Unit = {}

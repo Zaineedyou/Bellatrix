@@ -11,16 +11,16 @@ import kotlin.math.abs
  * draws it with [WindowRenderer]; home-screen terminal tiles use [claim] to take
  * a toplevel instead. Lives on the main thread; protocol callbacks are posted over.
  */
-class LinuxWindowManager : WindowManagerHooks {
-    lateinit var server: WaylandServer
+class LinuxWindowManager : WindowManagerHooks, WindowViewManager {
+    override lateinit var server: WaylandServer
     private val main = Handler(Looper.getMainLooper())
 
     @Volatile
-    var focused: XdgToplevel? = null
+    override var focused: XdgToplevel? = null
         private set
 
     /** Toplevels that have (or are getting) their own Android task. */
-    val appWindows = CopyOnWriteArrayList<XdgToplevel>()
+    override val appWindows = CopyOnWriteArrayList<XdgToplevel>()
 
     /** Each window's size in pixels, as its activity lays it out. */
     private val sizes = HashMap<XdgToplevel, Pair<Int, Int>>()
@@ -56,7 +56,7 @@ class LinuxWindowManager : WindowManagerHooks {
     private val session = System.currentTimeMillis().toString(36)
     private var nextHandle = 1
 
-    fun windowByHandle(handle: String?) = handle?.let { synchronized(handles) { handles[it] } }
+    override fun windowByHandle(handle: String?) = handle?.let { synchronized(handles) { handles[it] } }
 
     fun handleOf(window: XdgToplevel) = synchronized(handles) { handles.entries.firstOrNull { it.value === window }?.key }
 
@@ -90,7 +90,7 @@ class LinuxWindowManager : WindowManagerHooks {
     }
 
     /** Sizes an app window to its activity; called when that activity's view gets its size. */
-    fun applyAppLayout(
+    override fun applyAppLayout(
         window: XdgToplevel,
         width: Int,
         height: Int,
@@ -99,9 +99,9 @@ class LinuxWindowManager : WindowManagerHooks {
         synchronized(server) { configure(window) }
     }
 
-    fun close(window: XdgToplevel) = synchronized(server) { window.close() }
+    override fun close(window: XdgToplevel) = synchronized(server) { window.close() }
 
-    fun focus(toplevel: XdgToplevel?) {
+    override fun focus(toplevel: XdgToplevel?) {
         val previous = focused
         focused = toplevel
         synchronized(server) {
@@ -113,7 +113,7 @@ class LinuxWindowManager : WindowManagerHooks {
     }
 
     /** Zooms the focused window's text with Ctrl+= or Ctrl+-, foot's own zoom keys. */
-    fun zoom(
+    override fun zoom(
         window: XdgToplevel,
         steps: Int,
     ) {
@@ -134,14 +134,14 @@ class LinuxWindowManager : WindowManagerHooks {
         window.configure(w / scale, h / scale, window === focused)
     }
 
-    fun pointerMove(hit: SurfaceHit?) = server.postInput { pointerMotion(hit?.surface, hit?.x ?: 0f, hit?.y ?: 0f) }
+    override fun pointerMove(hit: SurfaceHit?) = server.postInput { pointerMotion(hit?.surface, hit?.x ?: 0f, hit?.y ?: 0f) }
 
-    fun pointerButton(
+    override fun pointerButton(
         button: Int,
         pressed: Boolean,
     ) = server.postInput { pointerButton(button, pressed) }
 
-    fun click(
+    override fun click(
         hit: SurfaceHit,
         button: Int,
     ) = server.postInput {
@@ -150,36 +150,36 @@ class LinuxWindowManager : WindowManagerHooks {
         pointerButton(button, false)
     }
 
-    fun scroll(
+    override fun scroll(
         dx: Float,
         dy: Float,
         source: Int,
         steps: Int = 0,
     ) = server.postInput { pointerAxis(dx, dy, source, steps) }
 
-    fun wantsTouch(surface: Surface) = synchronized(server) { server.input.wantsTouch(surface) }
+    override fun wantsTouch(surface: Surface) = synchronized(server) { server.input.wantsTouch(surface) }
 
-    fun touchDown(
+    override fun touchDown(
         hit: SurfaceHit,
         id: Int,
     ) = server.postInput { touchDown(hit.surface, id, hit.x, hit.y) }
 
-    fun touchMotion(
+    override fun touchMotion(
         id: Int,
         x: Float,
         y: Float,
     ) = server.postInput { touchMotion(id, x, y) }
 
-    fun touchUp(id: Int) = server.postInput { touchUp(id) }
+    override fun touchUp(id: Int) = server.postInput { touchUp(id) }
 
     /** Whether [hit] is on the row where its client last said its text cursor is: a terminal's prompt line. */
-    fun onTextCursorRow(hit: SurfaceHit) =
+    override fun onTextCursorRow(hit: SurfaceHit) =
         synchronized(server) {
             val (_, y, _, height) = server.input.textCursor(hit.surface) ?: return@synchronized false
             hit.y >= y && hit.y < y + height
         }
 
-    fun scrollStop() = server.postInput { pointerAxisStop() }
+    override fun scrollStop() = server.postInput { pointerAxisStop() }
 
     /** Closes [window]'s popups, newest first. */
     private fun dismissPopups(window: XdgToplevel) =
@@ -188,7 +188,7 @@ class LinuxWindowManager : WindowManagerHooks {
         }
 
     /** Focus handling for a press at [hit] in [window]; returns false if the press only dismissed popups. */
-    fun onPress(
+    override fun onPress(
         window: XdgToplevel,
         hit: SurfaceHit?,
     ): Boolean {

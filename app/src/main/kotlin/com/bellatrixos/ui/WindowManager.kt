@@ -10,6 +10,7 @@ import com.bellatrixos.wayland.Keys
 import com.bellatrixos.wayland.Surface
 import com.bellatrixos.wayland.SurfaceHit
 import com.bellatrixos.wayland.WaylandServer
+import com.bellatrixos.wayland.WindowViewManager
 import com.bellatrixos.wayland.WindowManagerHooks
 import com.bellatrixos.wayland.XdgToplevel
 import kotlin.math.abs
@@ -21,15 +22,15 @@ import kotlin.math.abs
  * embed, which [claim] takes instead (see [TerminalTiles]). Lives on the main thread;
  * protocol callbacks are posted over.
  */
-class WindowManager : WindowManagerHooks {
-    lateinit var server: WaylandServer
+class WindowManager : WindowManagerHooks, WindowViewManager {
+    override lateinit var server: WaylandServer
     private val main = Handler(Looper.getMainLooper())
 
-    var focused by mutableStateOf<XdgToplevel?>(null)
+    override var focused by mutableStateOf<XdgToplevel?>(null)
         private set
 
     /** Toplevels that have (or are getting) their own Android task. */
-    val appWindows = mutableStateListOf<XdgToplevel>()
+    override val appWindows = mutableStateListOf<XdgToplevel>()
 
     /** Each window's size in pixels, as its activity lays it out. */
     private val sizes = HashMap<XdgToplevel, Pair<Int, Int>>()
@@ -61,7 +62,7 @@ class WindowManager : WindowManagerHooks {
     private val session = System.currentTimeMillis().toString(36)
     private var nextHandle = 1
 
-    fun windowByHandle(handle: String?) = handle?.let(handles::get)
+    override fun windowByHandle(handle: String?) = handle?.let(handles::get)
 
     fun handleOf(window: XdgToplevel) = handles.entries.firstOrNull { it.value === window }?.key
 
@@ -93,7 +94,7 @@ class WindowManager : WindowManagerHooks {
     }
 
     /** Sizes an app window to its activity; called when that activity's view gets its size. */
-    fun applyAppLayout(
+    override fun applyAppLayout(
         window: XdgToplevel,
         width: Int,
         height: Int,
@@ -102,9 +103,9 @@ class WindowManager : WindowManagerHooks {
         synchronized(server) { configure(window) }
     }
 
-    fun close(window: XdgToplevel) = synchronized(server) { window.close() }
+    override fun close(window: XdgToplevel) = synchronized(server) { window.close() }
 
-    fun focus(toplevel: XdgToplevel?) {
+    override fun focus(toplevel: XdgToplevel?) {
         val previous = focused
         focused = toplevel
         synchronized(server) {
@@ -119,7 +120,7 @@ class WindowManager : WindowManagerHooks {
      * Zooms the focused [window]'s text [steps] times with Ctrl+= or Ctrl+-,
      * foot's font-increase and font-decrease. Only the focused window gets keys.
      */
-    fun zoom(
+    override fun zoom(
         window: XdgToplevel,
         steps: Int,
     ) {
@@ -140,14 +141,14 @@ class WindowManager : WindowManagerHooks {
         window.configure(w / scale, h / scale, window === focused)
     }
 
-    fun pointerMove(hit: SurfaceHit?) = server.postInput { pointerMotion(hit?.surface, hit?.x ?: 0f, hit?.y ?: 0f) }
+    override fun pointerMove(hit: SurfaceHit?) = server.postInput { pointerMotion(hit?.surface, hit?.x ?: 0f, hit?.y ?: 0f) }
 
-    fun pointerButton(
+    override fun pointerButton(
         button: Int,
         pressed: Boolean,
     ) = server.postInput { pointerButton(button, pressed) }
 
-    fun click(
+    override fun click(
         hit: SurfaceHit,
         button: Int,
     ) = server.postInput {
@@ -156,36 +157,36 @@ class WindowManager : WindowManagerHooks {
         pointerButton(button, false)
     }
 
-    fun scroll(
+    override fun scroll(
         dx: Float,
         dy: Float,
         source: Int,
         steps: Int = 0,
     ) = server.postInput { pointerAxis(dx, dy, source, steps) }
 
-    fun wantsTouch(surface: Surface) = synchronized(server) { server.input.wantsTouch(surface) }
+    override fun wantsTouch(surface: Surface) = synchronized(server) { server.input.wantsTouch(surface) }
 
-    fun touchDown(
+    override fun touchDown(
         hit: SurfaceHit,
         id: Int,
     ) = server.postInput { touchDown(hit.surface, id, hit.x, hit.y) }
 
-    fun touchMotion(
+    override fun touchMotion(
         id: Int,
         x: Float,
         y: Float,
     ) = server.postInput { touchMotion(id, x, y) }
 
-    fun touchUp(id: Int) = server.postInput { touchUp(id) }
+    override fun touchUp(id: Int) = server.postInput { touchUp(id) }
 
     /** Whether [hit] is on the row where its client last said its text cursor is: a terminal's prompt line. */
-    fun onTextCursorRow(hit: SurfaceHit) =
+    override fun onTextCursorRow(hit: SurfaceHit) =
         synchronized(server) {
             val (_, y, _, height) = server.input.textCursor(hit.surface) ?: return@synchronized false
             hit.y >= y && hit.y < y + height
         }
 
-    fun scrollStop() = server.postInput { pointerAxisStop() }
+    override fun scrollStop() = server.postInput { pointerAxisStop() }
 
     /** Closes [window]'s popups, newest first. */
     private fun dismissPopups(window: XdgToplevel) =
@@ -194,7 +195,7 @@ class WindowManager : WindowManagerHooks {
         }
 
     /** Focus handling for a press at [hit] in [window]; returns false if the press only dismissed popups. */
-    fun onPress(
+    override fun onPress(
         window: XdgToplevel,
         hit: SurfaceHit?,
     ): Boolean {

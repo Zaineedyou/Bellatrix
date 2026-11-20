@@ -22,9 +22,10 @@ import com.bellatrixos.windows.Window
 import com.bellatrixos.windows.WindowSize
 import com.bellatrixos.windows.Windows
 import com.bellatrixos.windows.installed_apps.models.InstalledApp
+import com.bellatrixos.wayland.ActiveLinuxBackend
 import com.bellatrixos.wayland.KeyBarView
-import com.bellatrixos.wayland.KeyboardBridge
 import com.bellatrixos.wayland.KeyboardSink
+import com.bellatrixos.wayland.LinuxViewBackend
 import com.bellatrixos.wayland.LinuxWindowInputView
 import com.bellatrixos.wayland.WindowSurfaceView
 import com.bellatrixos.wayland.XdgToplevel
@@ -52,7 +53,7 @@ class UILinuxWindow : UIFragment() {
     private var activityIn: MainActivityIn? = null
 
     private var handle: String? = null
-    private lateinit var runtime: LinuxRuntime
+    private lateinit var backend: LinuxViewBackend
     private var toplevel: XdgToplevel? = null
     private var closing = false
 
@@ -74,9 +75,9 @@ class UILinuxWindow : UIFragment() {
                 val w = toplevel
                 if (
                     isAdded &&
-                    this@UILinuxWindow::runtime.isInitialized &&
+                    this@UILinuxWindow::backend.isInitialized &&
                     w != null &&
-                    !runtime.wm.appWindows.contains(w)
+                    !backend.wm.appWindows.contains(w)
                 ) {
                     removeSelf()
                     return
@@ -87,16 +88,14 @@ class UILinuxWindow : UIFragment() {
 
     private val picker =
         registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
-            if (!this::runtime.isInitialized) return@registerForActivityResult
-            toplevel?.let(runtime.wm::focus)
+            if (!this::backend.isInitialized) return@registerForActivityResult
+            toplevel?.let(backend.wm::focus)
             if (this::sink.isInitialized && sink.isAttachedToWindow && !sink.showing) sink.show()
-            if (uris.isNotEmpty()) runtime.keyboard.insertImages(uris)
+            if (uris.isNotEmpty()) backend.keyboard.insertImages(uris)
         }
 
     private val imagePicker =
-        KeyboardBridge.ImagePicker {
-            picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        }
+        { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -120,7 +119,7 @@ class UILinuxWindow : UIFragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        runtime = LinuxRuntime.get(requireContext())
+        backend = ActiveLinuxBackend.get(requireContext())
         activityIn = requireContext() as? MainActivityIn
 
         handle =
@@ -129,7 +128,7 @@ class UILinuxWindow : UIFragment() {
                 ?: arguments?.getString("packageName")
 
         val h = handle
-        val w = if (h.isNullOrBlank()) null else runtime.wm.windowByHandle(h)
+        val w = if (h.isNullOrBlank()) null else backend.wm.windowByHandle(h)
         if (w == null) {
             removeSelf()
             return
@@ -154,7 +153,7 @@ class UILinuxWindow : UIFragment() {
         WindowSize.e(view, f, state, dragHandle, activityIn ?: return, this)
         WindowSize.d(view, f, state)
         WindowSize.f(f, t, state.c)
-        t?.setTitle(runtime.displayName(w.appId, w.title))
+        t?.setTitle(backend.displayName(w.appId, w.title))
 
         val focusResize =
             object : Window.OnResizeStateChangeListener, FloatingLayout.OnAppFocusListener {
@@ -202,15 +201,15 @@ class UILinuxWindow : UIFragment() {
     }
 
     private fun installLinuxViews(w: XdgToplevel) {
-        surface = WindowSurfaceView(requireContext(), runtime, w)
+        surface = WindowSurfaceView(requireContext(), backend.server, backend.wm, w)
         content.addView(surface, 0, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
 
-        input = LinuxWindowInputView(requireContext(), runtime.wm, w)
+        input = LinuxWindowInputView(requireContext(), backend.wm, w)
         input.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         input.onCursorTap = { if (this::sink.isInitialized && !sink.showing) sink.show() }
         content.addView(input, 1, input.layoutParams)
 
-        sink = KeyboardSink(requireContext(), runtime.keyboard)
+        sink = KeyboardSink(requireContext(), backend.keyboard)
         content.addView(sink, FrameLayout.LayoutParams(1, 1, Gravity.TOP or Gravity.START))
 
         keyBar = KeyBarView(requireContext())
@@ -223,20 +222,20 @@ class UILinuxWindow : UIFragment() {
 
     override fun onResume() {
         super.onResume()
-        if (!this::runtime.isInitialized) return
-        toplevel?.let(runtime.wm::focus)
-        runtime.keyboard.imagePicker = imagePicker
+        if (!this::backend.isInitialized) return
+        toplevel?.let(backend.wm::focus)
+        backend.keyboard.picker = imagePicker
         if (!bridgeSetByMe) {
-            KeyBarView.KeyboardBridgeHolder.bridge = runtime.keyboard
+            KeyBarView.KeyboardBridgeHolder.bridge = backend.keyboard
             bridgeSetByMe = true
         }
         relayout()
     }
 
     override fun onPause() {
-        if (this::runtime.isInitialized) {
-            runtime.keyboard.releaseHeld()
-            if (runtime.keyboard.imagePicker === imagePicker) runtime.keyboard.imagePicker = null
+        if (this::backend.isInitialized) {
+            backend.keyboard.releaseHeld()
+            if (backend.keyboard.picker === imagePicker) backend.keyboard.picker = null
         }
         releaseBridge()
         super.onPause()
@@ -245,8 +244,8 @@ class UILinuxWindow : UIFragment() {
     override fun onDestroyView() {
         contentView?.removeCallbacks(staleCheck)
         state.f4870e = null
-        if (this::runtime.isInitialized && runtime.keyboard.imagePicker === imagePicker) {
-            runtime.keyboard.imagePicker = null
+        if (this::backend.isInitialized && backend.keyboard.picker === imagePicker) {
+            backend.keyboard.picker = null
         }
         releaseBridge()
         super.onDestroyView()
@@ -254,14 +253,14 @@ class UILinuxWindow : UIFragment() {
 
     override fun onDestroy() {
         val w = toplevel
-        if (this::runtime.isInitialized && !closing && w != null && runtime.wm.appWindows.contains(w)) {
-            runtime.wm.close(w)
+        if (this::backend.isInitialized && !closing && w != null && backend.wm.appWindows.contains(w)) {
+            backend.wm.close(w)
         }
         super.onDestroy()
     }
 
     private fun handleKey(event: KeyEvent): Boolean {
-        if (!this::runtime.isInitialized) return false
+        if (!this::backend.isInitialized) return false
         if (
             event.keyCode == KeyEvent.KEYCODE_ESCAPE &&
             event.isMetaPressed &&
@@ -270,14 +269,14 @@ class UILinuxWindow : UIFragment() {
             if (event.repeatCount == 0) closeWindow()
             return true
         }
-        return runtime.keyboard.handle(event)
+        return backend.keyboard.handle(event)
     }
 
     private fun closeWindow() {
         closing = true
         val w = toplevel
-        if (this::runtime.isInitialized && w != null && runtime.wm.appWindows.contains(w)) {
-            runtime.wm.close(w)
+        if (this::backend.isInitialized && w != null && backend.wm.appWindows.contains(w)) {
+            backend.wm.close(w)
         }
         removeSelf()
     }
@@ -293,8 +292,8 @@ class UILinuxWindow : UIFragment() {
     private fun releaseBridge() {
         if (
             bridgeSetByMe &&
-            this::runtime.isInitialized &&
-            KeyBarView.KeyboardBridgeHolder.bridge === runtime.keyboard
+            this::backend.isInitialized &&
+            KeyBarView.KeyboardBridgeHolder.bridge === backend.keyboard
         ) {
             KeyBarView.KeyboardBridgeHolder.bridge = null
         }

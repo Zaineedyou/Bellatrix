@@ -39,7 +39,7 @@ class KeyBarView(
     /** Set by LinuxWindowActivity once the runtime is available. */
     object KeyboardBridgeHolder {
         @Volatile
-        var bridge: KeyboardBridge? = null
+        var bridge: KeyboardViewBridge? = null
     }
 
     private val rows =

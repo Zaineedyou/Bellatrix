@@ -166,7 +166,6 @@
     <id name="btnNewTab" />
     <id name="btnPower" />
     <id name="btnPrint" />
-    <id name="btnRearrangeConfirm" />
     <id name="btnScaleMinus" />
     <id name="btnScalePlus" />
     <id name="btnSearch" />

@@ -11,12 +11,13 @@ import android.view.SurfaceView
  */
 class WindowSurfaceView(
     context: Context,
-    private val runtime: com.bellatrixos.linux.LinuxRuntime,
+    private val server: WaylandServer,
+    private val wm: WindowViewManager,
     private val window: XdgToplevel,
     translucent: Boolean = false,
 ) : SurfaceView(context),
     SurfaceHolder.Callback {
-    private val renderer = WindowRenderer(runtime.server, window, translucent)
+    private val renderer = WindowRenderer(server, window, translucent)
 
     var background: Int by renderer::background
 
@@ -35,7 +36,7 @@ class WindowSurfaceView(
         if (surfaceWidth == 0) return
         val h = if (visibleHeight in 1..surfaceHeight) visibleHeight else surfaceHeight
         renderer.visibleHeight = h
-        runtime.wm.applyAppLayout(window, surfaceWidth, h)
+        wm.applyAppLayout(window, surfaceWidth, h)
     }
 
     init {

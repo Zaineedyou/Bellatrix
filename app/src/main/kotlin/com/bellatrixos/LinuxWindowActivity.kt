@@ -21,10 +21,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.bellatrixos.linux.LinuxRuntime
+import com.bellatrixos.wayland.ActiveLinuxBackend
 import com.bellatrixos.wayland.KeyBarView
-import com.bellatrixos.wayland.KeyboardBridge
 import com.bellatrixos.wayland.KeyboardSink
+import com.bellatrixos.wayland.KeyboardViewBridge
+import com.bellatrixos.wayland.LinuxViewBackend
 import com.bellatrixos.wayland.LinuxWindowInputView
 import com.bellatrixos.wayland.WindowSurfaceView
 import com.bellatrixos.wayland.XdgToplevel
@@ -35,7 +36,7 @@ import com.bellatrixos.wayland.XdgToplevel
  * Android only supplies input, the keybar and the soft keyboard.
  */
 class LinuxWindowActivity : AppCompatActivity() {
-    private lateinit var runtime: LinuxRuntime
+    private lateinit var backend: LinuxViewBackend
     private var window: XdgToplevel? = null
     private var keyboardHeight = 0
 
@@ -49,20 +50,18 @@ class LinuxWindowActivity : AppCompatActivity() {
 
     private val picker =
         registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
-            window?.let(runtime.wm::focus)
+            window?.let(backend.wm::focus)
             if (sink.isAttachedToWindow && !sink.showing) sink.show()
-            if (uris.isNotEmpty()) runtime.keyboard.insertImages(uris)
+            if (uris.isNotEmpty()) backend.keyboard.insertImages(uris)
         }
 
     private val imagePicker =
-        KeyboardBridge.ImagePicker {
-            picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        }
+        { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        runtime = LinuxRuntime.get(this)
-        val window = runtime.wm.windowByHandle(intent.data?.lastPathSegment)
+        backend = ActiveLinuxBackend.get(this)
+        val window = backend.wm.windowByHandle(intent.data?.lastPathSegment)
         if (window == null) {
             finishAndRemoveTask()
             return
@@ -75,19 +74,19 @@ class LinuxWindowActivity : AppCompatActivity() {
         toggle = findViewById(R.id.linux_keyboard_toggle)
         toggle.setImageTintList(ContextCompat.getColorStateList(this, R.color.linux_key_foreground))
 
-        surface = WindowSurfaceView(this, runtime, window)
+        surface = WindowSurfaceView(this, backend.server, backend.wm, window)
         root.addView(surface, 0, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
 
-        input = LinuxWindowInputView(this, runtime.wm, window)
+        input = LinuxWindowInputView(this, backend.wm, window)
         input.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         input.onCursorTap = { if (!sink.showing) sink.show() }
         root.addView(input, 1, input.layoutParams)
 
-        sink = KeyboardSink(this, runtime.keyboard)
+        sink = KeyboardSink(this, backend.keyboard)
         root.addView(sink, FrameLayout.LayoutParams(1, 1, Gravity.TOP or Gravity.START))
 
         keyBar = KeyBarView(this)
-        KeyBarView.KeyboardBridgeHolder.bridge = runtime.keyboard
+        KeyBarView.KeyboardBridgeHolder.bridge = backend.keyboard
         keyBarContainer.addView(keyBar, FrameLayout.LayoutParams(MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         toggle.setOnClickListener { sink.toggle() }
 
@@ -100,37 +99,37 @@ class LinuxWindowActivity : AppCompatActivity() {
             insets
         }
 
-        setTitle(runtime.displayName(window.appId, window.title))
+        setTitle(backend.displayName(window.appId, window.title))
     }
 
     override fun onStart() {
         super.onStart()
-        runtime.screenStarted()
+        backend.screenStarted()
     }
 
     override fun onResume() {
         super.onResume()
-        window?.let(runtime.wm::focus)
-        runtime.keyboard.imagePicker = imagePicker
+        window?.let(backend.wm::focus)
+        backend.keyboard.picker = imagePicker
         relayout()
     }
 
     override fun onPause() {
         super.onPause()
-        runtime.keyboard.releaseHeld()
-        if (runtime.keyboard.imagePicker === imagePicker) runtime.keyboard.imagePicker = null
+        backend.keyboard.releaseHeld()
+        if (backend.keyboard.picker === imagePicker) backend.keyboard.picker = null
     }
 
     override fun onStop() {
         super.onStop()
-        runtime.screenStopped()
+        backend.screenStopped()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         KeyBarView.KeyboardBridgeHolder.bridge = null
         val w = window ?: return
-        if (isFinishing && runtime.wm.appWindows.contains(w)) runtime.wm.close(w)
+        if (isFinishing && backend.wm.appWindows.contains(w)) backend.wm.close(w)
     }
 
     @SuppressLint("RestrictedApi")
@@ -139,7 +138,7 @@ class LinuxWindowActivity : AppCompatActivity() {
             if (event.repeatCount == 0) finish()
             return true
         }
-        if (runtime.keyboard.handle(event)) return true
+        if (backend.keyboard.handle(event)) return true
         return super.dispatchKeyEvent(event)
     }
 

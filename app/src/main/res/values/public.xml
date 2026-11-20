@@ -3031,7 +3031,6 @@
     <public type="id" name="btnNewTab" id="0x7f0a00a3" />
     <public type="id" name="btnPower" id="0x7f0a00a4" />
     <public type="id" name="btnPrint" id="0x7f0a00a5" />
-    <public type="id" name="btnRearrangeConfirm" id="0x7f0a00a6" />
     <public type="id" name="btnScaleMinus" id="0x7f0a00a7" />
     <public type="id" name="btnScalePlus" id="0x7f0a00a8" />
     <public type="id" name="btnSearch" id="0x7f0a00a9" />
@@ -4911,7 +4910,6 @@
     <public type="string" name="str_demo_title" id="0x7f1202a5" />
     <public type="string" name="str_todo" id="0x7f1202a6" />
     <public type="string" name="taskbar_app" id="0x7f1202a7" />
-    <public type="string" name="taskbar_rearrange_done" id="0x7f1202a8" />
     <public type="string" name="titlebar_actions_app_close" id="0x7f1202a9" />
     <public type="string" name="titlebar_actions_app_minimize" id="0x7f1202aa" />
     <public type="string" name="titlebar_actions_app_reload" id="0x7f1202ab" />

@@ -688,7 +688,6 @@ We will share more once you're back online."</string>
     <string name="str_demo_title">Title</string>
     <string name="str_todo">TODO</string>
     <string name="taskbar_app">TaskBar App</string>
-    <string name="taskbar_rearrange_done">Done Re-Arrange</string>
     <string name="titlebar_actions_app_close">Close this app</string>
     <string name="titlebar_actions_app_minimize">Minimize this app</string>
     <string name="titlebar_actions_app_reload">Reload this app</string>

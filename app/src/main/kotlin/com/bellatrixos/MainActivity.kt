@@ -202,7 +202,6 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     @JvmField var q1: BatteryReceiver? = null
     @JvmField var r0: RelativeLayout? = null
     @JvmField var r1: VolumeObserver? = null
-    @JvmField var s0: TextView? = null
     @JvmField var s1: ActivityResultLauncher<Intent>? = null
     @JvmField var t0: TaskBarAdapter? = null
     @JvmField var t1: Int = -1
@@ -289,9 +288,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
                 DesktopDB.c(adapter.E)
             }
         }
-        // "Done re-arrange" dihapus: posisi sudah disimpan saat drop, taskbar tetap terlihat.
         this.A0?.visibility = View.VISIBLE
-        this.s0?.visibility = View.GONE
     }
 
     override fun C(str: String, str2: String, str3: String) {
@@ -1199,7 +1196,6 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         this.X0 = findViewById(R.id.taskBarBlur)
         this.u0 = findViewById(R.id.taskBarAppList)
         this.A0 = findViewById(R.id.taskBarList)
-        this.s0 = findViewById(R.id.btnRearrangeConfirm)
         this.L0 = findViewById(R.id.startMenuBg)
         this.H0 = findViewById(R.id.startMenuBehavior)
         this.v0 = findViewById(R.id.btnStartMenu)

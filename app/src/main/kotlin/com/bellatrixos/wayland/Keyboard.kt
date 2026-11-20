@@ -231,7 +231,7 @@ class KeyboardBridge(
 /** An invisible view that owns the soft keyboard and feeds it into [KeyboardBridge]. */
 class KeyboardSink(
     context: Context,
-    private val bridge: KeyboardBridge,
+    private val bridge: KeyboardViewBridge,
 ) : View(context) {
     private var softKeyboard = false
     val wanted get() = softKeyboard
