@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.KeyEvent
@@ -97,9 +96,7 @@ class LinuxWindowActivity : AppCompatActivity() {
             insets
         }
 
-        runtime.displayName(window.appId, window.title).let { label ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) setTaskDescription(android.app.TaskDescription(label, android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888)))
-        }
+        setTitle(runtime.displayName(window.appId, window.title))
     }
 
     override fun onStart() {

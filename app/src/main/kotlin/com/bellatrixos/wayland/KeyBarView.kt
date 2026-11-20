@@ -180,9 +180,9 @@ class KeyBarView(
     ): RectF {
         val cols = rows[row].size
         val cell = width.toFloat() / cols
-        val x0 = col * cell + pad
-        val y0 = pad + row * keyHeight + pad
-        return RectF(x0, y0, (col + 1) * cell - pad, y0 + keyHeight - pad * 2)
+        val x0 = col * cell + pad.toFloat()
+        val y0 = pad.toFloat() + row * keyHeight.toFloat() + pad.toFloat()
+        return RectF(x0, y0, (col + 1) * cell - pad.toFloat(), y0 + keyHeight.toFloat() - pad.toFloat() * 2f)
     }
 
     private fun drawIcon(
