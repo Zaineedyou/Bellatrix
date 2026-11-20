@@ -24,13 +24,15 @@ class b : Runnable {
     @JvmField var x: Any? = null
     @JvmField var y: Any? = null
     @JvmField var z: Any? = null
+    @JvmField var maxMs: Long = 0L
 
-    constructor(context: Context, uri: Uri, file: File, callback: Any?, file2: File) {
+    constructor(context: Context, uri: Uri, file: File, callback: Any?, file2: File, maxMs: Long = 0L) {
         v = context
         w = uri
         x = file
         y = callback
         z = file2
+        this.maxMs = maxMs
         u = 1
     }
 
@@ -102,7 +104,7 @@ class b : Runnable {
                     outBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
                     stream.flush()
                 }
-                WallpaperVideoProcessor.a(context, uri, targetFile, success, failure)
+                WallpaperVideoProcessor.a(context, uri, targetFile, success, failure, maxMs)
             } else {
                 failure.run()
             }

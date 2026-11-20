@@ -104,22 +104,27 @@ class LinuxRuntime private constructor(
         if (started) return
         started = true
         scope.launch {
-            withContext(Dispatchers.IO) { proot.prepare() }
-            prepared = true
-            if (bootstrap.wanted) {
-                runLinux { bootstrap.run() }
-            } else {
-                // foot.ini follows Android's font size and display density even before Linux exists.
-                updateOutput()
+            try {
+                withContext(Dispatchers.IO) { proot.prepare() }
+                prepared = true
+                if (bootstrap.wanted) {
+                    runLinux { bootstrap.run() }
+                } else {
+                    // foot.ini follows Android's font size and display density even before Linux exists.
+                    updateOutput()
+                    // Resolve Checking -> NotInstalled like Omalauncher; otherwise the page hangs on "checking".
+                    bootstrap.run()
+                }
+            } catch (e: Throwable) {
+                bootstrap.fail(e)
+            } finally {
+                onStateChanged()
             }
         }
     }
 
     /** Starts an install. The chosen distro is the only one this port supports. */
-    fun install() {
-        bootstrap.choose()
-        runLinux { bootstrap.install() }
-    }
+    fun install() = runLinux { bootstrap.install() }
 
     /** Continues a failed install or update. */
     fun retry() = runLinux { bootstrap.run() }
@@ -166,16 +171,23 @@ class LinuxRuntime private constructor(
         if (linuxJob?.isActive == true) return
         linuxJob =
             scope.launch {
-                setService(true)
-                withContext(Dispatchers.IO) {
-                    if (!prepared) {
-                        proot.prepare()
-                        prepared = true
+                try {
+                    setService(true)
+                    withContext(Dispatchers.IO) {
+                        if (!prepared) {
+                            proot.prepare()
+                            prepared = true
+                        }
                     }
+                    work()
+                    if (bootstrap.isInstalled) onLinuxReady() else setService(false)
+                } catch (e: Throwable) {
+                    // Surface scaffolding failures instead of leaving the page stuck on "checking".
+                    bootstrap.fail(e)
+                    setService(false)
+                } finally {
+                    onStateChanged()
                 }
-                work()
-                if (bootstrap.isInstalled) onLinuxReady() else setService(false)
-                onStateChanged()
             }
     }
 

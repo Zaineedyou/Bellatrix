@@ -43,7 +43,8 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
             val source = if (Global.f4842k == 3) y else x
             val candidates = ArrayList<StartMenuItem>()
             for (item in source) {
-                if (Global.f4842k != 2 || item.a() == 1) candidates.add(item)
+                // Installed APKs are category 0; never hide them, whatever the saved view mode is.
+                candidates.add(item)
             }
             if (TextUtils.isEmpty(constraint)) {
                 val comparator = startMenuOrderComparator(Global.l)
@@ -103,7 +104,9 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
     @JvmField var F: Boolean = false
 
     init {
-        Global.f4842k = SharedPrefs.f4755a?.getInt("start_menu_apps_view", 0) ?: 0
+        // Migrate the old "built-in apps only" value (2) that hid every installed APK.
+        val savedView = SharedPrefs.f4755a?.getInt("start_menu_apps_view", 0) ?: 0
+        Global.f4842k = if (savedView == 2) 0 else savedView
         Global.l = SharedPrefs.f4755a?.getInt("start_menu_apps_order", 0) ?: 0
         try {
             val userManager = B.getSystemService(Context.USER_SERVICE) as? UserManager
@@ -144,12 +147,16 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
                 G[pkg] = label
             }
         }
-        for (installed in InstalledAppsDB.b()) A(1, installed.c(), installed.b().orEmpty())
+        // Seed built-ins first: InstalledAppsDB is initialised asynchronously and can throw here.
         A(1, "UINotepad", "UiNotepad")
         A(1, "UITerminal", "Terminal")
         A(1, "UIBrowser", "UiBrowser")
         A(1, "UIInstaller", "UIInstaller")
         A(1, "UIMusic", "UiMusic")
+        try {
+            for (installed in InstalledAppsDB.b()) A(1, installed.c(), installed.b().orEmpty())
+        } catch (_: RuntimeException) {
+        }
     }
 
     /** Muat aplikasi dari profil lain. */
@@ -198,7 +205,7 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
     fun E(i2: Int) {
         val selected: ArrayList<StartMenuItem> = when (i2) {
             0 -> ArrayList(x)
-            2 -> ArrayList(x.filter { it.a() == 1 })
+            2 -> ArrayList(x)
             3 -> { C(); ArrayList(y) }
             else -> ArrayList(x)
         }

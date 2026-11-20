@@ -22,7 +22,14 @@ object WallpaperVideoProcessor {
     }
 
     @JvmStatic
-    fun a(context: Context, uri: Uri, file: File, runnable: Runnable, runnable2: Runnable) {
+    fun a(
+        context: Context,
+        uri: Uri,
+        file: File,
+        runnable: Runnable,
+        runnable2: Runnable,
+        maxMs: Long = 0L,
+    ) {
         val transformer = Transformer.Builder(context)
             .addListener(object : Transformer.Listener {
                 override fun onCompleted(composition: Composition, exportResult: ExportResult) {
@@ -38,8 +45,16 @@ object WallpaperVideoProcessor {
                 }
             })
             .build()
-        val mediaItem = MediaItem.fromUri(uri)
-        val edited = EditedMediaItem.Builder(mediaItem).build()
+        val builder =
+            MediaItem.Builder().setUri(uri).also { item ->
+                context.contentResolver.getType(uri)?.let { type -> item.setMimeType(type) }
+                if (maxMs > 0) {
+                    item.setClippingConfiguration(
+                        MediaItem.ClippingConfiguration.Builder().setEndPositionMs(maxMs).build(),
+                    )
+                }
+            }
+        val edited = EditedMediaItem.Builder(builder.build()).build()
         transformer.start(edited, file.absolutePath)
     }
 }

@@ -253,8 +253,16 @@ class Bootstrap(
     }
 
     suspend fun install(picked: List<String> = emptyList()) {
+        cancelled = false
         choose(picked)
         run()
+    }
+
+    /** Publishes a setup failure that happened outside [run], e.g. while preparing proot. */
+    fun fail(e: Throwable) {
+        if (cancelled) return
+        Log.e(TAG, "setup failed before a step", e)
+        _state.value = LinuxState.Failed(stage, e.message ?: e.toString(), log.toList())
     }
 
     suspend fun remove() =

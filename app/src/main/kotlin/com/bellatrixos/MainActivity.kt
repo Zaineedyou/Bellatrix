@@ -682,7 +682,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     override fun c0(str: String, str2: String?) {
         val bottomSheetBehavior = this.U0
         if (bottomSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+            hideStartMenu()
         }
         val zEquals = "UIExplorer" == str
         val zEquals2 = Objects.equals(str2, this.p1)
@@ -696,6 +696,12 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         } else {
             ActivityCompat.requestPermissions(this, arrayOf("android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"), 100)
         }
+    }
+
+    /** Hides the Start Menu and its touch-consuming overlay. */
+    fun hideStartMenu() {
+        U0?.state = BottomSheetBehavior.STATE_HIDDEN
+        U?.visibility = View.GONE
     }
 
     override fun d(fragment: UIFragment?) {
@@ -932,15 +938,9 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         } else {
             this.O0?.a()
             val bottomSheetCallbackB = StartMenu.b(this.U!!, f(this, i2, 0), this.S0!!, this.v0!!)
+            this.Z0?.let { this.U0?.removeBottomSheetCallback(it) }
             this.Z0 = bottomSheetCallbackB
-            val behavior = this.U0
-            try {
-                val callbacks = behaviorCallbacks(behavior)
-                if (callbacks != null && !callbacks.contains(bottomSheetCallbackB)) {
-                    callbacks.add(bottomSheetCallbackB)
-                }
-            } catch (_: Throwable) {
-            }
+            this.U0?.addBottomSheetCallback(bottomSheetCallbackB)
         }
         val taskbarBtn = this.v0 ?: return
         val bottomSheetBehavior = this.U0 ?: return
@@ -1278,10 +1278,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         val bottomSheetBehavior = this.U0
         val cb = this.Z0
         if (bottomSheetBehavior != null && cb != null) {
-            try {
-                behaviorCallbacks(bottomSheetBehavior)?.remove(cb)
-            } catch (_: Throwable) {
-            }
+            bottomSheetBehavior.removeBottomSheetCallback(cb)
         }
         if (this.h1) {
             try {
@@ -1820,16 +1817,6 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             val m = fragment.javaClass.methods.firstOrNull { it.name == name && it.parameterCount == 0 }
             if (m != null) m.invoke(fragment) as? String
             else fragment.javaClass.getField(name).get(fragment) as? String
-        } catch (_: Throwable) {
-            null
-        }
-    }
-
-    private fun behaviorCallbacks(behavior: Any?): MutableList<Any?>? {
-        return try {
-            val field = behavior?.javaClass?.getField("P") ?: return null
-            @Suppress("UNCHECKED_CAST")
-            field.get(behavior) as? MutableList<Any?>
         } catch (_: Throwable) {
             null
         }

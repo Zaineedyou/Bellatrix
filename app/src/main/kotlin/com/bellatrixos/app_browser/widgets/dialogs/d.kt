@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.view.View
 import android.view.ViewGroup
-import androidx.exifinterface.media.ExifInterface
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.R
 import com.bellatrixos.interfaces.MainActivityIn
@@ -70,23 +69,10 @@ class d : Runnable {
         val activity = y as? MainActivityIn ?: return
         try {
             try {
-                val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                BitmapFactory.decodeFile(path, options)
-                val outW = options.outWidth
-                val outH = options.outHeight
-                if (outW <= 0 || outH <= 0) throw IOException("Invalid image")
-                var point: Point = helper.e(context, outW, outH, w)
+                var bitmap = helper.decodeFile(context, path, w) ?: throw IOException("Decode failed")
+                var point: Point = helper.e(context, bitmap.width, bitmap.height, w)
                 if (w == 2) point = helper.b(point)
-                var bitmap = helper.d(path, point.x, point.y, Bitmap.Config.ARGB_8888)
-                    ?: throw IOException("Decode failed")
-                try {
-                    val orientation = ExifInterface(path).getAttributeInt(
-                        ExifInterface.TAG_ORIENTATION,
-                        ExifInterface.ORIENTATION_NORMAL
-                    )
-                    bitmap = helper.f(orientation, bitmap) ?: bitmap
-                } catch (_: Exception) {
-                }
+                bitmap = Bitmap.createScaledBitmap(bitmap, point.x.coerceAtLeast(1), point.y.coerceAtLeast(1), true)
                 val applied = Wallpapers.a(context, bitmap, w)
                 AppExecutors.c().post(com.bellatrixos.wallpaper.b(activity, applied, 1))
             } catch (_: Exception) {

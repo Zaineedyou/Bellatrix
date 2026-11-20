@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.R
@@ -54,41 +55,57 @@ class a : Runnable {
         val activity = y as? MainActivityIn
         val done = z as? Runnable
         var bitmap: Bitmap? = null
-        try {
+        var imageDecoderOk = false
+
+        // ImageDecoder handles HEIC/HEIF, AVIF, WebP, GIF and the newer RAW variants.
+        if (Build.VERSION.SDK_INT >= 28) {
+            try {
+                bitmap = helper.decodeUri(context, uri, quality)
+                imageDecoderOk = bitmap != null
+            } catch (_: Exception) {
+            }
+        }
+
+        if (!imageDecoderOk) {
             try {
                 val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                 val first = context.contentResolver.openInputStream(uri)
-                if (first == null) {
-                    AppExecutors.c().post(b(activity, 4))
-                } else {
-                    first.use { input ->
-                        BitmapFactory.decodeStream(input, null, bounds)
-                    }
-                    val point: Point = helper.e(context, bounds.outWidth, bounds.outHeight, quality)
-                    val options = BitmapFactory.Options().apply {
-                        inSampleSize = helper.c(bounds, point.x, point.y)
-                        inPreferredConfig = Bitmap.Config.ARGB_8888
-                    }
-                    val second = context.contentResolver.openInputStream(uri)
-                    if (second == null) {
+                    ?: run {
                         AppExecutors.c().post(b(activity, 4))
-                    } else {
-                        bitmap = second.use { BitmapFactory.decodeStream(it, null, options) }
-                        val finalBitmap = helper.a(context, uri, bitmap)
-                        AppExecutors.c().post(b(activity, Wallpapers.a(context, finalBitmap, quality), 0))
+                        done?.run()
+                        return
                     }
+                first.use { BitmapFactory.decodeStream(it, null, bounds) }
+                val point: Point = helper.e(context, bounds.outWidth, bounds.outHeight, quality)
+                val options = BitmapFactory.Options().apply {
+                    inSampleSize = helper.c(bounds, point.x, point.y)
+                    inPreferredConfig = Bitmap.Config.ARGB_8888
                 }
-            } catch (ignored: Exception) {
-                AppExecutors.c().post(Runnable {
+                val second = context.contentResolver.openInputStream(uri)
+                    ?: run {
+                        AppExecutors.c().post(b(activity, 4))
+                        done?.run()
+                        return
+                    }
+                bitmap = second.use { BitmapFactory.decodeStream(it, null, options) }
+            } catch (_: Exception) {
+                AppExecutors.c().post {
                     Toast.makeText(context, R.string.toast_wallpaper_saving_error, Toast.LENGTH_SHORT).show()
-                })
+                }
+                done?.run()
+                return
             }
-            done?.run()
-        } catch (t: Throwable) {
-            AppExecutors.c().post(b(activity, null, 0))
-            done?.run()
-            throw t
         }
+
+        val decoded = bitmap
+        if (decoded == null) {
+            AppExecutors.c().post(b(activity, 4))
+        } else {
+            // ImageDecoder already applies EXIF orientation; only the fallback needs the legacy rotation.
+            val finalBitmap = if (imageDecoderOk) decoded else helper.a(context, uri, decoded)
+            AppExecutors.c().post(b(activity, Wallpapers.a(context, finalBitmap, quality), 0))
+        }
+        done?.run()
     }
 
     private fun runExplorer() {

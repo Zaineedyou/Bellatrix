@@ -56,16 +56,34 @@ class UIBackground : Fragment() {
     }
 
     fun a0() {
-        val intent = Intent("android.intent.action.PICK")
-        if (z0?.getSelectedPosition() == 1) {
-            intent.type = "video/*"
-        } else {
-            intent.type = "image/*"
+        val video = z0?.getSelectedPosition() == 1
+        val intent =
+            Intent(Intent.ACTION_GET_CONTENT)
+                .addCategory(Intent.CATEGORY_OPENABLE)
+                .setType("*/*")
+                .putExtra(Intent.EXTRA_MIME_TYPES, if (video) VIDEO_MIMES else IMAGE_MIMES)
+        if (!video) {
             intent.putExtra("aspectX", 1)
             intent.putExtra("aspectY", 1)
             intent.putExtra("scale", true)
         }
         F0.launch(intent)
+    }
+
+    companion object {
+        private val IMAGE_MIMES =
+            arrayOf(
+                "image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif",
+                "image/avif", "image/bmp", "image/x-ms-bmp", "image/tiff", "image/x-icon",
+                "image/x-adobe-dng", "image/dng", "image/vnd.adobe.photoshop",
+            )
+
+        private val VIDEO_MIMES =
+            arrayOf(
+                "video/mp4", "video/x-m4v", "video/3gpp", "video/3gpp2", "video/quicktime",
+                "video/webm", "video/x-matroska", "video/mpeg", "video/mp2t", "video/x-msvideo",
+                "video/x-flv", "video/x-ms-wmv",
+            )
     }
 
     fun b0(z: Boolean) {

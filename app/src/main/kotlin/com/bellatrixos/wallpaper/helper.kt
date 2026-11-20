@@ -3,11 +3,15 @@ package com.bellatrixos.wallpaper
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.graphics.Matrix
 import android.graphics.Point
 import android.net.Uri
+import android.os.Build
 import android.util.DisplayMetrics
+import androidx.annotation.RequiresApi
 import androidx.exifinterface.media.ExifInterface
+import java.io.File
 
 /** Utilitas geometri, sampling, dan orientasi gambar wallpaper. */
 object helper {
@@ -67,6 +71,50 @@ object helper {
         options.inPreferredConfig = config
         return BitmapFactory.decodeFile(str, options)
     }
+
+    /** Decode any format ImageDecoder understands (HEIC, AVIF, WebP, GIF first frame, ...). */
+    @RequiresApi(28)
+    @JvmStatic
+    fun decodeUri(context: Context, uri: Uri, quality: Int): Bitmap? {
+        val source = ImageDecoder.createSource(context.contentResolver, uri)
+        return software(ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+            val target = b(e(context, info.size.width, info.size.height, quality))
+            decoder.setTargetSize(target.x.coerceAtLeast(1), target.y.coerceAtLeast(1))
+            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+        })
+    }
+
+    /** Decode any local file ImageDecoder understands, with the old BitmapFactory path as fallback. */
+    @JvmStatic
+    fun decodeFile(context: Context, path: String, quality: Int): Bitmap? {
+        if (Build.VERSION.SDK_INT >= 28) {
+            val decoded =
+                runCatching {
+                    software(ImageDecoder.decodeBitmap(ImageDecoder.createSource(File(path))) { decoder, info, _ ->
+                        val target = b(e(context, info.size.width, info.size.height, quality))
+                        decoder.setTargetSize(target.x.coerceAtLeast(1), target.y.coerceAtLeast(1))
+                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                    })
+                }.getOrNull()
+            if (decoded != null) return decoded
+        }
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(path, bounds)
+        val target = b(e(context, bounds.outWidth, bounds.outHeight, quality))
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = c(bounds, target.x, target.y)
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+        val decoded = BitmapFactory.decodeFile(path, options) ?: return null
+        return runCatching {
+            val orientation =
+                ExifInterface(path).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            f(orientation, decoded)
+        }.getOrDefault(decoded)
+    }
+
+    private fun software(bitmap: Bitmap): Bitmap =
+        if (bitmap.config == Bitmap.Config.HARDWARE) bitmap.copy(Bitmap.Config.ARGB_8888, false) else bitmap
 
     /** Menentukan ukuran target berdasarkan preferensi kualitas wallpaper. */
     @JvmStatic

@@ -516,7 +516,7 @@ class e(@JvmField val u: MainActivity) :
 
     override fun d(startMenuItem: StartMenuItem, i2: Int) {
         val mainActivity = u
-        MainActivityBridge.callField(mainActivity, "U0", "B", 5)
+        mainActivity.hideStartMenu()
         mainActivity.M(startMenuItem.c(), startMenuItem, null)
     }
 

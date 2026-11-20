@@ -48,28 +48,28 @@ class C0059h(@JvmField val u: UIBackground) :
                 AppExecutors.c().post(A(background, file, file2, 2))
             }
         }
+        // Read the duration only to trim long clips; unknown or odd formats still get a chance.
+        var duration: Long? = null
+        val retriever = MediaMetadataRetriever()
         try {
-            val retriever = MediaMetadataRetriever()
             retriever.setDataSource(context, data)
-            val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-            retriever.release()
-            if (duration != null && duration.toLong() <= 30000L) {
-                val dir = File(context.filesDir, "wallpaper_videos")
-                if (!dir.exists()) dir.mkdirs()
-                val main = File(dir, "wallpaper_main.mp4")
-                WallpaperVideoProcessor.a(
-                    context,
-                    data,
-                    main,
-                    b(context, data, File(dir, "wallpaper_blur.mp4"), callback, main),
-                    Runnable { callback.a() }
-                )
-                return
-            }
-            callback.a()
+            duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull()
         } catch (_: Exception) {
-            callback.a()
+        } finally {
+            runCatching { retriever.release() }
         }
+        val maxMs = if (duration != null && duration > 30_000L) 30_000L else 0L
+        val dir = File(context.filesDir, "wallpaper_videos")
+        if (!dir.exists()) dir.mkdirs()
+        val main = File(dir, "wallpaper_main.mp4")
+        WallpaperVideoProcessor.a(
+            context,
+            data,
+            main,
+            b(context, data, File(dir, "wallpaper_blur.mp4"), callback, main, maxMs),
+            Runnable { callback.a() },
+            maxMs,
+        )
     }
 
     // ActivityResultCallback.e(Object)
