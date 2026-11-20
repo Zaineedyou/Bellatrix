@@ -7,6 +7,7 @@ import android.util.Log
 import com.bellatrixos.R
 import kotlinx.coroutines.sync.Mutex
 import java.io.File
+import java.io.FileNotFoundException
 
 /**
  * Opt-in GPU acceleration for guest apps.
@@ -154,7 +155,7 @@ class Gpu(
         val dest = proot.hostFile(GpuDrivers.MESA_ZINK_BUNDLE)
         val input = try {
             context.assets.open("mesa-zink/mesa-zink.tar.xz")
-        } catch (_: Exception) {
+        } catch (_: FileNotFoundException) {
             return
         }
         dest.parentFile?.mkdirs()

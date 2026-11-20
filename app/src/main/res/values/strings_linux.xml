@@ -45,4 +45,16 @@
     <string name="linux_notification_failed">Linux install failed</string>
     <string name="linux_notification_removing">removing Linux</string>
     <string name="linux_notification_running">Linux is running</string>
+
+    <!-- Omalauncher-style setup progress and expandable output. -->
+    <string name="linux_progress_title">installing Linux</string>
+    <string name="linux_progress_stopped">install stopped</string>
+    <string name="linux_progress_background">Linux keeps setting up in the background</string>
+    <string name="linux_progress_percent">%1$d%%</string>
+    <string name="linux_output">output</string>
+    <string name="linux_output_more">more</string>
+    <string name="linux_output_less">less</string>
+    <string name="home_job_failed">the last job failed</string>
+    <string name="home_job_whole_log">whole log</string>
+    <string name="linux_gpu_unsupported">not supported on this device</string>
 </resources>

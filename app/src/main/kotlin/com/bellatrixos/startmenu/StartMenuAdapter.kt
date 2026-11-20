@@ -103,7 +103,7 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
     @JvmField var F: Boolean = false
 
     init {
-        Global.f4842k = SharedPrefs.f4755a?.getInt("start_menu_apps_view", 2) ?: 2
+        Global.f4842k = SharedPrefs.f4755a?.getInt("start_menu_apps_view", 0) ?: 0
         Global.l = SharedPrefs.f4755a?.getInt("start_menu_apps_order", 0) ?: 0
         try {
             val userManager = B.getSystemService(Context.USER_SERVICE) as? UserManager

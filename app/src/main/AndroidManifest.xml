@@ -95,7 +95,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:configChanges="keyboardHidden|orientation"
             android:exported="true"
             android:theme="@style/Theme.Bellatrix"
             android:windowSoftInputMode="adjustPan" />
