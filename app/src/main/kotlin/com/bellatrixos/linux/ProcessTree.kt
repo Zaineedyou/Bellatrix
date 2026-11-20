@@ -6,7 +6,7 @@ import java.io.File
 
 /**
  * Ends a proot started with [Proot.process] and every guest process under it.
- * Ported verbatim from Omalauncher: SIGKILLing proot alone leaves its tracees
+ * Ported verbatim from Bellatrix: SIGKILLing proot alone leaves its tracees
  * running, so each process in the tree is killed, children before their proot.
  */
 fun killTree(process: Process) {

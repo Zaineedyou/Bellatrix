@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Bellatrix-Kotlin"
 include(":app")
+include(":owl")

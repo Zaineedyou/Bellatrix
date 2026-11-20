@@ -2,7 +2,7 @@ package com.bellatrixos.linux
 
 import java.io.File
 
-/** Small file helpers the rootfs installer needs, replacing Omalauncher's storage/upgrade helpers. */
+/** Small file helpers the rootfs installer needs, replacing Bellatrix's storage/upgrade helpers. */
 
 /** Recursive delete that doesn't follow symlinks out of [dir]. */
 fun deleteTree(dir: File) {
@@ -36,5 +36,5 @@ fun writeAtomically(
     }
 }
 
-/** Lowercase hex of a digest, matching the OWL `hex()` helper Omalauncher's installer used. */
+/** Lowercase hex of a digest, matching the OWL `hex()` helper Bellatrix's installer used. */
 fun ByteArray.hex(): String = joinToString("") { "%02x".format(it) }

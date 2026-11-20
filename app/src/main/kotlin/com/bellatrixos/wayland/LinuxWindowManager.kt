@@ -6,7 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.abs
 
 /**
- * Window state for Linux toplevels, ported from Omalauncher's ui.WindowManager.
+ * Window state for Linux toplevels, ported from Bellatrix's ui.WindowManager.
  * Every toplevel is shown as its own Android task (LinuxWindowActivity), which
  * draws it with [WindowRenderer]; home-screen terminal tiles use [claim] to take
  * a toplevel instead. Lives on the main thread; protocol callbacks are posted over.

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Guest job words and status, ported from Omalauncher's strings_linux.xml -->
+    <!-- Guest job words and status, ported from Bellatrix's strings_linux.xml -->
     <string name="linux_job_installing">installing</string>
     <string name="linux_job_removing">removing</string>
     <string name="linux_job_building">building</string>
@@ -46,7 +46,7 @@
     <string name="linux_notification_removing">removing Linux</string>
     <string name="linux_notification_running">Linux is running</string>
 
-    <!-- Omalauncher-style setup progress and expandable output. -->
+    <!-- Bellatrix-style setup progress and expandable output. -->
     <string name="linux_progress_title">installing Linux</string>
     <string name="linux_progress_stopped">install stopped</string>
     <string name="linux_progress_background">Linux keeps setting up in the background</string>

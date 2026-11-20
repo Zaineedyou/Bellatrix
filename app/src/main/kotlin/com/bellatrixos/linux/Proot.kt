@@ -14,7 +14,7 @@ private const val FAST_LANE = "/usr/local/lib/libfastpath.so"
 /**
  * Paths and process launching for the proot'd Linux rootfs.
  *
- * Ported 1:1 from Omalauncher's `dev.omalauncher.linux.Proot`: the proot command
+ * Ported 1:1 from Bellatrix's `dev.omalauncher.linux.Proot`: the proot command
  * line, the environment, the binds, the temporary-directory handling and the
  * process bookkeeping are unchanged. The launcher-specific binds for widgets
  * and themes are dropped because Bellatrix has no OWL/widget data directory.
@@ -72,13 +72,13 @@ class Proot(
     private val fastLaneSource = File(nativeDir, "libfastpath.so")
     private val fastLane = File(rootfs, FAST_LANE.removePrefix("/"))
 
-    /** Guest-visible copies of the launcher's data, at Omalauncher's exact paths. */
+    /** Guest-visible copies of the launcher's data, at Bellatrix's exact paths. */
     private val dataBinds =
         listOf(
             GUEST_HOME + "/.local/share/omarchy" to File(filesDir, "omarchy"),
-            GUEST_HOME + "/.config/omalauncher/widgets" to File(filesDir, "widgets"),
-            GUEST_HOME + "/.config/omalauncher/style" to File(filesDir, "style"),
-            GUEST_HOME + "/.config/omalauncher/home" to File(filesDir, "home"),
+            GUEST_HOME + "/.config/bellatrix/widgets" to File(filesDir, "widgets"),
+            GUEST_HOME + "/.config/bellatrix/style" to File(filesDir, "style"),
+            GUEST_HOME + "/.config/bellatrix/home" to File(filesDir, "home"),
             GUEST_HOME + "/.config/omarchy/themes" to File(filesDir, "themes"),
             GUEST_HOME + "/.config/omarchy/backgrounds" to File(filesDir, "backgrounds"),
         )

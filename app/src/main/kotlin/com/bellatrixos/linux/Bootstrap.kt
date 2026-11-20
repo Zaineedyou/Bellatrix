@@ -62,7 +62,7 @@ private class CountingInputStream(source: InputStream) : FilterInputStream(sourc
     ): Int = super.read(b, off, len).also { if (it > 0) count += it }
 }
 
-/** Idempotent step journal, replacing Omalauncher's upgrade StepJournal. */
+/** Idempotent step journal, replacing Bellatrix's upgrade StepJournal. */
 private class StepJournal(private val file: File) {
     private val ids = HashSet<String>()
 
@@ -146,7 +146,7 @@ private class Step(
 
 /**
  * Sets up the Void Linux rootfs and keeps it current. Ported 1:1 from
- * Omalauncher's Bootstrap for the parts a terminal needs; the coding-agent
+ * Bellatrix's Bootstrap for the parts a terminal needs; the coding-agent
  * steps are intentionally not part of this port.
  */
 class Bootstrap(
@@ -190,14 +190,16 @@ class Bootstrap(
             Step("rootfs", Stage.Download, R.string.linux_step_download, network = true) { installRootfs() },
             Step("etc-2", Stage.Configure, R.string.linux_step_configure, network = false) { configure() },
             // foot aborts if either include is missing. Omarchy's theme isn't part of
-            // this port, so seed both targets; existing installs get this as an update.
+            // this port, so seed both targets. The new id also migrates installs whose
+            // foot.ini still points at the old state path.
             Step(
-                "foot-includes-1",
+                "foot-includes-2",
                 Stage.Configure,
                 R.string.linux_step_foot,
                 network = false,
                 isDone = {
-                    File(proot.home, ".local/state/omarchy/current/theme/foot.ini").isFile &&
+                    File(proot.rootfs, "root/.config/foot/foot.ini").readTextOrNull() == FOOT_INI &&
+                        File(proot.home, ".local/state/omarchy/current/theme/foot.ini").isFile &&
                         File(proot.home, TerminalFont.PATH.removePrefix("~/")).isFile
                 },
             ) { ensureFootIncludes() },
@@ -586,7 +588,7 @@ class Bootstrap(
         }
         File(root, "etc/hosts").writeText("127.0.0.1 localhost\n::1 localhost\n")
         File(root, "etc/locale.conf").writeText("LANG=C.UTF-8\n")
-        // foot.ini: Omalauncher's phone-sized defaults, with our font include.
+        // foot.ini: Bellatrix's phone-sized defaults, with our font include.
         File(root, "root/.config/foot/foot.ini").apply {
             parentFile?.mkdirs()
             writeText(FOOT_INI)
@@ -594,8 +596,12 @@ class Bootstrap(
         ensureFootIncludes()
     }
 
-    /** Create both files referenced by FOOT_INI; foot exits at startup when an include is absent. */
+    /** Write FOOT_INI and create both files it includes; foot exits when an include is absent. */
     private fun ensureFootIncludes() {
+        File(proot.rootfs, "root/.config/foot/foot.ini").apply {
+            parentFile?.mkdirs()
+            writeText(FOOT_INI)
+        }
         val theme = File(proot.home, ".local/state/omarchy/current/theme/foot.ini")
         val font = File(proot.home, TerminalFont.PATH.removePrefix("~/"))
         theme.parentFile?.mkdirs()
@@ -603,6 +609,8 @@ class Bootstrap(
         font.parentFile?.mkdirs()
         if (!font.isFile) font.writeText("[main]\nfont=JetBrains Mono:size=8.0\n")
     }
+
+    private fun File.readTextOrNull(): String? = takeIf { it.isFile }?.readText()
 
     private fun compileKeymap() {
         guest(

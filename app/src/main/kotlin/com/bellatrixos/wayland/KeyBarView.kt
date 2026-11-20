@@ -25,7 +25,7 @@ private data class Key(
 )
 
 /**
- * The stock Omalauncher terminal key bar, drawn over the soft keyboard. The
+ * The stock Bellatrix terminal key bar, drawn over the soft keyboard. The
  * two rows, labels, modifiers, clipboard keys, photo key, repeat timing and
  * latch gestures are the ones in `keybar.owl`. Bellatrix does not ship the OWL
  * compiler, so this draws the stock bar rather than parsing a user's .owl.

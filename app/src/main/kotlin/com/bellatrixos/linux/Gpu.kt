@@ -12,7 +12,7 @@ import java.io.FileNotFoundException
 /**
  * Opt-in GPU acceleration for guest apps.
  *
- * Ported 1:1 from Omalauncher's `dev.omalauncher.linux.Gpu`. Bellatrix does not use
+ * Ported 1:1 from Bellatrix's `dev.omalauncher.linux.Gpu`. Bellatrix does not use
  * Compose, so the four observable properties call [onChange] instead of using
  * `mutableStateOf`; the state machine, persistence, probe, rollback and the
  * generated scripts are otherwise unchanged.

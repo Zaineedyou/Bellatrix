@@ -28,7 +28,7 @@ class StickyModifier(val code: Int) {
     var latch: Latch = Latch.Off
 }
 
-/** Translates Android key events and IME text into Wayland keyboard input. Ported from Omalauncher's KeyboardBridge. */
+/** Translates Android key events and IME text into Wayland keyboard input. Ported from Bellatrix's KeyboardBridge. */
 class KeyboardBridge(
     private val wm: LinuxWindowManager,
     private val images: GuestImages,

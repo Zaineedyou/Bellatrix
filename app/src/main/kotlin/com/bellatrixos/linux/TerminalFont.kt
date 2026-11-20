@@ -12,7 +12,7 @@ import kotlin.math.floor
 import kotlin.math.roundToInt
 
 /**
- * The font foot draws text in. Ported from Omalauncher's TerminalFont with Compose
+ * The font foot draws text in. Ported from Bellatrix's TerminalFont with Compose
  * state replaced by ordinary fields and Bellatrix SharedPreferences: foot.ini includes
  * [PATH], so every terminal gets the user's family at a size following Android's
  * display density and font size.
@@ -134,7 +134,7 @@ class TerminalFont(
     }
 
     companion object {
-        const val PATH = "~/.local/state/omalauncher/foot-font.ini"
+        const val PATH = "~/.local/state/bellatrix/foot-font.ini"
         private const val LIST_FAMILIES = "fc-list :spacing=100 -f '%{family[0]}\\n'"
         const val STEP = 0.5
         private const val PX_PER_PT = 96f / 72f
@@ -183,7 +183,7 @@ class TerminalFont(
     }
 }
 
-/** The terminal text sizes from Omalauncher's Style menu, as an em in dp. */
+/** The terminal text sizes from Bellatrix's Style menu, as an em in dp. */
 enum class TerminalText(
     val id: String,
     val em: Float,

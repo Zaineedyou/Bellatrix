@@ -51,8 +51,8 @@ android {
         applicationId = "com.bellatrixos"
         minSdk = 23
         targetSdk = 36
-        versionCode = 31
-        versionName = "2.7.10"
+        versionCode = 32
+        versionName = "2.8.0"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
@@ -156,6 +156,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":owl"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     // Rootfs tarball extraction, as in Omalauncher.
     implementation("org.apache.commons:commons-compress:1.26.2")

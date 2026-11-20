@@ -1,6 +1,6 @@
 package com.bellatrixos.wayland
 
-/** Keys by name and characters on a US keyboard as Linux evdev codes. Ported from Omalauncher's OWL KeyNames. */
+/** Keys by name and characters on a US keyboard as Linux evdev codes. Ported from Bellatrix's OWL KeyNames. */
 object KeyNames {
     data class Combo(
         val code: Int,

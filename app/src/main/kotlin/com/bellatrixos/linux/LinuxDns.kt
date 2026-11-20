@@ -9,7 +9,7 @@ import java.io.File
 import java.net.Inet6Address
 import java.net.InetAddress
 
-/** Keeps the guest's /etc/resolv.conf on the phone's default-network DNS servers. Ported from Omalauncher. */
+/** Keeps the guest's /etc/resolv.conf on the phone's default-network DNS servers. Ported from Bellatrix. */
 class LinuxDns(
     context: Context,
     private val rootfs: File,

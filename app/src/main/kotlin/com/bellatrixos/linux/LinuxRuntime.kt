@@ -32,7 +32,7 @@ import kotlin.concurrent.thread
 /**
  * Process-wide state for Bellatrix's Linux system: proot, the Wayland compositor,
  * the window manager, the keybar bridge and the GPU settings. Ported from
- * Omalauncher's `Runtime`, with the launcher's themes, widgets and agents left
+ * Bellatrix's `Runtime`, with the launcher's themes, widgets and agents left
  * out: only what Terminal, Proot and GPU acceleration need is kept.
  */
 class LinuxRuntime private constructor(
@@ -112,7 +112,7 @@ class LinuxRuntime private constructor(
                 } else {
                     // foot.ini follows Android's font size and display density even before Linux exists.
                     updateOutput()
-                    // Resolve Checking -> NotInstalled like Omalauncher; otherwise the page hangs on "checking".
+                    // Resolve Checking -> NotInstalled like Bellatrix; otherwise the page hangs on "checking".
                     bootstrap.run()
                 }
             } catch (e: Throwable) {

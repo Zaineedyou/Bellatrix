@@ -6,7 +6,7 @@ import java.io.InputStream
 /**
  * Shell quoting and stream helpers used by the guest scripts.
  *
- * Ported verbatim from Omalauncher's `shQuote` (owl Builtins) and
+ * Ported verbatim from Bellatrix's `shQuote` (owl Builtins) and
  * `Shell.shellQuote` / `InputStream.readUpTo`, so generated scripts stay
  * byte-for-byte identical to the ones the original launcher runs.
  */

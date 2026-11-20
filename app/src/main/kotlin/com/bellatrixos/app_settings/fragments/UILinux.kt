@@ -77,7 +77,7 @@ class UILinux : Fragment() {
         retry.setOnCardClickListener { runtime.retry() }
         cancel.setOnCardClickListener { runtime.cancel() }
         gpu.setOnCardClickListener {
-            // A failed check clears `wanted`, so a tap on the card is a retry, like Omalauncher.
+            // A failed check clears `wanted`, so a tap on the card is a retry, like Bellatrix.
             runtime.setGpu(!runtime.gpu.wanted)
         }
         terminal.setOnCardClickListener { runtime.terminal(null, "Terminal") }
@@ -132,7 +132,7 @@ class UILinux : Fragment() {
         updateProcessLog()
     }
 
-    /** Shows the current stage's own percentage and detail line, like Omalauncher's StageRow. */
+    /** Shows the current stage's own percentage and detail line, like Bellatrix's StageRow. */
     private fun updateProgress(working: LinuxState.Installing?) {
         if (working == null) {
             progress.visibility = View.GONE
@@ -155,7 +155,7 @@ class UILinux : Fragment() {
         }
     }
 
-    /** The done/running/failed/pending checklist from Omalauncher's setup screen. */
+    /** The done/running/failed/pending checklist from Bellatrix's setup screen. */
     private fun updateStages(
         working: LinuxState.Installing?,
         failed: LinuxState.Failed?,
