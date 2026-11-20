@@ -44,6 +44,8 @@ android {
     namespace = "com.bellatrixos"
     compileSdk = 36
     buildToolsVersion = "36.0.0"
+    // Omalauncher builds its patched proot libraries against this exact NDK.
+    ndkVersion = "30.0.16248370"
 
     defaultConfig {
         applicationId = "com.bellatrixos"
@@ -53,6 +55,23 @@ android {
         versionName = "2.7.1"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
+
+        // Omalauncher's proot and wlbridge binaries are arm64 only.
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
+        externalNativeBuild {
+            cmake {
+                arguments += "-DANDROID_STL=c++_static"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.31.1"
+        }
     }
 
     signingConfigs {
@@ -107,6 +126,11 @@ android {
     }
 
     packaging {
+        jniLibs {
+            // proot is exec'd from its extracted nativeLibraryDir (as in Omalauncher).
+            useLegacyPackaging = true
+            keepDebugSymbols += listOf("**/libproot.so", "**/libproot-loader.so")
+        }
         resources {
             excludes += setOf(
                 "META-INF/*.version",
@@ -132,6 +156,9 @@ android {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    // Rootfs tarball extraction, as in Omalauncher.
+    implementation("org.apache.commons:commons-compress:1.26.2")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.appcompat:appcompat-resources:1.7.1")
@@ -179,5 +206,5 @@ dependencies {
     implementation("com.google.android.ump:user-messaging-platform:4.0.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.5")
 }

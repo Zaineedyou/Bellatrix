@@ -42,6 +42,7 @@ class k(
                     if (listB.isEmpty()) {
                         observableList.add(TaskBarItem("UIExplorer", true))
                         observableList.add(TaskBarItem("UISettings", true))
+                        observableList.add(TaskBarItem("UITerminal", true))
                         TaskBarDB.d(observableList)
                     } else {
                         for (item in listB) {

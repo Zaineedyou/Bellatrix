@@ -10,6 +10,7 @@ import com.bellatrixos.app_installer.UIInstaller
 import com.bellatrixos.app_music_player.UIMusic
 import com.bellatrixos.app_notepad.UINotepad
 import com.bellatrixos.app_settings.UISettings
+import com.bellatrixos.app_terminal.UITerminal
 import com.bellatrixos.app_video_player.UIVideo
 import com.bellatrixos.app_webapp.UIWebApp
 
@@ -42,6 +43,7 @@ object WindowManager {
         "UIVideo" -> UIVideo()
         "UIPhotos" -> UIImageViewer()
         "UIBrowser" -> UIBrowser()
+        "UITerminal" -> UITerminal()
         else -> when {
             str2 == null -> null
             str2.startsWith("http") || str2.startsWith("www") -> UIWebApp()

@@ -39,6 +39,7 @@ object AppsDatabase {
         custom["UISettings"] = AppDataDBItem(context.getString(R.string.app_settings), null)
         custom["UIExplorer"] = AppDataDBItem(context.getString(R.string.app_explorer), null)
         custom["UINotepad"] = AppDataDBItem(context.getString(R.string.app_notepad), null)
+        custom["UITerminal"] = AppDataDBItem(context.getString(R.string.app_terminal), null)
         custom["UIBrowser"] = AppDataDBItem(context.getString(R.string.app_chrome), null)
 
         val installedRaw = context.getSharedPreferences("InstalledAppsPrefs", 0).getString("installed_apps", null)
@@ -60,5 +61,6 @@ object AppsDatabase {
         b["UINotepad"] = context.getString(R.string.app_notepad)
         b["UIInstaller"] = context.getString(R.string.app_installer)
         b["UIPhotos"] = context.getString(R.string.app_image)
+        b["UITerminal"] = context.getString(R.string.app_terminal)
     }
 }

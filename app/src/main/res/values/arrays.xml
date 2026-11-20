@@ -97,6 +97,7 @@
         <item>Time &amp; language</item>
         <item>Privacy &amp; security</item>
         <item>PC Update</item>
+        <item>Linux</item>
     </string-array>
     <string-array name="settings_nav_sub_items">
         <item>Display</item>

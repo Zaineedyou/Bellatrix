@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Process
 import android.util.Log
+import com.bellatrixos.linux.LinuxRuntime
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -31,6 +32,9 @@ class BellatrixApplication : Application() {
         super.onCreate()
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler(CrashClipboardHandler(this, previous))
+        // Owns proot, Wayland and the GPU state for the whole process. Starting is idempotent and
+        // never blocks: MainActivity only wires the "Linux isn't installed" callback on top of it.
+        LinuxRuntime.get(this).start()
     }
 
     private class CrashClipboardHandler(

@@ -74,6 +74,7 @@ import com.bellatrixos.desktop.DesktopDB
 import com.bellatrixos.desktop.DesktopItem
 import com.bellatrixos.interfaces.MainActivityIn
 import com.bellatrixos.interfaces.SaveCallback
+import com.bellatrixos.linux.LinuxRuntime
 import com.bellatrixos.searchapp.SearchApp
 import com.bellatrixos.searchapp.SearchAppAdapter
 import com.bellatrixos.searchapp.SearchItem
@@ -995,6 +996,10 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         var bByte: Byte = 6
         val i3 = 4
         super.onCreate(bundle)
+        LinuxRuntime.get(this).apply {
+            onLinuxUnavailable = { startActivity(Intent(this@MainActivity, LinuxSettingsActivity::class.java)) }
+            start()
+        }
 
         s1 = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
             val ctx = this@MainActivity.W
@@ -1438,9 +1443,11 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
                 onVolumeChangeListener?.X(streamVolume, streamMaxVolume)
             }
         }
+        LinuxRuntime.get(this).screenStarted()
     }
 
     override fun onStop() {
+        LinuxRuntime.get(this).screenStopped()
         super.onStop()
         val volumeObserver = this.r1
         try {

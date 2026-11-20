@@ -42,6 +42,7 @@ class IconEngine(context: Context) {
                 var drawable: Drawable? = when (pkg.substringBefore("::::")) {
                     "UIInstaller" -> ContextCompat.getDrawable(c, R.drawable.img_app_installer)
                     "UINotepad" -> ContextCompat.getDrawable(c, R.drawable.img_app_notepad)
+                    "UITerminal" -> ContextCompat.getDrawable(c, R.drawable.img_app_terminal)
                     "UISettings" -> ContextCompat.getDrawable(c, R.drawable.img_app_settings)
                     "UIExplorer" -> ContextCompat.getDrawable(c, R.drawable.img_app_explorer)
                     "UIMusic", "UIVideo" -> ContextCompat.getDrawable(c, R.drawable.img_app_music)

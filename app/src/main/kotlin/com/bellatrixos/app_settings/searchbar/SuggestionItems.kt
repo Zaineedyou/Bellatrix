@@ -26,6 +26,7 @@ object SuggestionItems {
         SuggestionItem(R.drawable.ic_paint_brush_24_regular, context.getString(R.string.settings_colors_scheme), "32_2131362621"),
         SuggestionItem(R.drawable.ic_taskbar_24_regular, context.getString(R.string.settings_taskbar_alignment), "33_2131362620"),
         SuggestionItem(R.drawable.ic_app_icons_24_regular, context.getString(R.string.settings_app_ic_pack), "4"),
-        SuggestionItem(R.drawable.ic_apps_add_in_24_regular, context.getString(R.string.settings_apps_installer), "4")
+        SuggestionItem(R.drawable.ic_apps_add_in_24_regular, context.getString(R.string.settings_apps_installer), "4"),
+        SuggestionItem(R.drawable.img_app_terminal, context.getString(R.string.linux_settings_title), "9")
     )
 }

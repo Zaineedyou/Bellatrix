@@ -146,6 +146,7 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
         }
         for (installed in InstalledAppsDB.b()) A(1, installed.c(), installed.b().orEmpty())
         A(1, "UINotepad", "UiNotepad")
+        A(1, "UITerminal", "Terminal")
         A(1, "UIBrowser", "UiBrowser")
         A(1, "UIInstaller", "UIInstaller")
         A(1, "UIMusic", "UiMusic")

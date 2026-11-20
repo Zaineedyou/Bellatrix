@@ -127,6 +127,7 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
 
             val label = when (name) {
                 "UiNotepad" -> R.string.app_notepad
+                "UiTerminal" -> R.string.app_terminal
                 "This PC" -> R.string.explorer_str_this_pc
                 "UiInstaller" -> R.string.app_installer
                 "UiBrowser" -> R.string.app_chrome
@@ -179,6 +180,7 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
             E.add(DesktopItem(0, "This PC", null))
             E.add(DesktopItem(1, "UiInstaller", "UIInstaller"))
             E.add(DesktopItem(1, "UiBrowser", "UIBrowser"))
+            E.add(DesktopItem(1, "UiTerminal", "UITerminal"))
             DesktopDB.c(E)
         } else {
             for (pin in pins) E.add(DesktopItem(pin.c(), pin.b(), pin.a()))

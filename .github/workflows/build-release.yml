@@ -30,7 +30,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Install Android SDK 36 and build tools
+      - name: Install Android SDK 36, build tools, NDK and CMake
         run: |
           export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           export ANDROID_SDK_ROOT="$ANDROID_HOME"
@@ -44,7 +44,21 @@ jobs:
           echo "Using sdkmanager: $SDKMANAGER"
 
           yes | "$SDKMANAGER" --licenses > /dev/null
-          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0" "ndk;30.0.16248370" "cmake;3.31.1"
+
+      - name: Build proot fast path
+        run: |
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          CLANG="$ANDROID_HOME/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+          mkdir -p app/src/main/jniLibs/arm64-v8a
+          "$CLANG" \
+            --target=aarch64-linux-gnu \
+            -O2 -fPIC -shared -nostdlib -ffreestanding \
+            -fvisibility=hidden -mno-outline-atomics -fno-stack-protector \
+            -Wall -Wextra -Werror \
+            -fuse-ld=lld -Wl,-z,now -Wl,--build-id=none \
+            -o app/src/main/jniLibs/arm64-v8a/libfastpath.so \
+            patches/proot/fastpath/fastpath.c
 
       - name: Cache Gradle
         uses: gradle/actions/setup-gradle@v4

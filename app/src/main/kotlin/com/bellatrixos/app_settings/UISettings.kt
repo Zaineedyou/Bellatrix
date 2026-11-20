@@ -1,6 +1,7 @@
 package com.bellatrixos.app_settings
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -24,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.R
+import com.bellatrixos.LinuxSettingsActivity
 import com.bellatrixos.UIFragment
 import com.bellatrixos.app_settings.searchbar.SuggestionAdapter
 import com.bellatrixos.app_settings.searchbar.SuggestionItems
@@ -282,7 +284,8 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
             scroll.findViewById(R.id.nav_accounts),
             scroll.findViewById(R.id.nav_time_lang),
             scroll.findViewById(R.id.nav_privacy),
-            scroll.findViewById(R.id.nav_updates)
+            scroll.findViewById(R.id.nav_updates),
+            scroll.findViewById(R.id.nav_linux)
         )
         val navItems = context.resources.getStringArray(R.array.settings_nav_items)
         val handler = NavClickHandler()
@@ -368,6 +371,10 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         FloatingLayout.OnWindowTapListener,
         UINavigator.ClickAction {
         override fun a(i2: Int) {
+            if (i2 == 9) {
+                openLinuxSettings()
+                return
+            }
             q0(i2)
             val scroll = O0 ?: return
             val overlay = B0 ?: return
@@ -383,7 +390,16 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
 
         override fun b(str: String) {
             val parts = UINavigation.a(str)
+            if (parts[0] == 9) {
+                openLinuxSettings()
+                return
+            }
             p0(parts[0], true, displayedListener(parts[1]))
+        }
+
+        private fun openLinuxSettings() {
+            val context = u0 ?: return
+            runCatching { context.startActivity(Intent(context, LinuxSettingsActivity::class.java)) }
         }
 
         override fun c() {

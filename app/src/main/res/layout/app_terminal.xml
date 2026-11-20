@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/terminal_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1B26"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/img_app_terminal" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/linux_terminal_hint"
+        android:textColor="#C0CAF5"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/terminal_open"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/linux_open_terminal" />
+
+</LinearLayout>

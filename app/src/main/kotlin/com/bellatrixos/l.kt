@@ -296,6 +296,7 @@ class l(@JvmField val v: Any, @JvmField val u: Int) : Runnable {
                 if (listB.isEmpty()) {
                     listB.add(InstalledApp("UiExplorer", "UIExplorer", "UIExplorer", 0, false))
                     listB.add(InstalledApp("UiSettings", "UISettings", "UISettings", 0, false))
+                    listB.add(InstalledApp("UiTerminal", "UITerminal", "UITerminal", 0, false))
                     InstalledAppsDB.f(listB, false)
                 }
                 InstalledAppsDB.d(listB)

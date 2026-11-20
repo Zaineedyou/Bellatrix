@@ -19,6 +19,9 @@
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="com.bellatrixos.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
@@ -56,12 +59,13 @@
         android:allowBackup="true"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:extractNativeLibs="false"
+        android:extractNativeLibs="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:usesCleartextTraffic="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.Bellatrix"
         tools:replace="android:theme">
@@ -91,10 +95,52 @@
 
         <activity
             android:name=".MainActivity"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
             android:exported="true"
             android:theme="@style/Theme.Bellatrix"
             android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".LinuxWindowActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:exported="false"
+            android:label="@string/linux_window_default"
+            android:theme="@style/Theme.Bellatrix"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".LinuxSettingsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="false"
+            android:label="@string/linux_settings_title"
+            android:theme="@style/Theme.Bellatrix" />
+
+        <activity-alias
+            android:name=".TerminalWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:label="@string/linux_terminal_window"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
+            android:name=".BtopWindow"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
+            android:enabled="true"
+            android:exported="false"
+            android:label="@string/linux_btop_window"
+            android:targetActivity=".LinuxWindowActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <service
+            android:name=".LinuxService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="linux_session" />
+        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"

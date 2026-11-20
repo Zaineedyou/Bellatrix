@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Guest job words and status, ported from Omalauncher's strings_linux.xml -->
+    <string name="linux_job_installing">installing</string>
+    <string name="linux_job_removing">removing</string>
+    <string name="linux_job_building">building</string>
+    <string name="linux_job_updating">updating</string>
+    <string name="linux_job_waiting">waiting</string>
+    <string name="linux_job_checking">checking</string>
+    <string name="linux_job_working">%1$s…</string>
+
+    <string name="linux_gpu_title">gpu acceleration</string>
+    <string name="linux_gpu_on">on · %1$s · for apps opened from now on</string>
+    <string name="linux_gpu_on_vulkan_only" translatable="false">on for Vulkan · %1$s · OpenGL apps stay on the CPU: zink won\'t start on this GPU</string>
+    <string name="linux_gpu_off_failed">off: the GPU failed its check after a system update</string>
+    <string name="linux_gpu_waiting">on · waiting for its check</string>
+    <string name="linux_gpu_failed">the GPU failed its check; apps stay in software</string>
+    <string name="linux_gpu_offer">experimental · %1$s · faster OpenGL and Vulkan apps and games; terminal apps don\'t change</string>
+    <string name="linux_retry">retry</string>
+    <string name="linux_gpu_turn_off">turn off</string>
+    <string name="linux_gpu_turn_on">turn on</string>
+
+    <string name="app_terminal">Terminal</string>
+    <string name="linux_window_default">Linux window</string>
+    <string name="linux_terminal_window">Terminal</string>
+    <string name="linux_btop_window">btop</string>
+    <string name="linux_toggle_keyboard">show or hide the keyboard</string>
+    <string name="linux_settings_title">Linux</string>
+    <string name="linux_install">install Linux</string>
+    <string name="linux_remove">remove Linux</string>
+    <string name="linux_retry_setup">retry setup</string>
+    <string name="linux_cancel_setup">cancel setup</string>
+    <string name="linux_open_terminal">open terminal</string>
+    <string name="linux_terminal_hint">Terminal runs inside Linux. The first launch installs Void Linux, then opens foot.</string>
+    <string name="linux_status_installed">Linux is installed</string>
+    <string name="linux_status_not_installed">Linux is not installed</string>
+
+    <string name="linux_notification_channel">Linux session</string>
+    <string name="linux_notification_installing">installing Linux · %1$s</string>
+    <string name="linux_notification_installing_percent">installing Linux · %1$d%% · %2$s</string>
+    <string name="linux_notification_failed">Linux install failed</string>
+    <string name="linux_notification_removing">removing Linux</string>
+    <string name="linux_notification_running">Linux is running</string>
+</resources>
