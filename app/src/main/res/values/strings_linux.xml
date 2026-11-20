@@ -54,6 +54,8 @@
     <string name="linux_output">output</string>
     <string name="linux_output_more">more</string>
     <string name="linux_output_less">less</string>
+    <string name="linux_process_log">linux process log</string>
+    <string name="linux_process_log_empty">waiting for linux output…</string>
     <string name="home_job_failed">the last job failed</string>
     <string name="home_job_whole_log">whole log</string>
     <string name="linux_gpu_unsupported">not supported on this device</string>

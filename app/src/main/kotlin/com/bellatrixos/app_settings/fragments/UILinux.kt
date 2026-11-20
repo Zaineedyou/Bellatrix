@@ -1,6 +1,8 @@
 package com.bellatrixos.app_settings.fragments
 
+import android.graphics.Color
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +37,7 @@ class UILinux : Fragment() {
     private lateinit var gpuLogText: TextView
     private lateinit var terminal: UISettingsCard
     private lateinit var remove: UISettingsCard
+    private lateinit var processLogText: TextView
 
     private var previousStateChanged: (() -> Unit)? = null
     private var installLogExpandedByFailure = false
@@ -67,6 +70,8 @@ class UILinux : Fragment() {
         gpuLogText = view.findViewById(R.id.linux_gpu_log_text)
         terminal = view.findViewById(R.id.linux_terminal)
         remove = view.findViewById(R.id.linux_remove)
+        processLogText = view.findViewById(R.id.linux_process_log_text)
+        processLogText.movementMethod = ScrollingMovementMethod()
 
         install.setOnCardClickListener { runtime.install() }
         retry.setOnCardClickListener { runtime.retry() }
@@ -124,6 +129,7 @@ class UILinux : Fragment() {
 
         updateGpu()
         updateLogs()
+        updateProcessLog()
     }
 
     /** Shows the current stage's own percentage and detail line, like Omalauncher's StageRow. */
@@ -219,6 +225,25 @@ class UILinux : Fragment() {
             expand(installLog)
             installLogExpandedByFailure = true
         }
+    }
+
+    /** Bottom terminal box: live output of the Linux install/process job. */
+    private fun updateProcessLog() {
+        val state = runtime.bootstrap.state.value
+        val lines =
+            when (state) {
+                is LinuxState.Installing -> state.log
+                is LinuxState.Failed -> state.log
+                else -> emptyList()
+            }
+        if (lines.isEmpty()) {
+            processLogText.text = getString(R.string.linux_process_log_empty)
+            processLogText.setTextColor(Color.parseColor("#7A9B80"))
+            return
+        }
+        processLogText.setTextColor(Color.parseColor("#D6FFD9"))
+        processLogText.text = lines.takeLast(200).joinToString("\n") { "$ $it" }
+        processLogText.post { processLogText.scrollTo(0, processLogText.lineCount * processLogText.lineHeight) }
     }
 
     private fun setLog(
