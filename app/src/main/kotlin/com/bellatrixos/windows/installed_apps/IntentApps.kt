@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.LauncherApps
 import android.os.UserHandle
 import android.net.Uri
+import android.util.Log
 import com.bellatrixos.R
 import com.bellatrixos.interfaces.MainActivityIn
 import com.bellatrixos.startmenu.StartMenuItem
@@ -13,6 +14,8 @@ import com.bellatrixos.widgets.UINotification
 
 /** Membuka aplikasi, web app, atau URL dari entri installed apps. */
 object IntentApps {
+    private const val TAG = "IntentApps"
+
     @JvmStatic
     fun a(str: String?): String? {
         if (str == null) return null
@@ -75,7 +78,13 @@ object IntentApps {
                     context.getString(R.string.st_menu_apps_title)
                 )
             }
-        } catch (ignored: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "cannot launch $str", e)
+            UINotification.a(
+                context,
+                context.getString(R.string.not_found_app),
+                context.getString(R.string.st_menu_apps_title),
+            )
         }
     }
 }

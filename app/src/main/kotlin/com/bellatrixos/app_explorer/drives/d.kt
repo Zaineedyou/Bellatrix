@@ -165,8 +165,10 @@ class d : DriveAdapter.OnItemClickListener, UIContextMenu.OnMenuItemClickListene
                             DesktopAdapter.H = !DesktopAdapter.H
                             val arrayList = desktopAdapter.E
                             if (!DesktopAdapter.H) {
-                                val dimen = recyclerView.resources.getDimensionPixelSize(R.dimen.explorer_file_width)
-                                val size = (recyclerView.height / dimen) * (recyclerView.width / dimen) - arrayList.size
+                                val dimen = recyclerView.resources.getDimensionPixelSize(R.dimen.explorer_file_width).coerceAtLeast(1)
+                                val cols = recyclerView.width / dimen
+                                DesktopAdapter.spanCount = cols.coerceAtLeast(1)
+                                val size = (recyclerView.height / dimen) * cols - arrayList.size
                                 if (size > 0) repeat(size) { arrayList.add(DesktopItem(-1, "", "blank_" + arrayList.size)) }
                             } else {
                                 arrayList.removeAll { it.c() == -1 }

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.bellatrixos.context_menu.UIContextMenu
 import com.bellatrixos.desktop.DesktopAdapter
+import com.bellatrixos.desktop.DesktopDB
 import com.bellatrixos.desktop.DesktopItem
 import java.util.Collections
 
@@ -26,6 +27,7 @@ class AllDirectionsDragCallback(@JvmField val f4762d: DesktopAdapter) : ItemTouc
     @JvmField var g: Int = -1
     @JvmField var f4765h: Int = -1
     @JvmField var f4766i: Boolean = false
+    @JvmField var selectedHolder: RecyclerView.ViewHolder? = null
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
@@ -44,6 +46,7 @@ class AllDirectionsDragCallback(@JvmField val f4762d: DesktopAdapter) : ItemTouc
             list[from] = DesktopItem(-1, "", "blank_$from")
             adapter.notifyItemChanged(from)
             adapter.notifyItemChanged(to)
+            DesktopDB.c(list)
             if (!adapter.y) {
                 adapter.C?.let {
                     adapter.y = true
@@ -54,6 +57,7 @@ class AllDirectionsDragCallback(@JvmField val f4762d: DesktopAdapter) : ItemTouc
         } else {
             Collections.swap(list, from, to)
             adapter.notifyItemMoved(from, to)
+            DesktopDB.c(list)
             if (!adapter.y) {
                 adapter.C?.let {
                     adapter.y = true
@@ -151,5 +155,13 @@ class AllDirectionsDragCallback(@JvmField val f4762d: DesktopAdapter) : ItemTouc
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
 
-    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {}
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        super.onSelectedChanged(viewHolder, actionState)
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+            selectedHolder = viewHolder
+            if (viewHolder != null) g = viewHolder.bindingAdapterPosition
+        } else {
+            selectedHolder = null
+        }
+    }
 }

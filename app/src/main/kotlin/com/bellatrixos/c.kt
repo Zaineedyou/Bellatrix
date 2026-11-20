@@ -80,9 +80,18 @@ class c(@JvmField val v: MainActivity, @JvmField val u: Int) : Runnable {
                 if (DesktopDB.f4759a == null) {
                     DesktopDB.f4759a = mainActivity3.getSharedPreferences("DesktopPrefs", 0)
                 }
-                Global.q = DesktopDB.f4759a?.getInt("desktop_icon_size", 1) ?: 1
-                Global.r = DesktopDB.f4759a?.getBoolean("desktop_icon_show", true) ?: true
-                DesktopAdapter.H = DesktopDB.f4759a?.getBoolean("desktop_icons_arrange_auto", true) ?: true
+                val desktopPrefs = DesktopDB.f4759a!!
+                // Sekali migrasi: aktifkan penempatan bebas supaya ikon tidak selalu
+                // bertambah ke kanan dan pengguna bisa menggeser ke slot kosong.
+                if (!desktopPrefs.getBoolean("desktop_free_place_migrated", false)) {
+                    desktopPrefs.edit()
+                        .putBoolean("desktop_icons_arrange_auto", false)
+                        .putBoolean("desktop_free_place_migrated", true)
+                        .apply()
+                }
+                Global.q = desktopPrefs.getInt("desktop_icon_size", 1)
+                Global.r = desktopPrefs.getBoolean("desktop_icon_show", true)
+                DesktopAdapter.H = desktopPrefs.getBoolean("desktop_icons_arrange_auto", false)
                 Global.p = SharedPrefs.f4755a?.getInt("system_input_tap_type", 0) ?: 0
                 mainActivity.p0 = DesktopAdapter(act)
                 mainActivity.runOnUiThread(c(mainActivity, 5))
@@ -116,6 +125,16 @@ class c(@JvmField val v: MainActivity, @JvmField val u: Int) : Runnable {
                     FilesRecyclerView.OnEmptyLongPressListener { iArr -> emptyLongPress.e(iArr) }
                 )
                 HoverAwareItemTouchHelper(AllDirectionsDragCallback(desktopAdapter)).i(filesRecyclerView)
+                // Isi slot kosong setelah ukuran grid diketahui agar drag bebas langsung bisa dipakai.
+                filesRecyclerView.post {
+                    val cell = filesRecyclerView.resources
+                        .getDimensionPixelSize(R.dimen.explorer_file_width)
+                        .coerceAtLeast(1)
+                    desktopAdapter.ensureFreeCells(
+                        filesRecyclerView.height / cell,
+                        filesRecyclerView.width / cell,
+                    )
+                }
                 if (Global.p == 1) {
                     desktopAdapter.z = true
                 }

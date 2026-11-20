@@ -149,6 +149,8 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
     companion object {
         @JvmField var G: Boolean = false
         @JvmField var H: Boolean = true
+        /** Jumlah kolom grid desktop; diisi saat layout diketahui. */
+        @JvmField var spanCount: Int = 1
     }
 
     @JvmField var A: OnContextMenuListener? = null
@@ -180,7 +182,6 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
             E.add(DesktopItem(0, "This PC", null))
             E.add(DesktopItem(1, "UiInstaller", "UIInstaller"))
             E.add(DesktopItem(1, "UiBrowser", "UIBrowser"))
-            E.add(DesktopItem(1, "UiTerminal", "UITerminal"))
             DesktopDB.c(E)
         } else {
             for (pin in pins) E.add(DesktopItem(pin.c(), pin.b(), pin.a()))
@@ -201,16 +202,40 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
             B()
             return
         }
-        for (i in E.indices) {
-            if (E[i].c() == -1) {
-                E[i] = item
-                notifyItemChanged(i)
-                DesktopDB.b(i, item)
-                B()
-                return
-            }
+        // Letakkan di bawah ikon terakhir bilapossible, bukan di samping kanannya.
+        val lastFilled = E.indexOfLast { it.c() != -1 }
+        val below = lastFilled + spanCount
+        val target = when {
+            lastFilled < 0 -> 0
+            below in E.indices && E[below].c() == -1 -> below
+            else -> E.indices.firstOrNull { E[it].c() == -1 } ?: -1
+        }
+        if (target != -1) {
+            E[target] = item
+            notifyItemChanged(target)
+            DesktopDB.b(target, item)
+            B()
+            return
         }
         Toast.makeText(x, "No space left", Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * Pastikan ada slot kosong untuk penempatan bebas saat auto-arrange mati.
+     * Dipanggil setelah tinggi grid diketahui, jadi jumlah baris/kolom nyata.
+     */
+    fun ensureFreeCells(rows: Int, cols: Int) {
+        if (H) return
+        spanCount = cols.coerceAtLeast(1)
+        val target = kotlin.math.max(0, rows * cols)
+        if (E.size >= target) return
+        val start = E.size
+        while (E.size < target) {
+            E.add(DesktopItem(-1, "", "blank_${E.size}"))
+        }
+        notifyItemRangeInserted(start, E.size - start)
+        DesktopDB.c(E)
+        B()
     }
 
     /** Bangun ulang peta data -> posisi. */

@@ -147,12 +147,17 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
                 G[pkg] = label
             }
         }
-        // Seed built-ins first: InstalledAppsDB is initialised asynchronously and can throw here.
-        A(1, "UINotepad", "UiNotepad")
-        A(1, "UITerminal", "Terminal")
-        A(1, "UIBrowser", "UiBrowser")
-        A(1, "UIInstaller", "UIInstaller")
-        A(1, "UIMusic", "UiMusic")
+        // Seed ALL built-in windows first. WindowManager.b() knows nine tags; the drawer must
+        // expose the same set or Settings/Explorer/Photos/Video look "missing" to the user.
+        A(1, "UISettings", B.getString(R.string.app_settings))
+        A(1, "UIExplorer", B.getString(R.string.app_explorer))
+        A(1, "UINotepad", B.getString(R.string.app_notepad))
+        A(1, "UITerminal", B.getString(R.string.app_terminal))
+        A(1, "UIBrowser", B.getString(R.string.app_chrome))
+        A(1, "UIInstaller", B.getString(R.string.app_installer))
+        A(1, "UIVideo", B.getString(R.string.app_media_player_title))
+        A(1, "UIMusic", B.getString(R.string.app_music))
+        A(1, "UIPhotos", B.getString(R.string.app_image))
         try {
             for (installed in InstalledAppsDB.b()) A(1, installed.c(), installed.b().orEmpty())
         } catch (_: RuntimeException) {
@@ -255,7 +260,14 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
         IconEngine.b(B).c(item.c().orEmpty(), IconEngine.Callback { bitmap ->
             if (holder.bindingAdapterPosition != -1) holder.u?.setImageBitmap(bitmap)
         })
-        holder.v?.text = AppsDatabase.a(item.c().orEmpty())
+        // Nama asli APK sudah ada di item.b(); AppsDatabase.a() hanya untuk tag window internal (UI...).
+        val packageName = item.c().orEmpty()
+        holder.v?.text =
+            if (AppsDatabase.b.containsKey(packageName)) {
+                AppsDatabase.a(packageName)
+            } else {
+                item.b()?.takeIf { it.isNotBlank() } ?: AppsDatabase.a(packageName)
+            }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
