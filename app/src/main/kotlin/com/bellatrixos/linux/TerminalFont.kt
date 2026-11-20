@@ -2,6 +2,8 @@ package com.bellatrixos.linux
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.StringRes
+import com.bellatrixos.R
 import com.bellatrixos.wayland.XdgToplevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -186,11 +188,12 @@ class TerminalFont(
 /** The terminal text sizes from Bellatrix's Style menu, as an em in dp. */
 enum class TerminalText(
     val id: String,
+    @StringRes val label: Int,
     val em: Float,
 ) {
-    Smaller("smaller", 10f),
-    Default("default", 12f),
-    Larger("larger", 14f),
+    Smaller("smaller", R.string.style_text_smaller, 10f),
+    Default("default", R.string.style_text_default, 12f),
+    Larger("larger", R.string.style_text_larger, 14f),
     ;
 
     companion object {

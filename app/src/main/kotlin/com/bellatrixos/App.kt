@@ -6,7 +6,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import com.bellatrixos.system.AppLanguage
 
-class App : Application() {
+open class App : Application() {
     val runtime by lazy { Runtime(this) }
 
     override fun attachBaseContext(base: Context) {

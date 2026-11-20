@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Environment
 import android.util.Log
+import com.bellatrixos.upgrade.Managed
+import com.bellatrixos.upgrade.Policy
 import java.io.File
 import kotlin.concurrent.thread
 
@@ -278,6 +280,14 @@ class Proot(
             }
             redirectErrorStream(true)
         }
+
+    /** Files this launcher owns inside the guest, so provisioning can keep them current. */
+    fun managed(): List<Managed> =
+        listOf(Managed.asset(context, "bwrap-shim.sh", File(rootfs, "usr/local/bin/bwrap"), Policy.Owned, executable = true)) +
+            if (fastLaneSource.isFile) listOf(Managed(fastLane, Policy.Owned) { fastLaneSource.readBytes() }) else emptyList()
+
+    /** The host file for an absolute guest path, following the guest's own symlinks and binds. */
+    fun guestFile(guestPath: String): File? = runCatching { guestFs.host(guestPath) }.getOrNull()
 
     companion object {
         private const val CPU_PINNING = "proot_cpu_pinning"

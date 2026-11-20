@@ -2,6 +2,10 @@ package com.bellatrixos
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -152,4 +156,33 @@ class LinuxWindowActivity : AppCompatActivity() {
     private companion object {
         const val MATCH_PARENT = ViewGroup.LayoutParams.MATCH_PARENT
     }
+}
+
+/** Recents card icon for an OWL app or terminal without its own: initials in the theme colors. */
+internal fun taskIcon(
+    name: String,
+    background: Int,
+    accent: Int,
+): Bitmap {
+    val size = 192
+    val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bmp)
+    canvas.drawColor(background)
+    val words = name.split(Regex("[^A-Za-z0-9]+")).filter { it.isNotEmpty() }
+    val initials =
+        when {
+            words.size >= 2 -> "${words[0][0]}${words[1][0]}".uppercase()
+            words.isNotEmpty() -> words[0].take(2).replaceFirstChar(Char::uppercase)
+            else -> "◆"
+        }
+    val paint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = accent
+            textSize = size * 0.42f
+            typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+            textAlign = Paint.Align.CENTER
+        }
+    val y = size / 2f - (paint.descent() + paint.ascent()) / 2
+    canvas.drawText(initials, size / 2f, y, paint)
+    return bmp
 }

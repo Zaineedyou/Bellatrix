@@ -9,7 +9,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.Icon
 import android.os.Build
 import android.view.KeyEvent
 import android.window.SplashScreen
@@ -116,20 +115,10 @@ abstract class InstantActivity : ComponentActivity() {
         appIcon: Bitmap?,
     ) {
         val icon = appIcon ?: taskIcon(label, Palette.background.toArgb(), Palette.accent.toArgb())
-        val description =
-            if (Build.VERSION.SDK_INT >= 37) {
-                ActivityManager.TaskDescription
-                    .Builder()
-                    .setLabel(label)
-                    .setIcon(Icon.createWithBitmap(icon))
-                    .setPrimaryColor(Palette.background.toArgb())
-                    .build()
-            } else {
-                // Builder.setIcon(Icon) is API 37+; the bitmap constructor still works before that.
-                @Suppress("DEPRECATION")
-                ActivityManager.TaskDescription(label, icon, Palette.background.toArgb())
-            }
-        setTaskDescription(description)
+        // Builder.setIcon(Icon) is API 37+, which this SDK (36) cannot compile against.
+        // The bitmap constructor still works on every version, including 37+.
+        @Suppress("DEPRECATION")
+        setTaskDescription(ActivityManager.TaskDescription(label, icon, Palette.background.toArgb()))
     }
 
     /** Back from Recents after [backInstantly]: solid again, so what's behind it can stop drawing. */

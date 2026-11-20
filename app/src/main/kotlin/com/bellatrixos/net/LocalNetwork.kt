@@ -1,6 +1,5 @@
 package com.bellatrixos.net
 
-import android.Manifest
 import android.content.Context
 import android.os.Build
 import java.net.Inet6Address
@@ -15,11 +14,13 @@ import com.bellatrixos.system.hasPermission
  * shows a row for it while it's missing.
  */
 object LocalNetwork {
-    const val PERMISSION = Manifest.permission.ACCESS_LOCAL_NETWORK
+    // API 37 / Android 17 introduced this permission; compileSdk 36 has no constant for it yet.
+    const val MIN_SDK = 37
+    const val PERMISSION = "android.permission.ACCESS_LOCAL_NETWORK"
 
     /** Whether local addresses are blocked for us: Android 17+ without the permission. */
     fun missing(context: Context): Boolean =
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN &&
+        Build.VERSION.SDK_INT >= MIN_SDK &&
             !context.hasPermission(PERMISSION)
 
     /**

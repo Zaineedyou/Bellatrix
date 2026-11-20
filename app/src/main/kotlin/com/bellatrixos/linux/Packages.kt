@@ -2,6 +2,7 @@ package com.bellatrixos.linux
 
 import android.util.Log
 import androidx.annotation.StringRes
+import androidx.compose.runtime.mutableIntStateOf
 import com.bellatrixos.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -30,8 +31,7 @@ class Packages(
     val states = ConcurrentHashMap<String, JobState>()
 
     /** Bumped after installs and removals so lists reload. */
-    @Volatile
-    var revision = 0
+    val revision = mutableIntStateOf(0)
         private set
 
     /** Notified when a package job starts, progresses or ends. */
@@ -78,7 +78,7 @@ class Packages(
             onChange?.invoke()
         }
         Log.i(TAG, "$verb $name: ${if (ok) "ok" else "failed"}")
-        revision++
+        revision.intValue++
         onChange?.invoke()
         return ok
     }

@@ -139,7 +139,7 @@ fun PermissionsScreen(
                     },
                     turnOff = { runCatching { context.startActivity(notificationSettings) } },
                 ),
-                if (sdk >= Build.VERSION_CODES.CINNAMON_BUN) {
+                if (sdk >= LocalNetwork.MIN_SDK) {
                     Permission(
                         R.string.settings_local_network,
                         stringResource(R.string.settings_local_network_subtitle),

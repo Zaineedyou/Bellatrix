@@ -350,7 +350,8 @@ internal fun LinuxProgress(
         style = Mono.copy(fontSize = TextSize.Large, color = if (failed != null) Palette.red else Palette.foreground),
     )
     Spacer(Modifier.height(24.dp))
-    val stages = Stage.entries.filter { it != Stage.Agents || agents.isNotEmpty() }
+    // Bellatrix installs agents with the packages stage; it has no separate Agents stage.
+    val stages = Stage.entries
     Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
         for (stage in stages) {
             val status =
@@ -361,9 +362,12 @@ internal fun LinuxProgress(
                     else -> StageStatus.Running
                 }
             StageRow(
-                label = if (stage == Stage.Agents) stringResource(R.string.linux_stage_agents_named, agents.joinToString { it.name }) else stringResource(stage.label),
+                label = stringResource(stage.label),
                 status = status,
-                detail = working?.takeIf { stage == current }?.step ?: failed?.takeIf { stage == current }?.message,
+                detail =
+                    working?.takeIf { stage == current }?.step
+                        ?: failed?.takeIf { stage == current }?.message
+                        ?: if (stage == Stage.Packages && agents.isNotEmpty()) stringResource(R.string.linux_stage_agents_named, agents.joinToString { it.name }) else null,
                 progress = working?.takeIf { stage == current }?.progress,
             )
         }
