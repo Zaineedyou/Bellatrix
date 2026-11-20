@@ -44,8 +44,14 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
                 -1,
                 view,
                 { if (bindingAdapterPosition == -1) null else (bindingAdapter as? DesktopAdapter)?.E?.getOrNull(bindingAdapterPosition) },
-                { iArr, obj -> (obj as? DesktopItem)?.let { item -> x?.i(iArr, item) } },
-                { if (bindingAdapterPosition == -1) null else (bindingAdapter as? DesktopAdapter)?.E?.getOrNull(bindingAdapterPosition) }
+                { iArr, obj ->
+                    (obj as? DesktopItem)?.let { item ->
+                        x?.i(iArr, item)
+                        y?.i(iArr, item)
+                    }
+                },
+                // Supplier klik: harus mengembalikan OnItemClickListener (w), bukan item desktop.
+                { w }
             )
         }
 

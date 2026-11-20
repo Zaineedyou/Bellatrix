@@ -60,7 +60,6 @@ import com.bellatrixos.windows.installed_apps.InstalledAppsDB
 import com.bellatrixos.windows.installed_apps.IntentSites
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.io.File
-import java.lang.reflect.Proxy
 
 /**
  * Jembatan untuk field/method MainActivity yang belum ada di port Kotlin.
@@ -113,24 +112,8 @@ internal object MainActivityBridge {
         }.getOrNull()
     }
 
-    fun asIn(target: MainActivity): MainActivityIn = Proxy.newProxyInstance(
-        MainActivityIn::class.java.classLoader,
-        arrayOf(MainActivityIn::class.java)
-    ) { _, method, args ->
-        when (method.name) {
-            "hashCode" -> System.identityHashCode(target)
-            "equals" -> args?.get(0) === target
-            "toString" -> "MainActivityIn(${target.javaClass.simpleName})"
-            else -> {
-                val invoked = runCatching {
-                    target.javaClass.methods.firstOrNull {
-                        it.name == method.name && it.parameterCount == (args?.size ?: 0)
-                    }?.invoke(target, *(args ?: emptyArray()))
-                }.getOrNull()
-                invoked ?: defaultValue(method.returnType)
-            }
-        }
-    } as MainActivityIn
+    /** MainActivity sudah mengimplementasikan MainActivityIn; tidak perlu proxy reflection. */
+    fun asIn(target: MainActivity): MainActivityIn = target
 
     private fun defaultValue(type: Class<*>): Any? = when (type) {
         java.lang.Boolean.TYPE -> false

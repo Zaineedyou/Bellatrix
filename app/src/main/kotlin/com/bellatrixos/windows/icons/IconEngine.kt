@@ -34,31 +34,12 @@ class IconEngine(context: Context) {
         override fun compareTo(other: IconTask): Int = 0
 
         override fun run() {
-            var drawable: Drawable? = null
             val pack = g
             val pm = c.packageManager
-            if (pack == null || pack == "system") {
-                val item = AppsDatabase.f4954d[pkg]
-                val path = item?.iconPath
-                if (!path.isNullOrEmpty() && File(path).exists()) {
-                    drawable = BitmapDrawable(c.resources, BitmapFactory.decodeFile(path))
-                }
-                val resId = f4947h[pkg]
-                if (drawable == null && !pack.isNullOrEmpty() && pack != "system" && resId != null) {
-                    try {
-                        drawable = ResourcesCompat.getDrawable(pm.getResourcesForApplication(pack), resId, null)
-                    } catch (_: Exception) {
-                    }
-                }
-                if (drawable == null) {
-                    drawable = try {
-                        pm.getApplicationInfo(pkg, 0).loadIcon(pm)
-                    } catch (_: Exception) {
-                        null
-                    }
-                }
-            } else {
-                drawable = when (pkg.substringBefore("::::")) {
+            // Urutan sama dengan Java asli: ikon app bawaan -> ikon dari DB -> icon pack -> ikon paket.
+            // Exception apa pun jatuh ke ikon generik (img_file_exe), bukan bitmap kosong.
+            val bitmap: Bitmap? = try {
+                var drawable: Drawable? = when (pkg.substringBefore("::::")) {
                     "UIInstaller" -> ContextCompat.getDrawable(c, R.drawable.img_app_installer)
                     "UINotepad" -> ContextCompat.getDrawable(c, R.drawable.img_app_notepad)
                     "UISettings" -> ContextCompat.getDrawable(c, R.drawable.img_app_settings)
@@ -69,24 +50,29 @@ class IconEngine(context: Context) {
                     else -> null
                 }
                 if (drawable == null) {
-                    val item = AppsDatabase.f4954d[pkg]
-                    val path = item?.iconPath
+                    val path = AppsDatabase.f4954d[pkg]?.iconPath
                     if (!path.isNullOrEmpty() && File(path).exists()) {
                         drawable = BitmapDrawable(c.resources, BitmapFactory.decodeFile(path))
                     }
                 }
-                if (drawable == null) {
-                    drawable = try {
-                        pm.getApplicationInfo(pkg, 0).loadIcon(pm)
-                    } catch (_: Exception) {
-                        ContextCompat.getDrawable(c, R.drawable.img_file_exe)
+                if (drawable == null && pack != null && pack != "system") {
+                    val resId = f4947h[pkg]
+                    if (resId != null) {
+                        drawable = ResourcesCompat.getDrawable(pm.getResourcesForApplication(pack), resId, null)
                     }
                 }
+                if (drawable == null) {
+                    drawable = pm.getApplicationInfo(pkg, 0).loadIcon(pm)
+                }
+                IconEngine.a(drawable!!)
+            } catch (_: Exception) {
+                ContextCompat.getDrawable(c, R.drawable.img_file_exe)?.let { IconEngine.a(it) }
             }
-            val bitmap: Bitmap? = drawable?.let { IconEngine.a(it) }
             if (bitmap != null) f4948a.put(key, bitmap)
             b.remove(key)
             f4949d.post(a(this, bitmap, 0))
+            // Kirim juga ke semua peminta lain yang menunggu key yang sama.
+            waiting.remove(key)?.forEach { cb -> f4949d.post { cb.i(bitmap) } }
         }
 
         fun deliver(bitmap: Bitmap?) = callbackCallback.i(bitmap)
@@ -153,6 +139,7 @@ class IconEngine(context: Context) {
 
     @JvmField val c: Context = context.applicationContext
     @JvmField val b: MutableSet<String> = Collections.synchronizedSet(HashSet())
+    private val waiting = ConcurrentHashMap<String, MutableList<Callback>>()
     @JvmField val f4949d: Handler = Handler(Looper.getMainLooper())
     @JvmField val f4950e: ThreadPoolExecutor = ThreadPoolExecutor(2, 2, 60, TimeUnit.SECONDS, PriorityBlockingQueue())
     @JvmField val f4948a: LruCache<String, Bitmap> = object : LruCache<String, Bitmap>(
@@ -172,6 +159,12 @@ class IconEngine(context: Context) {
             callback.i(bitmap)
         } else if (b.add(key)) {
             f4950e.execute(IconTask(key, str, callback))
+        } else {
+            // Key sedang dimuat: simpan callback agar tidak hilang (dulu dibuang -> ikon kosong).
+            waiting.getOrPut(key) { java.util.concurrent.CopyOnWriteArrayList() }.add(callback)
+            f4948a.get(key)?.let { ready ->
+                if (waiting[key]?.remove(callback) == true) callback.i(ready)
+            }
         }
     }
 

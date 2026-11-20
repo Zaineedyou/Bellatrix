@@ -33,7 +33,7 @@ abstract class BaseFileViewHolder(
                     if (index != -1) w.notifyItemChanged(index)
                 }
             }
-        }, supplier)
+        }, Supplier<Any?> { x })
     }
 
     abstract fun t(fileMeta: FileMeta)
