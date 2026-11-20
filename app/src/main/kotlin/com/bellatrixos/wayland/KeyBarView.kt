@@ -148,7 +148,7 @@ class KeyBarView(
         for ((r, row) in rows.withIndex()) {
             for ((c, key) in row.withIndex()) {
                 val bounds = bounds(r, c)
-                val held = key.latch?.let { bridge?.latches?.get(it)?.latch }
+                val held = key.latch?.let { bridge?.latches?.get(it) }
                 val pressed = downKey === key
                 val locked = held == Latch.Locked
                 val once = held == Latch.Once

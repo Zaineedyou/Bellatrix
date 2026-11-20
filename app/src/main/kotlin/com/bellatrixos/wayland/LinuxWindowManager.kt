@@ -154,7 +154,7 @@ class LinuxWindowManager : WindowManagerHooks, WindowViewManager {
         dx: Float,
         dy: Float,
         source: Int,
-        steps: Int = 0,
+        steps: Int,
     ) = server.postInput { pointerAxis(dx, dy, source, steps) }
 
     override fun wantsTouch(surface: Surface) = synchronized(server) { server.input.wantsTouch(surface) }

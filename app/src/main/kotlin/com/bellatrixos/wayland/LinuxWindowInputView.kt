@@ -100,7 +100,7 @@ class LinuxWindowInputView(
                         handler.removeCallbacks(longPress)
                         wm.pointerMove(h)
                     }
-                    if (scrolling) wm.scroll(-(x - lastX) / h.scale, -(y - lastY) / h.scale, AXIS_SOURCE_FINGER)
+                    if (scrolling) wm.scroll(-(x - lastX) / h.scale, -(y - lastY) / h.scale, AXIS_SOURCE_FINGER, 0)
                 }
                 lastX = x
                 lastY = y

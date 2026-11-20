@@ -124,7 +124,7 @@ private suspend fun PointerInputScope.handlePointer(
             }
             if (scrolling) {
                 val d = c.position - last
-                wm.scroll(-d.x / hit.scale, -d.y / hit.scale, AXIS_SOURCE_FINGER)
+                wm.scroll(-d.x / hit.scale, -d.y / hit.scale, AXIS_SOURCE_FINGER, 0)
             }
             last = c.position
         }

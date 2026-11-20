@@ -8,6 +8,7 @@ import com.bellatrixos.Runtime
 import com.bellatrixos.linux.LinuxRuntime
 import com.bellatrixos.storage.LauncherData
 import com.bellatrixos.ui.KeyboardBridge as OwlKeyboardBridge
+import com.bellatrixos.ui.Latch as OwlLatch
 import com.bellatrixos.widgets.lang.KeyNames
 
 /**
@@ -37,6 +38,8 @@ private class LegacyKeyboardBridge(
         set(value) { keyboard.flush = value }
 
     override var picker: (() -> Unit)? = null
+
+    override val latches get() = keyboard.latches.mapValues { it.value.latch }
 
     override fun handle(event: KeyEvent) = keyboard.handle(event)
 
@@ -75,6 +78,12 @@ private class OwlKeyboardBridge(
         set(value) { keyboard.flush = value }
 
     override var picker: (() -> Unit)? = null
+
+    override val latches get() = keyboard.latches.mapValues { (_, m) -> when (m.latch) {
+        OwlLatch.Off -> Latch.Off
+        OwlLatch.Once -> Latch.Once
+        OwlLatch.Locked -> Latch.Locked
+    } }
 
     override fun handle(event: KeyEvent) = keyboard.handle(event)
 

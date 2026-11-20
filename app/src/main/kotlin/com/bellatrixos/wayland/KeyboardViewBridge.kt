@@ -11,6 +11,9 @@ interface KeyboardViewBridge {
     /** Raised by the keybar's image key; set by the activity showing the keybar. */
     var picker: (() -> Unit)?
 
+    /** How each modifier is latched right now, for the keybar to draw it. */
+    val latches: Map<String, Latch>
+
     fun handle(event: KeyEvent): Boolean
 
     fun type(text: CharSequence)

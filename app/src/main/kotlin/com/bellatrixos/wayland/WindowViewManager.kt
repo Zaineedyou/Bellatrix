@@ -22,6 +22,11 @@ interface WindowViewManager {
 
     fun close(window: XdgToplevel)
 
+    fun zoom(
+        window: XdgToplevel,
+        steps: Int,
+    )
+
     fun focus(toplevel: XdgToplevel?)
 
     fun pointerMove(hit: SurfaceHit?)
