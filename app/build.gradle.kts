@@ -52,8 +52,8 @@ android {
         applicationId = "com.bellatrixos"
         minSdk = 23
         targetSdk = 36
-        versionCode = 33
-        versionName = "2.9.0"
+        versionCode = 34
+        versionName = "2.9.1"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
@@ -166,11 +166,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 
     // OWL's Compose renderer and the UI composables it shares with the launcher.
-    // Coordinates and versions match Omalauncher's gradle/libs.versions.toml.
+    // Compose 1.12.x pulls androidx.compose 1.12.1, which needs AGP 9.1 and
+    // compileSdk 37; this project is intentionally still on AGP 8.9.2/SDK 36.
     implementation("androidx.activity:activity-compose:1.13.0")
-    implementation("org.jetbrains.compose.runtime:runtime:1.12.2")
-    implementation("org.jetbrains.compose.foundation:foundation:1.12.2")
-    implementation("org.jetbrains.compose.ui:ui:1.12.2")
+    implementation("org.jetbrains.compose.runtime:runtime:1.11.1")
+    implementation("org.jetbrains.compose.foundation:foundation:1.11.1")
+    implementation("org.jetbrains.compose.ui:ui:1.11.1")
     implementation("com.caverock:androidsvg-aar:1.4")
     implementation("com.google.zxing:core:3.5.4")
     testImplementation("junit:junit:4.13.2")
