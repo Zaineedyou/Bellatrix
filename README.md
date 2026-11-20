@@ -81,9 +81,9 @@ For a stable signature in CI, add these repository secrets:
 | `ANDROID_KEY_ALIAS` | Key alias |
 | `ANDROID_KEY_PASSWORD` | Key password |
 
-If the secrets are absent, the workflow generates a temporary keystore for that
-run. Such APKs are installable but use a different certificate on every build,
-so existing installs must be removed before updating.
+All four secrets are required: the build fails immediately if any of them is
+missing, so CI never produces an APK with a different signing certificate.
+The keystore itself is never committed to this repository.
 
 ## Install
 

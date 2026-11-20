@@ -67,21 +67,8 @@ jobs:
             } >> "$GITHUB_ENV"
             echo "Using keystore from repository secrets."
           else
-            echo "No signing secrets configured. Generating an ephemeral keystore for this run."
-            keytool -genkeypair -v \
-              -keystore tools/release.jks \
-              -storetype JKS \
-              -alias bellatrix \
-              -keyalg RSA -keysize 2048 -validity 3650 \
-              -storepass bellatrix -keypass bellatrix \
-              -dname "CN=Bellatrix CI, OU=CI, O=Bellatrix, L=Unknown, ST=Unknown, C=US"
-            {
-              echo "ANDROID_KEYSTORE_FILE=tools/release.jks"
-              echo "ANDROID_KEYSTORE_PASSWORD=bellatrix"
-              echo "ANDROID_KEY_ALIAS=bellatrix"
-              echo "ANDROID_KEY_PASSWORD=bellatrix"
-            } >> "$GITHUB_ENV"
-            echo "::warning::APK will be signed with a temporary key. Set the ANDROID_KEYSTORE_* secrets for a stable signature."
+            echo "::error::Signing secrets are missing. Set ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD."
+            exit 1
           fi
 
       - name: Make Gradle wrapper executable
