@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@id/btn_ui_card" android:background="@drawable/ui_settings_card" android:padding="20.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="3.1999817dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/appIcon" android:layout_width="28.0dp" android:layout_height="28.0dp" android:src="@drawable/ic_taskbar_24_regular" android:layout_centerVertical="true" android:contentDescription="@null" android:layout_marginEnd="20.0dp" />
+    <TextView android:textSize="15.0sp" android:textColor="@color/text_default" android:id="@id/appName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/str_demo_title" android:layout_toEndOf="@id/appIcon" />
+    <TextView android:textSize="13.0sp" android:textColor="@color/text_muted" android:id="@id/appPackage" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/str_demo_subtitle" android:layout_below="@id/appName" android:layout_marginEnd="35.0dp" android:layout_toEndOf="@id/appIcon" />
+    <ImageButton android:id="@id/appBtnMore" android:background="@drawable/widget_btn_subtle" android:layout_width="34.0dp" android:layout_height="36.0dp" android:src="@drawable/menu_ic_more_horizontal_24_regular" android:layout_centerVertical="true" android:contentDescription="@string/titlebar_actions_app_settings" android:layout_alignParentEnd="true" />
+</RelativeLayout>

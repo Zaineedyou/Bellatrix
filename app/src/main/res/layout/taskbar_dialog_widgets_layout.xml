@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:id="@id/root_container" android:background="@drawable/ui_taskbar_widgets_item_bg" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="4.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageButton android:layout_gravity="end|top" android:id="@id/action_button" android:background="@drawable/widget_btn_subtle_32" android:layout_width="wrap_content" android:layout_height="28.0dp" android:src="@drawable/menu_ic_more_horizontal_24_regular" android:contentDescription="@null" android:alpha="0.7" android:paddingStart="28.0dp" android:paddingEnd="12.0dp" />
+    <FrameLayout android:id="@id/widget_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24.0dp" />
+</FrameLayout>

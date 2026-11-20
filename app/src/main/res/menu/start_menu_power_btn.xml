@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:icon="@drawable/menu_ic_settings_20_regular" android:id="@id/btn_power_settings" android:title="@string/st_menu_power_btn_start_settings" />
+    <item android:icon="@drawable/ic_power_20_regular" android:id="@id/btn_power_shutdown" android:title="@string/st_menu_power_btn_shutdown" />
+    <item android:icon="@drawable/menu_ic_clockwise_20_regular" android:id="@id/btn_power_app_restart" android:title="@string/st_menu_power_btn_restart_app" />
+    <item android:icon="@drawable/menu_ic_clockwise_20_regular" android:id="@id/btn_power_update" android:title="@string/st_menu_power_btn_install_updates" />
+</menu>

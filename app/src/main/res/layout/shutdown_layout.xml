@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center" android:orientation="vertical" android:background="#000000" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/boot_gif_loader" android:layout_width="64.0dp" android:layout_height="64.0dp" android:src="@drawable/app_logon_shutdown_loader" android:contentDescription="@string/st_menu_loading" />
+    <TextView android:textSize="20.0sp" android:textColor="#fff" android:id="@id/boot_txt" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20.0dp" android:text="@string/bootstrap_txt_shutting_down" android:textFontWeight="600" />
+</LinearLayout>

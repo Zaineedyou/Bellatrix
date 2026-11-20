@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6.0dp" android:layout_marginBottom="10.0dp"
+  xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:layout_gravity="center" android:id="@id/image_update_banner" android:layout_width="80.0dp" android:layout_height="80.0dp" android:layout_margin="4.0dp" android:src="@drawable/ui_settings_img_update" android:layout_centerVertical="true" android:contentDescription="@string/str_todo" />
+    <LinearLayout android:orientation="vertical" android:id="@id/container_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="16.0dp" android:layout_toEndOf="@id/image_update_banner">
+        <TextView android:textSize="20.0sp" android:textColor="@color/text_default" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_update_title" />
+        <TextView android:textSize="14.0sp" android:textColor="@color/text_muted" android:id="@id/title_update_version" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/app_ui_version" />
+        <com.bellatrixos.widgets.UIProgressBarLinear android:id="@id/title_update_progress" android:layout_width="@dimen/settings_update_progress_width" android:layout_height="4.0dp" app:ui_color="?colorPrimary" />
+        <TextView android:id="@id/btn_update" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10.0dp" android:text="@string/settings_update_check_updates" style="@style/Widget.UIButtonPrimary" />
+    </LinearLayout>
+</RelativeLayout>

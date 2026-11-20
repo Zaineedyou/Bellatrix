@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector android:height="20.0dp" android:width="20.0dp" android:viewportWidth="20.0" android:viewportHeight="20.0"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+    <path android:fillColor="@drawable/_ui_sm_ic_game_chat__0" android:pathData="M8 1a6 6 0 0 0 -5.3 8.9L2 12.4a0.5 0.5 0 0 0 0.7 0.6l2.3 -0.8q1.4 0.8 3 0.8A6 6 0 0 0 8 1" />
+    <path android:fillColor="@drawable/_ui_sm_ic_game_chat__1" android:pathData="M8 1a6 6 0 0 0 -5.3 8.9L2 12.4a0.5 0.5 0 0 0 0.7 0.6l2.3 -0.8q1.4 0.8 3 0.8A6 6 0 0 0 8 1" />
+    <path android:fillColor="@drawable/_ui_sm_ic_game_chat__2" android:pathData="M6.5 5.5a0.5 0.5 0 0 0 0 1h3a0.5 0.5 0 0 0 0 -1z" />
+    <path android:fillColor="@drawable/_ui_sm_ic_game_chat__3" android:pathData="M6 8q0 -0.5 0.5 -0.5h2a0.5 0.5 0 0 1 0 1h-2A1 1 0 0 1 6 8" />
+    <path android:fillColor="@drawable/_ui_sm_ic_game_chat__4" android:pathData="M14 10.2q0.3 -0.2 1 -0.2l0.7 0.2a2 2 0 0 1 1.5 1l1.2 2.6q0.8 1.8 0.6 3t-0.9 1.8q-0.4 0.4 -1 0.4t-0.9 -0.5l-0.8 -1q-0.5 -0.5 -1.1 -0.5h-3.6q-0.6 0 -1.1 0.5l-0.8 1q-0.4 0.5 -1 0.5 -0.5 0.1 -1 -0.4T6 16.8q-0.2 -1.2 0.6 -3l1.2 -2.5q0.5 -1 1.5 -1.1l0.7 -0.2q0.7 0 1 0.2h0.2q0.3 0.3 0.8 0.3h1q0.5 0 0.8 -0.2z" />
+    <path android:fillColor="#3e3e3e" android:pathData="M13.3 13.3a0.8 0.8 0 1 1 -1.6 0 0.8 0.8 0 0 1 1.6 0" />
+</vector>

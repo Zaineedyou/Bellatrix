@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bellatrixos.widgets.BtnLinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:id="@id/btn_ui_card" android:background="@drawable/ui_settings_card" android:padding="18.0dp" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/img_ui_card" android:layout_width="26.0dp" android:layout_height="26.0dp" android:contentDescription="@null" android:layout_marginEnd="18.0dp" />
+    <LinearLayout android:orientation="vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0">
+        <TextView android:textSize="14.599976sp" android:textColor="@color/text_default" android:id="@id/title_ui_card" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/str_demo_title" />
+        <TextView android:textSize="13.0sp" android:textColor="@color/text_muted" android:id="@id/subtitle_ui_card" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/str_demo_subtitle" />
+    </LinearLayout>
+    <TextView android:textSize="13.0sp" android:textColor="@color/text_default" android:id="@id/progress_txt" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="4" />
+    <ProgressBar android:id="@id/progress_bar" android:layout_width="wrap_content" android:layout_height="28.0dp" android:progress="46" android:minWidth="146.0dp" android:layout_marginStart="8.0dp" style="@style/Widget.UIProgressBar" />
+    <ViewStub android:id="@id/stub_icon_end_ui_card" android:layout="@layout/widget_card_icon_end" android:inflatedId="@id/icon_end_ui_card" android:layout_width="20.0dp" android:layout_height="20.0dp" android:layout_marginStart="8.0dp" android:layout_marginEnd="0.0dp" />
+</com.bellatrixos.widgets.BtnLinearLayout>

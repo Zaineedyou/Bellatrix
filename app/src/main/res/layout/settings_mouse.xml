@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/personalize" android:paddingLeft="16.0dp" android:paddingRight="16.0dp" android:paddingBottom="26.0dp" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingHorizontal="16.0dp"
+  xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.bellatrixos.widgets.cards.UISettingsCardSpinner android:id="@id/spinnerClickBehavior" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="1.5999756dp" android:layout_marginBottom="1.5999756dp" android:layout_marginVertical="1.5999756dp" app:ui_icon_src="@drawable/ic_mouse_24_regular" app:ui_subtitle="@string/settings_mouse_subtitle" app:ui_title="@string/settings_mouse_title" />
+    <com.bellatrixos.widgets.cards.UISettingsCardProgressBar android:id="@id/seekBarPointerSpeed" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="1.5999756dp" android:layout_marginBottom="1.5999756dp" android:layout_marginVertical="1.5999756dp" app:ui_icon_src="@drawable/ic_image_24_regular" app:ui_title="@string/settings_mouse_pointer_speed" />
+</LinearLayout>

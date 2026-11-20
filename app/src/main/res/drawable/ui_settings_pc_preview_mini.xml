@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/shape_rounded_corner_border_8" />
+    <item android:gravity="end|bottom" android:right="12.0dp" android:bottom="12.0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/app_dialog_bg_settings" />
+            <corners android:radius="5.0dp" />
+            <size android:height="68.0dp" android:width="68.0dp" />
+        </shape>
+    </item>
+    <item android:gravity="end|bottom" android:right="21.0dp" android:bottom="68.0dp">
+        <shape>
+            <size android:height="1.0dp" android:width="50.0dp" />
+            <solid android:color="@color/text_default" />
+        </shape>
+    </item>
+    <item android:gravity="end|bottom" android:right="21.0dp" android:bottom="60.0dp">
+        <shape>
+            <size android:height="1.0dp" android:width="50.0dp" />
+            <solid android:color="@color/text_default" />
+        </shape>
+    </item>
+    <item android:gravity="end|bottom" android:right="37.0dp" android:bottom="52.0dp">
+        <shape>
+            <size android:height="1.0dp" android:width="34.0dp" />
+            <solid android:color="@color/text_default" />
+        </shape>
+    </item>
+    <item android:gravity="end|bottom" android:right="20.0dp" android:bottom="22.0dp">
+        <shape>
+            <solid android:color="?colorPrimary" />
+            <corners android:radius="1.0dp" />
+            <size android:height="6.0dp" android:width="18.0dp" />
+        </shape>
+    </item>
+</layer-list>

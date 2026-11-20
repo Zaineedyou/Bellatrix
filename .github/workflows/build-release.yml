@@ -1,0 +1,114 @@
+name: Build Release APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Assemble release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK 36 and build tools
+        run: |
+          yes | sdkmanager --licenses > /dev/null
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Cache Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Prepare signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          mkdir -p tools
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > tools/release.jks
+            {
+              echo "ANDROID_KEYSTORE_FILE=tools/release.jks"
+              echo "ANDROID_KEYSTORE_PASSWORD=$STORE_PASSWORD"
+              echo "ANDROID_KEY_ALIAS=$KEY_ALIAS"
+              echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD"
+            } >> "$GITHUB_ENV"
+            echo "Using keystore from repository secrets."
+          else
+            echo "No signing secrets configured. Generating an ephemeral keystore for this run."
+            keytool -genkeypair -v \
+              -keystore tools/release.jks \
+              -storetype JKS \
+              -alias bellatrix \
+              -keyalg RSA -keysize 2048 -validity 3650 \
+              -storepass bellatrix -keypass bellatrix \
+              -dname "CN=Bellatrix CI, OU=CI, O=Bellatrix, L=Unknown, ST=Unknown, C=US"
+            {
+              echo "ANDROID_KEYSTORE_FILE=tools/release.jks"
+              echo "ANDROID_KEYSTORE_PASSWORD=bellatrix"
+              echo "ANDROID_KEY_ALIAS=bellatrix"
+              echo "ANDROID_KEY_PASSWORD=bellatrix"
+            } >> "$GITHUB_ENV"
+            echo "::warning::APK will be signed with a temporary key. Set the ANDROID_KEYSTORE_* secrets for a stable signature."
+          fi
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build release APK
+        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Collect APK
+        id: apk
+        run: |
+          APK_PATH=$(find app/build/outputs/apk/release -type f -name '*.apk' | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK was produced by the build." >&2
+            exit 1
+          fi
+          VERSION=$(grep -m1 'versionName' app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/')
+          SHORT_SHA="${GITHUB_SHA::7}"
+          OUTPUT_NAME="Bellatrix-${VERSION}-${SHORT_SHA}.apk"
+          cp "$APK_PATH" "$OUTPUT_NAME"
+          echo "path=$OUTPUT_NAME" >> "$GITHUB_OUTPUT"
+          echo "name=$OUTPUT_NAME" >> "$GITHUB_OUTPUT"
+          ls -lh "$OUTPUT_NAME"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bellatrix-release-${{ github.sha }}
+          path: ${{ steps.apk.outputs.path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.apk.outputs.path }}
+          generate_release_notes: true

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/widget_btn_secondary_bg_pressed" />
+            <stroke android:width="1.0dp" android:color="@color/widget_btn_secondary_bg_normal_border" />
+            <corners android:radius="46.0dp" />
+        </shape>
+    </item>
+    <item android:state_focused="true" android:state_activated="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/widget_input_bg_active" />
+                    <corners android:topLeftRadius="14.0dp" android:topRightRadius="14.0dp" />
+                    <stroke android:width="1.0dp" android:color="@color/widget_input_bg_active_border" />
+                </shape>
+            </item>
+            <item android:gravity="bottom">
+                <shape android:shape="rectangle">
+                    <size android:height="1.0dp" />
+                    <solid android:color="?colorPrimary" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/widget_input_bg_active" />
+            <corners android:radius="46.0dp" />
+            <stroke android:width="1.0dp" android:color="@color/widget_input_bg_active_border" />
+        </shape>
+    </item>
+    <item>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/widget_input_bg_corner_round" />
+                    <stroke android:width="1.0dp" android:color="@color/widget_btn_secondary_bg_normal_border" />
+                    <corners android:radius="46.0dp" />
+                </shape>
+            </item>
+            <item android:height="1.0dp" android:left="16.0dp" android:right="16.0dp">
+                <shape android:shape="oval">
+                    <solid android:color="@color/widget_input_bg_corner_round_border_top" />
+                </shape>
+            </item>
+            <item android:gravity="bottom" android:height="1.0dp" android:left="16.0dp" android:right="16.0dp">
+                <shape android:shape="oval">
+                    <gradient android:startColor="@color/widget_input_bg_corner_round_bottom" android:endColor="@color/widget_input_bg_corner_round_bottom" android:angle="0.0" android:type="linear" android:centerColor="@color/widget_btn_secondary_bg_normal_border_bottom" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

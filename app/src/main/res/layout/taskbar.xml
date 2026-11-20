@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:gravity="center_vertical" android:background="@drawable/ui_taskbar_bg_portrait" android:layout_width="match_parent" android:layout_height="@dimen/taskbar_height" android:backgroundTintMode="src_atop"
+  xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/taskBarBlur" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:contentDescription="@null" android:alpha="0.0" />
+    <LinearLayout android:gravity="center" android:orientation="horizontal" android:id="@id/taskBarList" android:paddingTop="8.0dp" android:paddingBottom="8.0dp" android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_centerHorizontal="true" android:paddingVertical="8.0dp">
+        <com.bellatrixos.widgets.TaskbarBtn android:id="@id/btnStartMenu" android:layout_width="wrap_content" android:layout_height="wrap_content" app:ui_icon_src="@drawable/img_app_start" app:ui_tooltip_text="@string/app_start" />
+        <androidx.recyclerview.widget.RecyclerView android:orientation="horizontal" android:id="@id/taskBarAppList" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+    </LinearLayout>
+    <TextView android:gravity="center" android:id="@id/btnRearrangeConfirm" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="@dimen/ui_48dp" android:text="@string/taskbar_rearrange_done" android:drawablePadding="@dimen/ui_20dp" android:layout_centerInParent="true" app:drawableStartCompat="@drawable/ic_checkmark_24_regular" style="@style/Widget.UIButtonPrimary" />
+</RelativeLayout>

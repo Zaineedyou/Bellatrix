@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:paddingBottom="@dimen/taskbar_height" android:layout_width="wrap_content" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout android:layout_gravity="bottom" android:id="@id/mainView" android:background="@drawable/app_startmenu_dialog_bg" android:focusable="true" android:focusableInTouchMode="true" android:clickable="true" android:layout_width="@dimen/action_center_width" android:layout_height="wrap_content" android:layout_margin="8.0dp" android:foreground="@drawable/app_startmenu_dialog_border" android:elevation="2.0dp" android:backgroundTintMode="src_atop" android:clipToOutline="true">
+        <ImageView android:id="@id/ACBlur" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:contentDescription="@null" />
+        <include android:id="@id/viewWidgets" layout="@layout/taskbar_dialog_action_widgets" />
+        <ViewStub android:id="@id/stubDate" android:layout="@layout/taskbar_dialog_action_date" android:inflatedId="@id/viewDate" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </FrameLayout>
+</FrameLayout>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <layer-list>
+            <item android:drawable="@drawable/widget_btn_secondary_active" />
+            <item android:gravity="end|center" android:drawable="@drawable/ic_arrow_down_14_regular" android:top="4.0dp" android:end="12.0dp" />
+        </layer-list>
+    </item>
+    <item android:state_activated="true">
+        <layer-list>
+            <item android:drawable="@drawable/widget_btn_secondary_hover" />
+            <item android:gravity="end|center" android:drawable="@drawable/ic_arrow_down_14_regular" android:end="12.0dp" />
+            <item>
+                <shape android:shape="rectangle">
+                    <stroke android:width="1.0dp" android:color="@color/edit_text_border_bottom" />
+                    <corners android:radius="5.0dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:state_hovered="true">
+        <layer-list>
+            <item android:drawable="@drawable/widget_btn_secondary_hover" />
+            <item android:gravity="end|center" android:drawable="@drawable/ic_arrow_down_14_regular" android:end="12.0dp" />
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item android:drawable="@drawable/widget_btn_secondary_base" />
+            <item android:gravity="end|center" android:drawable="@drawable/ic_arrow_down_14_regular" android:end="12.0dp" />
+        </layer-list>
+    </item>
+</selector>

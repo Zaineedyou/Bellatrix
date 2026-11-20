@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bellatrixos.widgets.BtnTextView android:textSize="14.0sp" android:textColor="@color/text_default" android:gravity="center_vertical" android:id="@android:id/text1" android:background="@drawable/widget_spinner_item" android:paddingTop="0.0dp" android:paddingBottom="0.0dp" android:layout_width="match_parent" android:layout_height="36.0dp" android:paddingStart="16.0dp" android:paddingEnd="34.0dp" android:paddingVertical="0.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" />

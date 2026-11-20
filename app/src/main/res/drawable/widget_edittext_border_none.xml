@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true" android:drawable="@drawable/widget_edittext_active_base" />
+    <item>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/widget_input_bg_corner_no" />
+                    <corners android:radius="5.0dp" />
+                    <stroke android:width="1.0dp" android:color="@color/widget_btn_subtle_border" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

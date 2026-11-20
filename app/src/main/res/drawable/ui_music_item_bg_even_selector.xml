@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:drawable="@drawable/ui_music_item_bg_active" />
+    <item android:drawable="@drawable/ui_music_item_bg_hover" android:state_hovered="true" />
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="8.0dp" />
+            <solid android:color="@color/ui_card_bg" />
+            <stroke android:width="1.0dp" android:color="@color/ui_card_border_alpha" />
+        </shape>
+    </item>
+</selector>

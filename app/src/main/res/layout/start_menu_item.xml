@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bellatrixos.widgets.BtnLinearLayout android:gravity="center" android:orientation="vertical" android:background="@drawable/widget_ui_item_bg_selector" android:layout_width="@dimen/start_menu_app_layout_width" android:layout_height="@dimen/start_menu_app_layout_height" android:backgroundTint="#5a5a5a"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/appIconImageView" android:layout_width="@dimen/start_menu_app_icon_size" android:layout_height="@dimen/start_menu_app_icon_size" android:src="@drawable/ui_taskbar_btn_bg_active" android:scaleType="fitCenter" android:contentDescription="@null" android:stateListAnimator="@animator/press_anim" />
+    <TextView android:textAppearance="?android:textAppearanceSmall" android:textSize="11.0sp" android:textColor="@color/text_default" android:ellipsize="end" android:id="@id/appNameTextView" android:paddingLeft="4.399994dp" android:paddingTop="4.0dp" android:paddingRight="4.399994dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/str_demo_title" android:maxLines="1" android:textAlignment="center" android:paddingHorizontal="4.399994dp" />
+</com.bellatrixos.widgets.BtnLinearLayout>

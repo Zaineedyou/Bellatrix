@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="f4629a">
+        <attr name="ui_icon_src" />
+        <attr name="ui_tooltip_text" />
+    </declare-styleable>
+    <declare-styleable name="b">
+        <attr name="ui_animating" />
+        <attr name="ui_color" />
+        <attr name="ui_thickness" />
+        <attr name="ui_trackColor" />
+    </declare-styleable>
+    <declare-styleable name="c">
+        <attr name="ui_color" />
+        <attr name="ui_thickness" />
+    </declare-styleable>
+    <declare-styleable name="l">
+        <attr name="ui_icon_src" />
+    </declare-styleable>
+    <declare-styleable name="f4630d">
+        <attr name="ui_card_style" />
+        <attr name="ui_drawable_end" />
+        <attr name="ui_icon_src" />
+        <attr name="ui_subtitle" />
+        <attr name="ui_title" />
+    </declare-styleable>
+    <declare-styleable name="f4631e">
+        <attr name="ui_card_style" />
+        <attr name="ui_drawable_end" />
+        <attr name="ui_icon_src" />
+        <attr name="ui_subtitle" />
+        <attr name="ui_title" />
+    </declare-styleable>
+    <declare-styleable name="f4632f">
+        <attr name="ui_card_style" />
+        <attr name="ui_clickable" />
+        <attr name="ui_drawable_end" />
+        <attr name="ui_icon_src" />
+        <attr name="ui_subtitle" />
+        <attr name="ui_title" />
+    </declare-styleable>
+    <declare-styleable name="g">
+        <attr name="ui_card_style" />
+        <attr name="ui_clickable" />
+        <attr name="ui_drawable_end" />
+        <attr name="ui_icon_src" />
+        <attr name="ui_subtitle" />
+        <attr name="ui_title" />
+    </declare-styleable>
+    <declare-styleable name="f4633h">
+        <attr name="ui_card_style" />
+        <attr name="ui_clickable" />
+        <attr name="ui_drawable_end" />
+        <attr name="ui_icon_src" />
+        <attr name="ui_subtitle" />
+        <attr name="ui_title" />
+    </declare-styleable>
+    <declare-styleable name="f4634i">
+        <attr name="ui_card_style" />
+        <attr name="ui_icon_src" />
+        <attr name="ui_title" />
+    </declare-styleable>
+    <declare-styleable name="j">
+        <attr name="ui_card_style" />
+        <attr name="ui_drawable_end" />
+        <attr name="ui_icon_src" />
+        <attr name="ui_spinner_text" />
+        <attr name="ui_subtitle" />
+        <attr name="ui_title" />
+    </declare-styleable>
+    <declare-styleable name="f4635k">
+        <attr name="ui_card_style" />
+        <attr name="ui_drawable_end" />
+        <attr name="ui_icon_src" />
+        <attr name="ui_subtitle" />
+        <attr name="ui_title" />
+    </declare-styleable>
+</resources>

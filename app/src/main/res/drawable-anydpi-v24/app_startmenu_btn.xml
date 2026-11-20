@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector android:height="31.5dp" android:width="31.5dp" android:viewportWidth="31.5" android:viewportHeight="31.5"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+    <path android:fillColor="@drawable/_app_startmenu_btn__0" android:pathData="M2.8611112 1.25C1.975 1.25 1.25 1.975 1.25 2.8611112V15.064917H15.064917V1.25Zm13.5739718 0V15.064917H30.25V2.8611112C30.25 1.975 29.525 1.25 28.638888 1.25ZM1.25 16.435083V28.638888C1.25 29.525 1.975 30.25 2.8611112 30.25H15.064917V16.435083Zm15.185083 0V30.25H28.638888C29.525 30.25 30.25 29.525 30.25 28.638888V16.435083Z" />
+</vector>

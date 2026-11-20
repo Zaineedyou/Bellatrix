@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="start|center" android:height="14.0dp" android:width="14.0dp">
+        <bitmap android:src="@drawable/ui_explorer_ic_arrow_down" android:tint="@color/text_muted" />
+    </item>
+    <item android:gravity="center_vertical" android:height="18.0dp" android:width="18.0dp" android:start="20.0dp">
+        <bitmap android:src="@drawable/img_this_pc_sm" />
+    </item>
+</layer-list>

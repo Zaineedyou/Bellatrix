@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView android:id="@id/icon_end_ui_card" android:layout_width="20.0dp" android:layout_height="20.0dp" android:src="@drawable/ic_chevron_right_20_regular" android:contentDescription="@null"
+  xmlns:android="http://schemas.android.com/apk/res/android" />

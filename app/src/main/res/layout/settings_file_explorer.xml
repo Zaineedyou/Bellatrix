@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:paddingLeft="16.0dp" android:paddingRight="16.0dp" android:paddingBottom="26.0dp" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingHorizontal="16.0dp"
+  xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.bellatrixos.widgets.cards.UISettingsCard android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="1.5999756dp" app:ui_card_style="header" app:ui_drawable_end="@drawable/ic_arrow_down_14_regular" app:ui_icon_src="@drawable/ic_folder_open_26_regular" app:ui_title="@string/explorer_str_name" />
+    <com.bellatrixos.widgets.cards.UISettingsCardSwitchCompact android:id="@id/checkbox_show_side_nav" android:layout_width="match_parent" android:layout_height="wrap_content" app:ui_icon_src="@drawable/menu_ic_blank_20_regular" app:ui_title="@string/settings_apps_file_mgr_side_nav_enable" />
+    <com.bellatrixos.widgets.cards.UISettingsCardSwitchCompact android:id="@id/checkbox_show_home_shortcuts" android:layout_width="match_parent" android:layout_height="wrap_content" app:ui_card_style="footer" app:ui_icon_src="@drawable/menu_ic_blank_20_regular" app:ui_title="@string/settings_apps_file_mgr_hm_shortcuts_enable" />
+</LinearLayout>

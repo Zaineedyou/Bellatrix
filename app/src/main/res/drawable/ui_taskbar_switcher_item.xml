@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="3.0dp" />
+            <solid android:color="@color/app_dialog_bg_dark" />
+        </shape>
+    </item>
+    <item android:height="8.0dp" android:top="0.0dp">
+        <shape android:shape="rectangle">
+            <corners android:topLeftRadius="3.0dp" android:topRightRadius="3.0dp" />
+            <solid android:color="@color/app_dialog_border_footer_alpha" />
+        </shape>
+    </item>
+    <item android:height="3.0dp" android:top="8.0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/app_dialog_border_light" />
+        </shape>
+    </item>
+    <item android:height="1.0dp" android:left="6.0dp" android:top="22.0dp" android:right="14.0dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="1.0dp" />
+            <solid android:color="@color/app_dialog_border_app" />
+        </shape>
+    </item>
+    <item android:height="1.0dp" android:left="6.0dp" android:top="28.0dp" android:right="10.0dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="1.0dp" />
+            <solid android:color="@color/app_dialog_border_app" />
+        </shape>
+    </item>
+    <item android:height="1.0dp" android:left="6.0dp" android:top="34.0dp" android:right="40.0dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="1.0dp" />
+            <solid android:color="@color/app_dialog_border_app" />
+        </shape>
+    </item>
+</layer-list>

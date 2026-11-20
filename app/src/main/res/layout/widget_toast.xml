@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:id="@id/main_view" android:paddingBottom="@dimen/taskbar_height" android:layout_width="wrap_content" android:layout_height="wrap_content"
+  xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:background="@drawable/widget_popup_bg" android:paddingLeft="12.0dp" android:paddingTop="10.0dp" android:paddingRight="12.0dp" android:paddingBottom="15.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="8.0dp" android:paddingHorizontal="12.0dp">
+        <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textSize="12.599976sp" android:textColor="@color/text_muted" android:ellipsize="end" android:id="@id/toast_title" android:layout_width="0.0dp" android:layout_height="wrap_content" android:maxWidth="260.0dp" android:text="@string/toast_title_default" android:maxLines="1" android:drawablePadding="6.0dp" android:layout_weight="1.0" android:paddingStart="6.0dp" android:paddingEnd="8.0dp" app:drawableEndCompat="@drawable/ic_toast_more" app:drawableStartCompat="@drawable/ic_toast_app_16_regular" />
+            <ImageButton android:id="@id/btn_close" android:background="@drawable/widget_btn_subtle" android:padding="5.0dp" android:layout_width="32.0dp" android:layout_height="24.0dp" android:src="@drawable/app_title_ic_close_16" android:scaleType="fitEnd" android:contentDescription="@string/titlebar_actions_dialog_close" app:tint="@color/text_muted" />
+        </LinearLayout>
+        <TextView android:textSize="14.0sp" android:textColor="@color/text_default" android:id="@id/toast_text" android:paddingLeft="6.0dp" android:paddingRight="6.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12.0dp" android:maxWidth="300.0dp" android:minWidth="240.0dp" android:text="@string/str_demo_subtitle" android:paddingHorizontal="6.0dp" />
+        <TextView android:id="@id/btn_action" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12.0dp" android:text="@string/str_demo_subtitle" style="@style/Widget.UIButtonSecondary.Small" />
+    </LinearLayout>
+</FrameLayout>

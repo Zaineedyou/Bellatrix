@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set android:interpolator="@anim/ui_interpolator_taskbar_dialog_show" android:fillAfter="true"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate android:duration="248" android:fromXDelta="100.0%" android:toXDelta="0.0%" android:fromYDelta="0.0%" android:toYDelta="0.0%" />
+    <alpha android:duration="228" android:fromAlpha="0.2" android:toAlpha="1.0" />
+</set>

@@ -1,0 +1,14 @@
+.gradle/
+build/
+app/build/
+local.properties
+*.class
+.DS_Store
+
+# Signing material must never be committed
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pepk
+tools/release.jks

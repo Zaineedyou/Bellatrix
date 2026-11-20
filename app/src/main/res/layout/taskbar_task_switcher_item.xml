@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center" android:orientation="vertical" android:background="@drawable/ui_taskbar_btn_bg_selector" android:paddingLeft="4.0dp" android:paddingTop="4.0dp" android:paddingRight="4.0dp" android:paddingBottom="8.0dp" android:layout_width="140.0dp" android:layout_height="wrap_content" android:paddingHorizontal="4.0dp"
+  xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:textSize="12.399994sp" android:textColor="@color/text_default" android:ellipsize="end" android:id="@id/title" android:layout_width="0.0dp" android:layout_height="wrap_content" android:maxLines="1" android:drawablePadding="4.0dp" android:layout_weight="1.0" android:paddingStart="4.0dp" android:paddingEnd="0.0dp" app:drawableStartCompat="@drawable/ic_toast_app_16_regular" />
+        <ImageButton android:id="@id/close" android:background="@drawable/app_title_btn_danger_round_sm" android:layout_width="32.0dp" android:layout_height="32.0dp" android:src="@drawable/app_title_ic_close_16" android:contentDescription="@string/titlebar_actions_dialog_close" app:tint="@color/ui_titlebar_btn_danger_color" />
+    </LinearLayout>
+    <View android:id="@id/preview" android:background="@drawable/ui_taskbar_switcher_item" android:layout_width="match_parent" android:layout_height="68.0dp" android:layout_marginLeft="4.0dp" android:layout_marginTop="4.0dp" android:layout_marginRight="4.0dp" android:layout_marginHorizontal="4.0dp" />
+</LinearLayout>

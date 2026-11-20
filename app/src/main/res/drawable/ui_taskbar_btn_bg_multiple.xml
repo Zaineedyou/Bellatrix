@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:right="7.0dp" android:bottom="2.0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/taskbar_app_bg_active" />
+            <stroke android:width="1.0dp" android:color="@color/widget_btn_secondary_bg_normal_border" />
+            <corners android:topLeftRadius="5.0dp" android:bottomLeftRadius="5.0dp" />
+        </shape>
+    </item>
+    <item android:gravity="end" android:width="5.0dp" android:bottom="2.0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/taskbar_app_bg_active" />
+            <stroke android:width="1.0dp" android:color="@color/widget_btn_secondary_bg_normal_border" />
+            <corners android:topRightRadius="12.0dp" android:bottomRightRadius="12.0dp" />
+        </shape>
+    </item>
+    <item android:height="1.0dp" android:left="5.5999756dp" android:right="7.0dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="36.0dp" />
+            <solid android:color="@color/widget_btn_secondary_bg_normal_border_top" />
+        </shape>
+    </item>
+</layer-list>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:background="@color/ui_card_bg" android:paddingLeft="14.0dp" android:paddingTop="8.0dp" android:paddingRight="14.0dp" android:paddingBottom="10.0dp" android:focusable="true" android:focusableInTouchMode="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="14.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TableLayout android:id="@id/file_table" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dp" android:stretchColumns="1">
+        <TableRow>
+            <TextView android:textSize="12.399994sp" android:textColor="@color/text_default" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/explorer_picker_file_name_title" android:layout_marginEnd="12.0dp" />
+            <EditText android:textSize="13.0sp" android:textColor="@color/text_default" android:id="@id/save_file_name" android:background="@drawable/widget_edittext" android:paddingLeft="8.0dp" android:paddingTop="5.0dp" android:paddingRight="8.0dp" android:paddingBottom="5.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:hint="@string/explorer_picker_file_name_hint" android:imeOptions="flagNoFullscreen|flagNoExtractUi" android:paddingHorizontal="8.0dp" android:paddingVertical="5.0dp" />
+        </TableRow>
+        <TableRow android:paddingTop="4.0dp">
+            <TextView android:textSize="12.399994sp" android:textColor="@color/text_default" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/explorer_picker_file_ext_title" android:layout_marginEnd="12.0dp" />
+            <TextView android:enabled="false" android:textSize="12.399994sp" android:textColor="@color/text_default" android:id="@id/about_ext" android:background="@drawable/widget_spinner_btn" android:paddingLeft="8.0dp" android:paddingTop="5.0dp" android:paddingRight="8.0dp" android:paddingBottom="5.0dp" android:clickable="false" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/explorer_picker_file_ext_txt" android:alpha="0.7" android:paddingHorizontal="8.0dp" android:paddingVertical="5.0dp" />
+        </TableRow>
+    </TableLayout>
+    <TextView android:id="@id/btn_file_save" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/context_menu_save" android:layout_below="@id/file_table" android:layout_toStartOf="@id/btn_cancel" style="@style/Widget.UIButtonSecondary.Small" />
+    <TextView android:textSize="12.399994sp" android:id="@id/btn_cancel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/dialog_actions_cancel" android:layout_below="@id/file_table" android:layout_marginStart="12.0dp" android:layout_alignParentEnd="true" style="@style/Widget.UIButtonSecondary.Small" />
+</RelativeLayout>

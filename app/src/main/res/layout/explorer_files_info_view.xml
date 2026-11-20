@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bellatrixos.widgets.ExplorerFilesInfoView android:gravity="center_vertical" android:orientation="horizontal" android:background="@color/explorer_files_info_bg" android:paddingBottom="1.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="18.0dp" android:paddingEnd="6.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="12.599976sp" android:textColor="@color/text_muted" android:id="@id/filesInfoText" android:layout_width="0.0dp" android:layout_height="wrap_content" android:text="48 items   |" android:layout_weight="1.0" />
+    <ImageButton android:id="@id/listViewButton" android:background="@drawable/ui_explorer_footer_info_bg_selector" android:padding="5.0dp" android:layout_width="27.0dp" android:layout_height="27.0dp" android:src="@drawable/ui_explorer_ic_footer_list" android:scaleType="centerInside" android:contentDescription="@string/context_menu_view_ic_details" android:layout_marginStart="4.0dp" />
+    <ImageButton android:id="@id/gridViewButton" android:background="@drawable/ui_explorer_footer_info_bg_selector" android:padding="5.0dp" android:layout_width="27.0dp" android:layout_height="27.0dp" android:src="@drawable/ui_explorer_ic_footer_grid" android:scaleType="centerInside" android:contentDescription="@string/context_menu_view_ic_medium" />
+</com.bellatrixos.widgets.ExplorerFilesInfoView>

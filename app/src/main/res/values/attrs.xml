@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="themeLineHeight" format="dimension" />
+    <attr name="ui_animAutostart" format="boolean" />
+    <attr name="ui_animDuration" format="integer" />
+    <attr name="ui_animSteps" format="integer" />
+    <attr name="ui_animSwoopDuration" format="integer" />
+    <attr name="ui_animSyncDuration" format="integer" />
+    <attr name="ui_animating" format="boolean" />
+    <attr name="ui_card_style">
+        <enum name="header" value="1" />
+        <enum name="footer" value="2" />
+        <enum name="external" value="3" />
+    </attr>
+    <attr name="ui_clickable" format="boolean" />
+    <attr name="ui_color" format="color" />
+    <attr name="ui_drawable_end" format="reference" />
+    <attr name="ui_icon_src" format="reference" />
+    <attr name="ui_indeterminate" format="boolean" />
+    <attr name="ui_maxProgress" format="float" />
+    <attr name="ui_progress" format="float" />
+    <attr name="ui_resize_btn" format="boolean" />
+    <attr name="ui_spinner_text" format="string" />
+    <attr name="ui_startAngle" format="float" />
+    <attr name="ui_subtitle" format="string" />
+    <attr name="ui_thickness" format="dimension" />
+    <attr name="ui_title" format="string" />
+    <attr name="ui_tooltip_text" format="string" />
+    <attr name="ui_trackColor" format="color" />
+</resources>

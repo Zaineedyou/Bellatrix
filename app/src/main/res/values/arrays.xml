@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="app_date_formats">
+        <item>05–04–2017</item>
+        <item>05–04–17</item>
+        <item>5–4–17</item>
+    </string-array>
+    <string-array name="app_time_formats">
+        <item>09:40 PM</item>
+        <item>21:40</item>
+    </string-array>
+    <string-array name="app_web_agents">
+        <item>Default</item>
+        <item>Desktop</item>
+    </string-array>
+    <string-array name="exo_controls_playback_speeds">
+        <item>0.25x</item>
+        <item>0.5x</item>
+        <item>0.75x</item>
+        <item>Normal</item>
+        <item>1.25x</item>
+        <item>1.5x</item>
+        <item>2x</item>
+    </string-array>
+    <string-array name="explorer_home_dirs">
+        <item>Documents</item>
+        <item>Downloads</item>
+        <item>Music</item>
+        <item>Pictures</item>
+        <item>Videos</item>
+    </string-array>
+    <string-array name="language_codes">
+        <item>default</item>
+        <item>en</item>
+        <item>zh-CN</item>
+        <item>hi</item>
+        <item>in</item>
+        <item>pt-BR</item>
+        <item>pt-PT</item>
+        <item>ru</item>
+        <item>es</item>
+        <item>uk</item>
+        <item>tr</item>
+        <item>th</item>
+        <item>ar</item>
+        <item>vi</item>
+        <item>ja</item>
+        <item>fr</item>
+    </string-array>
+    <string-array name="language_names">
+        <item>Default</item>
+        <item>English</item>
+        <item>简体中文</item>
+        <item>हिंदी</item>
+        <item>Bahasa Indonesia</item>
+        <item>Português (Brasil)</item>
+        <item>Português (Portugal)</item>
+        <item>русский</item>
+        <item>Español</item>
+        <item>Українська</item>
+        <item>Türkçe</item>
+        <item>แบบไทย</item>
+        <item>عربي</item>
+        <item>Tiếng Việt</item>
+        <item>日本語</item>
+        <item>Français</item>
+    </string-array>
+    <string-array name="settings_bg_img_quality">
+        <item>Optimized</item>
+        <item>High</item>
+        <item>Original</item>
+    </string-array>
+    <string-array name="settings_bg_img_type">
+        <item>Picture</item>
+        <item>Video</item>
+    </string-array>
+    <string-array name="settings_colors_current_scheme">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>System</item>
+    </string-array>
+    <string-array name="settings_display_orientation_types">
+        <item>System</item>
+        <item>Landscape</item>
+        <item>Portrait</item>
+    </string-array>
+    <string-array name="settings_display_statusbar_types">
+        <item>Hidden</item>
+        <item>Show on top</item>
+    </string-array>
+    <string-array name="settings_nav_items">
+        <item>System</item>
+        <item>Bluetooth &amp; devices</item>
+        <item>Personalize</item>
+        <item>Apps</item>
+        <item>Accounts</item>
+        <item>Time &amp; language</item>
+        <item>Privacy &amp; security</item>
+        <item>PC Update</item>
+    </string-array>
+    <string-array name="settings_nav_sub_items">
+        <item>Display</item>
+        <item>Custom</item>
+        <item>Storage</item>
+        <item>Multitasking</item>
+        <item>Home</item>
+        <item>About</item>
+        <item>Background</item>
+        <item>Colors</item>
+        <item>Taskbar</item>
+        <item>Start</item>
+        <item>Installed apps</item>
+        <item>File Explorer</item>
+        <item>Language &amp; region</item>
+    </string-array>
+    <string-array name="settings_taskbar_alignment_types">
+        <item>Center</item>
+        <item>Left</item>
+    </string-array>
+    <string-array name="settings_taskbar_search_app_types">
+        <item>Hide</item>
+        <item>Search icon only</item>
+        <item>Search icon and label</item>
+        <item>Search box</item>
+    </string-array>
+</resources>

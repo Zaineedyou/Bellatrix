@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="top" android:height="1.0dp">
+        <shape android:shape="rectangle">
+            <solid android:width="10.0dp" android:color="@color/app_dialog_border_footer_alpha" />
+        </shape>
+    </item>
+    <item android:top="1.0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/app_dialog_bg_footer_alpha_start" />
+        </shape>
+    </item>
+</layer-list>

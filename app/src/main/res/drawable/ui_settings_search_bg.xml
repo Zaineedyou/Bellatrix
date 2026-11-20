@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape android:shape="rectangle"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/app_dialog_bg" />
+    <padding android:left="10.0dp" android:top="10.0dp" android:right="10.0dp" android:bottom="10.0dp" />
+    <corners android:bottomLeftRadius="8.0dp" android:bottomRightRadius="8.0dp" />
+    <stroke android:width="1.0dp" android:color="@color/explorer_ui_border" />
+</shape>

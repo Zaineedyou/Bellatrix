@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:topLeftRadius="6.0dp" android:topRightRadius="6.0dp" />
+            <solid android:color="@color/ui_item_bg_pressed" />
+            <stroke android:width="1.0dp" android:color="@color/ui_card_border_alpha" />
+        </shape>
+    </item>
+    <item android:state_hovered="true">
+        <shape android:shape="rectangle">
+            <corners android:topLeftRadius="6.0dp" android:topRightRadius="6.0dp" />
+            <solid android:color="@color/ui_item_bg_hovered" />
+            <stroke android:width="1.0dp" android:color="@color/ui_card_border_alpha" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/ui_settings_card_header" />
+</selector>

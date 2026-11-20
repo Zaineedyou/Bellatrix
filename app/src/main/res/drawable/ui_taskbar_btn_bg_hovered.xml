@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:bottom="2.0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/taskbar_app_bg_hovered" />
+            <stroke android:width="1.0dp" android:color="@color/widget_btn_secondary_bg_normal_border" />
+            <corners android:radius="5.0dp" />
+        </shape>
+    </item>
+</layer-list>

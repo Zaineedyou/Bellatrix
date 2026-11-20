@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:paddingTop="@dimen/taskbar_height" android:paddingBottom="@dimen/taskbar_height" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingVertical="@dimen/taskbar_height"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <GridLayout android:layout_gravity="center" android:id="@id/mainView" android:background="@drawable/widget_popup_bg" android:padding="4.0dp" android:focusable="true" android:clickable="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="8.0dp" android:columnCount="3" android:elevation="2.0dp" android:backgroundTintMode="src_atop">
+        <ImageButton android:id="@id/btnDeviceUpdate" android:background="@drawable/ui_taskbar_btn_bg_selector" android:padding="10.0dp" android:layout_width="42.0dp" android:layout_height="42.0dp" android:src="@drawable/img_defender" android:scaleType="centerInside" android:contentDescription="@string/settings_update_check_updates" android:tooltipText="@string/settings_update_check_updates" />
+        <ImageButton android:id="@id/btnDeviceMouse" android:background="@drawable/ui_taskbar_btn_bg_selector" android:padding="10.0dp" android:layout_width="42.0dp" android:layout_height="42.0dp" android:src="@drawable/img_mouse" android:scaleType="centerInside" android:contentDescription="@string/settings_mouse_title" android:tooltipText="@string/settings_mouse_title" />
+        <ImageButton android:id="@id/btnDeviceInstaller" android:background="@drawable/ui_taskbar_btn_bg_selector" android:padding="10.0dp" android:layout_width="42.0dp" android:layout_height="42.0dp" android:src="@drawable/img_file_apk" android:scaleType="centerInside" android:contentDescription="@string/settings_apps_installer" android:tooltipText="@string/settings_apps_installer" />
+    </GridLayout>
+</FrameLayout>

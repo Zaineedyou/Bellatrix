@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector android:height="20.0dp" android:width="20.0dp" android:viewportWidth="20.0" android:viewportHeight="20.0"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+    <path android:fillColor="@drawable/_ui_sm_ic_library__0" android:pathData="M2 3.5C2 2.67 2.67 2 3.5 2h1C5.33 2 6 2.67 6 3.5v12.98c0 0.83 -0.67 1.5 -1.5 1.5h-1a1.5 1.5 0 0 1 -1.5 -1.5z" />
+    <path android:fillColor="@drawable/_ui_sm_ic_library__1" android:pathData="M7 3.5C7 2.67 7.67 2 8.5 2h1c0.83 0 1.5 0.67 1.5 1.5v12.98c0 0.83 -0.67 1.5 -1.5 1.5h-1a1.5 1.5 0 0 1 -1.5 -1.5z" />
+    <path android:fillColor="@drawable/_ui_sm_ic_library__2" android:pathData="M15.72 6.16a1.5 1.5 0 0 0 -1.87 -1.1l-0.75 0.2A1.5 1.5 0 0 0 12.04 7l2 9.8c0.18 0.84 1.02 1.36 1.85 1.15l0.98 -0.25c0.79 -0.2 1.27 -1 1.1 -1.78z" />
+    <path android:fillColor="@drawable/_ui_sm_ic_library__3" android:pathData="M6 7H2V5h4z" />
+    <path android:fillColor="@drawable/_ui_sm_ic_library__4" android:pathData="M12.32 8.36l3.73 -0.76 0.45 1.95 -3.78 0.76z" />
+    <path android:fillColor="@drawable/_ui_sm_ic_library__5" android:pathData="M7 7h4V5H7z" />
+</vector>

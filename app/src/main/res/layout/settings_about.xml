@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/personalize" android:paddingLeft="16.0dp" android:paddingRight="16.0dp" android:paddingBottom="26.0dp" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingHorizontal="16.0dp"
+  xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.bellatrixos.widgets.cards.UISettingsCardSpinnerText android:id="@id/about_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6.0dp" android:layout_marginBottom="1.5999756dp" app:ui_icon_src="@null" app:ui_spinner_text="@string/settings_accounts_user_name_btn" app:ui_subtitle="@string/str_demo_subtitle" app:ui_title="@string/str_demo_title" />
+    <TextView android:textSize="15.0sp" android:textColor="@color/text_default" android:gravity="center_vertical" android:background="@drawable/ui_settings_card_header" android:padding="18.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="1.5999756dp" android:text="@string/settings_about_device_specs" android:drawablePadding="18.0dp" app:drawableStartCompat="@drawable/ic_info_26_regular" />
+    <TableLayout android:background="@drawable/ui_settings_card_footer" android:paddingTop="10.0dp" android:paddingBottom="10.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="1.5999756dp" android:stretchColumns="1" android:paddingStart="@dimen/settings_card_nested_long_padding" android:paddingEnd="10.0dp" android:paddingVertical="10.0dp">
+        <TableRow android:paddingTop="6.0dp" android:paddingBottom="6.0dp" android:paddingVertical="6.0dp">
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_default" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_about_device_brand" android:layout_marginEnd="12.0dp" />
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_muted" android:id="@id/about_brand" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="- -" />
+        </TableRow>
+        <TableRow android:paddingTop="6.0dp" android:paddingBottom="6.0dp" android:paddingVertical="6.0dp">
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_default" android:id="@id/about_ram_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_about_device_ram" android:paddingStart="0.0dp" android:paddingEnd="20.0dp" android:layout_marginEnd="12.0dp" />
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_muted" android:id="@id/about_ram" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="- - GB" />
+        </TableRow>
+        <TableRow android:paddingTop="6.0dp" android:paddingBottom="6.0dp" android:paddingVertical="6.0dp">
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_default" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_about_device_pid" android:layout_marginEnd="12.0dp" />
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_muted" android:id="@id/about_id" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="- -" />
+        </TableRow>
+    </TableLayout>
+    <TextView android:textSize="15.0sp" android:textColor="@color/text_default" android:gravity="center_vertical" android:background="@drawable/ui_settings_card_header" android:padding="18.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="1.5999756dp" android:text="@string/settings_about_system_specs" android:drawablePadding="18.0dp" app:drawableStartCompat="@drawable/ic_fluent_grid_24_filled" />
+    <TableLayout android:background="@drawable/ui_settings_card_footer" android:paddingTop="10.0dp" android:paddingBottom="10.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="1.5999756dp" android:stretchColumns="1" android:paddingStart="@dimen/settings_card_nested_long_padding" android:paddingEnd="10.0dp" android:paddingVertical="10.0dp">
+        <TableRow android:paddingTop="6.0dp" android:paddingBottom="6.0dp" android:paddingVertical="6.0dp">
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_default" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_about_edition" android:layout_marginEnd="12.0dp" />
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_muted" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_about_app_name" />
+        </TableRow>
+        <TableRow android:paddingTop="6.0dp" android:paddingBottom="6.0dp" android:paddingVertical="6.0dp">
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_default" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_about_version" android:layout_marginEnd="12.0dp" />
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_muted" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/app_ui_version" />
+        </TableRow>
+        <TableRow android:paddingTop="6.0dp" android:paddingBottom="6.0dp" android:paddingVertical="6.0dp">
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_default" android:id="@id/about_installed_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_about_date_installed" android:layout_marginEnd="12.0dp" />
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_muted" android:id="@id/about_installed_date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0-00-2000" />
+        </TableRow>
+    </TableLayout>
+</LinearLayout>

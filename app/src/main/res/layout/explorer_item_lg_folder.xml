@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bellatrixos.widgets.BtnLinearLayout android:gravity="start|center" android:orientation="horizontal" android:background="@drawable/widget_ui_item_bg_selector" android:paddingLeft="@dimen/ui_8dp" android:paddingTop="@dimen/ui_4dp" android:paddingRight="@dimen/ui_8dp" android:paddingBottom="@dimen/ui_4dp" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="@dimen/ui_8dp" android:paddingVertical="@dimen/ui_4dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:gravity="center" android:id="@id/folder_image" android:layout_width="@dimen/ui_46dp" android:layout_height="@dimen/ui_46dp" android:src="@drawable/img_folder_images" android:scaleType="fitCenter" android:contentDescription="@null" />
+    <TextView android:textSize="12.0sp" android:textColor="@color/text_default" android:id="@id/folder_name" android:paddingLeft="@dimen/ui_6dp" android:paddingRight="@dimen/ui_6dp" android:layout_width="80.0dp" android:layout_height="wrap_content" android:text="@string/str_demo_title" android:maxLines="1" android:paddingHorizontal="@dimen/ui_6dp" />
+</com.bellatrixos.widgets.BtnLinearLayout>

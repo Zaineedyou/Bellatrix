@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:paddingTop="8.0dp" android:paddingBottom="6.0dp" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditText android:textSize="14.0sp" android:textColor="@color/text_default" android:textColorHint="@color/text_muted" android:id="@id/search_apps" android:background="@drawable/widget_edittext" android:paddingLeft="12.0dp" android:paddingTop="8.0dp" android:paddingRight="12.0dp" android:paddingBottom="8.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="228.0dp" android:hint="@string/settings_taskbar_search" android:maxLines="1" android:imeOptions="flagNoFullscreen|flagNoExtractUi" android:drawableEnd="@drawable/ic_search_14_regular" android:paddingHorizontal="12.0dp" android:paddingVertical="8.0dp" />
+    <TextView android:textColor="@color/text_default" android:id="@id/page_title" android:paddingBottom="12.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20.0dp" android:text="@string/settings_apps_installed" />
+</LinearLayout>

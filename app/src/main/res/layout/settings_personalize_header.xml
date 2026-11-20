@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView android:id="@id/desktop_wallpaper" android:background="@drawable/shape_rounded_corner_16" android:layout_width="224.0dp" android:layout_height="138.0dp" android:layout_marginTop="6.0dp" android:layout_marginBottom="10.0dp" android:foreground="@drawable/ui_settings_pc_preview_mini" android:src="@drawable/theme_2_mini" android:scaleType="centerCrop" android:contentDescription="@string/settings_bg_img_current"
+  xmlns:android="http://schemas.android.com/apk/res/android" />
