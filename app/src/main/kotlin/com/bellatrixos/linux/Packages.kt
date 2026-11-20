@@ -32,7 +32,6 @@ class Packages(
 
     /** Bumped after installs and removals so lists reload. */
     val revision = mutableIntStateOf(0)
-        private set
 
     /** Notified when a package job starts, progresses or ends. */
     var onChange: (() -> Unit)? = null
