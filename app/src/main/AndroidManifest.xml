@@ -108,13 +108,6 @@
             android:theme="@style/Theme.Bellatrix"
             android:windowSoftInputMode="adjustResize" />
 
-        <activity
-            android:name=".LinuxSettingsActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:exported="false"
-            android:label="@string/linux_settings_title"
-            android:theme="@style/Theme.Bellatrix" />
-
         <activity-alias
             android:name=".TerminalWindow"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"

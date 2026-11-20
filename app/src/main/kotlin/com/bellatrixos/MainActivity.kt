@@ -997,7 +997,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         val i3 = 4
         super.onCreate(bundle)
         LinuxRuntime.get(this).apply {
-            onLinuxUnavailable = { startActivity(Intent(this@MainActivity, LinuxSettingsActivity::class.java)) }
+            onLinuxUnavailable = { c0("UISettings", "9") }
             start()
         }
 

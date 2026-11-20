@@ -1,7 +1,6 @@
 package com.bellatrixos.app_settings
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -25,7 +24,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.R
-import com.bellatrixos.LinuxSettingsActivity
 import com.bellatrixos.UIFragment
 import com.bellatrixos.app_settings.searchbar.SuggestionAdapter
 import com.bellatrixos.app_settings.searchbar.SuggestionItems
@@ -112,6 +110,7 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         UINavigator.g = navItems[5]
         UINavigator.f4710h = navItems[6]
         UINavigator.f4711i = navItems[7]
+        UINavigator.linuxTitle = navItems[8]
         UINavigator.j = navSub[0]
         UINavigator.l = context.getString(R.string.settings_system_sound)
         UINavigator.f4712k = navSub[1]
@@ -371,10 +370,6 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         FloatingLayout.OnWindowTapListener,
         UINavigator.ClickAction {
         override fun a(i2: Int) {
-            if (i2 == 9) {
-                openLinuxSettings()
-                return
-            }
             q0(i2)
             val scroll = O0 ?: return
             val overlay = B0 ?: return
@@ -390,16 +385,7 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
 
         override fun b(str: String) {
             val parts = UINavigation.a(str)
-            if (parts[0] == 9) {
-                openLinuxSettings()
-                return
-            }
             p0(parts[0], true, displayedListener(parts[1]))
-        }
-
-        private fun openLinuxSettings() {
-            val context = u0 ?: return
-            runCatching { context.startActivity(Intent(context, LinuxSettingsActivity::class.java)) }
         }
 
         override fun c() {
@@ -540,7 +526,7 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         val suggestions = SuggestionAdapter(context, SuggestionItems.a(context))
         search.w.dropDownVerticalOffset = context.resources.getDimensionPixelSize(R.dimen.ui_0_4dp)
         search.w.setAdapter(suggestions)
-        search.w.onItemClickListener = h(0, search)
+        search.w.onItemClickListener = h(1, search)
         suggestions.u = SuggestionAdapter.OnResultsStateListener { hasResults -> search.w.isActivated = hasResults }
         search.setOnSearchSuggestionClickListener(NavClickHandler())
     }

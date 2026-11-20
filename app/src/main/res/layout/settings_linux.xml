@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="16.0dp"
+    android:paddingBottom="26.0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6.0dp"
+        android:layout_marginBottom="10.0dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="56.0dp"
+            android:layout_height="56.0dp"
+            android:background="@drawable/shape_rounded_corner_14"
+            android:contentDescription="@string/linux_settings_title"
+            android:foreground="@drawable/shape_rounded_corner_border_6"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_app_terminal" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16.0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/linux_settings_title"
+                android:textColor="@color/text_default"
+                android:textSize="20.0sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/linux_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?colorPrimary"
+                android:textSize="14.0sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.bellatrixos.widgets.cards.UISettingsCard
+        android:id="@+id/linux_install"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="1.5999756dp"
+        app:ui_icon_src="@drawable/img_nav_update_20"
+        app:ui_subtitle="@string/linux_settings_install_subtitle"
+        app:ui_title="@string/linux_install" />
+
+    <com.bellatrixos.widgets.cards.UISettingsCard
+        android:id="@+id/linux_retry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="1.5999756dp"
+        app:ui_icon_src="@drawable/img_nav_update_20"
+        app:ui_subtitle="@string/linux_retry_setup"
+        app:ui_title="@string/linux_retry" />
+
+    <com.bellatrixos.widgets.cards.UISettingsCard
+        android:id="@+id/linux_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="1.5999756dp"
+        app:ui_icon_src="@drawable/app_title_ic_close_16"
+        app:ui_subtitle="@string/linux_cancel_setup"
+        app:ui_title="@string/linux_cancel_setup" />
+
+    <com.bellatrixos.widgets.cards.UISettingsCard
+        android:id="@+id/linux_gpu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="1.5999756dp"
+        app:ui_icon_src="@drawable/ic_info_26_regular"
+        app:ui_subtitle="@string/linux_settings_gpu_subtitle"
+        app:ui_title="@string/linux_gpu_title" />
+
+    <com.bellatrixos.widgets.cards.UISettingsCard
+        android:id="@+id/linux_terminal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="1.5999756dp"
+        app:ui_icon_src="@drawable/img_app_terminal"
+        app:ui_subtitle="@string/linux_settings_terminal_subtitle"
+        app:ui_title="@string/linux_open_terminal" />
+
+    <com.bellatrixos.widgets.cards.UISettingsCard
+        android:id="@+id/linux_remove"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="1.5999756dp"
+        app:ui_icon_src="@drawable/ic_delete_26_regular"
+        app:ui_subtitle="@string/linux_settings_remove_subtitle"
+        app:ui_title="@string/linux_remove" />
+</LinearLayout>

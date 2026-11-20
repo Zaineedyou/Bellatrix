@@ -16,6 +16,7 @@ import com.bellatrixos.app_settings.fragments.UIDisplayScale
 import com.bellatrixos.app_settings.fragments.UIFManager
 import com.bellatrixos.app_settings.fragments.UIHome
 import com.bellatrixos.app_settings.fragments.UILangRegion
+import com.bellatrixos.app_settings.fragments.UILinux
 import com.bellatrixos.app_settings.fragments.UIMouse
 import com.bellatrixos.app_settings.fragments.UIMultitasking
 import com.bellatrixos.app_settings.fragments.UIPCUpdate
@@ -52,6 +53,7 @@ class UINavigator {
         @JvmField var g: String? = null
         @JvmField var f4710h: String? = null
         @JvmField var f4711i: String? = null
+        @JvmField var linuxTitle: String? = null
         @JvmField var j: String? = null
         @JvmField var f4712k: String? = null
         @JvmField var l: String? = null
@@ -86,6 +88,7 @@ class UINavigator {
                 6 -> UITimeLang()
                 7 -> UIPrivacy()
                 8 -> UIPCUpdate()
+                9 -> UILinux()
                 11 -> UIDisplay()
                 12 -> UIStorage()
                 13 -> UIMultitasking()
@@ -147,6 +150,7 @@ class UINavigator {
                     6 -> return g
                     7 -> return f4710h
                     8 -> return f4711i
+                    9 -> return linuxTitle
                     11 -> {
                         sb = StringBuilder()
                         sb.append(b)

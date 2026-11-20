@@ -32,6 +32,10 @@
     <string name="linux_cancel_setup">cancel setup</string>
     <string name="linux_open_terminal">open terminal</string>
     <string name="linux_terminal_hint">Terminal runs inside Linux. The first launch installs Void Linux, then opens foot.</string>
+    <string name="linux_settings_install_subtitle">Set up the Linux environment used by Terminal</string>
+    <string name="linux_settings_gpu_subtitle">Use the device GPU for Linux graphics</string>
+    <string name="linux_settings_terminal_subtitle">Open a foot terminal inside Linux</string>
+    <string name="linux_settings_remove_subtitle">Delete the Linux environment</string>
     <string name="linux_status_installed">Linux is installed</string>
     <string name="linux_status_not_installed">Linux is not installed</string>
 
