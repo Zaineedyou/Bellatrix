@@ -1,0 +1,30 @@
+widget "updates" {
+  page: 4
+  order: 2
+  size: 3x3
+  minSize: 2x2
+
+  // Syncs the repository data, then lists what an upgrade would install: -n is a dry run, so
+  // nothing on the system changes.
+  source pending = cmd("""
+    xbps-install -S >/dev/null 2>&1 || { echo error; exit; }
+    xbps-install -un 2>/dev/null | awk '$2 == "update" { print $1 }'
+  """) every 1h timeout 90s
+  let failed = pending == "error"
+  let list = pending == null || failed ? null : lines(pending).filter(l => l != "").map(l => words(l)[0])
+
+  onTap: terminal("xbps-install -Su", "updates")
+
+  Column {
+    gap: 2
+    Text { text: "updates"; style: muted }
+    Text {
+      text: failed ? "offline" : list == null ? "…" : "${len(list)}"
+      style: title
+      color: failed || list == null ? muted : len(list) > 0 ? yellow : green
+    }
+    if list != null {
+      Text { text: len(list) == 0 ? "up to date" : join(list.take(4), " "); style: small; maxLines: 2 }
+    }
+  }
+}
