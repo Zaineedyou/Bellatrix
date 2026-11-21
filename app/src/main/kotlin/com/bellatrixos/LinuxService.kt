@@ -12,7 +12,6 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.bellatrixos.linux.LinuxRuntime
 import com.bellatrixos.linux.LinuxState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +42,7 @@ class LinuxService : Service() {
                 NotificationChannel(CHANNEL, getString(R.string.linux_notification_channel), NotificationManager.IMPORTANCE_LOW),
             )
         }
-        val state = LinuxRuntime.get(this).bootstrap.state
+        val state = (application as App).runtime.bootstrap.state
         val notification = notification(state.value)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)

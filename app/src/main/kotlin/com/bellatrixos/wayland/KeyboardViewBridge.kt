@@ -3,7 +3,7 @@ package com.bellatrixos.wayland
 import android.net.Uri
 import android.view.KeyEvent
 
-/** The keyboard operations an Android Linux-window view needs, independent of which runtime owns the compositor. */
+/** The keyboard operations an Android Linux-window view needs from the launcher's one runtime. */
 interface KeyboardViewBridge {
     /** Flushes text the soft keyboard is still composing; set by each [KeyboardSink]. */
     var flush: () -> Unit

@@ -213,6 +213,23 @@ class Runtime(
 
     private val prefs = LauncherData.prefs(context)
 
+    /** Legacy Linux settings and the notification service listen here; the OWL screens collect [bootstrap.state]. */
+    @Volatile
+    var onStateChanged: () -> Unit = {}
+
+    /** Legacy home's callback when a guest command is attempted before Linux is installed. */
+    @Volatile
+    var onLinuxUnavailable: () -> Unit = {
+        openSettings(SettingsPage.Linux)
+    }
+
+    /** The home screen's floating-terminal host; set while a home is on screen, cleared as it leaves. */
+    @Volatile
+    var openFloatingTerminal: ((String) -> Unit)? = null
+
+    /** Compatibility with the legacy Linux settings and Terminal fragments. */
+    val isLinuxReady get() = linux
+
     /**
      * How many times, and when last (0: never), a Linux app ended by SIGKILL that we didn't send: Android's
      * phantom process limit (Android 12+), a battery saver or low memory. Shown in settings › linux.
@@ -281,26 +298,37 @@ class Runtime(
                 else -> false
             }
         }
+        // Legacy Linux settings listen through onStateChanged; OWL screens collect the state flow directly.
+        gpu.onChange = { scope.launch { onStateChanged() } }
+        packages.onChange = { scope.launch { onStateChanged() } }
         // A terminal shown again after the text size changed catches up, with foot's own zoom keys.
         wm.created = { window -> if (followsTerminalFont(window.appId)) terminalFont.track(window) }
         wm.focusGained = { window -> wm.zoom(window, terminalFont.catchUp(window)) }
         wm.openAppWindow = { handle ->
-            // Recents uses the activity's manifest label, not the task description's; see the aliases in the manifest.
             val window = wm.windowByHandle(handle)
             val name = window?.let { displayName(it.appId, it.title) }
-            val activity =
-                when (name) {
-                    "Terminal" -> "TerminalWindow"
-                    "btop" -> "BtopWindow"
-                    else -> agentOf(window?.appId.orEmpty(), name)?.windowAlias ?: "LinuxWindowActivity"
-                }
-            InstantActivity.startInstantly(
-                context,
-                Intent()
-                    .setClassName(context, "com.bellatrixos.$activity")
-                    .setData(Uri.parse("omarchy://window/$handle"))
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK),
-            )
+            // foot windows (the shell and every agent) are terminals: the home hosts them as
+            // floating windows, never as full-screen activities. All other guest apps keep tasks.
+            val terminal =
+                window != null && (window.appId.startsWith("omarchy.") || name == "Terminal")
+            if (terminal && openFloatingTerminal != null) {
+                openFloatingTerminal?.invoke(handle)
+            } else {
+                // Recents uses the activity's manifest label, not the task description's; see the aliases.
+                val activity =
+                    when (name) {
+                        "Terminal" -> "TerminalWindow"
+                        "btop" -> "BtopWindow"
+                        else -> agentOf(window?.appId.orEmpty(), name)?.windowAlias ?: "LinuxWindowActivity"
+                    }
+                InstantActivity.startInstantly(
+                    context,
+                    Intent()
+                        .setClassName(context, "com.bellatrixos.$activity")
+                        .setData(Uri.parse("omarchy://window/$handle"))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK),
+                )
+            }
         }
     }
 
@@ -308,6 +336,7 @@ class Runtime(
     fun start() {
         if (started) return
         started = true
+        scope.launch { bootstrap.state.collect { onStateChanged() } }
         scope.launch {
             withContext(Dispatchers.IO) {
                 launcherFiles.sync()
@@ -332,6 +361,22 @@ class Runtime(
         launcherReady = true
         scope.launch { themes.ensureRelease() }
     }
+
+    /** Called as the home leaves: a terminal opened elsewhere uses the full-window fallback again. */
+    fun clearHomeHooks() {
+        openFloatingTerminal = null
+        onLinuxUnavailable = { openSettings(SettingsPage.Linux) }
+    }
+
+    /** Legacy settings' install button: no picked agents, the same default install OWL's setup uses. */
+    fun install() = runLinux { bootstrap.install() }
+
+    /** Legacy names for the same Linux lifecycle operations the OWL settings use. */
+    fun retry() = retryLinux()
+
+    fun cancel() = cancelLinux()
+
+    fun remove() = removeLinux()
 
     /** Installs Linux in the background, with [agents]; progress shows in [Bootstrap.state] and the notification. */
     fun installLinux(agents: List<Agent>) {
@@ -367,6 +412,7 @@ class Runtime(
                 install?.join()
                 bootstrap.remove()
                 setService(false)
+                onStateChanged()
             }
     }
 
@@ -384,6 +430,7 @@ class Runtime(
                 }
                 work()
                 if (bootstrap.isInstalled) onLinuxReady() else setService(false)
+                onStateChanged()
             }
     }
 
@@ -408,6 +455,7 @@ class Runtime(
                 gpu.turnOff()
                 linuxApps.clear()
                 setService(false)
+                onStateChanged()
             }
     }
 
@@ -665,7 +713,7 @@ class Runtime(
         agent: Agent? = null,
     ) {
         if (!linux) {
-            openSettings(SettingsPage.Linux)
+            onLinuxUnavailable()
             return
         }
         // Per agent, so a Claude and a Grok "New app" don't share an app_id.
@@ -773,7 +821,7 @@ class Runtime(
         onExit: () -> Unit = {},
     ) {
         if (!linux) {
-            openSettings(SettingsPage.Linux)
+            onLinuxUnavailable()
             onExit()
             return
         }

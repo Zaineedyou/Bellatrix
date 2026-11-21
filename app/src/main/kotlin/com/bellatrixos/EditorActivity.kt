@@ -27,7 +27,6 @@ class EditorActivity : InstantActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!requireOwlHome()) return
         val path = intent.data?.path?.takeIf { it.startsWith('/') }
         intent.getStringExtra(EXTRA_DONE)?.let(waiting::add)
         if (!runtime.bootstrap.wanted) return close()

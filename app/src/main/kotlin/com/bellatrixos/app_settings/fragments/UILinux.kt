@@ -9,9 +9,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.bellatrixos.App
 import com.bellatrixos.R
+import com.bellatrixos.Runtime
 import com.bellatrixos.linux.JobState
-import com.bellatrixos.linux.LinuxRuntime
 import com.bellatrixos.linux.LinuxState
 import com.bellatrixos.linux.Stage
 import com.bellatrixos.widgets.cards.UISettingsCard
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 /** Settings page for the ported Linux system: install, GPU, terminal and removal. */
 class UILinux : Fragment() {
     private lateinit var root: View
-    private lateinit var runtime: LinuxRuntime
+    private lateinit var runtime: Runtime
     private lateinit var status: TextView
     private lateinit var progress: UISettingsCardProgressBar
     private lateinit var stages: TextView
@@ -54,7 +55,7 @@ class UILinux : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
         root = view
-        runtime = LinuxRuntime.get(requireContext())
+        runtime = (requireContext().applicationContext as App).runtime
 
         status = view.findViewById(R.id.linux_status)
         progress = view.findViewById(R.id.linux_progress)

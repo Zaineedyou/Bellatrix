@@ -10,7 +10,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Process
 import android.util.Log
-import com.bellatrixos.linux.LinuxRuntime
 import com.bellatrixos.linux.Proot
 import com.bellatrixos.upgrade.ManagedFiles
 import com.bellatrixos.widgets.WidgetEngine
@@ -35,11 +34,9 @@ class BellatrixApplication : App() {
         super.onCreate()
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler(CrashClipboardHandler(this, previous))
-        // Legacy home owns proot, Wayland and the GPU here. In OWL mode the full Runtime owns
-        // them instead, so only one compositor listens on wayland-0 per process.
-        if (!com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
-            LinuxRuntime.get(this).start()
-        }
+        // One runtime for the whole process: it owns proot, Wayland, widgets and the OWL home
+        // rendered inside the launcher's own MainActivity. No second compositor, ever.
+        runtime.start()
         // Seed the guest-side widget plumbing (AGENTS.md, owl-check, owl-send) without starting
         // the whole OWL engine. The proot binds already point these files at filesDir.
         runCatching {

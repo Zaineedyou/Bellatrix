@@ -25,7 +25,6 @@ class SettingsActivity : InstantActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!requireOwlHome()) return
         // Brought back on its own after Android killed the process (turning phone storage off on its page does), the
         // Linux screen would otherwise wait on Linux's check forever; home starts it too, once.
         runtime.start()

@@ -544,7 +544,7 @@ We will share more once you're back online."</string>
     <string name="settings_home_enable_title">Enable as launcher</string>
     <string name="settings_home_info">Enable Bellatrix to act as a launcher and then set it as the default.</string>
     <string name="settings_owl_home_title">Use OWL home</string>
-    <string name="settings_owl_home_subtitle">Flex/box/anchor pages from layout.toml. Reopen the app to apply.</string>
+    <string name="settings_owl_home_subtitle">Flex/box/anchor pages from layout.toml, drawn inside this launcher.</string>
     <string name="settings_lang_region">Language &amp; region</string>
     <string name="settings_lang_region_subtitle">Display language, preferred regional formats</string>
     <string name="settings_mouse_click_double">Double click</string>

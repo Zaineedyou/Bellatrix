@@ -3,9 +3,8 @@ package com.bellatrixos.wayland
 /**
  * The part of a Wayland window manager that Android views need.
  *
- * Bellatrix has two window managers (the legacy Linux one and the OWL launcher's),
- * with the same behavior. Linux window views talk to this interface so a window
- * opened by either runtime can be drawn by the same activity or floating tile.
+ * The launcher's single Runtime owns the window manager. Linux window views talk
+ * to this interface so the same activity or floating tile can draw every window.
  */
 interface WindowViewManager {
     val server: WaylandServer

@@ -13,7 +13,6 @@ class FilesActivity : InstantActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!requireOwlHome()) return
         // Files shows the Linux file system; without Linux (e.g. a Recents card from before it was removed) there's nothing to show.
         if (!runtime.bootstrap.wanted) {
             finishAndRemoveTask()

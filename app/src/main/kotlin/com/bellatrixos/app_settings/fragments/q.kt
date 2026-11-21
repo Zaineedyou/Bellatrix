@@ -1,5 +1,6 @@
 package com.bellatrixos.app_settings.fragments
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -57,6 +58,8 @@ class q(@JvmField val f4720a: Int, @JvmField val b: Fragment) : CompoundButton.O
                 val fragment = b as? UIHome ?: return
                 val context = fragment.s0 ?: return
                 LauncherData.setOwlHome(context, z)
+                // The home is now inside MainActivity; redraw it with (or without) the OWL layout at once.
+                (context as? Activity)?.recreate()
             }
             else -> {
                 val fragment = b as? UITaskbar ?: return

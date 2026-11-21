@@ -360,7 +360,8 @@ internal fun MainActivity.y0(): Boolean =
     runCatching { javaClass.getMethod("y0").invoke(this) as? Boolean }.getOrNull() == true
 
 internal fun MainActivity.M(str: String?, item: StartMenuItem?, str2: String?) {
-    MainActivityBridge.call(this, "M", str, item, str2)
+    // MainActivity.M's third parameter is non-null; reflection would otherwise pass null and crash.
+    MainActivityBridge.call(this, "M", str, item, str2 ?: "")
 }
 
 internal fun MainActivity.z0(i2: Int) {
@@ -591,6 +592,11 @@ class e(@JvmField val u: MainActivity) :
         val view4 = mainActivity.n0
         val view5 = mainActivity.o0
         val viewGroup = mainActivity.g0
+        // OWL's Compose home pads itself for the system bars; the classic XML must not add its own.
+        if (com.bellatrixos.storage.LauncherData.useOwlHome(mainActivity)) {
+            viewGroup?.setPadding(0, 0, 0, 0)
+            return windowInsetsCompat
+        }
         if (i2 == 2) {
             val insetsD: Insets = windowInsetsCompat.getInsets(2)
             InsetManager.f4864a = if (Global.f4840h) 0 else windowInsetsCompat.getInsets(1).top

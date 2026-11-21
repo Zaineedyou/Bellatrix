@@ -42,7 +42,7 @@ object LauncherData {
 
     private const val OWL_HOME = "owl_home"
 
-    /** Whether the OWL flex/box/anchor home replaces the legacy launcher; opt-in for now. */
+    /** Whether MainActivity's home is drawn from OWL's flex/box/anchor layout.toml instead of the classic grid. */
     fun useOwlHome(context: Context): Boolean = prefs(context).getBoolean(OWL_HOME, false)
 
     fun setOwlHome(

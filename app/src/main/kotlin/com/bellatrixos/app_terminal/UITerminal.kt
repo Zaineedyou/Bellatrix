@@ -4,12 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import com.bellatrixos.R
+import android.widget.FrameLayout
+import com.bellatrixos.App
+import com.bellatrixos.MainActivityIn
 import com.bellatrixos.UIFragment
-import com.bellatrixos.linux.LinuxRuntime
 
-/** Bellatrix's Terminal entry: opens a foot window owned by the Linux compositor. */
+/**
+ * A stale taskbar/Recents entry for the old Terminal tile. It draws nothing and
+ * immediately opens foot; MainActivity.c0 now bypasses it for every new launch.
+ */
 class UITerminal : UIFragment() {
     private var launched = false
 
@@ -17,25 +20,19 @@ class UITerminal : UIFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View {
-        val view = inflater.inflate(R.layout.app_terminal, container, false)
-        contentView = view
-        view.findViewById<Button>(R.id.terminal_open).setOnClickListener { open() }
-        return view
-    }
+    ): View = FrameLayout(requireContext()).also { contentView = it }
 
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        val runtime = LinuxRuntime.get(requireContext())
-        if (runtime.isLinuxReady && !launched) view.post { open() }
-    }
-
-    private fun open() {
         if (launched) return
         launched = true
-        LinuxRuntime.get(requireContext()).terminal(null, "Terminal")
+        view.post {
+            val ctx = context ?: return@post
+            (ctx.applicationContext as? App)?.runtime?.terminal(null, "Terminal")
+            (activity as? MainActivityIn)?.d(this)
+        }
     }
 }

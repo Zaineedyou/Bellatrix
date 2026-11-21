@@ -2,6 +2,7 @@ package com.bellatrixos
 
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -43,6 +44,7 @@ import android.widget.Toast
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.ui.platform.ComposeView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -74,10 +76,10 @@ import com.bellatrixos.desktop.DesktopDB
 import com.bellatrixos.desktop.DesktopItem
 import com.bellatrixos.interfaces.MainActivityIn
 import com.bellatrixos.interfaces.SaveCallback
-import com.bellatrixos.linux.LinuxRuntime
 import com.bellatrixos.searchapp.SearchApp
 import com.bellatrixos.searchapp.SearchAppAdapter
 import com.bellatrixos.searchapp.SearchItem
+import com.bellatrixos.storage.LauncherData
 import com.bellatrixos.startmenu.StartMenu
 import com.bellatrixos.startmenu.StartMenuAdapter
 import com.bellatrixos.startmenu.StartMenuItem
@@ -95,6 +97,16 @@ import com.bellatrixos.taskbar.center_widgets.WidgetManager
 import com.bellatrixos.taskbar.center_widgets.callbacks.WidgetBindCallback
 import com.bellatrixos.taskbar.utils.HorizontalDragCallback
 import com.bellatrixos.taskbar.utils.ObservableList
+import com.bellatrixos.ui.KeyIndicated
+import com.bellatrixos.ui.SystemBarsEffect
+import com.bellatrixos.ui.applySystemBars
+import com.bellatrixos.ui.keyPressed
+import com.bellatrixos.ui.keysFocused
+import com.bellatrixos.ui.keysStartAgain
+import com.bellatrixos.ui.movesFocus
+import com.bellatrixos.ui.home.LauncherRoot
+import com.bellatrixos.ui.home.LauncherState
+import com.bellatrixos.ui.Palette
 import com.bellatrixos.variables.Global
 import com.bellatrixos.wallpaper.Default
 import com.bellatrixos.wallpaper.WallpaperVideoManager
@@ -219,10 +231,58 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     @JvmField var J0: ArrayList<Any?>? = null
     @JvmField var h1: Boolean = false
     @JvmField val p1: String = "TARGET_TASKBAR"
+    private var owlState: LauncherState? = null
 
     companion object {
         @JvmField
         val u1: IntentFilter = IntentFilter("android.intent.action.BATTERY_CHANGED")
+    }
+
+    /**
+     * Draws OWL's layout.toml home in this activity, above the classic grid but below
+     * apps_window: the same fragment manager keeps terminals floating over it. The
+     * classic views are hidden, not removed, so leaving OWL mode needs only a recreate.
+     */
+    private fun setupOwlHome() {
+        val home = findViewById<ComposeView>(R.id.owl_home) ?: return
+        val apps = findViewById<View>(R.id.apps_window) ?: return
+        val runtime = (application as App).runtime
+        val state =
+            LauncherState().apply {
+                onSettings = { page, pageIndex -> runtime.openSettings(page, pageIndex) }
+            }
+        owlState = state
+        fun fill(view: View) {
+            val lp = view.layoutParams as ConstraintLayout.LayoutParams
+            lp.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            lp.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            lp.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            lp.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            lp.startToEnd = ConstraintLayout.LayoutParams.UNSET
+            lp.endToStart = ConstraintLayout.LayoutParams.UNSET
+            lp.topToBottom = ConstraintLayout.LayoutParams.UNSET
+            lp.bottomToTop = ConstraintLayout.LayoutParams.UNSET
+            lp.width = ViewGroup.LayoutParams.MATCH_PARENT
+            lp.height = ViewGroup.LayoutParams.MATCH_PARENT
+            lp.setMargins(0, 0, 0, 0)
+            view.layoutParams = lp
+        }
+        fill(home)
+        fill(apps)
+
+        // OWL has its own bar, drawer and pages; apps_window stays as the floating-window layer.
+        for (id in intArrayOf(R.id.desktop_icons, R.id.startMenuLayout, R.id.taskBar, R.id.overlay, R.id.taskBarBlur, R.id.context_pos)) {
+            findViewById<View>(id)?.visibility = View.GONE
+        }
+        home.visibility = View.VISIBLE
+        // Match InstantActivity's edge-to-edge setup before the first OWL frame is drawn.
+        applySystemBars(this@MainActivity, Palette.isLight)
+        // The prompt bar needs the window to resize for the keyboard.
+        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        home.setContent {
+            SystemBarsEffect(this@MainActivity)
+            KeyIndicated { LauncherRoot(runtime, state) }
+        }
     }
 
     /* Inner class MainActivity$1 (nama kelas tidak valid). */
@@ -375,14 +435,10 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     override fun M(str: String, item: StartMenuItem?, str2: String) {
-        // The terminal no longer opens a placeholder tile: launch foot directly
-        // and let its toplevel arrive as a floating UILinuxWindow below.
-        if (str == "UITerminal" && str2.isEmpty()) {
-            if (com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
-                (application as App).runtime.terminal(null, "Terminal")
-            } else {
-                LinuxRuntime.get(this).terminal(null, "Terminal")
-            }
+        // The terminal never opens a placeholder tile: launch foot directly and let
+        // its toplevel arrive as a floating UILinuxWindow.
+        if (str == "UITerminal") {
+            (application as App).runtime.terminal(null, "Terminal")
             return
         }
         val callbackA = { s: String -> IntentApps.b(this.W ?: this, s, item, this) }
@@ -672,6 +728,12 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     override fun c0(str: String, str2: String?) {
+        // App drawer, taskbar, pinned shortcut and start menu all come through here.
+        // Terminal must go straight to foot, never to the old "Open terminal" placeholder.
+        if (str == "UITerminal") {
+            (application as App).runtime.terminal(null, "Terminal")
+            return
+        }
         val bottomSheetBehavior = this.U0
         if (bottomSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             hideStartMenu()
@@ -988,25 +1050,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         var bByte: Byte = 6
         val i3 = 4
         super.onCreate(bundle)
-        if (!com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
-            LinuxRuntime.get(this).apply {
-                onLinuxUnavailable = { this@MainActivity.c0("UISettings", "9") }
-                // Terminals live inside the launcher now. Other guest apps keep the
-                // existing full-window task path; foot windows become floating tiles.
-                val openGuestWindow = wm.openAppWindow
-                wm.openAppWindow = { handle ->
-                    val guest = wm.windowByHandle(handle)
-                    // foot windows (the shell and every coding agent) are terminals,
-                    // so they all get the same desktop-style floating treatment.
-                    if (guest != null && (guest.appId.startsWith("omarchy.") || displayName(guest.appId, guest.title) == "Terminal")) {
-                        this@MainActivity.c0("UILinuxWindow", handle)
-                    } else {
-                        openGuestWindow(handle)
-                    }
-                }
-                start()
-            }
-        }
+        // One runtime owns Linux for this process, for both the classic grid and the OWL layout.
+        (application as App).runtime.start()
 
         s1 = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
             val ctx = this@MainActivity.W
@@ -1254,9 +1299,12 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         }
         try { AppExecutors.b().execute(c(this, i3)) } catch (_: Throwable) {}
         this.f0?.viewTreeObserver?.addOnGlobalLayoutListener(AnonymousClass1(bundle))
+        if (LauncherData.useOwlHome(this)) setupOwlHome()
     }
 
     override fun onDestroy() {
+        owlState = null
+        (application as App).runtime.clearHomeHooks()
         val logonController = this.n1
         if (logonController != null) {
             logonController.f4890d = true
@@ -1354,6 +1402,16 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         }
     }
 
+    // Lint flags super.dispatchKeyEvent: ComponentActivity marks its override @RestrictTo, but Activity's is public API.
+    @SuppressLint("RestrictedApi")
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val down = event.action == KeyEvent.ACTION_DOWN
+        if (down) keyPressed(window.decorView)
+        if (down && movesFocus(event.keyCode) && keysStartAgain(window.decorView)) return true
+        if (down && event.isPrintingKey && !keysFocused(window.decorView)) keysStartAgain(window.decorView)
+        return super.dispatchKeyEvent(event) || escapeAsBack(event)
+    }
+
     override fun onKeyShortcut(i2: Int, keyEvent: KeyEvent): Boolean {
         val uIFragment = Windows.f4882e
         if (uIFragment != null && (fragmentBool(uIFragment, "t") || uIFragment.isVisible)) {
@@ -1407,6 +1465,12 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
 
     override fun onStart() {
         super.onStart()
+        val runtime = (application as App).runtime
+        runtime.onLinuxUnavailable = { runOnUiThread { this@MainActivity.c0("UISettings", "9") } }
+        // Every foot window, from the classic tile or an OWL agent tile, becomes a floating home window.
+        runtime.openFloatingTerminal = { handle ->
+            if (!isFinishing && !isDestroyed) runOnUiThread { this@MainActivity.c0("UILinuxWindow", handle) }
+        }
         val networkMonitor = this.k0
         if (networkMonitor != null && Build.VERSION.SDK_INT >= 24) {
             val connectivityManager = networkMonitor.f4909a
@@ -1446,15 +1510,14 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
                 onVolumeChangeListener?.X(streamVolume, streamMaxVolume)
             }
         }
-        if (!com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
-            LinuxRuntime.get(this).screenStarted()
-        }
+        (application as App).runtime.screenStarted()
     }
 
     override fun onStop() {
-        if (!com.bellatrixos.storage.LauncherData.useOwlHome(this)) {
-            LinuxRuntime.get(this).screenStopped()
-        }
+        // Animations pause in the background and could leave an invisible drawer catching touches.
+        owlState?.closeNow()
+        (application as App).runtime.clearHomeHooks()
+        (application as App).runtime.screenStopped()
         super.onStop()
         val volumeObserver = this.r1
         try {
