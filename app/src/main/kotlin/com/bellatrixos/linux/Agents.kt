@@ -411,7 +411,7 @@ class AgentStore(
                 if (states[key] === waiting) states.remove(key)
                 throw e
             }
-        Log.i("agents", "${agent.bin}: ${if (ok) "ok" else "failed"}")
+        Log.i("agents", "$key: ${if (ok) "ok" else "failed"}")
         return ok
     }
 }
