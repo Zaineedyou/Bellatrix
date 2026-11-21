@@ -30,6 +30,9 @@
     <string name="explorer_linux_home_detail">Void Linux home</string>
     <string name="agents_install_all">install all</string>
     <string name="agents_installed_count">%1$d of %2$d installed</string>
+    <string name="agents_installed">installed</string>
+    <string name="agents_interactive">interactive</string>
+    <string name="agents_log">log</string>
     <string name="linux_install">install Linux</string>
     <string name="linux_remove">remove Linux</string>
     <string name="linux_retry_setup">retry setup</string>
