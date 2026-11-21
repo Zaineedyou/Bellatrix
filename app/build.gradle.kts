@@ -52,8 +52,8 @@ android {
         applicationId = "com.bellatrixos"
         minSdk = 23
         targetSdk = 36
-        versionCode = 57
-        versionName = "2.9.24"
+        versionCode = 58
+        versionName = "2.9.25"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 

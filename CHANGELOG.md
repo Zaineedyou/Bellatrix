@@ -9,6 +9,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.25] - 2026-11-22
+
+### Fixed
+
+- Declarative `widget` and `face` files now appear as tiles on the native `MainActivity` home grid, at the real grid cells and size, instead of only being compiled into the unused Compose launcher.
+- A tile's own `onTap` and a long-press to edit its `.owl` file work on those native tiles; taps elsewhere still reach Bellatrix's icons, windows and taskbar.
+
 ## [2.9.24] - 2026-11-22
 
 ### Added

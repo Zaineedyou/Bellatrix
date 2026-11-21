@@ -43,11 +43,11 @@ tiles = [
 
 On the phone, long-press an empty part of home and use **new widget file**,
 **edit home surface** or **edit taskbar surface**: they open those `.owl` files in Bellatrix's own
-text editor, with no Linux or coding agent needed. Save, and the file appears on home within a
-second. Coding agents work too (the prompts point them at these same files), as
-does any other writer of files. A widget tile's **edit file** action opens just that file, and the
-empty home invite creates a widget or face tile directly when Linux isn't installed. There is no
-second launcher screen — the files below are the ones Bellatrix home reads.
+text editor, with no Linux or coding agent needed. Save, and the file appears on the real native
+home grid within a second. Coding agents work too (the prompts point them at these same files), as
+does any other writer of files. Tap a widget tile to open its OWL screen, or long-press the tile to
+edit just that file; the empty home invite creates a widget or face tile directly when Linux isn't
+installed. There is no second launcher screen — the files below are the ones Bellatrix home reads.
 
 The two surface files are ordinary OWL `panel` files drawn **over the Bellatrix views you already
 see**: `home.owl` fills the desktop area above the taskbar, and `taskbar.owl` fills the taskbar itself.

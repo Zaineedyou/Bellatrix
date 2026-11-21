@@ -36,8 +36,9 @@ page is full, the new tile takes the least crowded spot and is drawn on top.
 
 On the phone, long-pressing empty home offers **new widget file**,
 **edit home surface** and **edit taskbar surface**: those open `.owl` files in Bellatrix's own editor,
-no Linux or coding agent needed. A tile's **edit file** action edits that widget, and the empty home invite makes
-a widget or face tile directly. `home.owl` and `taskbar.owl` are seeded `panel` files drawn over Bellatrix's
+no Linux or coding agent needed. A `widget` or `face` tile is now drawn on the real native home grid too;
+tap it to open its OWL screen, or long-press it to edit its file. The empty home invite makes a tile directly.
+`home.owl` and `taskbar.owl` are seeded `panel` files drawn over Bellatrix's
 real home and taskbar views (not a separate OWL screen), so Flex/Box/Anchor can be tested from the first
 install. They start transparent to keep the native look; set a `background` on the root `Box` to cover the
 native surface, or add anchored modules to draw on it. Bellatrix's icons, windows, search and start

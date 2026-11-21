@@ -69,9 +69,11 @@ files are ordinary OWL `panel` files drawn over Bellatrix's real home and taskba
 launcher screen. They start transparent, so the shipped Bellatrix look stays; set an opaque `background`
 or add anchored nodes to cover or decorate those native surfaces. Lay their modules out with `Flex`,
 `Box`, `Anchor` and the `anchor` property (owl 24), Waybar-style; a new `widget-*.owl` or `face-*.owl`
-uses the same nodes as an ordinary home tile. A widget tile's **edit file** action and the empty home
-invite open the same native Bellatrix editor, so creating and editing OWL files never requires Linux or
-a coding agent. Agents can still work on the same files from the standalone Coding Agents settings page.
+uses the same nodes as an ordinary home tile and is drawn on the real native desktop grid, not only in
+the Compose launcher. A widget tile's tap opens its OWL screen and a long-press edits its `.owl` file;
+the empty home invite opens the same native Bellatrix editor, so creating and editing OWL files never
+requires Linux or a coding agent. Agents can still work on the same files from the standalone Coding
+Agents settings page.
 
 ## Requirements
 
