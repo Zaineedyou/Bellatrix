@@ -432,7 +432,7 @@
     <string name="store_theme_install_confirm">%1$s installieren?</string>
     <string name="store_theme_install_message">Von %1$s. Linux bekommt die Farben und Hintergründe, aber nicht die Skripte oder Terminal-Configs.</string>
     <string name="store_theme_install_message_replaces">Von %1$s. Linux bekommt die Farben und Hintergründe, aber nicht die Skripte oder Terminal-Configs.\n\nEs ersetzt dein %2$s.</string>
-    <string name="store_theme_install_message_over">Von %1$s. Linux bekommt die Farben und Hintergründe, aber nicht die Skripte oder Terminal-Configs.\n\nEs überdeckt Bellatrix's %2$s; entfernst du es, ist das wieder da.</string>
+    <string name="store_theme_install_message_over">Von %1$s. Linux bekommt die Farben und Hintergründe, aber nicht die Skripte oder Terminal-Configs.\n\nEs überdeckt Bellatrix\'s %2$s; entfernst du es, ist das wieder da.</string>
     <string name="store_theme_installing">installiert %1$s… %2$d MB</string>
     <string name="store_theme_catalog_failed">konnte the Bellatrix theme catalog nicht laden: %1$s</string>
     <string name="store_theme_page_changed">die seite hat sich geändert, lesen klappt nicht mehr</string>
@@ -527,10 +527,10 @@
     <string name="style_update">aktualisieren</string>
     <string name="style_remove">entfernen</string>
     <string name="style_remove_theme_title">%1$s entfernen?</string>
-    <string name="style_remove_theme_builtin">Deine Änderungen daran gehen verloren; Bellatrix's Version bleibt.</string>
+    <string name="style_remove_theme_builtin">Deine Änderungen daran gehen verloren; Bellatrix\'s Version bleibt.</string>
     <string name="style_remove_deleted">Es wird vom Smartphone und aus Linux gelöscht.</string>
-    <string name="style_themes_downloading">Bellatrix's andere Themes laden gerade von the Bellatrix theme pack (~70 MB).</string>
-    <string name="style_themes_not_installed">Bellatrix's Themes sind noch nicht da. Sie kommen von the Bellatrix theme pack (~70 MB).</string>
+    <string name="style_themes_downloading">Bellatrix\'s andere Themes laden gerade von the Bellatrix theme pack (~70 MB).</string>
+    <string name="style_themes_not_installed">Bellatrix\'s Themes sind noch nicht da. Sie kommen von the Bellatrix theme pack (~70 MB).</string>
     <string name="style_downloading">lädt… %1$d MB</string>
     <string name="style_failed">hat nicht geklappt: %1$s</string>
     <string name="style_retry">nochmal versuchen</string>
