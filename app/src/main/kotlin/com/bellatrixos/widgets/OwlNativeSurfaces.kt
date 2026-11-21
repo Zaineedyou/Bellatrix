@@ -36,7 +36,7 @@ import kotlin.math.max
 object OwlNativeSurfaces {
     fun attach(activity: AppCompatActivity) {
         val parent = activity.findViewById<ViewGroup>(R.id.window_main)
-        val desktop = activity.findViewById<View>(R.id.desktop_icons)
+        val desktop = activity.findViewById<ViewGroup>(R.id.desktop_icons)
         val taskBar = activity.findViewById<ViewGroup>(R.id.taskBar)
         if (parent !is ConstraintLayout || desktop == null || taskBar == null) return
         val runtime = (activity.application as? App)?.runtime ?: return
@@ -82,7 +82,7 @@ object OwlNativeSurfaces {
     }
 
     /** The columns and rows GridAutofillLayoutManager gives the native desktop, in pixels. */
-    private fun measureGrid(desktop: View): NativeGrid {
+    private fun measureGrid(desktop: ViewGroup): NativeGrid {
         val iconWidth = desktop.resources.getDimension(R.dimen.explorer_file_width)
         val padLeft = desktop.paddingLeft
         val padTop = desktop.paddingTop
@@ -114,7 +114,9 @@ object OwlNativeSurfaces {
     ) {
         setViewTreeLifecycleOwner(activity)
         setViewTreeSavedStateRegistryOwner(activity)
+        background = null
         isFocusable = false
+        isFocusableInTouchMode = false
         isClickable = false
         setContent {
             // Frosted OWL nodes blur the same wallpaper the Compose launcher would blur.

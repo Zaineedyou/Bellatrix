@@ -12,7 +12,6 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import com.bellatrixos.Runtime
 import com.bellatrixos.ui.Mono
 import com.bellatrixos.ui.Palette
@@ -85,8 +84,7 @@ internal fun OwlHomeTiles(
                 spec.error?.let { error ->
                     BasicText(
                         error,
-                        color = Palette.red,
-                        style = Mono.copy(fontSize = TextSize.Small),
+                        style = Mono.copy(color = Palette.red, fontSize = TextSize.Small),
                     )
                 }
             }
