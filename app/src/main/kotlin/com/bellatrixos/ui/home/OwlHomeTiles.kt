@@ -64,7 +64,7 @@ internal data class NativeGrid(
     val padTop: Int,
 )
 
-private data class Edges(
+internal data class Edges(
     val left: Boolean,
     val top: Boolean,
     val right: Boolean,
@@ -73,7 +73,7 @@ private data class Edges(
     val any get() = left || top || right || bottom
 }
 
-private val NO_EDGES = Edges(false, false, false, false)
+internal val NO_EDGES = Edges(false, false, false, false)
 
 /** Which edges a press grabs. A corner grabs two; the top-right corner belongs to the dropdown button. */
 private fun edgesAt(
@@ -150,11 +150,11 @@ private fun legacyRect(
 ): PixelRect? =
     cell?.let {
         PixelRect(
-            grid.padLeft + it.x * grid.cellW,
-            grid.padTop + it.y * grid.cellH,
-            it.w * grid.cellW - grid.gapX,
-            it.h * grid.cellH - grid.gapY,
-        ).let { px -> px.copy(x = px.x.roundToInt(), y = px.y.roundToInt(), w = px.w.roundToInt(), h = px.h.roundToInt()) }
+            (grid.padLeft + it.x * grid.cellW).roundToInt(),
+            (grid.padTop + it.y * grid.cellH).roundToInt(),
+            (it.w * grid.cellW - grid.gapX).roundToInt(),
+            (it.h * grid.cellH - grid.gapY).roundToInt(),
+        )
     }
 
 /**
