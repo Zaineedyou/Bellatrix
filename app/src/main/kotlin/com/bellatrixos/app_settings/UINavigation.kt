@@ -29,17 +29,25 @@ class UINavigation {
 
         @JvmStatic
         fun b(i2: Int) {
-            // 10 is the tenth top-level page, not "1" after division; keep its radio checked.
-            if (i2 == 10) {
-                f4705a?.getOrNull(9)?.isChecked = true
-                return
-            }
-            var abs = kotlin.math.abs(i2)
-            while (abs >= 10) abs /= 10
-            val index = abs - 1
-            val buttons = f4705a ?: return
-            if (index < 0 || index >= buttons.size) return
-            buttons[index].isChecked = true
+            // Radio buttons follow the visible order: System, Linux, Coding Agents, ...
+            // Page ids are unchanged, so map the two merged pages explicitly.
+            val abs = kotlin.math.abs(i2)
+            val page =
+                if (abs.toString().startsWith("10")) {
+                    10
+                } else {
+                    var first = abs
+                    while (first >= 10) first /= 10
+                    first
+                }
+            val index =
+                when (page) {
+                    1 -> 0
+                    9 -> 1
+                    10 -> 2
+                    else -> page + 1
+                }
+            f4705a?.getOrNull(index)?.isChecked = true
         }
 
         @JvmStatic

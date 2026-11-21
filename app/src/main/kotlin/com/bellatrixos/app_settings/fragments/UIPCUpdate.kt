@@ -1,5 +1,6 @@
 package com.bellatrixos.app_settings.fragments
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +11,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.bellatrixos.App
+import com.bellatrixos.BuildConfig
+import com.bellatrixos.LauncherUpdates
 import com.bellatrixos.R
 import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.variables.Global
@@ -49,6 +53,9 @@ class UIPCUpdate : Fragment() {
     @JvmField var y0: TextView? = null
     @JvmField var z0: AppUpdateManager? = null
 
+    private val launcherUpdates: LauncherUpdates?
+        get() = (s0?.applicationContext as? App)?.runtime?.launcherUpdates
+
     override fun onDestroyView() {
         super.onDestroyView()
         u0?.setOnClickListener(null)
@@ -57,13 +64,64 @@ class UIPCUpdate : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        y0?.text = "${getString(R.string.settings_about_version)} ${getString(R.string.app_ui_version)}"
-        u0?.setOnClickListener(w(this, 0))
+        y0?.text = "${getString(R.string.settings_about_version)} ${BuildConfig.VERSION_NAME}"
+        u0?.setOnClickListener { checkUpdates() }
         C0?.setSwitchChecked(SharedPrefs.f4755a?.getBoolean("system_notify_updates", false) ?: false)
         A0?.setOnCardClickListener(w(this, 1))
         B0?.setOnCardClickListener(w(this, 2))
         if (Global.B == 1) c0()
         C0?.setOnSwitchCheckedChangeListener(com.bellatrixos.app_settings.fragments.u(2))
+    }
+
+    private fun checkUpdates() {
+        val launcher = launcherUpdates ?: return
+        b0(true)
+        a0(STATUS.u)
+        launcher.check(force = true) { release ->
+            if (!isAdded) return@check
+            b0(false)
+            a0(if (release != null) STATUS.v else STATUS.w)
+            showUpdateDialog(release, launcher)
+        }
+    }
+
+    private fun showUpdateDialog(release: LauncherUpdates.Info?, launcher: LauncherUpdates) {
+        val context = s0 ?: return
+        val current = BuildConfig.VERSION_NAME
+        val version = release?.version ?: current
+        val notes =
+            release?.changelog?.takeIf { it.isNotBlank() }
+                ?: getString(R.string.settings_update_dialog_no_notes)
+        val message =
+            buildString {
+                append(getString(R.string.settings_update_dialog_current, current)).append('\n')
+                append(getString(R.string.settings_update_dialog_version, version)).append("\n\n")
+                append(getString(R.string.settings_update_dialog_changelog)).append('\n')
+                append(notes.take(4000))
+                if (launcher.lastError != null) {
+                    append("\n\n").append(launcher.lastError)
+                } else if (release == null) {
+                    append("\n\n").append(getString(R.string.settings_update_dialog_latest_note))
+                }
+            }
+        val dialog =
+            AlertDialog
+                .Builder(context, R.style.UIAlertDialog)
+                .setTitle(
+                    if (release != null) {
+                        getString(R.string.settings_update_dialog_available, version)
+                    } else {
+                        getString(R.string.settings_update_dialog_latest)
+                    },
+                ).setMessage(message)
+        if (release != null && release.apk.isNotBlank()) {
+            dialog.setPositiveButton(R.string.settings_update_dialog_install) { _, _ -> launcher.install(context) }
+            dialog.setNeutralButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
+        } else {
+            dialog.setPositiveButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
+        }
+        dialog.setNegativeButton(android.R.string.cancel, null)
+        dialog.show()
     }
 
     fun a0(status: STATUS) {

@@ -1,89 +1,190 @@
 package com.bellatrixos
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.FileProvider
 import com.bellatrixos.net.httpGet
+import com.bellatrixos.net.openHttp
 import com.bellatrixos.system.installerOf
 import com.bellatrixos.system.openUrl
+import com.bellatrixos.variables.AppLinks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import java.io.File
+import java.io.IOException
 
 /**
- * A newer launcher on GitHub releases, for settings' updates box: the GitHub and F-Droid build's twin of the play
- * build's LauncherUpdates. GitHub is asked when settings opens (at most hourly) and on its "check", never in the
- * background; "update" opens the release's page, with its APK. An install an F-Droid client made never asks:
- * F-Droid ships each release some days later and updates it itself.
+ * A newer release of this fork on GitHub Releases, for both Composable and Bellatrix settings.
+ * It only asks when settings opens or its Check button is used, never in the background. The
+ * native update page shows the release notes and can install its APK from inside the launcher or
+ * hand the release URL to Chrome.
  */
 class LauncherUpdates(
     private val context: Context,
 ) {
+    data class Info(
+        val version: String,
+        val page: String,
+        val changelog: String,
+        val apk: String,
+    )
+
     private val fromFdroid = installerOf(context) in FDROID_CLIENTS
     private val scope = MainScope()
     private var checkedAt = 0L
 
-    /** The newer release's page. */
-    private var page: String? = null
-
-    /** GitHub has a newer release. */
     var available by mutableStateOf(false)
         private set
 
     var checking by mutableStateOf(false)
         private set
 
-    /** Never: the update happens outside the launcher. */
+    /** Never: the install is offered from the launcher's own update page. */
     val failed = false
 
-    /** The newer release's version, like "1.5.0". */
+    /** The newer release's version, like "2.9.18". */
     var version by mutableStateOf<String?>(null)
         private set
 
-    /** Asks GitHub unless it was asked within the hour; [force] asks anyway. */
-    fun check(force: Boolean = false) {
-        // This build is a fork: upstream's releases would replace it with the stock launcher, so it never offers them.
-        if (!CHECK_UPSTREAM || fromFdroid || checking) return
-        if (!force && System.currentTimeMillis() - checkedAt < CHECK_EVERY) return
+    var changelog by mutableStateOf<String?>(null)
+        private set
+
+    var apk by mutableStateOf<String?>(null)
+        private set
+
+    /** The newest GitHub release data, or null when this build is current. */
+    var info by mutableStateOf<Info?>(null)
+        private set
+
+    var installing by mutableStateOf(false)
+        private set
+
+    var lastError by mutableStateOf<String?>(null)
+        private set
+
+    /** Asks this fork's GitHub unless it was asked within the hour; [force] asks anyway. */
+    fun check(
+        force: Boolean = false,
+        onChecked: ((Info?) -> Unit)? = null,
+    ) {
+        if (!CHECK_UPSTREAM || fromFdroid || checking || (!force && System.currentTimeMillis() - checkedAt < CHECK_EVERY)) {
+            // The native page is showing progress; it must always get its callback back.
+            onChecked?.let { callback -> scope.launch(Dispatchers.Main) { callback(info) } }
+            return
+        }
         checking = true
+        lastError = null
         scope.launch {
+            var result: Info? = null
             try {
-                val json = withContext(Dispatchers.IO) { String(httpGet(RELEASES)) }
-                val newer = newerRelease(json, BuildConfig.VERSION_NAME)
-                page = newer?.second
-                version = newer?.first
-                available = newer != null
+                val json = withContext(Dispatchers.IO) { fetchReleases() }
+                result = newerRelease(json, BuildConfig.VERSION_NAME)
+                publish(result)
                 checkedAt = System.currentTimeMillis()
             } catch (e: Exception) {
-                // Offline or rate-limited: nothing to show, as without an update; the next settings visit asks again.
                 Log.w(TAG, "checking GitHub for a release failed", e)
+                lastError = context.getString(R.string.settings_update_dialog_failed)
+                publish(null)
             } finally {
                 checking = false
+                withContext(Dispatchers.Main) { onChecked?.invoke(result) }
             }
         }
     }
 
-    /** Opens the newer release's page in the browser. */
+    private fun publish(release: Info?) {
+        info = release
+        version = release?.version
+        changelog = release?.changelog
+        apk = release?.apk.takeUnless { it.isNullOrBlank() }
+        available = release != null
+    }
+
+    /** Opens the GitHub release so Chrome (or any browser) can download and install the APK. */
+    fun openRelease(targetContext: Context = context) {
+        val target = info?.page?.takeUnless { it.isBlank() } ?: AppLinks.RELEASES_URL
+        if (!targetContext.openUrl(target)) Log.w(TAG, "no app opens $target")
+    }
+
+    /** Downloads this fork's APK and hands it to Android's installer without leaving the launcher. */
+    fun install(targetContext: Context = context) {
+        val release = info ?: return
+        if (release.apk.isBlank()) {
+            openRelease(targetContext)
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !targetContext.packageManager.canRequestPackageInstalls()) {
+            val permission =
+                Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:${targetContext.packageName}"),
+                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            runCatching { targetContext.startActivity(permission) }
+            return
+        }
+        if (installing) return
+        installing = true
+        lastError = null
+        scope.launch {
+            try {
+                val file =
+                    withContext(Dispatchers.IO) {
+                        val bytes = httpGet(release.apk, connectTimeout = 15_000, readTimeout = 60_000)
+                        val dir = File(targetContext.cacheDir, "updates").apply { mkdirs() }
+                        File(dir, "Bellatrix-${release.version}.apk").apply { writeBytes(bytes) }
+                    }
+                val uri = FileProvider.getUriForFile(targetContext, "${targetContext.packageName}.provider", file)
+                val intent =
+                    Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
+                        setDataAndType(uri, "application/vnd.android.package-archive")
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                withContext(Dispatchers.Main) { targetContext.startActivity(intent) }
+            } catch (e: Exception) {
+                Log.w(TAG, "installing the launcher update failed", e)
+                lastError = targetContext.getString(R.string.settings_update_dialog_install_failed)
+            } finally {
+                withContext(Dispatchers.Main) { installing = false }
+            }
+        }
+    }
+
     @Suppress("UNUSED_PARAMETER")
     fun start(launcher: ActivityResultLauncher<IntentSenderRequest>) {
-        val page = page ?: return
-        // Without a browser there's nothing to open it in; mustn't crash the launcher.
-        if (!context.openUrl(page)) Log.w(TAG, "no app opens $page")
+        openRelease()
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onResult(resultCode: Int) {}
 
+    private fun fetchReleases(): String {
+        val connection = openHttp(RELEASES, 15_000, 30_000)
+        try {
+            connection.setRequestProperty("User-Agent", "Bellatrix-Launcher")
+            connection.setRequestProperty("Accept", "application/vnd.github+json")
+            if (connection.responseCode != 200) throw IOException("HTTP ${connection.responseCode} for $RELEASES")
+            return connection.inputStream.use { String(it.readBytes(), Charsets.UTF_8) }
+        } finally {
+            connection.disconnect()
+        }
+    }
+
     internal companion object {
         const val TAG = "LauncherUpdates"
-        const val CHECK_UPSTREAM = false
-        const val RELEASES = "https://api.github.com/repos/SimonSchubert/bellatrix/releases?per_page=20"
+        const val CHECK_UPSTREAM = true
+        const val RELEASES = "https://api.github.com/repos/Zaineedyou/Bellatrix/releases?per_page=20"
         const val CHECK_EVERY = 60 * 60_000L
 
         /** F-Droid and the clients of its repositories. */
@@ -92,22 +193,39 @@ class LauncherUpdates(
         private val TAG_VERSION = Regex("""v(\d+(?:\.\d+)*)""")
 
         /**
-         * The newest release in GitHub's releases [json] that's newer than [current], as its version and page; only
-         * the app's own releases count (tags like v1.5.0, not drafts or pre-releases, nor others like mesa-zink-…).
+         * The newest release in GitHub's releases [json] that's newer than [current], with its
+         * version, page, changelog and APK asset. Only this fork's tags (v1.5.0, …) count; drafts,
+         * pre-releases and unrelated tags do not.
          */
         fun newerRelease(
             json: String,
             current: String,
-        ): Pair<String, String>? {
+        ): Info? {
             val releases = JSONArray(json)
             val versions =
                 (0 until releases.length()).mapNotNull { i ->
-                    val r = releases.getJSONObject(i)
-                    if (r.optBoolean("draft") || r.optBoolean("prerelease")) return@mapNotNull null
-                    val version = TAG_VERSION.matchEntire(r.optString("tag_name"))?.groupValues?.get(1) ?: return@mapNotNull null
-                    version to r.optString("html_url")
+                    val release = releases.getJSONObject(i)
+                    if (release.optBoolean("draft") || release.optBoolean("prerelease")) return@mapNotNull null
+                    val version = TAG_VERSION.matchEntire(release.optString("tag_name"))?.groupValues?.get(1) ?: return@mapNotNull null
+                    val assets = release.optJSONArray("assets")
+                    var apk = ""
+                    if (assets != null) {
+                        for (j in 0 until assets.length()) {
+                            val asset = assets.getJSONObject(j)
+                            val name = asset.optString("name")
+                            if (!name.endsWith(".apk", ignoreCase = true)) continue
+                            apk = asset.optString("browser_download_url")
+                            if (name.startsWith("Bellatrix", ignoreCase = true)) break
+                        }
+                    }
+                    Info(
+                        version = version,
+                        page = release.optString("html_url"),
+                        changelog = release.optString("body"),
+                        apk = apk,
+                    )
                 }
-            return versions.filter { compareVersions(it.first, current) > 0 }.maxWithOrNull { a, b -> compareVersions(a.first, b.first) }
+            return versions.filter { compareVersions(it.version, current) > 0 }.maxWithOrNull { a, b -> compareVersions(a.version, b.version) }
         }
 
         /** Compares dotted versions part by part as numbers: 1.10.0 is after 1.9.2; a missing part is 0. */

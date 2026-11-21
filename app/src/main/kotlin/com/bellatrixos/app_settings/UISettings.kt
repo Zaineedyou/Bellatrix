@@ -103,15 +103,15 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         val navItems = context.resources.getStringArray(R.array.settings_nav_items)
         val navSub = context.resources.getStringArray(R.array.settings_nav_sub_items)
         UINavigator.b = navItems[0]
-        UINavigator.c = navItems[1]
-        UINavigator.f4707d = navItems[2]
-        UINavigator.f4708e = navItems[3]
-        UINavigator.f4709f = navItems[4]
-        UINavigator.g = navItems[5]
-        UINavigator.f4710h = navItems[6]
-        UINavigator.f4711i = navItems[7]
-        UINavigator.linuxTitle = navItems[8]
-        UINavigator.codingAgentsTitle = navItems[9]
+        UINavigator.linuxTitle = navItems[1]
+        UINavigator.codingAgentsTitle = navItems[2]
+        UINavigator.c = navItems[3]
+        UINavigator.f4707d = navItems[4]
+        UINavigator.f4708e = navItems[5]
+        UINavigator.f4709f = navItems[6]
+        UINavigator.g = navItems[7]
+        UINavigator.f4710h = navItems[8]
+        UINavigator.f4711i = navItems[9]
         UINavigator.j = navSub[0]
         UINavigator.l = context.getString(R.string.settings_system_sound)
         UINavigator.f4712k = navSub[1]
@@ -276,24 +276,27 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         }
 
         val scroll = O0 ?: return
+        // Display order: System, Linux, Coding Agents, then the rest. Page ids stay the
+        // same so saved paths, search suggestions and deep links keep working.
         UINavigation.f4705a = arrayOf(
             scroll.findViewById(R.id.nav_system),
+            scroll.findViewById(R.id.nav_linux),
+            scroll.findViewById(R.id.nav_coding_agents),
             scroll.findViewById(R.id.nav_bluetooth),
             scroll.findViewById(R.id.nav_personalize),
             scroll.findViewById(R.id.nav_apps),
             scroll.findViewById(R.id.nav_accounts),
             scroll.findViewById(R.id.nav_time_lang),
             scroll.findViewById(R.id.nav_privacy),
-            scroll.findViewById(R.id.nav_updates),
-            scroll.findViewById(R.id.nav_linux),
-            scroll.findViewById(R.id.nav_coding_agents)
+            scroll.findViewById(R.id.nav_updates)
         )
+        val pageIds = intArrayOf(1, 9, 10, 2, 3, 4, 5, 6, 7, 8)
         val navItems = context.resources.getStringArray(R.array.settings_nav_items)
         val handler = NavClickHandler()
         for (i in UINavigation.f4705a!!.indices) {
             val button = UINavigation.f4705a!![i]
             button.setText(navItems[i])
-            button.setOnClickListener(View.OnClickListener { handler.a(i + 1) })
+            button.setOnClickListener(View.OnClickListener { handler.a(pageIds[i]) })
         }
         (scroll.findViewById<View>(R.id.header_user) as? BtnRelativeLayout)?.setOnClickListener {
             handler.a(5)

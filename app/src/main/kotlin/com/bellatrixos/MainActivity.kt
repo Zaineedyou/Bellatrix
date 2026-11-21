@@ -1444,7 +1444,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     /**
-     * Taskbar Terminal behaves like Settings and Explorer: one window, focused on the next tap.
+     * Taskbar Terminal behaves like Settings and Explorer: one window, closed on the next tap.
      * A new foot is launched only when no plain terminal window is open, so repeated taps never
      * pile new Terminal entries into Recents.
      */
@@ -1603,16 +1603,17 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         }
         val idx = TaskBarDB.a(Windows.taskTag(uIFragment) ?: "")
         val visible = if (fragmentBool(uIFragment, "t")) true else uIFragment.isVisible
+        if (visible) {
+            // Perilaku taskbar Windows: tekan ikon jendela yang sedang aktif untuk menutupnya.
+            closeWindow(uIFragment)
+            return
+        }
         if (Windows.b != idx) {
             if (!visible) {
                 windowsCall("e", Windows.f4881d, uIFragment)
             }
             uIFragment.g0()
             windowsCall("j", 4, taskBarAdapter, uIFragment)
-            return
-        }
-        if (visible) {
-            uIFragment.g0()
             return
         }
         windowsCall("e", Windows.f4881d, uIFragment)

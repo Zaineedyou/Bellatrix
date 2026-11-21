@@ -84,7 +84,7 @@ This is also not Windows 365 cloud PC."</string>
     <string name="app_privacy_policy_ok_before">OK, I understand (%ss)</string>
     <string name="app_settings">UiSettings</string>
     <string name="app_start">Start</string>
-    <string name="app_ui_version">2.7</string>
+    <string name="app_ui_version">2.9.18</string>
     <string name="app_video">UiVideo</string>
     <string name="app_web_cache_enabled">Cache enabled</string>
     <string name="app_web_link_copied">Link Copied</string>
@@ -638,6 +638,17 @@ We will share more once you're back online."</string>
     <string name="settings_typing_touch_keyboard_subtitle">Manage keyboard settings and input preferences</string>
     <string name="settings_typing_touch_keyboard_title">Touch keyboard</string>
     <string name="settings_update_check_updates">Check for updates</string>
+    <string name="settings_update_dialog_available">Update %1$s tersedia</string>
+    <string name="settings_update_dialog_browser">Buka di Chrome</string>
+    <string name="settings_update_dialog_changelog">Changelog</string>
+    <string name="settings_update_dialog_current">Versi terpasang: %1$s</string>
+    <string name="settings_update_dialog_failed">Gagal mengecek rilis GitHub. Coba lagi nanti.</string>
+    <string name="settings_update_dialog_install">Install di Launcher</string>
+    <string name="settings_update_dialog_install_failed">Gagal mengunduh atau memasang APK. Coba lewat Chrome.</string>
+    <string name="settings_update_dialog_latest">Sudah versi terbaru</string>
+    <string name="settings_update_dialog_latest_note">Tidak ada pembaruan di GitHub Releases.</string>
+    <string name="settings_update_dialog_no_notes">Tidak ada catatan rilis dari GitHub.</string>
+    <string name="settings_update_dialog_version">Versi update: %1$s</string>
     <string name="settings_update_download_btn">Download &amp; install</string>
     <string name="settings_update_download_subtitle">"See what's in this update"</string>
     <string name="settings_update_download_title">A newer version is available</string>

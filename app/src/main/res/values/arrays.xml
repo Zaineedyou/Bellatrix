@@ -90,6 +90,8 @@
     </string-array>
     <string-array name="settings_nav_items">
         <item>System</item>
+        <item>Linux</item>
+        <item>Coding Agents</item>
         <item>Bluetooth &amp; devices</item>
         <item>Personalize</item>
         <item>Apps</item>
@@ -97,8 +99,6 @@
         <item>Time &amp; language</item>
         <item>Privacy &amp; security</item>
         <item>PC Update</item>
-        <item>Linux</item>
-        <item>Coding Agents</item>
     </string-array>
     <string-array name="settings_nav_sub_items">
         <item>Display</item>
