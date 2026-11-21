@@ -78,6 +78,10 @@ class UIExplorer : UIFragment(), BackPressHandler {
         private const val GUEST_EDITOR_HOME = GUEST_PREFIX + "editor-home"
         private const val GUEST_SEPARATOR = "\u001f"
 
+        /** The installed Linux home, at the proot path the guest calls /root. */
+        private fun linuxHome(context: Context) =
+            (context.applicationContext as? App)?.runtime?.proot?.home?.takeIf { it.isDirectory }
+
         /** Encodes a guest Files request in the one string argument the window system carries. */
         fun filesArg(path: String?): String = GUEST_FILES + GUEST_SEPARATOR + path.orEmpty()
 
@@ -940,6 +944,11 @@ private class ExplorerRunnable(
             val z2 = !zContains
             arrayList2.add(NavigationItem(R.drawable.img_exp_drive_nav_pc_18, ctx.getString(R.string.explorer_str_this_pc), 7, z2, 0))
             arrayList2.add(NavigationItem(R.drawable.img_exp_drive_nav_18, ctx.getString(R.string.storage_internal), 8, z2, 0))
+            linuxHome(ctx)?.let { home ->
+                val linuxItem = NavigationItem(R.drawable.img_nav_linux_20, ctx.getString(R.string.explorer_linux_home), 10, z2, 0)
+                linuxItem.f4690d = home.absolutePath
+                arrayList2.add(linuxItem)
+            }
             uIExplorer3.K0 = NavigationAdapter(ctx, arrayList2)
         }
         AppExecutors.c().post { uIExplorer3.setupAfterInit(rootView, showSide) }
@@ -975,6 +984,17 @@ private class ExplorerRunnable(
                     internal.b(),
                     internal.a()
                 )
+            )
+        }
+        linuxHome(context)?.let { home ->
+            arrayList2.add(
+                DriveItem(
+                    context.getString(R.string.explorer_linux_home),
+                    R.drawable.img_nav_linux_20,
+                    context.getString(R.string.explorer_linux_home_detail),
+                    0,
+                    home.absolutePath,
+                ),
             )
         }
         val externalFilesDirs = context.getExternalFilesDirs(null) ?: emptyArray()
@@ -1176,6 +1196,7 @@ private class ExplorerNavClick(val explorer: UIExplorer) : NavigationAdapter.OnI
             }
             8 -> explorer.v0(Global.w?.a() ?: Environment.getExternalStorageDirectory().absolutePath)
             9 -> if (str != null) explorer.w0(str)
+            10 -> if (str != null) explorer.v0(str)
         }
     }
 }
