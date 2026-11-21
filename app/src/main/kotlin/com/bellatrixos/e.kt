@@ -592,11 +592,8 @@ class e(@JvmField val u: MainActivity) :
         val view4 = mainActivity.n0
         val view5 = mainActivity.o0
         val viewGroup = mainActivity.g0
-        // OWL's Compose home pads itself for the system bars; the classic XML must not add its own.
-        if (com.bellatrixos.storage.LauncherData.useOwlHome(mainActivity)) {
-            viewGroup?.setPadding(0, 0, 0, 0)
-            return windowInsetsCompat
-        }
+        // OWL home always draws inside this activity; the hidden classic XML must not add its own padding.
+        viewGroup?.setPadding(0, 0, 0, 0)
         if (i2 == 2) {
             val insetsD: Insets = windowInsetsCompat.getInsets(2)
             InsetManager.f4864a = if (Global.f4840h) 0 else windowInsetsCompat.getInsets(1).top

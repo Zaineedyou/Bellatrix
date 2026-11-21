@@ -40,16 +40,6 @@ object LauncherData {
     /** Settings that belong to no one store: setup, gestures, the GPU, the home role. Keys carry their owner's prefix. */
     fun prefs(context: Context): SharedPreferences = context.getSharedPreferences("launcher", Context.MODE_PRIVATE)
 
-    private const val OWL_HOME = "owl_home"
-
-    /** Whether MainActivity's home is drawn from OWL's flex/box/anchor layout.toml instead of the classic grid. */
-    fun useOwlHome(context: Context): Boolean = prefs(context).getBoolean(OWL_HOME, false)
-
-    fun setOwlHome(
-        context: Context,
-        on: Boolean,
-    ) = prefs(context).edit().putBoolean(OWL_HOME, on).apply()
-
     /** Manifest of the launcher-side [com.bellatrixos.upgrade.Provisioner]; the guest's is managed.json. */
     const val LAUNCHER_MANIFEST = "launcher-managed.json"
     const val GUEST_MANIFEST = "managed.json"

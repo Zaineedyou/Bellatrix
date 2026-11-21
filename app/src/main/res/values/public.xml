@@ -3074,7 +3074,6 @@
     <public type="id" name="btn_fwd" id="0x7f0a00cf" />
     <public type="id" name="btn_home_enable" id="0x7f0a00d0" />
     <public type="id" name="btn_home_select" id="0x7f0a00d1" />
-    <public type="id" name="btn_owl_home" id="0x7f0a0420" />
     <public type="id" name="btn_info" id="0x7f0a00d2" />
     <public type="id" name="btn_install" id="0x7f0a00d3" />
     <public type="id" name="btn_install_ext" id="0x7f0a00d4" />
@@ -4765,8 +4764,6 @@
     <public type="string" name="settings_home_enable_subtitle" id="0x7f120216" />
     <public type="string" name="settings_home_enable_title" id="0x7f120217" />
     <public type="string" name="settings_home_info" id="0x7f120218" />
-    <public type="string" name="settings_owl_home_title" id="0x7f1202d3" />
-    <public type="string" name="settings_owl_home_subtitle" id="0x7f1202d4" />
     <public type="string" name="settings_lang_region" id="0x7f120219" />
     <public type="string" name="settings_lang_region_subtitle" id="0x7f12021a" />
     <public type="string" name="settings_mouse_click_double" id="0x7f12021b" />

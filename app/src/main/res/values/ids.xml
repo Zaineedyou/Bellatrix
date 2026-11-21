@@ -209,7 +209,6 @@
     <id name="btn_fwd" />
     <id name="btn_home_enable" />
     <id name="btn_home_select" />
-    <id name="btn_owl_home" />
     <id name="btn_info" />
     <id name="btn_install" />
     <id name="btn_install_ext" />

@@ -79,7 +79,6 @@ import com.bellatrixos.interfaces.SaveCallback
 import com.bellatrixos.searchapp.SearchApp
 import com.bellatrixos.searchapp.SearchAppAdapter
 import com.bellatrixos.searchapp.SearchItem
-import com.bellatrixos.storage.LauncherData
 import com.bellatrixos.startmenu.StartMenu
 import com.bellatrixos.startmenu.StartMenuAdapter
 import com.bellatrixos.startmenu.StartMenuItem
@@ -239,9 +238,9 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     /**
-     * Draws OWL's layout.toml home in this activity, above the classic grid but below
-     * apps_window: the same fragment manager keeps terminals floating over it. The
-     * classic views are hidden, not removed, so leaving OWL mode needs only a recreate.
+     * Bellatrix has one home. It is drawn from layout.toml in this activity, above the
+     * legacy views (which stay only as host plumbing) and below apps_window, so the same
+     * fragment manager keeps every terminal floating over it.
      */
     private fun setupOwlHome() {
         val home = findViewById<ComposeView>(R.id.owl_home) ?: return
@@ -1299,7 +1298,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         }
         try { AppExecutors.b().execute(c(this, i3)) } catch (_: Throwable) {}
         this.f0?.viewTreeObserver?.addOnGlobalLayoutListener(AnonymousClass1(bundle))
-        if (LauncherData.useOwlHome(this)) setupOwlHome()
+        setupOwlHome()
     }
 
     override fun onDestroy() {
@@ -1466,8 +1465,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     override fun onStart() {
         super.onStart()
         val runtime = (application as App).runtime
-        runtime.onLinuxUnavailable = { runOnUiThread { this@MainActivity.c0("UISettings", "9") } }
-        // Every foot window, from the classic tile or an OWL agent tile, becomes a floating home window.
+        // Every foot window, from any tile, becomes a floating home window. Missing Linux goes
+        // to the one launcher Settings screen, never a separate legacy Linux window.
         runtime.openFloatingTerminal = { handle ->
             if (!isFinishing && !isDestroyed) runOnUiThread { this@MainActivity.c0("UILinuxWindow", handle) }
         }
