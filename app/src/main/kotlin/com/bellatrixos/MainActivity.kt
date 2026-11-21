@@ -44,7 +44,6 @@ import android.widget.Toast
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.ui.platform.ComposeView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -72,6 +71,7 @@ import com.bellatrixos.app_settings.searchbar.SuggestionItem
 import com.bellatrixos.context_menu.UIContextMenu
 import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.desktop.DesktopAdapter
+import com.bellatrixos.linux.LINUX_APP_PREFIX
 import com.bellatrixos.desktop.DesktopDB
 import com.bellatrixos.desktop.DesktopItem
 import com.bellatrixos.interfaces.MainActivityIn
@@ -96,16 +96,10 @@ import com.bellatrixos.taskbar.center_widgets.WidgetManager
 import com.bellatrixos.taskbar.center_widgets.callbacks.WidgetBindCallback
 import com.bellatrixos.taskbar.utils.HorizontalDragCallback
 import com.bellatrixos.taskbar.utils.ObservableList
-import com.bellatrixos.ui.KeyIndicated
-import com.bellatrixos.ui.SystemBarsEffect
-import com.bellatrixos.ui.applySystemBars
 import com.bellatrixos.ui.keyPressed
 import com.bellatrixos.ui.keysFocused
 import com.bellatrixos.ui.keysStartAgain
 import com.bellatrixos.ui.movesFocus
-import com.bellatrixos.ui.home.LauncherRoot
-import com.bellatrixos.ui.home.LauncherState
-import com.bellatrixos.ui.Palette
 import com.bellatrixos.variables.Global
 import com.bellatrixos.wallpaper.Default
 import com.bellatrixos.wallpaper.WallpaperVideoManager
@@ -144,6 +138,10 @@ import com.bellatrixos.windows.navigation.Navigation
 import com.bellatrixos.windows.switcher.UIInstanceSwitcher
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -230,58 +228,10 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     @JvmField var J0: ArrayList<Any?>? = null
     @JvmField var h1: Boolean = false
     @JvmField val p1: String = "TARGET_TASKBAR"
-    private var owlState: LauncherState? = null
 
     companion object {
         @JvmField
         val u1: IntentFilter = IntentFilter("android.intent.action.BATTERY_CHANGED")
-    }
-
-    /**
-     * Bellatrix has one home. It is drawn from layout.toml in this activity, above the
-     * legacy views (which stay only as host plumbing) and below apps_window, so the same
-     * fragment manager keeps every terminal floating over it.
-     */
-    private fun setupOwlHome() {
-        val home = findViewById<ComposeView>(R.id.owl_home) ?: return
-        val apps = findViewById<View>(R.id.apps_window) ?: return
-        val runtime = (application as App).runtime
-        val state =
-            LauncherState().apply {
-                onSettings = { page, pageIndex -> runtime.openSettings(page, pageIndex) }
-            }
-        owlState = state
-        fun fill(view: View) {
-            val lp = view.layoutParams as ConstraintLayout.LayoutParams
-            lp.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            lp.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-            lp.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            lp.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-            lp.startToEnd = ConstraintLayout.LayoutParams.UNSET
-            lp.endToStart = ConstraintLayout.LayoutParams.UNSET
-            lp.topToBottom = ConstraintLayout.LayoutParams.UNSET
-            lp.bottomToTop = ConstraintLayout.LayoutParams.UNSET
-            lp.width = ViewGroup.LayoutParams.MATCH_PARENT
-            lp.height = ViewGroup.LayoutParams.MATCH_PARENT
-            lp.setMargins(0, 0, 0, 0)
-            view.layoutParams = lp
-        }
-        fill(home)
-        fill(apps)
-
-        // OWL has its own bar, drawer and pages; apps_window stays as the floating-window layer.
-        for (id in intArrayOf(R.id.desktop_icons, R.id.startMenuLayout, R.id.taskBar, R.id.overlay, R.id.taskBarBlur, R.id.context_pos)) {
-            findViewById<View>(id)?.visibility = View.GONE
-        }
-        home.visibility = View.VISIBLE
-        // Match InstantActivity's edge-to-edge setup before the first OWL frame is drawn.
-        applySystemBars(this@MainActivity, Palette.isLight)
-        // The prompt bar needs the window to resize for the keyboard.
-        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        home.setContent {
-            SystemBarsEffect(this@MainActivity)
-            KeyIndicated { LauncherRoot(runtime, state) }
-        }
     }
 
     /* Inner class MainActivity$1 (nama kelas tidak valid). */
@@ -433,11 +383,24 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         return this.b0
     }
 
+    /** Opens a guest app by its desktop id from the drawer, a pin or a shortcut. */
+    private fun openLinuxApp(id: String) {
+        val runtime = (application as App).runtime
+        val app = runtime.linuxApps.apps.firstOrNull { it.id == id } ?: return
+        runtime.launch(app)
+    }
+
     override fun M(str: String, item: StartMenuItem?, str2: String) {
         // The terminal never opens a placeholder tile: launch foot directly and let
         // its toplevel arrive as a floating UILinuxWindow.
         if (str == "UITerminal") {
             (application as App).runtime.terminal(null, "Terminal")
+            return
+        }
+        // Guest .desktop entries (including installed coding agents) live in the same drawer
+        // as every other app. They open through the one runtime, never a separate screen.
+        if (str.startsWith(LINUX_APP_PREFIX)) {
+            openLinuxApp(str.removePrefix(LINUX_APP_PREFIX))
             return
         }
         val callbackA = { s: String -> IntentApps.b(this.W ?: this, s, item, this) }
@@ -731,6 +694,10 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         // Terminal must go straight to foot, never to the old "Open terminal" placeholder.
         if (str == "UITerminal") {
             (application as App).runtime.terminal(null, "Terminal")
+            return
+        }
+        if (str.startsWith(LINUX_APP_PREFIX)) {
+            openLinuxApp(str.removePrefix(LINUX_APP_PREFIX))
             return
         }
         val bottomSheetBehavior = this.U0
@@ -1298,11 +1265,9 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         }
         try { AppExecutors.b().execute(c(this, i3)) } catch (_: Throwable) {}
         this.f0?.viewTreeObserver?.addOnGlobalLayoutListener(AnonymousClass1(bundle))
-        setupOwlHome()
     }
 
     override fun onDestroy() {
-        owlState = null
         (application as App).runtime.clearHomeHooks()
         val logonController = this.n1
         if (logonController != null) {
@@ -1470,6 +1435,12 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         runtime.openFloatingTerminal = { handle ->
             if (!isFinishing && !isDestroyed) runOnUiThread { this@MainActivity.c0("UILinuxWindow", handle) }
         }
+        // Agents install .desktop entries in the guest; coming home picks them up in the
+        // same drawer, alongside Android apps and the built-in windows.
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) { runtime.refreshApps() }
+            M0?.D(null)
+        }
         val networkMonitor = this.k0
         if (networkMonitor != null && Build.VERSION.SDK_INT >= 24) {
             val connectivityManager = networkMonitor.f4909a
@@ -1513,8 +1484,6 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     override fun onStop() {
-        // Animations pause in the background and could leave an invisible drawer catching touches.
-        owlState?.closeNow()
         (application as App).runtime.clearHomeHooks()
         (application as App).runtime.screenStopped()
         super.onStop()

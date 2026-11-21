@@ -18,8 +18,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.AdapterListUpdateCallback
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import androidx.compose.ui.graphics.asAndroidBitmap
+import com.bellatrixos.App
 import com.bellatrixos.R
 import com.bellatrixos.context_menu.ContextMenuManager
+import com.bellatrixos.linux.LINUX_APP_PREFIX
 import com.bellatrixos.context_menu.OnItemClickListener
 import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.startmenu.listeners.StartMenuItemDiffCallback
@@ -176,6 +179,13 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
             for (installed in InstalledAppsDB.b()) A(1, installed.c(), installed.b().orEmpty())
         } catch (_: RuntimeException) {
         }
+        // The guest's .desktop entries belong in this same drawer. Coding agents install
+        // their own entries, so they appear here like any other app: no separate UI.
+        try {
+            val runtime = (B.applicationContext as? App)?.runtime ?: return
+            for (app in runtime.linuxApps.apps) A(1, LINUX_APP_PREFIX + app.id, app.name)
+        } catch (_: RuntimeException) {
+        }
     }
 
     /** Muat aplikasi dari profil lain. */
@@ -271,9 +281,18 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = z[position]
-        IconEngine.b(B).c(item.c().orEmpty(), IconEngine.Callback { bitmap ->
-            if (holder.bindingAdapterPosition != -1) holder.u?.setImageBitmap(bitmap)
-        })
+        val key = item.c().orEmpty()
+        if (key.startsWith(LINUX_APP_PREFIX)) {
+            // The runtime already decoded the guest's Icon=; reuse it instead of asking
+            // IconEngine to resolve a desktop id as if it were an Android package.
+            val id = key.removePrefix(LINUX_APP_PREFIX)
+            val icon = (B.applicationContext as? App)?.runtime?.linuxApps?.icons?.get(id)?.asAndroidBitmap()
+            holder.u?.setImageBitmap(icon)
+        } else {
+            IconEngine.b(B).c(key, IconEngine.Callback { bitmap ->
+                if (holder.bindingAdapterPosition != -1) holder.u?.setImageBitmap(bitmap)
+            })
+        }
         // Nama asli APK sudah ada di item.b(); AppsDatabase.a() hanya untuk tag window internal (UI...).
         val packageName = item.c().orEmpty()
         holder.v?.text =

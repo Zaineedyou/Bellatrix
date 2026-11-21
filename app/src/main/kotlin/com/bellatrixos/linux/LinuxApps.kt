@@ -2,6 +2,9 @@ package com.bellatrixos.linux
 
 import java.io.File
 
+/** Key a guest `.desktop` entry carries in Bellatrix's existing drawer, before its desktop id. */
+const val LINUX_APP_PREFIX = "linux:"
+
 data class LinuxApp(
     val name: String,
     /** The command, without the terminal wrapper for terminal apps. */
