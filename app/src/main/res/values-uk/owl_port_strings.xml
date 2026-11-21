@@ -653,4 +653,7 @@
     <string name="widgets_no_app_opens">немає додатка, щоб відкрити %1$s</string>
     <string name="widgets_copied">скопійовано</string>
     <string name="widgets_notify_channel">Віджети</string>
+    <string name="home_new_widget_file">новий файл віджета</string>
+    <string name="home_edit_home">редагувати поверхню головного екрана</string>
+    <string name="home_edit_taskbar">редагувати поверхню панелі завдань</string>
 </resources>

@@ -653,4 +653,7 @@
     <string name="widgets_no_app_opens">没有应用能打开 %1$s</string>
     <string name="widgets_copied">已复制</string>
     <string name="widgets_notify_channel">小组件</string>
+    <string name="home_new_widget_file">新建小部件文件</string>
+    <string name="home_edit_home">编辑主屏幕表面</string>
+    <string name="home_edit_taskbar">编辑任务栏表面</string>
 </resources>

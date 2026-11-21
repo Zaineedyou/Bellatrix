@@ -42,20 +42,23 @@ tiles = [
 ## Create and modify widgets on Bellatrix home
 
 On the phone, long-press an empty part of home and use **new widget file**,
-**edit home bar** or **edit taskbar**: they open those `.owl` files in Bellatrix's own text editor,
-with no Linux or coding agent needed. Save, and the file appears on home within a
+**edit home surface** or **edit taskbar surface**: they open those `.owl` files in Bellatrix's own
+text editor, with no Linux or coding agent needed. Save, and the file appears on home within a
 second. Coding agents work too (the prompts point them at these same files), as
 does any other writer of files. A widget tile's **edit file** action opens just that file, and the
 empty home invite creates a widget or face tile directly when Linux isn't installed. There is no
 second launcher screen — the files below are the ones Bellatrix home reads.
 
-The two bar files are ordinary OWL `panel` files that render **inside the bar
-Bellatrix already draws**, not swiped open as a panel and not a separate OWL home
-screen. They are seeded from Flex/Box/Anchor starters on the first install, so they can be tested
-without editing anything first:
+The two surface files are ordinary OWL `panel` files drawn **over the Bellatrix views you already
+see**: `home.owl` fills the desktop area above the taskbar, and `taskbar.owl` fills the taskbar itself.
+They are not swiped open as panels and not a separate OWL home screen. Native desktop icons, app
+windows, the start menu, search and task buttons stay in place underneath; a transparent OWL file
+leaves the shipped Bellatrix look alone, while an opaque `background` or a node with its own drawing
+covers that part of the native surface. Taps still reach the native view unless an OWL node has an
+`onTap`. They are seeded from Flex/Box/Anchor starters on the first install:
 
-- `~/.config/bellatrix/widgets/home.owl` — the strip above the prompt bar.
-- `~/.config/bellatrix/widgets/taskbar.owl` — the strip below it, over the taskbar.
+- `~/.config/bellatrix/widgets/home.owl` — the native home surface above the taskbar.
+- `~/.config/bellatrix/widgets/taskbar.owl` — the native taskbar surface.
 - `~/.config/bellatrix/widgets/widget-1.owl` — a new widget template using the same nodes on home.
 - `~/.config/bellatrix/widgets/face-1.owl` — a face tile using the same nodes on home.
 
@@ -63,6 +66,10 @@ without editing anything first:
    `panel`, or `keybar` declaration; see `README.md` and `docs/nodes.md`).
 2. Run `owl-check ~/.config/bellatrix/widgets/<name>.owl`. It prints errors and
    the path of a PNG drawn with live data; open that PNG to check the layout.
+   `home.owl` and `taskbar.owl` are previewed at the real desktop and taskbar
+   sizes; a transparent surface gives a transparent PNG, which is how it leaves
+   Bellatrix's native look visible. Add nodes or an opaque `background` if you
+   want something to see in the preview.
 3. Move it with `{ widget = "<name>.owl", x, y, w, h }` in
    `~/.config/bellatrix/home/layout.toml`, or let it take the first free spot.
 4. `owl-send ~/.config/bellatrix/widgets/<name>.owl set <state> <value>` changes
@@ -70,31 +77,34 @@ without editing anything first:
 
 Waybar-style declarative layout (owl 24):
 
-- `Flex { … }` is a wrapping flex row: a status strip that flows to a new line
-  when the tile is narrow. It takes `gap`, `align`, `justify`, like `Row`.
+- `Flex { … }` is a wrapping flex row: a surface module that flows to a new line
+  when the view is narrow. It takes `gap`, `align`, `justify`, like `Row`.
 - `Anchor { … }` pins children to its edges. Give each child an `anchor` of
   `topStart`, `top`, `topEnd`, `start`, `center`, `end`, `bottomStart`, `bottom`
-  or `bottomEnd`. A bar panel with a left clock and right icons is:
+  or `bottomEnd`. A full-size surface with a left clock and right icons is:
 
 ```owl
 panel "home" {
   meta { owl: 24 }
   source now = clock every 1s
   source bat = android.battery
-  Anchor {
-    fill: width
-    height: 40
-    Text { anchor: topStart; text: fmtTime(now, "HH:mm") }
-    Flex { anchor: topEnd; gap: 6
-      Text { text: "${round(bat.level)}%" }
-      Text { text: "󰀂" }
+  Box {
+    fill: true
+    background: transparent           // change this to cover the native home surface
+    Anchor {
+      fill: true
+      Text { anchor: topStart; text: fmtTime(now, "HH:mm") }
+      Flex { anchor: topEnd; gap: 6
+        Text { text: "${round(bat.level)}%" }
+        Text { text: "󰀂" }
+      }
     }
   }
 }
 ```
 
-Save that as `home.owl` and the modules sit in Bellatrix's home bar. `taskbar.owl`
-uses the same shape for the taskbar strip. `Box` accepts the same `anchor`
+Save that as `home.owl` and the modules sit on the native home surface at the size of the real
+desktop area. `taskbar.owl` uses the same shape at the taskbar's size. `Box` accepts the same `anchor`
 property, so an existing panel can be converted without changing its structure. The shipped
 `widget-*.owl` and `face-*.owl` files use `Box` around `Anchor` too, so the same nodes can be checked
 as ordinary home tiles.

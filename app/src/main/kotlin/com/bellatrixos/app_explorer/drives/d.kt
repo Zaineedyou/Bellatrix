@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.view.View
 import androidx.core.util.Consumer
+import com.bellatrixos.App
 import com.bellatrixos.R
 import com.bellatrixos.app_explorer.files.FileAdapter
 import com.bellatrixos.app_settings.fragments.DialogInterfaceOnClickListenerC0055d
@@ -18,12 +19,17 @@ import com.bellatrixos.startmenu.StartMenuItem
 import com.bellatrixos.taskbar.TaskBarAdapter
 import com.bellatrixos.variables.Global
 import com.bellatrixos.widgets.FilesRecyclerView
+import com.bellatrixos.widgets.OwlBars
+import com.bellatrixos.widgets.WidgetEngine
 import com.bellatrixos.windows.dialogs.UIDialog
 import com.bellatrixos.windows.files.clipboard.Clipboards
 import com.bellatrixos.windows.files.operations.New
 import com.bellatrixos.windows.installed_apps.AppsDatabase
 import com.bellatrixos.windows.installed_apps.IntentApps
 import com.bellatrixos.windows.installed_apps.IntentSites
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 /** Satu callback besar untuk pilih drive dan menu konteks desktop/start menu. */
@@ -106,6 +112,20 @@ class d : DriveAdapter.OnItemClickListener, UIContextMenu.OnMenuItemClickListene
                 mainActivityIn.c0("UISettings", "3")
                 return
             }
+            260 -> {
+                editOwlSurface(v, WidgetEngine.HOME_BAR)
+                return
+            }
+            261 -> {
+                editOwlSurface(v, WidgetEngine.TASKBAR_BAR)
+                return
+            }
+            262 -> {
+                val context = v
+                val runtime = (context.applicationContext as App).runtime
+                CoroutineScope(Dispatchers.Main).launch { OwlBars.newWidget(context, runtime) }
+                return
+            }
         }
         val context = v
         val menu = mainActivityIn.k() as? UIContextMenu ?: return
@@ -186,6 +206,15 @@ class d : DriveAdapter.OnItemClickListener, UIContextMenu.OnMenuItemClickListene
         if (target != -1) mainActivityIn.c0("UISettings", target.toString())
         menu.a(0)
         menu.e(view, view.width, -view.height)
+    }
+
+    /** Opens one of the OWL surface files in Bellatrix's editor through the one app runtime. */
+    private fun editOwlSurface(
+        context: Context,
+        name: String,
+    ) {
+        val runtime = (context.applicationContext as App).runtime
+        CoroutineScope(Dispatchers.Main).launch { OwlBars.edit(context, runtime, name) }
     }
 
     private fun appMenu(i2: Int) {

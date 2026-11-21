@@ -60,6 +60,7 @@ import com.bellatrixos.Runtime
 import com.bellatrixos.theme.Style
 import com.bellatrixos.theme.StyleStore
 import com.bellatrixos.widgets.HomeStore
+import com.bellatrixos.widgets.WidgetEngine
 import com.bellatrixos.widgets.checkSecretsCommand
 import com.bellatrixos.widgets.editWidgetCommand
 import com.bellatrixos.widgets.publishWidgetCommand
@@ -135,6 +136,9 @@ private fun DesktopScreen(
     CompositionLocalProvider(LocalHomeCovered provides covered, LocalBackdrop provides backdrop) {
         // The whole window: a face fills it, and tiles keep clear of the system bars and the bar themselves.
         HomeScreen(runtime, state, Modifier.fillMaxSize())
+        // home.owl skins this same home surface: transparent by default, but its nodes can tint or cover
+        // the grid. It sits below the prompt bar, panels and menus that follow, so they stay usable.
+        OwlSurface(runtime, WidgetEngine.HOME_BAR, Modifier.fillMaxSize())
     }
     HomeMenu(runtime, state)
 

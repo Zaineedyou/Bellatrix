@@ -100,8 +100,8 @@
     <string name="home_create_app">app</string>
     <string name="home_create_panel">panel</string>
     <string name="home_new_widget_file">new widget file</string>
-    <string name="home_edit_home">edit home bar</string>
-    <string name="home_edit_taskbar">edit taskbar</string>
+    <string name="home_edit_home">edit home surface</string>
+    <string name="home_edit_taskbar">edit taskbar surface</string>
     <string name="home_face_invite_title">a full-screen widget of your own</string>
     <string name="home_face_invite_text">This page is yours to fill with a full-screen widget: a feed, a dashboard, a start page, a game. Say what you want and %1$s builds it here.</string>
     <string name="home_face_invite_text_no_agent">This page is yours to fill with a full-screen widget: a feed, a dashboard, a start page, a game. Say what you want and an agent builds it here.</string>

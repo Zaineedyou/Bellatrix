@@ -105,6 +105,7 @@ import com.bellatrixos.variables.Global
 import com.bellatrixos.wallpaper.Default
 import com.bellatrixos.wallpaper.WallpaperVideoManager
 import com.bellatrixos.widgets.FilesRecyclerView
+import com.bellatrixos.widgets.OwlNativeSurfaces
 import com.bellatrixos.widgets.TaskbarBtn
 import com.bellatrixos.widgets.UINotification
 import com.bellatrixos.widgets.UIProgressCircular
@@ -1250,6 +1251,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             this.y0 = findViewById(R.id.tray_volume)
             this.z0 = findViewById(R.id.tray_battery)
         }
+        // Declarative OWL skins live on the native views above, under one runtime. They do not replace home.
+        OwlNativeSurfaces.attach(this)
         ViewCompat.setOnApplyWindowInsetsListener(this.f0!!, e(this))
         val bottomSheetBehaviorX = BottomSheetBehavior.from(this.H0!!)
         this.U0 = bottomSheetBehaviorX

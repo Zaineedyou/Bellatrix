@@ -9,70 +9,82 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * The two declarative layout files that rice Bellatrix's own home bar and taskbar.
+ * The two declarative layout files that skin Bellatrix's own home and taskbar surfaces.
  *
  * These are ordinary OWL panel files in the widgets folder, so the launcher's file observer reloads them
  * within a second and `owl-check <file>` previews them like any other file. What makes them special is
- * where they render: not swiped open as a panel, but inside the bar the launcher already draws on home,
- * using Flex/Box/Anchor and the `anchor` property (owl 24). The classic Bellatrix home and taskbar stay
- * exactly where they are; these files only add the user's own Waybar-style modules to them.
+ * where they render: not swiped open as a panel, but over the native home area and over the native
+ * taskbar, at the size of those real views. Flex/Box/Anchor and the `anchor` property (owl 24) place
+ * modules there. Bellatrix's desktop, windows, start menu and taskbar stay exactly where they are; an
+ * OWL file with a transparent background leaves their shipped look alone, while an opaque one covers it.
  *
  * They are seeded from the templates below so a fresh install already has a working Flex/Box/Anchor
- * example on the native bar; editing either file just opens what is there.
+ * example; editing either file just opens what is there.
  */
 object OwlBars {
     /** Guest paths, which [Runtime.edit] maps back to [LauncherData.widgetsDir] through proot's binds. */
     fun guestPath(name: String) = "/root/${WidgetEngine.GUEST_DIR}/$name"
 
-    /** The starter home bar: a full-width Anchor with modules pinned to both ends. */
+    /** The starter home surface: a full-size Box + Anchor with hidden modules pinned to the edges. */
     val homeTemplate =
         """
-        // HOME BAR — Bellatrix's home status strip, riced with OWL like a Waybar.
-        // Long-press home → "edit home" opens this file in Bellatrix's own editor.
-        // Flex flows modules into a row; Box + Anchor and `anchor` pin them to the edges.
-        // Save and it shows on home within a second. `owl-check home.owl` previews it in Linux.
+        // HOME SURFACE — Bellatrix's native home, skinned with OWL.
+        // Long-press empty home → "edit home surface" opens this file in Bellatrix's own editor.
+        // The root Box fills the real home area above the taskbar. Keep its background transparent to
+        // leave Bellatrix's icons and wallpaper alone, or set one to cover them with your own surface.
+        // Flex flows modules into a row; Anchor and `anchor` pin them to the edges. Save to apply within a second.
         panel "home" {
-          meta { owl: 24; description: "Waybar-style home bar" }
+          meta { owl: 24; description: "OWL skin for Bellatrix home" }
 
           source now = clock every 1s
           source bat = android.battery
 
-          Anchor {
-            fill: width
-            height: 40
+          Box {
+            fill: true
+            background: transparent
 
-            Flex { anchor: topStart; gap: 12
-              Text { text: "Bellatrix"; style: title; color: accent }
-              Text { text: fmtTime(now, "HH:mm"); style: small }
-            }
+            Anchor {
+              fill: true
 
-            Flex { anchor: topEnd; gap: 12
-              Text { text: bat ? "${'$'}{round(bat.level)}%" : ""; style: small; color: muted }
+              // Switch visible to true, or add your own nodes, to draw on the home surface.
+              Flex { anchor: topStart; gap: 12; visible: false
+                Text { text: "Bellatrix"; style: title; color: accent }
+                Text { text: fmtTime(now, "HH:mm"); style: small }
+              }
+
+              Flex { anchor: topEnd; gap: 12; visible: false
+                Text { text: bat ? "${'$'}{round(bat.level)}%" : ""; style: small; color: muted }
+              }
             }
           }
         }
         """.trimIndent() + "\n"
 
-    /** The starter taskbar strip: anchored modules over the native taskbar. */
+    /** The starter taskbar surface: a full-size Box + Anchor over the native taskbar. */
     val taskbarTemplate =
         """
-        // TASKBAR — Bellatrix's taskbar, riced with OWL like a Waybar.
-        // Long-press home → "edit taskbar" opens this file in Bellatrix's own editor.
-        // Flex flows modules into a row; Box + Anchor and `anchor` pin them to the edges.
-        // Save and it shows on home within a second. `owl-check taskbar.owl` previews it in Linux.
+        // TASKBAR SURFACE — Bellatrix's native taskbar, skinned with OWL.
+        // Long-press empty home → "edit taskbar surface" opens this file in Bellatrix's own editor.
+        // The root Box fills the real taskbar. Keep its background transparent to leave Bellatrix's
+        // start button, search and icons alone, or set one to cover them. Taps still reach the native
+        // view unless a node has its own onTap.
         panel "taskbar" {
-          meta { owl: 24; description: "Waybar-style taskbar" }
+          meta { owl: 24; description: "OWL skin for Bellatrix taskbar" }
 
-          Anchor {
-            fill: width
-            height: 28
+          Box {
+            fill: true
+            background: transparent
 
-            Flex { anchor: topStart; gap: 8
-              Text { text: "tasks"; style: small; color: muted }
-            }
+            Anchor {
+              fill: true
 
-            Flex { anchor: topEnd; gap: 8
-              Text { text: "▸"; style: small }
+              Flex { anchor: bottomStart; gap: 8; visible: false
+                Text { text: "tasks"; style: small; color: muted }
+              }
+
+              Flex { anchor: bottomEnd; gap: 8; visible: false
+                Text { text: "▸"; style: small }
+              }
             }
           }
         }

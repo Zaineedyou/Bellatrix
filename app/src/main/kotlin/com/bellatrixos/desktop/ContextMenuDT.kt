@@ -43,6 +43,10 @@ object ContextMenuDT {
                 UIMenuItem(1, 0, 0, ""),
                 newItem,
                 UIMenuItem(1, 0, 0, ""),
+                UIMenuItem(0, 260, R.drawable.menu_ic_brush_20_regular, context.getString(R.string.home_edit_home)),
+                UIMenuItem(0, 261, R.drawable.menu_ic_brush_20_regular, context.getString(R.string.home_edit_taskbar)),
+                UIMenuItem(0, 262, R.drawable.img_file_txt_sm, context.getString(R.string.home_new_widget_file)),
+                UIMenuItem(1, 0, 0, ""),
                 UIMenuItem(0, 10, R.drawable.menu_ic_settings_desktop_20_regular, context.getString(R.string.context_menu_display_settings)),
                 UIMenuItem(0, 15, R.drawable.menu_ic_brush_20_regular, context.getString(R.string.context_menu_personalize))
             )

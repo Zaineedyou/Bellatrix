@@ -9,6 +9,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.24] - 2026-11-22
+
+### Added
+
+- `home.owl` now skins the real Bellatrix desktop area and `taskbar.owl` now skins the real native taskbar, at the size of those views. They are drawn over the existing launcher views, never as a second home screen or a separate runtime.
+- Long-press empty home now offers **new widget file**, **edit home surface** and **edit taskbar surface** on the native home used by MainActivity, all opening Bellatrix's own editor.
+
+### Changed
+
+- The seeded `home.owl` and `taskbar.owl` use a full-size `Box`/`Anchor` with hidden `Flex` modules and `anchor` (owl 24). They start transparent so the shipped Bellatrix look stays; set a `background` or add nodes to cover or decorate the native surface.
+- The unused Compose prompt bar no longer reserves fixed 40dp/28dp extra strips for OWL; `taskbar.owl` draws over the bar's own bounds instead.
+- Agent prompts and bundled widget docs describe the native-surface behavior and the exact edit entries.
+
+### Fixed
+
+- OWL surface files are now drawn from a panel's compiled nodes (the `screen` tree) rather than the empty tile `root`, so editing them changes what is visibly drawn.
+- `owl-check` previews `home.owl` at the desktop area's size and `taskbar.owl` at the taskbar's size, without a swipe panel's backdrop, so the PNG matches what OWL draws on the native surface.
+
 ## [2.9.23] - 2026-11-22
 
 ### Fixed

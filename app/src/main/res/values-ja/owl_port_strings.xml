@@ -653,4 +653,7 @@
     <string name="widgets_no_app_opens">%1$s を開けるアプリがありません</string>
     <string name="widgets_copied">コピーしました</string>
     <string name="widgets_notify_channel">ウィジェット</string>
+    <string name="home_new_widget_file">新しいウィジェットファイル</string>
+    <string name="home_edit_home">ホーム画面サーフェスを編集</string>
+    <string name="home_edit_taskbar">タスクバーサーフェスを編集</string>
 </resources>

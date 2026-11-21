@@ -653,4 +653,7 @@
     <string name="widgets_no_app_opens">ninguna app abre %1$s</string>
     <string name="widgets_copied">copiado</string>
     <string name="widgets_notify_channel">Widgets</string>
+    <string name="home_new_widget_file">nuevo archivo de widget</string>
+    <string name="home_edit_home">editar superficie de inicio</string>
+    <string name="home_edit_taskbar">editar superficie de barra de tareas</string>
 </resources>

@@ -653,4 +653,7 @@
     <string name="widgets_no_app_opens">%1$s нечем открыть</string>
     <string name="widgets_copied">скопировано</string>
     <string name="widgets_notify_channel">Виджеты</string>
+    <string name="home_new_widget_file">новый файл виджета</string>
+    <string name="home_edit_home">изменить поверхность главного экрана</string>
+    <string name="home_edit_taskbar">изменить поверхность панели задач</string>
 </resources>

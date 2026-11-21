@@ -25,6 +25,7 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.bellatrixos.ui.KeybarPreview
 import com.bellatrixos.ui.home.LocalOffscreen
 import com.bellatrixos.ui.home.OwlAppWindow
+import com.bellatrixos.ui.home.OwlSurfacePreview
 import com.bellatrixos.ui.home.PanelPreview
 import com.bellatrixos.ui.home.WidgetScreenPanel
 import com.bellatrixos.widgets.lang.OwlKind
@@ -87,7 +88,8 @@ internal class Previews(
         draw(spec, widthPx, heightPx, out, ready) {
             when (instance.program.kind) {
                 OwlKind.App -> OwlAppWindow(spec, instance)
-                OwlKind.Panel -> PanelPreview(instance)
+                OwlKind.Panel ->
+                    if (spec.file.name in WidgetEngine.BAR_FILES) OwlSurfacePreview(instance) else PanelPreview(instance)
                 OwlKind.Keybar -> KeybarPreview(instance)
                 else -> WidgetScreenPanel(spec, instance, onDismiss = {})
             }

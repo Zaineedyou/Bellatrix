@@ -108,15 +108,6 @@ enum class PromptRequest { Type, Send, Listen, Release }
 val PromptBarHeight = 48.dp
 
 /**
- * Room for the two declarative OWL bars when their files exist: home.owl above the prompt bar and
- * taskbar.owl below it. Each is an ordinary OWL panel rendered inside this bar (see [OwlBar]), so the
- * home and taskbar can be riced Waybar-style without another launcher screen. A bar that hasn't been
- * created renders nothing and takes no room.
- */
-val OwlHomeBarHeight = 40.dp
-val OwlTaskbarHeight = 28.dp
-
-/**
  * The one input at the bottom of the home screen: it finds apps and asks agents.
  * Focusing it opens the app panel above it; typing narrows that panel, and Enter
  * opens the highlighted app or sends the text to the default agent in a terminal
@@ -298,12 +289,9 @@ internal fun PromptBar(
                 style = Mono.copy(color = Palette.red, fontSize = TextSize.Small),
             )
         }
-        // Bellatrix's own bar, with the user's declarative bars around it. These are part of this bar,
-        // not a separate OWL screen: home.owl and taskbar.owl are edited as files and render right here.
-        Column(Modifier.onSizeChanged { frame = it.height }) {
-            OwlBar(runtime, WidgetEngine.HOME_BAR, Modifier.fillMaxWidth().height(OwlHomeBarHeight))
-            // A Box keeps the native bar's overlays (menu, level line) in their own coordinates.
-            Box(Modifier.fillMaxWidth()) {
+        // Bellatrix's own bar. taskbar.owl draws over this real bar rather than adding a strip below it:
+        // a transparent file leaves the native bar alone, while its nodes can tint or cover the whole thing.
+        Box(Modifier.fillMaxWidth().onSizeChanged { frame = it.height }) {
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -365,16 +353,16 @@ internal fun PromptBar(
                     // Padding inside the field, so the bar's full height takes taps.
                     decorationBox = { inner ->
                         Box(Modifier.padding(vertical = 12.dp)) {
-                        if (shown.isEmpty()) {
-                            val hint =
-                                when {
-                                    listening -> stringResource(R.string.prompt_listening)
-                                    !linux || agent == null -> stringResource(R.string.prompt_hint_apps)
-                                    else -> stringResource(R.string.prompt_hint_ask, agent.bin)
-                                }
-                            BasicText(hint, style = Mono.copy(color = Palette.muted, fontSize = TextSize.Item), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                        inner()
+                            if (shown.isEmpty()) {
+                                val hint =
+                                    when {
+                                        listening -> stringResource(R.string.prompt_listening)
+                                        !linux || agent == null -> stringResource(R.string.prompt_hint_apps)
+                                        else -> stringResource(R.string.prompt_hint_ask, agent.bin)
+                                    }
+                                BasicText(hint, style = Mono.copy(color = Palette.muted, fontSize = TextSize.Item), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                            inner()
                         }
                     },
                 )
@@ -412,9 +400,8 @@ internal fun PromptBar(
                     },
                 )
             }
-            }
-            // The taskbar strip, below the native bar: another declarative OWL file, rendered in place.
-            OwlBar(runtime, WidgetEngine.TASKBAR_BAR, Modifier.fillMaxWidth().height(OwlTaskbarHeight))
+            // Over the native bar, in its exact bounds: the file edits what the user sees, not an extra strip.
+            OwlSurface(runtime, WidgetEngine.TASKBAR_BAR, Modifier.matchParentSize())
         }
     }
 }

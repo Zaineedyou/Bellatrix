@@ -653,4 +653,7 @@
     <string name="widgets_no_app_opens">tidak ada aplikasi yang bisa membuka %1$s</string>
     <string name="widgets_copied">disalin</string>
     <string name="widgets_notify_channel">Widget</string>
+    <string name="home_new_widget_file">file widget baru</string>
+    <string name="home_edit_home">edit permukaan home</string>
+    <string name="home_edit_taskbar">edit permukaan taskbar</string>
 </resources>

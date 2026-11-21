@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import com.bellatrixos.system.AppLanguage
 import com.bellatrixos.BuildConfig
+import com.bellatrixos.R
 import com.bellatrixos.storage.LauncherData
 import com.bellatrixos.Runtime
 import com.bellatrixos.linux.Agent
@@ -274,17 +275,19 @@ class WidgetEngine(
 
     /**
      * Panel files, which gesture settings offer for swiping up and down; ones that don't compile too, to say so.
-     * The stock drawer and the two declarative bar files aren't swipe panels: [HOME_BAR] and [TASKBAR_BAR] render
-     * inside Bellatrix's own home bar, so offering them as a gesture target would open the bar as a full screen.
+     * The stock drawer and the two declarative surface files aren't swipe panels: [HOME_BAR] and [TASKBAR_BAR]
+     * draw over Bellatrix's own home and taskbar, so offering them as a gesture target would open them as a
+     * separate full screen.
      */
     fun panels(): List<WidgetSpec> = specs.filter { spec ->
         spec.kind == OwlKind.Panel && spec.file.name !in setOf(STOCK_DRAWER, HOME_BAR, TASKBAR_BAR)
     }
 
     /**
-     * A declarative bar file: a panel-kind OWL file rendered inside Bellatrix's home bar rather than swiped open.
-     * [HOME_BAR] is the home's status strip, [TASKBAR_BAR] the taskbar strip; both use Flex/Box/Anchor layout
-     * (owl 24) so the home and taskbar can be riced like a Waybar, without a second launcher screen.
+     * A declarative surface file: a panel-kind OWL file drawn over a native Bellatrix view rather than swiped open.
+     * [HOME_BAR] fills the home area above the taskbar; [TASKBAR_BAR] fills the taskbar itself. Both use
+     * Flex/Box/Anchor layout (owl 24), so they can tint or cover the native look without a second launcher screen
+     * or a second engine.
      */
     fun barInstance(name: String): WidgetInstance? {
         val spec = specs.firstOrNull { it.file.name == name && it.kind == OwlKind.Panel } ?: return null
@@ -300,7 +303,7 @@ class WidgetEngine(
 
     /** The running panel [name] with its spec, for home to show; null if it's gone, doesn't compile or can't run here. */
     fun panelInstance(name: String): Pair<WidgetSpec, WidgetInstance>? {
-        // Bars belong in the home bar, never in a swipe panel, even if style.toml names one by hand.
+        // Surfaces belong over the native home/taskbar views, never in a swipe panel, even if style.toml names one by hand.
         if (name in BAR_FILES) return null
         val spec = specs.firstOrNull { it.file.name == name && it.kind == OwlKind.Panel } ?: return null
         if (waitsForLinux(spec)) return null
@@ -732,7 +735,7 @@ class WidgetEngine(
                         }
                     },
                     linux = { linux },
-                    // Bars are drawn in the home bar whenever home shows, so their triggers and sounds count as foreground too.
+                    // Surfaces are drawn over home whenever home shows, so their triggers and sounds count as foreground too.
                     foreground = { (shownApps[name] ?: 0) > 0 || openScreen == name || name in shownPanels || name in BAR_FILES },
                 )
             prev?.let(inst::adopt)
@@ -842,9 +845,9 @@ class WidgetEngine(
                 previews.render(spec, inst, shownCells(cells), w, h, File(previewDir, "$name.png"), loaded).also {
                     // The screen { } as it opens over home, at the phone's size.
                     if (it && program.screen != null) {
-                        val dm = context.resources.displayMetrics
-                        if (previews.renderScreen(spec, inst, dm.widthPixels, dm.heightPixels, File(previewDir, "$name.screen.png"), loaded)) {
-                            screen = "screen $hash ${dm.widthPixels}x${dm.heightPixels}"
+                        val (pw, ph) = screenPreviewSize(spec)
+                        if (previews.renderScreen(spec, inst, pw, ph, File(previewDir, "$name.screen.png"), loaded)) {
+                            screen = "screen $hash ${pw}x$ph"
                         }
                     }
                 }
@@ -863,6 +866,29 @@ class WidgetEngine(
     private fun tileCells(spec: WidgetSpec) = (if (spec.isFace) layout.grid ?: (layout.columns to 12) else null) ?: layout.cell(spec.file.name)?.let { it.w to it.h } ?: spec.size?.let { (w, h) -> w.coerceIn(1, layout.columns) to h.coerceAtLeast(1) } ?: (3 to 3)
 
     /**
+     * The size `owl-check` should use for a screen preview. The two surface files are not full swipe
+     * panels: `home.owl` fills the desktop area above the native taskbar and `taskbar.owl` fills that
+     * taskbar, so their PNGs show the size they actually render at on the phone.
+     */
+    private fun screenPreviewSize(spec: WidgetSpec): Pair<Int, Int> {
+        val res = context.resources
+        val dm = res.displayMetrics
+        return when (spec.file.name) {
+            HOME_BAR -> {
+                val bar = res.getDimensionPixelSize(R.dimen.taskbar_height)
+                val bottom = res.getDimensionPixelSize(R.dimen.taskbar_margin_bottom)
+                dm.widthPixels to (dm.heightPixels - bar - bottom).coerceAtLeast(1)
+            }
+            TASKBAR_BAR -> {
+                val side = res.getDimensionPixelSize(R.dimen.taskbar_margin_horizontal)
+                val bar = res.getDimensionPixelSize(R.dimen.taskbar_height)
+                (dm.widthPixels - 2 * side).coerceAtLeast(1) to bar
+            }
+            else -> dm.widthPixels to dm.heightPixels
+        }
+    }
+
+    /**
      * [cells] as home shows them, for `cols` and `rows`: on its side in landscape, like the tile on home. The preview
      * shares the tile's instance, so drawing it with the file's cells would put them in the tile on home too.
      */
@@ -878,11 +904,11 @@ class WidgetEngine(
         hash: String,
     ) {
         val name = spec.file.name
-        val dm = context.resources.displayMetrics
+        val (pw, ph) = screenPreviewSize(spec)
         previewing += name
         val ok =
             try {
-                previews.renderScreen(spec, inst, dm.widthPixels, dm.heightPixels, File(previewDir, "$name.screen.png"), loadedOf(inst))
+                previews.renderScreen(spec, inst, pw, ph, File(previewDir, "$name.screen.png"), loadedOf(inst))
             } finally {
                 previewing.remove(name)
             }
@@ -894,7 +920,7 @@ class WidgetEngine(
                     OwlKind.Keybar -> "the terminal key bar has no tile"
                     else -> "an app has no tile"
                 }
-        writeCheck(spec.file, hash, "ok", if (ok) "$tile\nscreen $hash ${dm.widthPixels}x${dm.heightPixels}" else "$tile; rendering its screen failed")
+        writeCheck(spec.file, hash, "ok", if (ok) "$tile\nscreen $hash ${pw}x$ph" else "$tile; rendering its screen failed")
     }
 
     /**
@@ -922,7 +948,7 @@ class WidgetEngine(
         try {
             val loaded = loadedOf(inst)
             withTimeoutOrNull(30_000) { loaded() }
-            val dm = context.resources.displayMetrics
+            val (pw, ph) = screenPreviewSize(spec)
             for ((n, screen) in screens.ifEmpty { listOf("") }.withIndex()) {
                 for ((state, value) in assignments(screen)) {
                     // wait = <seconds> pauses first, for an API that limits calls a minute.
@@ -943,7 +969,7 @@ class WidgetEngine(
                     Palette.apply(theme.colors)
                     val out = File(dir, "${theme.name}/$name${if (n > 0) ".${n + 1}" else ""}.png")
                     if (spec.kind == OwlKind.App || spec.kind == OwlKind.Panel || spec.kind == OwlKind.Keybar) {
-                        previews.renderScreen(spec, inst, dm.widthPixels, dm.heightPixels, out, ready)
+                        previews.renderScreen(spec, inst, pw, ph, out, ready)
                     } else {
                         previews.render(spec, inst, shownCells(cells), w, h, out, ready)
                     }
@@ -968,7 +994,7 @@ class WidgetEngine(
         // Over a Linux window too, while home is hidden.
         if (spec.kind == OwlKind.Keybar) return keybarShown > 0
         if (!visible) return false
-        // Declarative bars live for as long as home shows: they ARE part of the home bar, not a page or a swipe panel.
+        // Declarative surfaces live for as long as home shows: they ARE drawn on home, not a page or a swipe panel.
         if (spec.file.name in BAR_FILES) return true
         // Its screen is open: it's on screen wherever the pages are.
         if (spec.file.name == openScreen) return true
@@ -1188,8 +1214,8 @@ class WidgetEngine(
         const val STOCK_KEYBAR = ".stock-keybar.owl"
 
         /**
-         * Declarative bar files: panel-kind OWL files rendered inside Bellatrix's own home bar (not swiped open).
-         * Edit these to rice the home and the taskbar with Flex/Box/Anchor, Waybar-style. Both are user files,
+         * Declarative surface files: panel-kind OWL files drawn over Bellatrix's own home and taskbar views
+         * (not swiped open). Edit these to skin the native surfaces with Flex/Box/Anchor. Both are user files,
          * created on first edit from the templates in [OwlBars], and watched by the same file observer as every .owl.
          */
         const val HOME_BAR = "home.owl"
@@ -1220,9 +1246,10 @@ class WidgetEngine(
                 "drawer.owl there: to change the drawer, edit it; .stock-drawer.owl is the drawer as this launcher ships it. " +
                 "Likewise keybar.owl (`keybar \"name\" { }`) is the terminal key bar over the soft keyboard while typing in a terminal, " +
                 "and .stock-keybar.owl the bar as shipped. " +
-                "The home and taskbar are riced with two more declarative files here: home.owl and taskbar.owl, both `panel \"name\" { }` files. " +
-                "They render inside Bellatrix's own home bar rather than swiping open: lay their modules out with Flex, Box and Anchor and " +
-                "the `anchor` property (owl 24) like a Waybar. Saved files show up on the phone within seconds. After saving, run `owl-check <file>`: it prints the errors " +
+                "The home and taskbar are skinned with two more declarative files here: home.owl and taskbar.owl, both `panel \"name\" { }` files. " +
+                "They draw over Bellatrix's real home and taskbar views rather than swiping open: they start transparent, so the native look stays, " +
+                "and an opaque background or anchored nodes change those surfaces. Lay modules out with Flex, Box and Anchor and the `anchor` property " +
+                "(owl 24) like a Waybar. Saved files show up on the phone within seconds. After saving, run `owl-check <file>`: it prints the errors " +
                 "and the path of a PNG of the tile or view, drawn with live data; look at it to check the layout. " +
                 "examples/ holds more widgets to learn from or move up to use. Scripts and hooks can set a running " +
                 "widget's state or refresh it with `owl-send <file> set <state> <value>` and `owl-send <file> refresh`.\n\n" +

@@ -130,3 +130,15 @@ internal fun PanelPreview(inst: com.bellatrixos.widgets.runtime.WidgetInstance) 
         WidgetScreen(inst, Modifier.fillMaxSize())
     }
 }
+
+/**
+ * The nodes of a native-surface OWL file, without a swipe panel's backdrop or insets. `owl-check` draws
+ * these at the real home/taskbar size, so a transparent file gives a transparent preview: that is how it
+ * leaves Bellatrix's own surface visible.
+ */
+@Composable
+internal fun OwlSurfacePreview(inst: com.bellatrixos.widgets.runtime.WidgetInstance) {
+    Box(Modifier.fillMaxSize()) {
+        WidgetScreen(inst, Modifier.fillMaxSize())
+    }
+}
