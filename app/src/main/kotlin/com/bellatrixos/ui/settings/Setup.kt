@@ -164,14 +164,7 @@ private fun Welcome(
         }
     }
     Spacer(Modifier.height(32.dp))
-    // The theme picked starts downloading, the default one right away; another once it stays picked a moment, so
-    // arrowing along the strip doesn't start one for each theme passed (start fetches the picked one anyway).
-    var first by remember { mutableStateOf(true) }
-    LaunchedEffect(themes.picked) {
-        if (!first) delay(PrefetchSettle)
-        first = false
-        themes.prefetch(themes.picked)
-    }
+    // Themes are local files; picking one in the strip only recolors the launcher until start.
     Appear(1) {
         // A key moving along the strip picks as it goes, as a tap does.
         ThemeStrip(themes, pickOnFocus = true, pickedFocus = pickedFocus)

@@ -139,6 +139,12 @@ import com.bellatrixos.ui.menuLongPresses
 import com.bellatrixos.ui.passesKeys
 import com.bellatrixos.ui.tile
 
+/** Picks up themes an agent added or removed in Linux since the launcher started, when the calling screen opens. */
+@Composable
+internal fun RescanThemes(store: ThemeStore) {
+    LaunchedEffect(store) { if (store.loaded) store.rescan() }
+}
+
 /**
  * Bellatrix's Style menu: the theme, its background, how the home screen
  * draws itself and, with Linux, the terminal's text size.
