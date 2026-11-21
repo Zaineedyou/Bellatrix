@@ -76,8 +76,8 @@ class l(@JvmField val v: Any, @JvmField val u: Int) : Runnable {
                     if (columns == 5) {
                         val dimension = mainActivity2.resources.getDimension(R.dimen.ui_84dp).toInt()
                         val view = startMenuViews.g
-                        if (view.height > dimension) columns = 6
-                        view.visibility = View.GONE
+                        if ((view?.height ?: 0) > dimension) columns = 6
+                        view?.visibility = View.GONE
                     }
                     iMax = columns
                 } else {
