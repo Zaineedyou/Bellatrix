@@ -28,8 +28,8 @@ you're done, since that's the tile on the user's home. Terminal and Browser tile
 go to `.errors/<file>.txt`, and the tile shows them.
 
 Widgets sit on a grid of roughly square cells, 6 columns by default (a phone
-has about 12 rows), bordered like Omarchy windows and colored by the current
-Omarchy theme. Users move and resize them on the phone; where everything is
+has about 12 rows), bordered like Bellatrix windows and colored by the current
+Bellatrix theme. Users move and resize them on the phone; where everything is
 lives in ~/.config/bellatrix/home/layout.toml, which you can edit too (see
 docs/home.md). The launcher puts a new file on home itself, by its `page:`, `order:` and `size:`:
 don't add it to layout.toml, move it there afterwards if it should be elsewhere.
@@ -73,7 +73,7 @@ A file holds declarations, then the nodes it shows:
 - `state x = 0` is a value handlers change (`persist` keeps it across restarts), and `let x = ...` a value worked
   out from the others, again whenever they change.
 - Nodes are `Name { prop: value; ...children }`, with `if c { } else { }`, `for x in list { }` and `let` among them.
-  `Column`, `Row`, `Box`, `Grid` and `Flow` lay out; `Text`, `Button`, `Image`, `Progress`, `Ring`, `Sparkline`,
+  `Column`, `Row`, `Box`, `Grid`, `Flow`, `Flex` and `Anchor` lay out (Flex/Anchor are owl 24); `Text`, `Button`, `Image`, `Progress`, `Ring`, `Sparkline`,
   `Slider`, `Input`, `Canvas`, `Shader`, `Terminal` and `Spacer` show things. Every node takes `width`, `height`,
   `weight`, `fill`, `padding`, `background`, `radius`, `visible` and more.
 - Handlers, like `onTap: count = count + 1`, set state and run actions: `terminal("btop")`, `run("cmd")`,
@@ -83,7 +83,7 @@ A file holds declarations, then the nodes it shows:
   while a is null. Lists have `map`, `filter`, `sortBy` and the rest. Colors are the theme's names (`accent`,
   `foreground`, `muted`, `red`, ...), so widgets follow theme changes.
 - `meta { owl: 12 }` says which version of the language the file needs. Declare the highest it uses; without it,
-  it's 1. This launcher has 23.
+  it's 1. This launcher has 24.
 - Text is written in the language of whoever uses the widget. One meant for the store keeps its text in
   `strings { en { ... } id { ... } }` and shows `str.name`, the phone's language's (owl 16, see Text in more
   languages in docs/declarations.md).
@@ -107,7 +107,7 @@ declarations.md, nodes.md, expressions.md and handlers.md; a face, an app, a pan
 | docs/browser.md | a web page in a tile: `Browser`, and `web` to steer it |
 | docs/panels.md | panels a swipe opens, the app drawer among them |
 | docs/keybar.md | the terminal key bar over the keyboard |
-| docs/home.md | home's layout.toml, and reaching a running widget from scripts with `owl-send` |
+| docs/home.md | home's layout.toml, creating widgets on Bellatrix home, and reaching a running widget from scripts with `owl-send` |
 | docs/sharing.md | the widget store, and sharing a file as a link or QR code |
 | docs/versions.md | what each owl version added |
 

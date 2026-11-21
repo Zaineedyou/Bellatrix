@@ -77,12 +77,13 @@ class Proot(
     /** Guest-visible copies of the launcher's data, at Bellatrix's exact paths. */
     private val dataBinds =
         listOf(
-            GUEST_HOME + "/.local/share/omarchy" to File(filesDir, "omarchy"),
             GUEST_HOME + "/.config/bellatrix/widgets" to File(filesDir, "widgets"),
             GUEST_HOME + "/.config/bellatrix/style" to File(filesDir, "style"),
             GUEST_HOME + "/.config/bellatrix/home" to File(filesDir, "home"),
-            GUEST_HOME + "/.config/omarchy/themes" to File(filesDir, "themes"),
-            GUEST_HOME + "/.config/omarchy/backgrounds" to File(filesDir, "backgrounds"),
+            GUEST_HOME + "/.config/bellatrix/taskbar" to File(filesDir, "taskbar"),
+            GUEST_HOME + "/.config/bellatrix/themes" to File(filesDir, "themes"),
+            GUEST_HOME + "/.config/bellatrix/backgrounds" to File(filesDir, "backgrounds"),
+            GUEST_HOME + "/.local/share/bellatrix/themes" to File(filesDir, "bellatrix-themes"),
         )
 
     private val fixedBinds =

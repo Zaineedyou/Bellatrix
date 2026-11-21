@@ -374,7 +374,7 @@ class WebSocket private constructor(
                         append("Connection: Upgrade\r\n")
                         append("Sec-WebSocket-Key: $key\r\n")
                         append("Sec-WebSocket-Version: 13\r\n")
-                        if (headers.keys.none { it.equals("User-Agent", ignoreCase = true) }) append("User-Agent: bellatrix-widgets\r\n")
+                        if (headers.keys.none { it.equals("User-Agent", ignoreCase = true) }) append("User-Agent: omarchy-widgets\r\n")
                         for ((k, v) in headers) append("$k: $v\r\n")
                         append("\r\n")
                     }

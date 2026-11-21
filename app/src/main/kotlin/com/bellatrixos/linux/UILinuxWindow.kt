@@ -7,10 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ImageView
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bellatrixos.R
@@ -63,7 +61,6 @@ class UILinuxWindow : UIFragment() {
     private lateinit var sink: KeyboardSink
     private lateinit var keyBar: KeyBarView
     private lateinit var keyBarContainer: FrameLayout
-    private lateinit var toggle: ImageView
 
     private var bridgeSetByMe = false
     private var keyboardHeight = 0
@@ -137,10 +134,6 @@ class UILinuxWindow : UIFragment() {
 
         content = view.findViewById(R.id.linux_content)
         keyBarContainer = view.findViewById(R.id.linux_keybar_container)
-        toggle = view.findViewById(R.id.linux_keyboard_toggle)
-        toggle.setImageTintList(
-            ContextCompat.getColorStateList(requireContext(), R.color.linux_key_foreground),
-        )
 
         installed = Windows.d(state, TAG)
         // A terminal is always a desktop-style floating window, never a fullscreen pane.
@@ -216,7 +209,6 @@ class UILinuxWindow : UIFragment() {
             keyBar,
             FrameLayout.LayoutParams(MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
         )
-        toggle.setOnClickListener { sink.toggle() }
     }
 
     override fun onResume() {
@@ -312,14 +304,12 @@ class UILinuxWindow : UIFragment() {
         if (!::input.isInitialized) return@post
         if (!::surface.isInitialized) return@post
         if (!::keyBarContainer.isInitialized) return@post
-        if (!::toggle.isInitialized) return@post
 
         val barHeight = if (keyBarContainer.visibility == View.VISIBLE) keyBarContainer.height else 0
         val visible = (content.height - keyboardHeight - barHeight).coerceAtLeast(1)
         input.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, visible)
         input.requestLayout()
         keyBarContainer.translationY = -keyboardHeight.toFloat()
-        toggle.translationY = -keyboardHeight.toFloat()
         surface.visibleHeight = visible
     }
 

@@ -193,7 +193,7 @@ class Bootstrap(
         listOf(
             Step("rootfs", Stage.Download, R.string.linux_step_download, network = true) { installRootfs() },
             Step("etc-2", Stage.Configure, R.string.linux_step_configure, network = false) { configure() },
-            // foot aborts if either include is missing. Omarchy's theme isn't part of
+            // foot aborts if either include is missing. Bellatrix's theme isn't part of
             // this port, so seed both targets. The new id also migrates installs whose
             // foot.ini still points at the old state path.
             Step(
@@ -203,7 +203,7 @@ class Bootstrap(
                 network = false,
                 isDone = {
                     File(proot.rootfs, "root/.config/foot/foot.ini").readTextOrNull() == FOOT_INI &&
-                        File(proot.home, ".local/state/omarchy/current/theme/foot.ini").isFile &&
+                        File(proot.home, ".local/state/bellatrix/current/theme/foot.ini").isFile &&
                         File(proot.home, TerminalFont.PATH.removePrefix("~/")).isFile
                 },
             ) { ensureFootIncludes() },
@@ -619,10 +619,10 @@ class Bootstrap(
             parentFile?.mkdirs()
             writeText(FOOT_INI)
         }
-        val theme = File(proot.home, ".local/state/omarchy/current/theme/foot.ini")
+        val theme = File(proot.home, ".local/state/bellatrix/current/theme/foot.ini")
         val font = File(proot.home, TerminalFont.PATH.removePrefix("~/"))
         theme.parentFile?.mkdirs()
-        if (!theme.isFile) theme.writeText("# Bellatrix: no Omarchy theme is installed.\n")
+        if (!theme.isFile) theme.writeText("# Bellatrix: no Bellatrix theme is installed.\n")
         font.parentFile?.mkdirs()
         if (!font.isFile) font.writeText("[main]\nfont=JetBrains Mono:size=8.0\n")
     }
@@ -698,7 +698,7 @@ class Bootstrap(
         val FOOT_INI =
             """
             [main]
-            include=~/.local/state/omarchy/current/theme/foot.ini
+            include=~/.local/state/bellatrix/current/theme/foot.ini
             term=xterm-256color
             include=${TerminalFont.PATH}
             pad=8x8

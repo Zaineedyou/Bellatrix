@@ -5,13 +5,13 @@ import com.bellatrixos.upgrade.Policy
 import java.io.File
 
 /** Exec of the Files entry; the launcher opens its own Files app for it (see OpenBridge's shim). */
-const val FILES_COMMAND = "omarchy-files"
+const val FILES_COMMAND = "bellatrix-files"
 
 /** Exec of the Voice entry; the launcher opens its voice screen for it (see OpenBridge's shim). */
-const val VOICE_COMMAND = "omarchy-voice"
+const val VOICE_COMMAND = "bellatrix-voice"
 
 /** Exec of the Editor entry and Linux's $EDITOR; the launcher's own editor (see OpenBridge's shim). */
-const val EDIT_COMMAND = "omarchy-edit"
+const val EDIT_COMMAND = "bellatrix-edit"
 
 private fun entry(
     name: String,
@@ -53,8 +53,8 @@ private val HIDDEN =
         "footclient",
         "foot-server",
         "micro",
-        "omarchy-files",
-        "omarchy-voice",
+        "bellatrix-files",
+        "bellatrix-voice",
         "vim",
         "nvim",
         "yazi",

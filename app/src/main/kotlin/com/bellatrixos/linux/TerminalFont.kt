@@ -177,7 +177,7 @@ class TerminalFont(
             return minOf(size, floor(fit * 2.0) / 2).coerceAtLeast(MIN_SIZE)
         }
 
-        fun isTextFont(family: String) = family.isNotEmpty() && !Regex("emoji|signwriting|omarchy|symbols", RegexOption.IGNORE_CASE).containsMatchIn(family)
+        fun isTextFont(family: String) = family.isNotEmpty() && !Regex("emoji|signwriting|bellatrix|symbols", RegexOption.IGNORE_CASE).containsMatchIn(family)
 
         fun format(size: Double): String = String.format(Locale.ROOT, "%.1f", size)
 

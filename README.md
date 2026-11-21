@@ -174,6 +174,12 @@ recent logcat output. It copies the report to the clipboard and saves a backup t
 `Download/Bellatrix-crash.txt`, falling back to private app storage when external storage is
 unavailable.
 
+## Requirement for every update
+
+DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
+
+All Bellatrix features, including OWL widgets, the taskbar, themes, and Coding Agents, use the native Bellatrix UI only.
+
 ## License
 
 Bellatrix is free software licensed under the **GNU General Public License, version 3**.

@@ -742,7 +742,7 @@ class WidgetServices(
                     try {
                         connection.instanceFollowRedirects = false
                         if (pinned != null) (connection as HttpsURLConnection).pin(pinned)
-                        connection.setRequestProperty("User-Agent", "bellatrix-widgets")
+                        connection.setRequestProperty("User-Agent", "omarchy-widgets")
                         if (origin(target) == origin(URL(url))) headers.forEach { (k, v) -> connection.setRequestProperty(k, v) }
                         connection.requestMethod = sendMethod
                         // A DELETE usually has no body, and some servers refuse one.
@@ -886,7 +886,7 @@ class WidgetServices(
     private fun download(url: String): ByteArray? {
         val connection = openHttp(url, readTimeout = 20_000)
         try {
-            connection.setRequestProperty("User-Agent", "bellatrix-widgets")
+            connection.setRequestProperty("User-Agent", "omarchy-widgets")
             if (connection.responseCode !in 200..299) return null
             return connection.inputStream.use { it.readUpTo(MAX_FILE_BYTES + 1) }.takeIf { it.size <= MAX_FILE_BYTES }
         } finally {

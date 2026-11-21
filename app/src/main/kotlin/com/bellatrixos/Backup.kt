@@ -355,7 +355,7 @@ class Backup(
 
         /** What the launcher makes again by itself, or that only means something while it runs; the same list as backup_rules.xml. */
         val EXCLUDED =
-            setOf("tmp", "xdg", "sys", "proc", "keymap.xkb", "bwrap-shim", ".omarchy.download", "arch", STAGING, PREFS_STAGING)
+            setOf("tmp", "xdg", "sys", "proc", "keymap.xkb", "bwrap-shim", ".bellatrix.download", "arch", STAGING, PREFS_STAGING)
 
         /** [path] as a clean relative path, or null when it would leave the folder it is unpacked into. */
         fun safeRelative(path: String): String? {

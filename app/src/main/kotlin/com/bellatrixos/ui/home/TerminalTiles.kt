@@ -295,7 +295,7 @@ class TerminalTiles(
 
     companion object {
         /** Tiles' foot app_ids, numbered on. */
-        const val APP_ID_PREFIX = "omarchy.tile-"
+        const val APP_ID_PREFIX = "bellatrix.tile-"
 
         /**
          * What the lift keeps clear: the typing tile's whole tile, so its frame clears the keys too, measured before the

@@ -82,7 +82,7 @@ import com.bellatrixos.ui.glassBackground
 import com.bellatrixos.ui.frame
 
 /**
- * Pixel geometry of the home grid: cells separated by Omarchy-style gaps, as many rows of
+ * Pixel geometry of the home grid: cells separated by Bellatrix-style gaps, as many rows of
  * square-ish cells as fit, but never fewer than the [used] rows tiles were placed on. A layout
  * made on a tall screen keeps its arrangement on a squarer one (a foldable's inner screen) with
  * shorter cells, rather than tiles stacking. [turned] (landscape) lays portrait's grid on its

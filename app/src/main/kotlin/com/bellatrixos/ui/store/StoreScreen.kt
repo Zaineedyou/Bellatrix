@@ -111,7 +111,7 @@ fun StoreScreen(
     engine: WidgetEngine,
     agents: List<Agent>,
     page: Int,
-    /** The Omarchy theme in use, so previews show widgets in its colors. */
+    /** The Bellatrix theme in use, so previews show widgets in its colors. */
     theme: String?,
     onDismiss: () -> Unit,
     /** The kind it opens on; faces open the widgets on their full screen tab. */

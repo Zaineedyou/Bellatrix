@@ -67,7 +67,7 @@ import com.bellatrixos.ui.passesKeys
 import com.bellatrixos.ui.settings.rememberAddPhoneFolder
 import com.bellatrixos.ui.takesPassedKeys
 
-/** A touch-first file manager for the guest filesystem, in the Omarchy theme. */
+/** A touch-first file manager for the guest filesystem, in the Bellatrix theme. */
 @Composable
 fun FilesScreen(
     runtime: Runtime,

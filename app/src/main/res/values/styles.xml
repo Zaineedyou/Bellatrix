@@ -2775,6 +2775,12 @@
         <item name="android:listChoiceBackgroundIndicator">@android:color/transparent</item>
         <item name="colorControlHighlight">@android:color/transparent</item>
     </style>
+    <!-- Native Check for updates dialog with a frosted Liquid Glass surface. -->
+    <style name="UILiquidGlassDialog" parent="@style/UIAlertDialog">
+        <item name="android:windowBackground">@drawable/app_dialog_bg_liquid_glass</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:backgroundDimAmount">0.32</item>
+    </style>
     <style name="UICalenderView">
         <item name="android:textColorPrimaryInverse">@color/color_scheme_ui</item>
         <item name="colorControlActivated">?colorPrimary</item>

@@ -10,6 +10,7 @@ import android.os.SystemClock
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -586,7 +587,7 @@ private fun Element(
                 }
             }
         }
-        "Row", "Flow" -> {
+        "Row", "Flow", "Flex" -> {
             val gap = (p.observe("gap")?.num() ?: 8.0).dp
             val vertical =
                 when (p.observe("align")?.toString()) {
@@ -596,7 +597,7 @@ private fun Element(
                 }
             val arr = horizontal(p.observe("justify")?.toString(), gap)
             HoldingPopups(el, mod, env, inst) { m, children ->
-                if (el.kind == "Flow" || p.observe("wrap")?.truthy == true) {
+                if (el.kind == "Flow" || el.kind == "Flex" || p.observe("wrap")?.truthy == true) {
                     FlowRow(m, horizontalArrangement = arr, verticalArrangement = Arrangement.spacedBy(gap), itemVerticalAlignment = vertical) {
                         Nodes(children, env, inst, this)
                     }
@@ -605,7 +606,7 @@ private fun Element(
                 }
             }
         }
-        "Box" -> Box(mod, contentAlignment = boxAlign(p.observe("align")?.toString())) { Nodes(el.children, env, inst, this) }
+        "Box", "Anchor" -> Box(mod, contentAlignment = boxAlign(p.observe("align")?.toString())) { Nodes(el.children, env, inst, this) }
         "Popup" -> PopupNode(el, p, mod, env, inst)
         "Grid" -> {
             val columns = (p.observe("columns")?.num() ?: 2.0).toInt().coerceIn(1, 12)
@@ -864,6 +865,10 @@ private fun common(
     var m: Modifier = Modifier
     // While the node's own onDrag has the finger: an animated offset follows it rather than easing after it.
     val held = remember { mutableStateOf(false) }
+    // owl 24: Waybar-style anchoring — a child of an Anchor/Box pins itself to an edge.
+    if (parent is BoxScope) {
+        p.observe("anchor")?.toString()?.let { a -> m = with(parent) { m.align(boxAlign(a)) } }
+    }
     p.observe("weight")?.num()?.toFloat()?.takeIf { it > 0f }?.let { w ->
         m =
             when (parent) {

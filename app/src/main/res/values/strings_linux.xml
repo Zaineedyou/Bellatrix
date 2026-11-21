@@ -24,7 +24,6 @@
     <string name="linux_window_default">Linux window</string>
     <string name="linux_terminal_window">Terminal</string>
     <string name="linux_btop_window">btop</string>
-    <string name="linux_toggle_keyboard">show or hide the keyboard</string>
     <string name="linux_settings_title">Linux</string>
     <string name="explorer_linux_home">Linux (/root)</string>
     <string name="explorer_linux_home_detail">Void Linux home</string>

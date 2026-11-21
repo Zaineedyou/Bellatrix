@@ -9,6 +9,9 @@ object TaskBarDB {
     @JvmField var f4804a: SharedPreferences? = null
     @JvmField val b: HashMap<String, Int> = HashMap()
 
+    /** TaskBarStore mirrors saved pins into layout.toml; set once at runtime startup. */
+    @JvmField var onPinsChanged: ((List<TaskBarItemPins>) -> Unit)? = null
+
     private val prefs: SharedPreferences
         get() = requireNotNull(f4804a) { "TaskBarDB belum diinisialisasi" }
 
@@ -43,5 +46,6 @@ object TaskBarDB {
     @JvmStatic
     fun e(list: List<TaskBarItemPins>) {
         prefs.edit().putString("taskbar_apps", Gson().toJson(list)).apply()
+        onPinsChanged?.invoke(list)
     }
 }

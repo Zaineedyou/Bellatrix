@@ -96,7 +96,7 @@ object ColorSpec {
 
     private val HEX = Regex("#[0-9a-f]{6}")
 
-    /** The names every theme has once [ThemeColors.resolve] ran, plus the optional ones Omarchy's themes use. */
+    /** The names every theme has once [ThemeColors.resolve] ran, plus the optional ones Bellatrix's themes use. */
     val NAMES: Set<String> =
         buildSet {
             addAll(listOf("background", "foreground", "accent", "cursor", "muted", "selection", "selection_background", "selection_foreground"))
@@ -157,8 +157,8 @@ class Style(
         /** How blurred the wallpaper is behind panels and the drawer: soft, so what it shows is still known. */
         const val BLUR = 0.30
 
-        val THEME = Setting.Name("theme", "The Omarchy theme, by its directory name in ~/.local/share/omarchy/themes or ~/.config/omarchy/themes (yours win).")
-        val BACKGROUND = Setting.Name("background", "A file name from the theme's backgrounds/ or ~/.config/omarchy/backgrounds/<theme>/. Unset: the theme's first.")
+        val THEME = Setting.Name("theme", "The Bellatrix theme, by its directory name in ~/.local/share/bellatrix/themes or ~/.config/bellatrix/themes (yours win).")
+        val BACKGROUND = Setting.Name("background", "A file name from the theme's backgrounds/ or ~/.config/bellatrix/backgrounds/<theme>/. Unset: the theme's first.")
 
         val APP_TILES = Setting.Flag("home.app-tiles", true, "Apps on home in a tile like a widget; false draws bare icons on the wallpaper.")
         val RECENT_APPS = Setting.Flag("home.recent-apps", true, "The strip of recently used apps above the prompt bar.")
@@ -233,10 +233,10 @@ class Style(
         val DRAWER_BORDER = Setting.Color("drawer.border", "The line around the app drawer's list: \"theme\" is the theme's border color, \"none\" draws none.", noneAllowed = true)
         val DRAWER_BORDER_WIDTH = Setting.Number("drawer.border-width", 1.0, 0.0..8.0, "How thick the line around the app drawer's list is, in dp.")
 
-        val MONOCHROME_ICONS = Setting.Flag("icons.monochrome", false, "App icons as silhouettes in the accent color, as on Omarchy, rather than in their own colors.")
+        val MONOCHROME_ICONS = Setting.Flag("icons.monochrome", false, "App icons as silhouettes in the accent color, as on Bellatrix, rather than in their own colors.")
         val ICON_PACK = Setting.Name("icons.pack", "An installed icon pack's package name (Arcticons: \"com.donnnno.arcticons\") whose icons Android apps take; apps it doesn't cover keep their own. Unset: apps' own icons. Works with icons.monochrome.")
 
-        val CORNER_SCALE = Setting.Number("corners.scale", 1.0, 0.0..2.0, "Multiplies every frame's corner radius: 0 square (Omarchy), 0.5 soft, 1 round like stock Android and liquid glass.")
+        val CORNER_SCALE = Setting.Number("corners.scale", 1.0, 0.0..2.0, "Multiplies every frame's corner radius: 0 square (Bellatrix), 0.5 soft, 1 round like stock Android and liquid glass.")
 
         val STATUS_BAR = Bar("status-bar", "Android's status bar at the top of home")
         val STATUS_BAR_SHOWN = Setting.Flag("status-bar.shown", true, "Android's status bar on home; false hides it until a swipe down from the top edge.")

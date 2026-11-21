@@ -74,11 +74,11 @@ fun HomeMenu(
     val linux = linuxPhase(runtime) == LinuxPhase.Installed
     val scope = rememberCoroutineScope()
 
-    /** Recolors right away, then applies the full theme: its first background, like omarchy-theme-set, and the guest's configs. */
+    /** Recolors right away, then applies the full theme: its first background, like bellatrix-theme-set, and the guest's configs. */
     fun pickTheme(theme: com.bellatrixos.theme.BundledTheme) {
         runtime.themes.pick(theme)
         // Until all themes are downloaded, one that isn't there yet is fetched on its own.
-        scope.launch { if (runtime.themes.complete) runtime.themes.applyPicked() else runtime.themes.fetchPicked() }
+        scope.launch { runtime.themes.applyPicked() }
     }
     Menu(onDismiss = { state.homeMenuOpen = false }) {
         // What to create sits on the row itself: one tap starts the agent, each kind with its own prompt.
@@ -121,7 +121,7 @@ fun HomeMenu(
                 onPick = ::pickTheme,
                 onBrowse = {
                     state.homeMenuOpen = false
-                    state.show(SettingsPage.Themes)
+                    state.show(SettingsPage.Style)
                 },
             )
         }

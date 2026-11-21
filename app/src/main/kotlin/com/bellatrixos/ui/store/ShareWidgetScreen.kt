@@ -78,7 +78,7 @@ import com.bellatrixos.ui.passesKeys
  * Shares a widget, the two ways there are:
  *
  * - as a QR code and a link (widgets/market/Share.kt): another phone scans the code and its launcher
- *   shows what the widget runs before adding it; Omarchy's Widgets app takes the same link. The whole
+ *   shows what the widget runs before adding it; Bellatrix's Widgets app takes the same link. The whole
  *   file is in the link, after the `#`, so nothing is uploaded anywhere.
  * - to the widget store, for everyone: as an issue from the browser (widgets/market/Submit.kt),
  *   or [onPublish] hands it to the default agent, which opens a pull request and can add previews too.
@@ -204,7 +204,7 @@ fun ShareWidgetScreen(
                         }
                     }
                     if (sendable) BasicText(
-                        "Omarchy: omarchy-widgets import '<link>'",
+                        "Widget store: omarchy-widgets import '<link>'",
                         style = Mono.copy(color = Palette.muted, fontSize = TextSize.Small),
                     )
                 }

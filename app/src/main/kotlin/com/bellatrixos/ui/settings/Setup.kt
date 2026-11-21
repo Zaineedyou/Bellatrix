@@ -76,30 +76,25 @@ import com.bellatrixos.ui.takesPassedKeys
 
 /**
  * The first-run screen: pick a theme and, optionally, set up Linux. Start
- * fetches Omarchy's themes, then the home screen opens; a Linux install
+ * fetches Bellatrix's themes, then the home screen opens; a Linux install
  * carries on in the background.
  */
 @Composable
 internal fun SetupScreen(runtime: Runtime) {
     val themes = runtime.themes
     var linux by rememberSaveable { mutableStateOf(false) }
-    // Claude Code first, like Omarchy's default agent; the first picked becomes the launcher's default.
+    // Claude Code first, like Bellatrix's default agent; the first picked becomes the launcher's default.
     var picked by rememberSaveable { mutableStateOf(listOf(AGENTS.first().bin)) }
     var started by remember { mutableStateOf(false) }
     val install = rememberLinuxInstall(runtime)
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    // Only the picked theme now; the rest download in the background once home is up.
+    // Themes are local files now: there's nothing to download before home opens.
     fun fetchTheme(then: () -> Unit = {}) {
         error = null
-        scope.launch {
-            error = themes.fetchPicked()
-            if (error == null) {
-                runtime.finishWelcome()
-                then()
-            }
-        }
+        runtime.finishWelcome()
+        then()
     }
     // Keys start on the picked theme: on the first, the strip would pick that one as focus lands on it.
     val pickedFocus = remember { FocusRequester() }
@@ -484,7 +479,7 @@ private fun LogTail(
 }
 
 /**
- * Omarchy's themes as swatches in a horizontal row; tapping one recolors everything right away.
+ * Bellatrix's themes as swatches in a horizontal row; tapping one recolors everything right away.
  * [gutter] is the parent's side padding, which the row scrolls under. By default a pick only
  * recolors, for setup where the full themes aren't downloaded yet. With [onBrowse], the row
  * ends in a tile that opens the community themes.

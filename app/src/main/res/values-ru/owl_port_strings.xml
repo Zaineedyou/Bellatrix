@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="wallpaper_label">Omarchy</string>
-    <string name="wallpaper_description">Фон текущей темы Omarchy. Системные цвета подстраиваются под тему.</string>
+    <string name="wallpaper_label">Bellatrix</string>
+    <string name="wallpaper_description">Фон текущей темы Bellatrix. Системные цвета подстраиваются под тему.</string>
     <string name="activity_linux">Linux</string>
     <string name="activity_terminal">Терминал</string>
     <string name="activity_app">Приложение</string>
@@ -143,14 +143,14 @@
     <string name="drawer_action_uninstall">удалить</string>
     <string name="linux_stage_agents_named">установка: %1$s</string>
     <string name="linux_updates_unreachable">не удалось связаться с зеркалами</string>
-    <string name="linux_welcome_title">omarchy на главном экране</string>
-    <string name="linux_welcome_body">Темы и обои Omarchy, ваши Android-приложения и виджеты на главном экране. Void Linux добавит терминальные приложения и ИИ-агентов — сейчас или позже в настройках.</string>
+    <string name="linux_welcome_title">Bellatrix на главном экране</string>
+    <string name="linux_welcome_body">Темы и обои Bellatrix, ваши Android-приложения и виджеты на главном экране. Void Linux добавит терминальные приложения и ИИ-агентов — сейчас или позже в настройках.</string>
     <string name="linux_welcome_linux">linux</string>
     <string name="linux_welcome_choice">также установить Void Linux</string>
     <string name="linux_welcome_choice_detail">терминальные приложения, агенты, xbps · загрузка ~1 ГБ, 3 ГБ места</string>
     <string name="linux_welcome_start">начать</string>
     <string name="linux_welcome_start_linux">начать и установить linux</string>
-    <string name="linux_welcome_start_hint">Обои темы скачаются сразу, а остальные темы Omarchy (около 70 МБ) — в фоне.</string>
+    <string name="linux_welcome_start_hint">Обои темы скачаются сразу, а остальные темы Bellatrix (около 70 МБ) — в фоне.</string>
     <string name="linux_welcome_start_linux_hint">Linux — это около 1 ГБ загрузки (лучше по Wi-Fi) и 3 ГБ места. Он устанавливается в фоне за 10–20 минут, а главным экраном можно пользоваться сразу.</string>
     <string name="linux_welcome_getting">загрузка темы %1$s</string>
     <string name="linux_welcome_theme_failed">тема не скачалась</string>
@@ -211,7 +211,7 @@
     <string name="licenses_use_shmem">общая память для PRoot</string>
     <string name="licenses_use_mesa">OpenGL на GPU Adreno в необязательной системе Linux</string>
     <string name="licenses_use_wayland">файлы протоколов, входящие в Mesa</string>
-    <string name="licenses_use_omarchy">цвета тем для первого запуска</string>
+    <string name="licenses_use_bellatrix">цвета тем для первого запуска</string>
     <string name="licenses_use_nerd_fonts">шрифт с символами</string>
     <string name="licenses_use_weather_icons">значки погоды в шрифте с символами</string>
     <string name="licenses_use_mdi">значки в шрифте с символами</string>
@@ -427,14 +427,14 @@
     <string name="store_add">добавить</string>
     <string name="store_theme_title">темы сообщества</string>
     <string name="store_theme_search">поиск: темы (%1$d)</string>
-    <string name="store_theme_header">созданы сообществом, список на omarchy.org/themes · устанавливаются с GitHub</string>
+    <string name="store_theme_header">созданы сообществом, список на the Bellatrix theme catalog · устанавливаются с GitHub</string>
     <string name="store_theme_in_use">✓ используется</string>
     <string name="store_theme_install_confirm">установить %1$s?</string>
     <string name="store_theme_install_message">Из %1$s. Linux получит цвета и обои темы, но не скрипты и не настройки терминала.</string>
     <string name="store_theme_install_message_replaces">Из %1$s. Linux получит цвета и обои темы, но не скрипты и не настройки терминала.\n\nОна заменит вашу тему %2$s.</string>
-    <string name="store_theme_install_message_over">Из %1$s. Linux получит цвета и обои темы, но не скрипты и не настройки терминала.\n\nОна заменит тему Omarchy %2$s; если удалить новую, тема Omarchy вернётся.</string>
+    <string name="store_theme_install_message_over">Из %1$s. Linux получит цвета и обои темы, но не скрипты и не настройки терминала.\n\nОна заменит тему Bellatrix %2$s; если удалить новую, тема Bellatrix вернётся.</string>
     <string name="store_theme_installing">установка %1$s… %2$d МБ</string>
-    <string name="store_theme_catalog_failed">не удалось загрузить omarchy.org/themes: %1$s</string>
+    <string name="store_theme_catalog_failed">не удалось загрузить the Bellatrix theme catalog: %1$s</string>
     <string name="store_theme_page_changed">страница изменилась, и её не удаётся прочитать</string>
     <string name="store_theme_not_github">это не репозиторий GitHub: %1$s</string>
     <string name="store_theme_not_on_github">%1$s нет на GitHub</string>
@@ -527,10 +527,10 @@
     <string name="style_update">обновить</string>
     <string name="style_remove">удалить</string>
     <string name="style_remove_theme_title">удалить %1$s?</string>
-    <string name="style_remove_theme_builtin">Ваши изменения в ней пропадут, версия Omarchy останется.</string>
+    <string name="style_remove_theme_builtin">Ваши изменения в ней пропадут, версия Bellatrix останется.</string>
     <string name="style_remove_deleted">Она будет удалена с телефона и из Linux.</string>
-    <string name="style_themes_downloading">Остальные темы Omarchy скачиваются с github.com/omacom/omarchy (~70 МБ).</string>
-    <string name="style_themes_not_installed">Темы Omarchy ещё не установлены. Они скачиваются с github.com/omacom/omarchy (~70 МБ).</string>
+    <string name="style_themes_downloading">Остальные темы Bellatrix скачиваются с the Bellatrix theme pack (~70 МБ).</string>
+    <string name="style_themes_not_installed">Темы Bellatrix ещё не установлены. Они скачиваются с the Bellatrix theme pack (~70 МБ).</string>
     <string name="style_downloading">загрузка… %1$d МБ</string>
     <string name="style_failed">ошибка: %1$s</string>
     <string name="style_retry">повторить</string>
@@ -570,7 +570,7 @@
     <string name="gestures_keybar_until_fixed">панель клавиш терминала будет стандартной, пока ошибка не исправлена: %1$s</string>
     <string name="gestures_strip_until_fixed">панель приложений будет стандартной, пока ошибка не исправлена: %1$s</string>
     <string name="agents_title">ИИ-агенты</string>
-    <string name="agents_intro">Устанавливаются как в Omarchy, большинство через mise. Вход открывается в браузере; ключи вставляйте из буфера обмена клавиатуры.</string>
+    <string name="agents_intro">Устанавливаются как в Bellatrix, большинство через mise. Вход открывается в браузере; ключи вставляйте из буфера обмена клавиатуры.</string>
     <string name="agents_open">открыть</string>
     <string name="agents_remove">удалить</string>
     <string name="agents_install">установить</string>

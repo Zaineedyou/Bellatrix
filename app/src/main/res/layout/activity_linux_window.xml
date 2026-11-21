@@ -5,18 +5,6 @@
     android:layout_height="match_parent"
     android:background="#1a1b26">
 
-    <ImageView
-        android:id="@+id/linux_keyboard_toggle"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/linux_key_circle"
-        android:contentDescription="@string/linux_toggle_keyboard"
-        android:src="@drawable/ic_key_keyboard"
-        android:visibility="visible" />
-
     <FrameLayout
         android:id="@+id/linux_keybar_container"
         android:layout_width="match_parent"

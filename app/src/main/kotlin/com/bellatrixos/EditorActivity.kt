@@ -16,13 +16,13 @@ import com.bellatrixos.ui.files.EditorScreen
 
 /**
  * The text editor: one Recents card per file (documentLaunchMode), opened from
- * Files, the drawer, or `$EDITOR` in Linux. Opened by `omarchy-edit`, it holds
+ * Files, the drawer, or `$EDITOR` in Linux. Opened by `bellatrix-edit`, it holds
  * the shim's reply FIFOs and answers once it closes, which is what makes
  * `git commit` wait for the message, as with a terminal editor.
  */
 class EditorActivity : InstantActivity() {
 
-    /** Host paths of the `omarchy-edit` FIFOs waiting for this file to close. */
+    /** Host paths of the `bellatrix-edit` FIFOs waiting for this file to close. */
     private val waiting = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +41,7 @@ class EditorActivity : InstantActivity() {
         }
     }
 
-    /** The same file again, from another `omarchy-edit`: it waits for this one to close too. */
+    /** The same file again, from another `bellatrix-edit`: it waits for this one to close too. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent.getStringExtra(EXTRA_DONE)?.let(waiting::add)

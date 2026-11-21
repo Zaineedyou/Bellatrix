@@ -109,7 +109,7 @@ import com.bellatrixos.ui.passesKeys
 import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.ui.keyActivated
 
-/** Home pages of JSON widgets on a snap grid, bordered and gapped like Omarchy windows. */
+/** Home pages of JSON widgets on a snap grid, bordered and gapped like Bellatrix windows. */
 @Composable
 fun HomeScreen(
     runtime: Runtime,

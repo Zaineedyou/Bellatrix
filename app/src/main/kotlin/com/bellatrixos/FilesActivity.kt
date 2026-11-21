@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.bellatrixos.ui.files.FilesScreen
 
-/** The Files app for the Linux file system: its own task and Recents card, opened from the drawer or `omarchy-files` in a terminal. */
+/** The Files app for the Linux file system: its own task and Recents card, opened from the drawer or `bellatrix-files` in a terminal. */
 class FilesActivity : InstantActivity() {
     private var startPath by mutableStateOf(DEFAULT_PATH)
 
@@ -24,7 +24,7 @@ class FilesActivity : InstantActivity() {
         }
     }
 
-    /** Opened again with a path (e.g. `omarchy-files ~/Downloads`): jump there. */
+    /** Opened again with a path (e.g. `bellatrix-files ~/Downloads`): jump there. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent.getStringExtra(EXTRA_PATH)?.let { startPath = it }

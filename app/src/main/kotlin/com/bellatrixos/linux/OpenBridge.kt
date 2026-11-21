@@ -51,11 +51,11 @@ class OpenBridge(
 
     private fun open(target: String) {
         val url = target.trim()
-        // Written by the omarchy-files shim: open the Files app at a guest path.
+        // Written by the bellatrix-files shim: open the Files app at a guest path.
         if (url.startsWith(FILES_PREFIX)) return onOpenFiles(url.removePrefix(FILES_PREFIX))
-        // Written by the omarchy-voice shim: open the voice screen.
+        // Written by the bellatrix-voice shim: open the voice screen.
         if (url == VOICE_PREFIX) return onOpenVoice()
-        // Written by the omarchy-edit shim: its reply FIFO (no spaces, made by mktemp) and the file.
+        // Written by the bellatrix-edit shim: its reply FIFO (no spaces, made by mktemp) and the file.
         if (url.startsWith(EDIT_PREFIX)) {
             val (reply, path) = url.removePrefix(EDIT_PREFIX).split(' ', limit = 2).takeIf { it.size == 2 } ?: return
             return onEdit(path, proot.guestFile(reply)?.path ?: return)
@@ -129,8 +129,8 @@ class OpenBridge(
     }
 
     private companion object {
-        const val FILES_PREFIX = "omarchy-files:"
-        const val EDIT_PREFIX = "omarchy-edit:"
-        const val VOICE_PREFIX = "omarchy-voice:"
+        const val FILES_PREFIX = "bellatrix-files:"
+        const val EDIT_PREFIX = "bellatrix-edit:"
+        const val VOICE_PREFIX = "bellatrix-voice:"
     }
 }

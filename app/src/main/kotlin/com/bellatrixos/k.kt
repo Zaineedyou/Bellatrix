@@ -53,6 +53,14 @@ class k(
                 } else if (TaskBarDB.b.isEmpty()) {
                     TaskBarDB.c(observableList)
                 }
+                // An agent-editable layout.toml wins over the prefs; pins made on the phone write it back.
+                val runtime = (context.applicationContext as? App)?.runtime
+                val currentPins = observableList.mapIndexed { index, item -> TaskBarItemPins(item.a(), index) }
+                runtime?.taskbar?.loaded(currentPins) { pins ->
+                    observableList.clear()
+                    pins.forEach { observableList.add(TaskBarItem(it.a(), true)) }
+                    TaskBarDB.c(observableList)
+                }
                 mainActivity.t0 = TaskBarAdapter(context, observableList)
                 mainActivity.runOnUiThread(l(holder, 1))
             }

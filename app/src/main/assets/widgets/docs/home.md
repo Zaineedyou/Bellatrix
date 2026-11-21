@@ -43,6 +43,62 @@ tiles = [
 - What couldn't be read is in `errors.txt` next to it, and on the phone's home.
   A file that doesn't parse changes nothing, and isn't saved over until it's fixed.
 
+## Create and modify widgets on Bellatrix home
+
+Anything that can write files can create or change a home widget: a coding agent
+from **Settings → Coding Agents**, or a terminal in the launcher. There is no
+second launcher screen — the files below are the ones Bellatrix home reads.
+
+1. Write `~/.config/bellatrix/widgets/<name>.owl` (a `widget`, `face`, `app`,
+   `panel`, or `keybar` declaration; see `README.md` and `docs/nodes.md`).
+2. Run `owl-check ~/.config/bellatrix/widgets/<name>.owl`. It prints errors and
+   the path of a PNG drawn with live data; open that PNG to check the layout.
+3. Add `{ widget = "<name>.owl", x, y, w, h }` to a `[[page]]` in
+   `~/.config/bellatrix/home/layout.toml` (or let it take the first free spot).
+4. `owl-send ~/.config/bellatrix/widgets/<name>.owl set <state> <value>` changes
+   live state; `owl-send <file> refresh` redraws it.
+
+Waybar-style declarative layout (owl 24):
+
+- `Flex { … }` is a wrapping flex row: a status strip that flows to a new line
+  when the tile is narrow. It takes `gap`, `align`, `justify`, like `Row`.
+- `Anchor { … }` pins children to its edges. Give each child an `anchor` of
+  `topStart`, `top`, `topEnd`, `start`, `center`, `end`, `bottomStart`, `bottom`
+  or `bottomEnd`. A bar panel with a left clock and right icons is:
+
+```owl
+widget {
+  meta { owl: 24 }
+  Anchor {
+    Text { anchor: topStart; text: clock() }
+    Flex { anchor: topEnd; gap: 6
+      Text { text: battery() }
+      Text { text: network() }
+    }
+  }
+}
+```
+
+`Box` accepts the same `anchor` property, so an existing panel can be converted
+without changing its structure.
+
+## Taskbar layout
+
+`~/.config/bellatrix/taskbar/layout.toml` is the taskbar's pinned apps. Changes
+made with the taskbar's pin/unpin menu write it; an agent editing it adds,
+removes and reorders taskbar icons within a second. `errors.txt` next to it says
+what was ignored. Transient state (which windows are open, minimized or focused)
+is never written here — only pins.
+
+```toml
+version = 1
+pins = ["UIExplorer", "UISettings", "UITerminal", "linux:foot", "org.mozilla.firefox"]
+```
+
+Names are the same keys home and the taskbar use: `UIExplorer`, `UISettings`,
+`UITerminal`, `linux:<desktop id>`, or an Android package. A file that doesn't
+parse changes nothing, and isn't overwritten until it's fixed.
+
 On a foldable, the cover screen has pages of its own, under `[cover]`: the
 same tiles, placed for a screen a third as tall. The pages at the top say
 what's on home; `[cover]` only says where it goes there. A tile left out of

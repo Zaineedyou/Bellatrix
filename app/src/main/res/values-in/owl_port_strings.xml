@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="wallpaper_label">Omarchy</string>
-    <string name="wallpaper_description">Latar belakang tema Omarchy saat ini. Warna sistem mengikuti tema.</string>
+    <string name="wallpaper_label">Bellatrix</string>
+    <string name="wallpaper_description">Latar belakang tema Bellatrix saat ini. Warna sistem mengikuti tema.</string>
     <string name="activity_linux">Linux</string>
     <string name="activity_terminal">Terminal</string>
     <string name="activity_app">Aplikasi</string>
@@ -143,14 +143,14 @@
     <string name="drawer_action_uninstall">uninstal</string>
     <string name="linux_stage_agents_named">instal %1$s</string>
     <string name="linux_updates_unreachable">tidak dapat terhubung ke mirror</string>
-    <string name="linux_welcome_title">omarchy di layar utamamu</string>
-    <string name="linux_welcome_body">Tema dan wallpaper Omarchy, aplikasi Android-mu, dan widget layar utama. Void Linux menambahkan aplikasi terminal dan agen coding, sekarang atau nanti di setelan.</string>
+    <string name="linux_welcome_title">Bellatrix di layar utamamu</string>
+    <string name="linux_welcome_body">Tema dan wallpaper Bellatrix, aplikasi Android-mu, dan widget layar utama. Void Linux menambahkan aplikasi terminal dan agen coding, sekarang atau nanti di setelan.</string>
     <string name="linux_welcome_linux">linux</string>
     <string name="linux_welcome_choice">siapkan Void Linux juga</string>
     <string name="linux_welcome_choice_detail">aplikasi terminal, agen, xbps · unduhan ~1 GB, ruang 3 GB</string>
     <string name="linux_welcome_start">mulai</string>
     <string name="linux_welcome_start_linux">mulai dan siapkan linux</string>
-    <string name="linux_welcome_start_hint">Mengunduh wallpaper tema sekarang, dan tema Omarchy lainnya (sekitar 70 MB) di latar belakang.</string>
+    <string name="linux_welcome_start_hint">Mengunduh wallpaper tema sekarang, dan tema Bellatrix lainnya (sekitar 70 MB) di latar belakang.</string>
     <string name="linux_welcome_start_linux_hint">Linux mengunduh sekitar 1 GB, jadi sebaiknya pakai Wi-Fi, dan memakai ruang 3 GB. Penginstalan berjalan di latar belakang selama 10 sampai 20 menit; layar utama langsung siap.</string>
     <string name="linux_welcome_getting">mengunduh %1$s</string>
     <string name="linux_welcome_theme_failed">tema gagal diunduh</string>
@@ -211,7 +211,7 @@
     <string name="licenses_use_shmem">memori bersama untuk PRoot</string>
     <string name="licenses_use_mesa">OpenGL di GPU Adreno pada sistem Linux opsional</string>
     <string name="licenses_use_wayland">file protokol yang disertakan bersama Mesa</string>
-    <string name="licenses_use_omarchy">warna tema yang disertakan untuk saat pertama kali dijalankan</string>
+    <string name="licenses_use_bellatrix">warna tema yang disertakan untuk saat pertama kali dijalankan</string>
     <string name="licenses_use_nerd_fonts">font simbol</string>
     <string name="licenses_use_weather_icons">glyph cuaca di font simbol</string>
     <string name="licenses_use_mdi">glyph di font simbol</string>
@@ -427,14 +427,14 @@
     <string name="store_add">tambah</string>
     <string name="store_theme_title">tema komunitas</string>
     <string name="store_theme_search">cari %1$d tema</string>
-    <string name="store_theme_header">dibuat oleh komunitas, terdaftar di omarchy.org/themes · diinstal dari GitHub</string>
+    <string name="store_theme_header">dibuat oleh komunitas, terdaftar di the Bellatrix theme catalog · diinstal dari GitHub</string>
     <string name="store_theme_in_use">✓ dipakai</string>
     <string name="store_theme_install_confirm">instal %1$s?</string>
     <string name="store_theme_install_message">Dari %1$s. Linux mendapat warna dan wallpaper-nya, bukan skrip atau konfigurasi terminalnya.</string>
     <string name="store_theme_install_message_replaces">Dari %1$s. Linux mendapat warna dan wallpaper-nya, bukan skrip atau konfigurasi terminalnya.\n\nTema ini menggantikan %2$s milikmu.</string>
-    <string name="store_theme_install_message_over">Dari %1$s. Linux mendapat warna dan wallpaper-nya, bukan skrip atau konfigurasi terminalnya.\n\nTema ini menimpa %2$s dari Omarchy; menghapus tema ini akan memulihkan %2$s.</string>
+    <string name="store_theme_install_message_over">Dari %1$s. Linux mendapat warna dan wallpaper-nya, bukan skrip atau konfigurasi terminalnya.\n\nTema ini menimpa %2$s dari Bellatrix; menghapus tema ini akan memulihkan %2$s.</string>
     <string name="store_theme_installing">menginstal %1$s… %2$d MB</string>
-    <string name="store_theme_catalog_failed">tidak dapat memuat omarchy.org/themes: %1$s</string>
+    <string name="store_theme_catalog_failed">tidak dapat memuat the Bellatrix theme catalog: %1$s</string>
     <string name="store_theme_page_changed">halamannya berubah dan tidak dapat dibaca</string>
     <string name="store_theme_not_github">bukan repo GitHub: %1$s</string>
     <string name="store_theme_not_on_github">%1$s tidak ada di GitHub</string>
@@ -527,10 +527,10 @@
     <string name="style_update">perbarui</string>
     <string name="style_remove">hapus</string>
     <string name="style_remove_theme_title">hapus %1$s?</string>
-    <string name="style_remove_theme_builtin">Perubahan yang kamu buat akan hilang; versi Omarchy tetap ada.</string>
+    <string name="style_remove_theme_builtin">Perubahan yang kamu buat akan hilang; versi Bellatrix tetap ada.</string>
     <string name="style_remove_deleted">Tema dihapus dari ponsel dan dari Linux.</string>
-    <string name="style_themes_downloading">Tema Omarchy lainnya sedang diunduh dari github.com/omacom/omarchy (~70 MB).</string>
-    <string name="style_themes_not_installed">Tema Omarchy belum terinstal. Tema diunduh dari github.com/omacom/omarchy (~70 MB).</string>
+    <string name="style_themes_downloading">Tema Bellatrix lainnya sedang diunduh dari the Bellatrix theme pack (~70 MB).</string>
+    <string name="style_themes_not_installed">Tema Bellatrix belum terinstal. Tema diunduh dari the Bellatrix theme pack (~70 MB).</string>
     <string name="style_downloading">mengunduh… %1$d MB</string>
     <string name="style_failed">gagal: %1$s</string>
     <string name="style_retry">coba lagi</string>
@@ -570,7 +570,7 @@
     <string name="gestures_keybar_until_fixed">bilah tombol terminal memakai bawaan sampai diperbaiki: %1$s</string>
     <string name="gestures_strip_until_fixed">bilah aplikasi memakai bawaan sampai diperbaiki: %1$s</string>
     <string name="agents_title">agen coding</string>
-    <string name="agents_intro">Diinstal seperti di Omarchy, sebagian besar dengan mise. Login terbuka di browser; tempel kunci API lewat papan klip keyboard.</string>
+    <string name="agents_intro">Diinstal seperti di Bellatrix, sebagian besar dengan mise. Login terbuka di browser; tempel kunci API lewat papan klip keyboard.</string>
     <string name="agents_open">buka</string>
     <string name="agents_remove">hapus</string>
     <string name="agents_install">instal</string>

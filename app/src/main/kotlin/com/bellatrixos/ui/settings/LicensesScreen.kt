@@ -65,9 +65,9 @@ private val COMPONENTS =
             "PRoot",
             R.string.licenses_use_proot,
             "gpl-2.0",
-            "Copyright (C) 2015 STMicroelectronics. Built from Termux's 5.1.107.96 with bellatrix's patches; the binary's libtalloc.so.2 dependency is renamed to libtalloc.so.",
+            "Copyright (C) 2015 STMicroelectronics. Built from Termux's 5.1.107.96 with upstream patches; the binary's libtalloc.so.2 dependency is renamed to libtalloc.so.",
             "https://proot-me.github.io",
-            source = "https://github.com/SimonSchubert/bellatrix/tree/main/patches/proot",
+            source = "https://github.com/SimonSchubert/omarchy/tree/main/patches/proot",
         ),
         Component(
             "talloc",
@@ -89,10 +89,10 @@ private val COMPONENTS =
             "Mesa",
             R.string.licenses_use_mesa,
             "mit",
-            "Copyright (C) 1999-2007 Brian Paul and the Mesa contributors. Mesa 26.2.4 with bellatrix's " +
+            "Copyright (C) 1999-2007 Brian Paul and the Mesa contributors. Mesa 26.2.4 with upstream " +
                 "zink patch. Most files are MIT; the rest are under the permissive licenses in Mesa's licenses/ directory.",
             "https://mesa3d.org",
-            source = "https://github.com/SimonSchubert/bellatrix/tree/main/scripts/mesa",
+            source = "https://github.com/SimonSchubert/omarchy/tree/main/scripts/mesa",
         ),
         Component(
             "wayland-protocols",
@@ -102,13 +102,6 @@ private val COMPONENTS =
                 "Copyright © 2013 Rafael Antognolli\nCopyright © 2013 Jasper St. Pierre\nCopyright © 2014 Jonas Ådahl\n" +
                 "Copyright © 2014 Jason Ekstrand\nCopyright © 2014-2015 Collabora, Ltd.\nCopyright © 2015 Red Hat Inc.",
             "https://gitlab.freedesktop.org/wayland/wayland-protocols",
-        ),
-        Component(
-            "Omarchy",
-            R.string.licenses_use_omarchy,
-            "mit",
-            "Copyright (c) David Heinemeier Hansson",
-            "https://github.com/omacom/omarchy",
         ),
         Component("Nerd Fonts", R.string.licenses_use_nerd_fonts, "mit", "Copyright (c) 2014 Ryan L McIntyre", "https://www.nerdfonts.com"),
         Component(

@@ -1,7 +1,7 @@
 package com.bellatrixos.theme
 
-import com.bellatrixos.storage.LauncherData
 import android.system.Os
+import com.bellatrixos.storage.LauncherData
 import com.bellatrixos.linux.Proot
 import com.bellatrixos.linux.TerminalFont
 import com.bellatrixos.linux.run
@@ -11,101 +11,63 @@ import com.bellatrixos.upgrade.writeAtomically
 import java.io.File
 
 /**
- * What omarchy-theme-set would write inside the guest: the current theme's
- * rendered templates, plus configs for Omarchy's terminal apps that pick
- * them up. The configs are defaults the user may edit (see [Policy.Seeded]).
+ * Writes a Bellatrix theme into the guest: the theme's own config fragments
+ * plus the launcher's terminal/agent defaults in its colors. All paths are
+ * Bellatrix's; everything is seeded so an agent may change it afterwards.
  */
 class GuestThemeConfig(
     private val proot: Proot,
-    private val omarchyDir: File,
+    private val themesDir: File,
 ) {
     private val home = proot.home
-    private val templatesDir = File(omarchyDir, "default/themed")
-    private val currentDir = File(home, ".local/state/omarchy/current")
+    private val currentDir = File(home, ".local/state/bellatrix/current")
 
-    /**
-     * Renders [theme] into current/theme, which foot, btop and the rest
-     * include. A file the theme ships wins over the template's.
-     */
-    fun render(theme: OmarchyTheme) {
+    /** Renders [theme] into current/theme, which foot, btop and the rest include. */
+    fun render(theme: BellatrixTheme) {
         val themeDir = File(currentDir, "theme")
-        // In the guest's home, where Omarchy's own scripts make current/theme a link to a theme: emptied through
-        // the link, that theme would be lost.
         LauncherData.deleteTree(themeDir)
         themeDir.mkdirs()
         theme.guestFiles().forEach { (name, file) -> file.copyTo(File(themeDir, name)) }
         File(currentDir, "theme.name").writeText(theme.name + "\n")
-        templatesDir.listFiles { f -> f.extension == "tpl" }.orEmpty().forEach { tpl ->
-            val out = File(themeDir, tpl.nameWithoutExtension)
-            val colors = if (tpl.name == "foot.ini.tpl") footColors(theme.colors) else theme.colors
-            if (!out.exists()) out.writeText(Templates.render(tpl.readText(), colors))
+        // A theme may provide its own terminal colors; otherwise generate them from its palette.
+        if (!File(themeDir, "foot.ini").isFile) File(themeDir, "foot.ini").writeText(footTheme(theme.colors))
+        if (!File(themeDir, "btop.theme").isFile) File(themeDir, "btop.theme").writeText(btopTheme(theme.colors))
+        symlink("${Proot.GUEST_HOME}/.local/state/bellatrix/current/theme/btop.theme", File(home, ".config/btop/themes/current.theme"))
+        val agentTheme = File(themeDir, if (File(home, ".claude").isDirectory) "claude.json" else "pi.json")
+        if (agentTheme.isFile) {
+            copyTheme(agentTheme, ".claude/themes/bellatrix.json")
+            copyTheme(agentTheme, ".pi/agent/themes/bellatrix-system.json")
         }
-        symlink("${Proot.GUEST_HOME}/.local/state/omarchy/current/theme/btop.theme", File(home, ".config/btop/themes/current.theme"))
-        // Like omarchy-theme-set-claude and -pi; both agents reload the file, so running sessions recolor too.
-        // Claude Code's is there to pick in /theme once it has been run; Pi's is picked from the start (see managed()).
-        if (File(home, ".claude").isDirectory) copyTheme(File(themeDir, "claude.json"), ".claude/themes/omarchy.json")
-        copyTheme(File(themeDir, "pi.json"), ".pi/agent/themes/omarchy-system.json")
     }
 
-    private fun copyTheme(
-        src: File,
-        to: String,
-    ) {
+    private fun copyTheme(src: File, to: String) {
         if (src.isFile) writeAtomically(File(home, to), src.readBytes())
     }
 
-    /** Mirrors Omarchy's ~/.local/state/omarchy/current/background symlink. */
     fun linkBackground(file: File) {
         proot.guestPath(file)?.let { symlink(it, File(currentDir, "background")) }
     }
 
-    private fun symlink(
-        target: String,
-        link: File,
-    ) {
+    private fun symlink(target: String, link: File) {
         link.parentFile?.mkdirs()
         link.delete()
         runCatching { Os.symlink(target, link.path) }
     }
 
-    /** Configs for Omarchy's terminal apps and GTK, the latter in [theme]'s colors. */
-    fun managed(theme: OmarchyTheme?): List<Managed> {
+    /** Configs the launcher owns in the guest. */
+    fun managed(theme: BellatrixTheme?): List<Managed> {
         val files = ArrayList<Managed>()
-        fun seed(
-            path: String,
-            content: () -> String,
-        ) = files.add(Managed.text(File(home, path), Policy.Seeded, content = content))
-
-        /** Omarchy's own config for an app, as its installer seeds it. */
-        fun copy(
-            from: String,
-            to: String,
-        ) {
-            val src = File(omarchyDir, from)
-            if (src.isFile) files.add(Managed(File(home, to), Policy.Seeded) { src.readBytes() })
-        }
+        fun seed(path: String, content: () -> String) = files.add(Managed.text(File(home, path), Policy.Seeded, content = content))
 
         seed(".config/foot/foot.ini") { FOOT_INI }
-        // Omarchy's bash setup (aliases, starship, zoxide, fzf) reads everything from $OMARCHY_PATH.
         seed(".bashrc") { BASHRC }
-        File(omarchyDir, "etc/fastfetch/config.jsonc").takeIf { it.isFile }?.let { src ->
-            seed(".config/fastfetch/config.jsonc") { guestFastfetch(src.readText()) }
-        }
-        // btop rewrites its config on exit; from then on it's the user's.
-        copy("config/btop/btop.conf", ".config/btop/btop.conf")
-        files.add(Managed.text(File(proot.rootfs, "usr/local/bin/btop"), Policy.Owned, executable = true) { BTOP })
-        copy("icon.txt", ".config/omarchy/branding/about.txt")
-        copy("config/starship.toml", ".config/starship.toml")
-        copy("config/lazygit/config.yml", ".config/lazygit/config.yml")
-        copy("config/tmux/tmux.conf", ".config/tmux/tmux.conf")
-        // Pi in the theme render() copies, as Omarchy's install runs omarchy-theme-set-pi --activate, and OpenCode
-        // in its system theme, which takes the terminal's colors; OpenCode 2 reads it from tui.json, not opencode.json.
-        seed(".pi/agent/settings.json") { "{\n  \"theme\": \"omarchy-system\"\n}\n" }
+        seed(".pi/agent/settings.json") { "{\n  \"theme\": \"bellatrix-system\"\n}\n" }
         seed(".config/opencode/opencode.json") { OPENCODE_JSON }
         seed(".config/opencode/tui.json") { "{\n  \"theme\": \"system\"\n}\n" }
+        files.add(Managed.text(File(proot.rootfs, "usr/local/bin/btop"), Policy.Owned, executable = true) { BTOP })
         if (theme != null) {
             val dark = !theme.isLight
-            val accent = theme.colors["accent"] ?: theme.colors["blue"]
+            val accent = theme.colors["accent"] ?: theme.colors["blue"] ?: "#7aa2f7"
             for (gtk in listOf("gtk-3.0", "gtk-4.0")) {
                 seed(".config/$gtk/settings.ini") {
                     "[Settings]\ngtk-application-prefer-dark-theme=${if (dark) 1 else 0}\ngtk-theme-name=Adwaita${if (dark) "-dark" else ""}\n"
@@ -118,15 +80,12 @@ class GuestThemeConfig(
         return files
     }
 
-    /** Live-recolors running foot terminals with OSC sequences, like omarchy-theme-set-foot. Blocking. */
-    fun recolorTerminals(theme: OmarchyTheme) {
+    /** Live-recolors running foot terminals with OSC sequences. Blocking. */
+    fun recolorTerminals(theme: BellatrixTheme) {
         val c = footColors(theme.colors)
         val osc =
             buildString {
-                fun emit(
-                    code: String,
-                    key: String,
-                ) = c[key]?.let { append("\u001b]$code;$it\u0007") }
+                fun emit(code: String, key: String) = c[key]?.let { append("\u001b]$code;$it\u0007") }
                 emit("10", "foreground")
                 emit("11", "background")
                 emit("12", "cursor")
@@ -134,39 +93,49 @@ class GuestThemeConfig(
                 emit("19", "selection_foreground")
                 for (i in 0..15) c["color$i"]?.let { append("\u001b]4;$i;$it\u0007") }
             }
-        proot.hostFile("/tmp/omarchy-osc").writeText(osc)
+        proot.hostFile("/tmp/bellatrix-osc").writeText(osc)
         val script =
             "for p in \$(pgrep -x foot); do for c in \$(pgrep -P \$p); do " +
-                "t=\$(readlink /proc/\$c/fd/1); case \$t in /dev/pts/*) cat /tmp/omarchy-osc > \$t;; esac; done; done; " +
-                // Like omarchy-restart-btop: btop reloads its theme on SIGUSR2.
+                "t=\$(readlink /proc/\$c/fd/1); case \$t in /dev/pts/*) cat /tmp/bellatrix-osc > \$t;; esac; done; done; " +
                 "pkill -SIGUSR2 btop; true"
         runCatching { proot.run(script) }
     }
 
     private companion object {
-        /**
-         * Themes pick a selection a shade off the background, made for a mouse on a big screen;
-         * on a phone it's barely visible. foot selects in the accent instead, as inverted text.
-         */
         fun footColors(c: Map<String, String>): Map<String, String> {
             val accent = c["accent"] ?: c["blue"] ?: return c
             val background = c["background"] ?: return c
             return c + mapOf("selection_background" to accent, "selection_foreground" to background)
         }
 
-        /**
-         * Omarchy's foot.ini, sized for a phone: the font comes from [TerminalFont], which
-         * follows the screen and Android's font size. Nerd glyphs come via fontconfig fallback.
-         */
+        fun footTheme(c: Map<String, String>): String {
+            val colors = footColors(c)
+            return buildString {
+                append("[colors]\n")
+                listOf("foreground", "background", "cursor", "selection_background", "selection_foreground").forEach { key ->
+                    colors[key]?.let { append("$key=$it\n") }
+                }
+                for (i in 0..15) colors["color$i"]?.let { append("color$i=$it\n") }
+            }
+        }
+
+        fun btopTheme(c: Map<String, String>): String =
+            buildString {
+                append("[theme]\n")
+                c["background"]?.let { append("main_bg = $it\n") }
+                c["foreground"]?.let { append("main_fg = $it\n") }
+                c["accent"]?.let { append("selected_fg = $it\n") }
+                c["muted"]?.let { append("title_bg = $it\n") }
+            }
+
         val FOOT_INI =
             """
             [main]
-            include=~/.local/state/omarchy/current/theme/foot.ini
+            include=~/.local/state/bellatrix/current/theme/foot.ini
             term=xterm-256color
             include=${TerminalFont.PATH}
             pad=8x8
             workers=0
-            # Copy on select: on a phone a selection is a deliberate long press, and Android shows what was copied.
             selection-target=both
 
             [scrollback]
@@ -183,13 +152,6 @@ class GuestThemeConfig(
             clipboard-paste=Shift+Insert Control+Shift+v XF86Paste
             """.trimIndent() + "\n"
 
-        /**
-         * btop's full layout needs 80 columns, more than a terminal on a phone in
-         * portrait has at a readable size, and btop then draws nothing: it opens
-         * with less instead. Its first preset, cpu and processes, needs 60; under
-         * that only the process list fits (44), from a copy of the config.
-         * /usr/local/bin precedes /usr/bin.
-         */
         val BTOP =
             """
             #!/bin/sh
@@ -205,7 +167,6 @@ class GuestThemeConfig(
             exec /usr/bin/btop -c "${'$'}narrow"
             """.trimIndent() + "\n"
 
-        /** OpenCode's updates come through mise with the other agents, as on Omarchy. */
         val OPENCODE_JSON =
             """
             {
@@ -217,28 +178,8 @@ class GuestThemeConfig(
 
         val BASHRC =
             """
-            export OMARCHY_PATH=/root/.local/share/omarchy
-            export EDITOR=omarchy-edit VISUAL=omarchy-edit
-            [[ $- != *i* ]] && return
-            [[ -f ${'$'}OMARCHY_PATH/default/bash/rc ]] && source "${'$'}OMARCHY_PATH/default/bash/rc"
+            export BELLATRIX_PATH=${Proot.GUEST_HOME}/.local/share/bellatrix
+            export EDITOR=bellatrix-edit VISUAL=bellatrix-edit
             """.trimIndent() + "\n"
     }
 }
-
-/** Omarchy 4.5's OS Age line, which words its count with omarchy-i18n. */
-private const val OS_AGE_I18N = "omarchy-i18n --count \\\"\$days\\\" about.days \\\"\$days\\\""
-
-/** Omarchy 4.5's Uptime line: a command reading /proc/uptime, which Android denies apps, worded with omarchy-i18n. */
-private val UPTIME_COMMAND = Regex(""""type": "command",(\s*"key": "[^"]*Uptime",\s*"keyColor": "[^"]*"),\s*"text": "[^\n]*omarchy-i18n[^\n]*""")
-
-/**
- * Omarchy's fastfetch config, made to fit the guest. In portrait the
- * side-by-side logo leaves ~20 columns for the info, so it goes on top.
- * omarchy-i18n isn't in the guest: OS Age says its days in English, and
- * Uptime is fastfetch's own again, as before 4.5.
- */
-internal fun guestFastfetch(config: String): String =
-    config
-        .replaceFirst("\"type\": \"file\",", "\"type\": \"file\",\n    \"position\": \"top\",")
-        .replace(OS_AGE_I18N, "echo \\\"\$days days\\\"")
-        .replace(UPTIME_COMMAND, "\"type\": \"uptime\",$1")

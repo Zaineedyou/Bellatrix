@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="wallpaper_label">Omarchy</string>
-    <string name="wallpaper_description">当前 Omarchy 主题的背景。系统颜色跟随主题。</string>
+    <string name="wallpaper_label">Bellatrix</string>
+    <string name="wallpaper_description">当前 Bellatrix 主题的背景。系统颜色跟随主题。</string>
     <string name="activity_linux">Linux</string>
     <string name="activity_terminal">终端</string>
     <string name="activity_app">应用</string>
@@ -143,14 +143,14 @@
     <string name="drawer_action_uninstall">卸载</string>
     <string name="linux_stage_agents_named">安装 %1$s</string>
     <string name="linux_updates_unreachable">无法连接镜像源</string>
-    <string name="linux_welcome_title">把 omarchy 放上主屏幕</string>
-    <string name="linux_welcome_body">Omarchy 的主题和壁纸、你的 Android 应用，以及主屏幕小组件。Void Linux 再带来终端应用和编程智能体，现在装或以后在设置里装都行。</string>
+    <string name="linux_welcome_title">把 Bellatrix 放上主屏幕</string>
+    <string name="linux_welcome_body">Bellatrix 的主题和壁纸、你的 Android 应用，以及主屏幕小组件。Void Linux 再带来终端应用和编程智能体，现在装或以后在设置里装都行。</string>
     <string name="linux_welcome_linux">linux</string>
     <string name="linux_welcome_choice">同时安装 Void Linux</string>
     <string name="linux_welcome_choice_detail">终端应用、智能体、xbps · 下载约 1 GB，占用 3 GB</string>
     <string name="linux_welcome_start">开始</string>
     <string name="linux_welcome_start_linux">开始并安装 linux</string>
-    <string name="linux_welcome_start_hint">现在下载这个主题的壁纸，并在后台下载 Omarchy 的其他主题（约 70 MB）。</string>
+    <string name="linux_welcome_start_hint">现在下载这个主题的壁纸，并在后台下载 Bellatrix 的其他主题（约 70 MB）。</string>
     <string name="linux_welcome_start_linux_hint">Linux 要下载约 1 GB（最好连 Wi-Fi），占用 3 GB 空间。它会在后台安装，大约 10 到 20 分钟；主屏幕马上就能用。</string>
     <string name="linux_welcome_getting">正在获取 %1$s</string>
     <string name="linux_welcome_theme_failed">主题没有下载成功</string>
@@ -211,7 +211,7 @@
     <string name="licenses_use_shmem">PRoot 的共享内存</string>
     <string name="licenses_use_mesa">在可选的 Linux 系统中为 Adreno GPU 提供 OpenGL</string>
     <string name="licenses_use_wayland">随 Mesa 附带的协议文件</string>
-    <string name="licenses_use_omarchy">随应用附带、供首次运行使用的主题颜色</string>
+    <string name="licenses_use_bellatrix">随应用附带、供首次运行使用的主题颜色</string>
     <string name="licenses_use_nerd_fonts">符号字体</string>
     <string name="licenses_use_weather_icons">符号字体中的天气图标</string>
     <string name="licenses_use_mdi">符号字体中的图标</string>
@@ -427,14 +427,14 @@
     <string name="store_add">添加</string>
     <string name="store_theme_title">社区主题</string>
     <string name="store_theme_search">搜索 %1$d 个主题</string>
-    <string name="store_theme_header">由社区制作，列于 omarchy.org/themes · 从 GitHub 安装</string>
+    <string name="store_theme_header">由社区制作，列于 the Bellatrix theme catalog · 从 GitHub 安装</string>
     <string name="store_theme_in_use">✓ 使用中</string>
     <string name="store_theme_install_confirm">安装 %1$s？</string>
     <string name="store_theme_install_message">来自 %1$s。Linux 会获得它的颜色和壁纸，但不包括它的脚本和终端配置。</string>
     <string name="store_theme_install_message_replaces">来自 %1$s。Linux 会获得它的颜色和壁纸，但不包括它的脚本和终端配置。\n\n它会替换你的 %2$s。</string>
-    <string name="store_theme_install_message_over">来自 %1$s。Linux 会获得它的颜色和壁纸，但不包括它的脚本和终端配置。\n\n它会覆盖 Omarchy 的 %2$s；移除它即可恢复原样。</string>
+    <string name="store_theme_install_message_over">来自 %1$s。Linux 会获得它的颜色和壁纸，但不包括它的脚本和终端配置。\n\n它会覆盖 Bellatrix 的 %2$s；移除它即可恢复原样。</string>
     <string name="store_theme_installing">正在安装 %1$s… %2$d MB</string>
-    <string name="store_theme_catalog_failed">无法加载 omarchy.org/themes：%1$s</string>
+    <string name="store_theme_catalog_failed">无法加载 the Bellatrix theme catalog：%1$s</string>
     <string name="store_theme_page_changed">页面已改变，无法读取</string>
     <string name="store_theme_not_github">不是 GitHub 仓库：%1$s</string>
     <string name="store_theme_not_on_github">%1$s 不在 GitHub 上</string>
@@ -527,10 +527,10 @@
     <string name="style_update">更新</string>
     <string name="style_remove">移除</string>
     <string name="style_remove_theme_title">移除 %1$s？</string>
-    <string name="style_remove_theme_builtin">你对它的修改会被删除；Omarchy 的版本保留。</string>
+    <string name="style_remove_theme_builtin">你对它的修改会被删除；Bellatrix 的版本保留。</string>
     <string name="style_remove_deleted">它会从手机和 Linux 中删除。</string>
-    <string name="style_themes_downloading">正在从 github.com/omacom/omarchy 下载 Omarchy 的其他主题（约 70 MB）。</string>
-    <string name="style_themes_not_installed">Omarchy 的主题还没有安装。它们会从 github.com/omacom/omarchy 下载（约 70 MB）。</string>
+    <string name="style_themes_downloading">正在从 the Bellatrix theme pack 下载 Bellatrix 的其他主题（约 70 MB）。</string>
+    <string name="style_themes_not_installed">Bellatrix 的主题还没有安装。它们会从 the Bellatrix theme pack 下载（约 70 MB）。</string>
     <string name="style_downloading">正在下载… %1$d MB</string>
     <string name="style_failed">失败：%1$s</string>
     <string name="style_retry">重试</string>
@@ -570,7 +570,7 @@
     <string name="gestures_keybar_until_fixed">修复之前，终端按键栏使用默认按键：%1$s</string>
     <string name="gestures_strip_until_fixed">修复之前，应用栏使用默认版本：%1$s</string>
     <string name="agents_title">编程智能体</string>
-    <string name="agents_intro">和 Omarchy 一样安装，大多数用 mise。登录会在浏览器中打开；用键盘的剪贴板粘贴密钥。</string>
+    <string name="agents_intro">和 Bellatrix 一样安装，大多数用 mise。登录会在浏览器中打开；用键盘的剪贴板粘贴密钥。</string>
     <string name="agents_open">打开</string>
     <string name="agents_remove">移除</string>
     <string name="agents_install">安装</string>

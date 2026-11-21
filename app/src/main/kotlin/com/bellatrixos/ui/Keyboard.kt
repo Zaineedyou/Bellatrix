@@ -42,7 +42,7 @@ class KeyboardBridge(
     private val wm: WindowManager,
     private val images: GuestImages,
 ) {
-    /** Launcher shortcuts triggered with Meta (Super), like Omarchy's Super bindings. */
+    /** Launcher shortcuts triggered with Meta (Super), like Bellatrix's Super bindings. */
     var onShortcut: (Int) -> Boolean = { false }
 
     /** Types what the active soft keyboard is still composing; keys sent from a widget call it first so they don't overtake it. */

@@ -320,7 +320,7 @@ internal fun PromptBar(
                                 // Tapped (or Super+D): the panel opens. Mid-swipe it's already showing.
                                 if (it.isFocused && !panelShown) state.open()
                             }
-                            // Esc closes the drawer, as Omarchy's launcher does, before the soft keyboard can keep it to itself.
+                            // Esc closes the drawer, as Bellatrix's launcher does, before the soft keyboard can keep it to itself.
                             .onInterceptKeyBeforeSoftKeyboard { e ->
                                 if (e.key != Key.Escape || !panelShown) return@onInterceptKeyBeforeSoftKeyboard false
                                 if (e.type == KeyEventType.KeyUp) {

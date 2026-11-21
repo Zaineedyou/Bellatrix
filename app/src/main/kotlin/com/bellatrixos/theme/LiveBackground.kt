@@ -4,10 +4,10 @@ import java.io.File
 
 private val VIDEO_EXTENSIONS = setOf("mp4", "webm", "mkv", "m4v", "3gp", "mov")
 
-/** A background that is a video: played by [OmarchyWallpaperService], so it moves only as the phone's live wallpaper. */
+/** A background that is a video: played by [BellatrixWallpaperService], so it moves only as the phone's live wallpaper. */
 fun File.isVideoBackground() = extension.lowercase() in VIDEO_EXTENSIONS
 
-/** A background that is a GIF, which [OmarchyWallpaperService] animates (an animated WebP does too, once it is the live wallpaper). */
+/** A background that is a GIF, which [BellatrixWallpaperService] animates (an animated WebP does too, once it is the live wallpaper). */
 fun File.isGifBackground() = extension.lowercase() == "gif"
 
 /** A background that moves: only the live wallpaper shows it, so picking one asks Android to make it the phone's. */

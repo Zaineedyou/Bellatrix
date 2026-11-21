@@ -517,7 +517,7 @@ class Speech(
         private const val SESSION_MS = 5 * 60 * 1000
 
         /** The launcher's own names, said to agents: see [RecognizerIntent.EXTRA_BIASING_STRINGS]. */
-        private val BIASING = arrayListOf("bellatrix", "Omarchy", "owl")
+        private val BIASING = arrayListOf("bellatrix", "Bellatrix", "owl")
 
         /** Google's own extra, in both its recognizers, for no start and end beeps. */
         private const val MUTE_BEEPS = "com.google.recognition.extra.MUTE_AUDIO_BEEPS"

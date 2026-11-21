@@ -24,7 +24,11 @@ internal val KINDS: Map<String, Kind> =
         "Column" to Kind(setOf("gap", "align", "justify", "scroll", "lazy", "reverse"), Children.UI),
         "Row" to Kind(setOf("gap", "align", "justify", "wrap"), Children.UI),
         "Flow" to Kind(setOf("gap", "align", "justify"), Children.UI),
+        // owl 24: Waybar-style declarative layout — a wrapping flex row, and an
+        // anchor box whose children pin themselves to its edges with `anchor`.
+        "Flex" to Kind(setOf("gap", "align", "justify", "wrap"), Children.UI),
         "Box" to Kind(setOf("align"), Children.UI),
+        "Anchor" to Kind(setOf("align"), Children.UI),
         "Grid" to Kind(setOf("columns", "gap", "lazy", "reverse"), Children.UI),
         "Text" to Kind(setOf("text", "style", "color", "fontSize", "bold", "italic", "font", "align", "maxLines", "minLines", "spans", "fontWeight", "letterSpacing"), Children.NONE),
         "Image" to Kind(setOf("src", "fit", "tint", "label"), Children.NONE),
@@ -50,6 +54,8 @@ internal val COMMON =
     setOf(
         "width", "height", "size", "fill", "weight", "padding", "background", "border", "borderColor",
         "radius", "opacity", "rotation", "scale", "offset", "clip", "visible", "frost", "repeats", "drag", "ripple",
+        // owl 24: pins a child of an Anchor/Box to one of its edges.
+        "anchor",
     )
 
 internal val ANIMATABLE = setOf("opacity", "rotation", "scale", "offset", "value", "color", "background")
@@ -65,6 +71,8 @@ internal val ENUMS =
         "fill" to setOf("width", "height"),
         "cap" to setOf("round", "butt", "square"),
         "position" to setOf("above", "below"),
+        // owl 24: edges a child of an Anchor can pin itself to.
+        "anchor" to ALIGN,
         // The one direction onDrag follows (owl 13); without it, any.
         "drag" to setOf("horizontal", "vertical"),
     )
@@ -204,7 +212,9 @@ internal val SINCE =
         // player's own buttons.
         listOf("media(\"seek\")", "media(\"speed\")", "media(\"action\")").associateWith { 23 } +
         // owl 23: how strong a haptic() is.
-        mapOf(HAPTIC_STRENGTH to 23)
+        mapOf(HAPTIC_STRENGTH to 23) +
+        // owl 24: Waybar-style declarative layout on the Bellatrix home screen.
+        listOf("Flex", "Anchor", "anchor").associateWith { 24 }
 
 /** A Shader's `uniform shader name;`, an image it samples, named like this in [SINCE]. */
 internal const val SHADER_IMAGE = "uniform shader"

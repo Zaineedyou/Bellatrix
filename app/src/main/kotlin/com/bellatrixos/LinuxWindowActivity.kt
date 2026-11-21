@@ -16,11 +16,9 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ImageView
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.compose.ui.graphics.toArgb
@@ -50,7 +48,6 @@ class LinuxWindowActivity : AppCompatActivity() {
     private lateinit var sink: KeyboardSink
     private lateinit var keyBar: KeyBarView
     private lateinit var keyBarContainer: FrameLayout
-    private lateinit var toggle: ImageView
 
     private val picker =
         registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
@@ -75,8 +72,6 @@ class LinuxWindowActivity : AppCompatActivity() {
 
         root = findViewById(R.id.linux_window_root)
         keyBarContainer = findViewById(R.id.linux_keybar_container)
-        toggle = findViewById(R.id.linux_keyboard_toggle)
-        toggle.setImageTintList(ContextCompat.getColorStateList(this, R.color.linux_key_foreground))
 
         surface = WindowSurfaceView(this, backend.server, backend.wm, window)
         root.addView(surface, 0, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
@@ -92,7 +87,6 @@ class LinuxWindowActivity : AppCompatActivity() {
         keyBar = KeyBarView(this)
         KeyBarView.KeyboardBridgeHolder.bridge = backend.keyboard
         keyBarContainer.addView(keyBar, FrameLayout.LayoutParams(MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-        toggle.setOnClickListener { sink.toggle() }
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
@@ -165,7 +159,6 @@ class LinuxWindowActivity : AppCompatActivity() {
         input.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, visible)
         input.requestLayout()
         keyBarContainer.translationY = -keyboardHeight.toFloat()
-        toggle.translationY = -keyboardHeight.toFloat()
         surface.visibleHeight = visible
     }
 

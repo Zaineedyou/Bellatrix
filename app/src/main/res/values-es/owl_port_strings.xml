@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="wallpaper_label">Omarchy</string>
-    <string name="wallpaper_description">El fondo del tema actual de Omarchy. Los colores del sistema siguen al tema.</string>
+    <string name="wallpaper_label">Bellatrix</string>
+    <string name="wallpaper_description">El fondo del tema actual de Bellatrix. Los colores del sistema siguen al tema.</string>
     <string name="activity_linux">Linux</string>
     <string name="activity_terminal">Terminal</string>
     <string name="activity_app">App</string>
@@ -143,14 +143,14 @@
     <string name="drawer_action_uninstall">desinstalar</string>
     <string name="linux_stage_agents_named">instalar %1$s</string>
     <string name="linux_updates_unreachable">no se pudo conectar con los mirrors</string>
-    <string name="linux_welcome_title">omarchy en tu pantalla principal</string>
-    <string name="linux_welcome_body">Los temas y fondos de Omarchy, tus apps de Android y widgets en la pantalla principal. Void Linux suma apps de terminal y agentes de programación, ahora o más tarde en configuración.</string>
+    <string name="linux_welcome_title">Bellatrix en tu pantalla principal</string>
+    <string name="linux_welcome_body">Los temas y fondos de Bellatrix, tus apps de Android y widgets en la pantalla principal. Void Linux suma apps de terminal y agentes de programación, ahora o más tarde en configuración.</string>
     <string name="linux_welcome_linux">linux</string>
     <string name="linux_welcome_choice">configurar también Void Linux</string>
     <string name="linux_welcome_choice_detail">apps de terminal, agentes, xbps · ~1 GB de descarga, 3 GB de espacio</string>
     <string name="linux_welcome_start">empezar</string>
     <string name="linux_welcome_start_linux">empezar y configurar linux</string>
-    <string name="linux_welcome_start_hint">Descarga ahora el fondo del tema, y los demás temas de Omarchy (unos 70 MB) en segundo plano.</string>
+    <string name="linux_welcome_start_hint">Descarga ahora el fondo del tema, y los demás temas de Bellatrix (unos 70 MB) en segundo plano.</string>
     <string name="linux_welcome_start_linux_hint">Linux descarga aproximadamente 1 GB, así que mejor por Wi-Fi, y ocupa 3 GB. Se instala en segundo plano en 10 a 20 minutos; la pantalla principal está lista enseguida.</string>
     <string name="linux_welcome_getting">descargando %1$s</string>
     <string name="linux_welcome_theme_failed">el tema no se descargó</string>
@@ -211,7 +211,7 @@
     <string name="licenses_use_shmem">memoria compartida para PRoot</string>
     <string name="licenses_use_mesa">OpenGL en GPUs Adreno en el sistema Linux opcional</string>
     <string name="licenses_use_wayland">archivos de protocolo incluidos con Mesa</string>
-    <string name="licenses_use_omarchy">colores de temas incluidos para el primer inicio</string>
+    <string name="licenses_use_bellatrix">colores de temas incluidos para el primer inicio</string>
     <string name="licenses_use_nerd_fonts">fuente de símbolos</string>
     <string name="licenses_use_weather_icons">glifos del clima en la fuente de símbolos</string>
     <string name="licenses_use_mdi">glifos en la fuente de símbolos</string>
@@ -427,14 +427,14 @@
     <string name="store_add">agregar</string>
     <string name="store_theme_title">temas de la comunidad</string>
     <string name="store_theme_search">buscar en %1$d temas</string>
-    <string name="store_theme_header">hechos por la comunidad, listados en omarchy.org/themes · instalados desde GitHub</string>
+    <string name="store_theme_header">hechos por la comunidad, listados en the Bellatrix theme catalog · instalados desde GitHub</string>
     <string name="store_theme_in_use">✓ en uso</string>
     <string name="store_theme_install_confirm">¿instalar %1$s?</string>
     <string name="store_theme_install_message">De %1$s. Linux recibe sus colores y fondos, no sus scripts ni sus configs de terminal.</string>
     <string name="store_theme_install_message_replaces">De %1$s. Linux recibe sus colores y fondos, no sus scripts ni sus configs de terminal.\n\nReemplaza tu %2$s.</string>
-    <string name="store_theme_install_message_over">De %1$s. Linux recibe sus colores y fondos, no sus scripts ni sus configs de terminal.\n\nReemplaza al %2$s de Omarchy; si lo quitas, vuelve el original.</string>
+    <string name="store_theme_install_message_over">De %1$s. Linux recibe sus colores y fondos, no sus scripts ni sus configs de terminal.\n\nReemplaza al %2$s de Bellatrix; si lo quitas, vuelve el original.</string>
     <string name="store_theme_installing">instalando %1$s… %2$d MB</string>
-    <string name="store_theme_catalog_failed">no se pudo cargar omarchy.org/themes: %1$s</string>
+    <string name="store_theme_catalog_failed">no se pudo cargar the Bellatrix theme catalog: %1$s</string>
     <string name="store_theme_page_changed">la página cambió y no se puede leer</string>
     <string name="store_theme_not_github">no es un repo de GitHub: %1$s</string>
     <string name="store_theme_not_on_github">%1$s no está en GitHub</string>
@@ -527,10 +527,10 @@
     <string name="style_update">actualizar</string>
     <string name="style_remove">quitar</string>
     <string name="style_remove_theme_title">¿quitar %1$s?</string>
-    <string name="style_remove_theme_builtin">Tus cambios se pierden; la versión de Omarchy se queda.</string>
+    <string name="style_remove_theme_builtin">Tus cambios se pierden; la versión de Bellatrix se queda.</string>
     <string name="style_remove_deleted">Se borra del teléfono y de Linux.</string>
-    <string name="style_themes_downloading">Los demás temas de Omarchy se están descargando de github.com/omacom/omarchy (~70 MB).</string>
-    <string name="style_themes_not_installed">Los temas de Omarchy aún no están instalados. Se descargan de github.com/omacom/omarchy (~70 MB).</string>
+    <string name="style_themes_downloading">Los demás temas de Bellatrix se están descargando de the Bellatrix theme pack (~70 MB).</string>
+    <string name="style_themes_not_installed">Los temas de Bellatrix aún no están instalados. Se descargan de the Bellatrix theme pack (~70 MB).</string>
     <string name="style_downloading">descargando… %1$d MB</string>
     <string name="style_failed">falló: %1$s</string>
     <string name="style_retry">reintentar</string>
@@ -570,7 +570,7 @@
     <string name="gestures_keybar_until_fixed">la barra de teclas de la terminal es la original hasta que se arregle: %1$s</string>
     <string name="gestures_strip_until_fixed">la barra de apps es la original hasta que se arregle: %1$s</string>
     <string name="agents_title">agentes de programación</string>
-    <string name="agents_intro">Se instalan como en Omarchy, la mayoría con mise. Los inicios de sesión se abren en tu navegador; pega las claves con el portapapeles del teclado.</string>
+    <string name="agents_intro">Se instalan como en Bellatrix, la mayoría con mise. Los inicios de sesión se abren en tu navegador; pega las claves con el portapapeles del teclado.</string>
     <string name="agents_open">abrir</string>
     <string name="agents_remove">desinstalar</string>
     <string name="agents_install">instalar</string>

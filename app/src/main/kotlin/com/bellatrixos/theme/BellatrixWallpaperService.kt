@@ -41,7 +41,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * Android live wallpaper showing the current Omarchy background: a still image, a GIF or a video. It is the one that
+ * Android live wallpaper showing the current Bellatrix background: a still image, a GIF or a video. It is the one that
  * moves: a background picked in style as a video or GIF shows on the phone only through this wallpaper, which the
  * launcher asks Android to make the phone's once. Its other purpose is [Engine.onComputeColors]: Android 12+ derives
  * the system color scheme (quick settings, notifications, Settings, keyboard, dynamic-color apps) from the colors the
@@ -52,13 +52,13 @@ import kotlin.math.roundToInt
  * the video never showed and only the background color stayed (a black screen). Here the video goes into a
  * [SurfaceTexture] and is drawn by GL like the image and the GIF, so which kind of background it is never matters.
  */
-class OmarchyWallpaperService : WallpaperService() {
-    override fun onCreateEngine(): Engine = OmarchyEngine()
+class BellatrixWallpaperService : WallpaperService() {
+    override fun onCreateEngine(): Engine = BellatrixEngine()
 
-    private inner class OmarchyEngine : Engine() {
+    private inner class BellatrixEngine : Engine() {
         private val main = Handler(Looper.getMainLooper())
         private val decoder = Executors.newSingleThreadExecutor()
-        private val thread = HandlerThread("omarchy-wallpaper").also { it.start() }
+        private val thread = HandlerThread("bellatrix-wallpaper").also { it.start() }
 
         /** Every GL object, the player and the animation below belong to this thread alone. */
         private val gl = Handler(thread.looper)
@@ -221,7 +221,7 @@ class OmarchyWallpaperService : WallpaperService() {
             runCatching {
                 decoder.execute {
                     val (themeColors, file) =
-                        runCatching { ThemeStore.savedSelection(this@OmarchyWallpaperService) }
+                        runCatching { ThemeStore.savedSelection(this@BellatrixWallpaperService) }
                             .onFailure { Log.w(TAG, "the saved background can't be read", it) }
                             .getOrNull() ?: (emptyMap<String, String>() to null)
                     Log.i(TAG, "background: ${file?.path ?: "none"} (${themeColors.size} theme colors)")
@@ -231,7 +231,7 @@ class OmarchyWallpaperService : WallpaperService() {
                     loadedStamp = stamp
                     val image = file?.takeIf { changed && !it.isVideoBackground() }
                     val gif =
-                        image?.takeIf { it.extension.lowercase() in ANIMATED_TYPES }?.let { decodeAnimated(it, this@OmarchyWallpaperService) } as? AnimatedImageDrawable
+                        image?.takeIf { it.extension.lowercase() in ANIMATED_TYPES }?.let { decodeAnimated(it, this@BellatrixWallpaperService) } as? AnimatedImageDrawable
                     val movie = file?.takeIf { changed && it.isVideoBackground() }
                     // A video shows its first frame at once, as a picture, and moves when the player has frames: the
                     // screen is never left on the plain color while the player starts, or if it can't play this file.
@@ -677,7 +677,7 @@ class OmarchyWallpaperService : WallpaperService() {
     }
 
     private companion object {
-        const val TAG = "OmarchyWallpaper"
+        const val TAG = "BellatrixWallpaper"
 
         /** Every GPU can hold a texture this big. */
         const val MAX_TEXTURE = 4096

@@ -25,6 +25,17 @@ private fun agentCommand(
     readOnly: Boolean = false,
 ) = "cd ~/${WidgetEngine.GUEST_DIR} && ${agentInvocation(agentBin, prompt, readOnly)}; exec bash"
 
+/** Session about Bellatrix themes: an agent creates or edits local theme folders in ~/.config/bellatrix/themes. */
+fun editThemeCommand(agentBin: String) =
+    "cd ~/.config/bellatrix/themes && " +
+        agentInvocation(
+            agentBin,
+            "Ask me what to change about my Bellatrix theme. A theme is a folder here with colors.toml " +
+                "(background, foreground, accent, muted, and color0..color15) and an optional backgrounds/ folder. " +
+                "Read ~/.config/bellatrix/style/defaults.toml for the color names. Change or add folders directly; " +
+                "the launcher rescans them within a second. Then pick the theme in Settings → Style.",
+        ) + "; exec bash"
+
 /** What each kind of owl file is, for the agent: where it shows up on the phone. */
 private fun OwlKind.what() =
     when (this) {

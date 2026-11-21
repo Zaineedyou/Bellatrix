@@ -93,6 +93,7 @@ import com.bellatrixos.apps.androidShortcutKey
 import com.bellatrixos.linux.LinuxAppCatalog
 import com.bellatrixos.storage.LauncherData
 import com.bellatrixos.storage.PhoneFolders
+import com.bellatrixos.taskbar.TaskBarStore
 
 /**
  * Process-wide state: the launcher (themes, widgets, Android apps) and the
@@ -146,6 +147,9 @@ class Runtime(
         }
     }
     val widgets = WidgetEngine(context, proot, this)
+
+    /** The taskbar's pins as an agent-editable layout.toml, like home's. */
+    val taskbar = TaskBarStore(context)
 
     /** Widgets' speech(...) and android.speech. */
     val dictation = Dictation(context)
@@ -311,7 +315,7 @@ class Runtime(
             snapshotFlow { style.style[Style.ICON_PACK] }.drop(1).collect { androidApps.iconPack = it }
         }
         androidApps.start()
-        // Omarchy's Super bindings inside Linux windows; the home screen handles its own (see MainActivity).
+        // Bellatrix's Super bindings inside Linux windows; the home screen handles its own (see MainActivity).
         keyboard.onShortcut = { code ->
             when (code) {
                 KeyEvent.KEYCODE_ENTER -> true.also { terminal(null, "Terminal") }
@@ -331,7 +335,7 @@ class Runtime(
             // foot windows (the shell and every agent) are terminals: the home hosts them as
             // floating windows, never as full-screen activities. All other guest apps keep tasks.
             val terminal =
-                window != null && (window.appId.startsWith("omarchy.") || name == "Terminal")
+                window != null && (window.appId.startsWith("bellatrix.") || name == "Terminal")
             if (terminal && openFloatingTerminal != null) {
                 openFloatingTerminal?.invoke(handle)
             } else {
@@ -351,7 +355,7 @@ class Runtime(
                     context,
                     Intent()
                         .setClassName(context, "com.bellatrixos.$activity")
-                        .setData(Uri.parse("omarchy://window/$handle"))
+                        .setData(Uri.parse("bellatrix://window/$handle"))
                         .addFlags(flags),
                 )
             }
@@ -375,17 +379,14 @@ class Runtime(
             widgets.start()
             themes.load()
             style.start()
-            // On the first-run screen the download is the screen's job, with progress.
-            if (launcherReady) scope.launch { themes.ensureRelease() }
             if (bootstrap.wanted) runLinux { bootstrap.run() } else bootstrap.run()
         }
     }
 
-    /** The first-run screen is done; the home screen shows from now on, while the rest of the themes download. */
+    /** The first-run screen is done; the home screen shows from now on. */
     fun finishWelcome() {
         prefs.edit().putBoolean(SETUP_DONE, true).apply()
         launcherReady = true
-        scope.launch { themes.ensureRelease() }
     }
 
     /** Called as the home leaves: a terminal opened elsewhere uses the full-window fallback again. */
@@ -767,7 +768,7 @@ class Runtime(
         val effectiveAgent = agent ?: inferAgent(command, name)
         // Per agent, so a Claude and a Grok "New app" don't share an app_id.
         val slug = if (effectiveAgent == null || effectiveAgent.name == name) name else "${effectiveAgent.bin} $name"
-        val appId = "omarchy." + slug.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-')
+        val appId = "bellatrix." + slug.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-')
         launchedNames[appId] = name
         if (effectiveAgent != null) launchedAgents[appId] = effectiveAgent
         val script = command?.let { effectiveAgent?.prepared(it) ?: it }

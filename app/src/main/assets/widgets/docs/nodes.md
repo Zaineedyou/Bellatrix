@@ -11,7 +11,9 @@ when lists reorder), and `let x = ...` inside any node.
 | `Column` | `gap` (dp, default 4), `align: start/center/end`, `justify: start/center/end/spaceBetween/spaceAround/spaceEvenly`, `scroll: true`, `lazy: true` (scrolls, and a `for` right inside builds its rows only as they come into view, so a list of hundreds opens as fast as a short one; give it a height to fill, such as `weight: 1`, since inside a scrolling Column it builds everything, owl 11), `reverse: true` with `lazy` (lists from the end: the first item at the bottom, as search results sit right above a bar; when its items change it scrolls back to the first, owl 11) |
 | `Row` | `gap` (8), `align: top/center/bottom`, `justify`, `wrap: true` |
 | `Flow` | a Row that wraps to new lines |
+| `Flex` | Waybar-style declarative flex row: like `Row`, but always wraps to new lines; `gap` (8), `align: top/center/bottom`, `justify` (owl 24) |
 | `Box` | stacks children on top of each other; `align: center/top/bottom/start/end/topStart/topEnd/bottomStart/bottomEnd` |
+| `Anchor` | a `Box` meant for Waybar-style anchoring: children pin themselves to its edges with `anchor` (owl 24) |
 | `Grid` | `columns` (2), `gap`, `lazy: true` (as Column's: scrolls, and builds the cells of a `for` right inside as they come into view, owl 11), `reverse` as Column's; children fill cells left to right |
 | `Text` | `text`, `style: huge/title/body/small/muted/label`, `color`, `fontSize`, `bold`, `italic`, `font: mono/sans/serif/icon` (`icon` draws the Nerd Font weather glyphs U+E300–E3E3, plus 󰄬 U+F012C and 󰅖 U+F0156) or since owl 10 a font of the widget's own (see Fonts), `align: start/center/end`, `maxLines`, `minLines` (at least that many lines tall at any font size, so a row of labels keeps one height; a `height` in dp cuts text off when the phone's text is larger, owl 11); since owl 10 `fontWeight` (100 thin to 900 black; the font shows the nearest weight it has), `letterSpacing` (sp, negative to tighten) and `spans` (see Text in pieces) |
 | `Button` | `text`, `color`, `onTap` |
@@ -37,6 +39,8 @@ Every node also takes:
   (without `radius`, bordered elements follow the launcher's corner style: 0 for edge, 4 for soft, 8 for round;
   anything else matches it with `radius: 8 * corners`)
 - `opacity`, `rotation` (degrees), `scale`, `offset: [x, y]` (dp), `visible`
+- `anchor` (owl 24): on a child of an `Anchor` or `Box`, pins it to `topStart`, `top`, `topEnd`, `start`,
+  `center`, `end`, `bottomStart`, `bottom` or `bottomEnd`. A status-bar style panel is an `Anchor { Text { anchor: topStart; … } Text { anchor: topEnd; … } }`.
 - handlers: `onTap` (with `x`, `y`) and `onDrag` (with `dx`, `dy`, `x`, `y`). Since owl 13, `drag: horizontal` (or
   `vertical`) has `onDrag` take only moves along it, so a list it's in still scrolls the other way, and `onDragEnd` runs as
   the finger lets go, with `vx` and `vy`, how fast it was moving in dp a second: a row that follows the finger with

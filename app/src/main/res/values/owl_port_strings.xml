@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="wallpaper_label">Omarchy</string>
-    <string name="wallpaper_description">The current Omarchy theme background, a video or GIF too. System colors follow the theme.</string>
+    <string name="wallpaper_label">Bellatrix</string>
+    <string name="wallpaper_description">The current Bellatrix theme background, a video or GIF too. System colors follow the theme.</string>
     <string name="activity_linux">Linux</string>
     <string name="activity_terminal">Terminal</string>
     <string name="activity_app">App</string>
@@ -144,14 +144,14 @@
     <string name="drawer_action_uninstall">uninstall</string>
     <string name="linux_stage_agents_named">install %1$s</string>
     <string name="linux_updates_unreachable">couldn\'t reach the mirrors</string>
-    <string name="linux_welcome_title">omarchy on your home screen</string>
-    <string name="linux_welcome_body">Omarchy\'s themes and wallpapers, your Android apps, and home-screen widgets. Void Linux adds terminal apps and coding agents, now or later in settings.</string>
+    <string name="linux_welcome_title">Bellatrix on your home screen</string>
+    <string name="linux_welcome_body">Bellatrix\'s themes and wallpapers, your Android apps, and home-screen widgets. Void Linux adds terminal apps and coding agents, now or later in settings.</string>
     <string name="linux_welcome_linux">linux</string>
     <string name="linux_welcome_choice">also set up Void Linux</string>
     <string name="linux_welcome_choice_detail">terminal apps, agents, xbps · ~1 GB download, 3 GB space</string>
     <string name="linux_welcome_start">start</string>
     <string name="linux_welcome_start_linux">start and set up linux</string>
-    <string name="linux_welcome_start_hint">Downloads the theme\'s wallpaper now and Omarchy\'s other themes (about 70 MB) in the background.</string>
+    <string name="linux_welcome_start_hint">Downloads the theme\'s wallpaper now and Bellatrix\'s other themes (about 70 MB) in the background.</string>
     <string name="linux_welcome_start_linux_hint">Linux downloads about 1 GB, so Wi-Fi is best, and takes 3 GB of space. It installs in the background in 10 to 20 minutes; the home screen is ready right away.</string>
     <string name="linux_welcome_getting">getting %1$s</string>
     <string name="linux_welcome_theme_failed">the theme didn\'t download</string>
@@ -212,7 +212,7 @@
     <string name="licenses_use_shmem">shared memory for PRoot</string>
     <string name="licenses_use_mesa">OpenGL on Adreno GPUs in the optional Linux system</string>
     <string name="licenses_use_wayland">protocol files bundled with Mesa</string>
-    <string name="licenses_use_omarchy">theme colors bundled for first run</string>
+    <string name="licenses_use_bellatrix">theme colors bundled for first run</string>
     <string name="licenses_use_nerd_fonts">symbol font</string>
     <string name="licenses_use_weather_icons">weather glyphs in the symbol font</string>
     <string name="licenses_use_mdi">glyphs in the symbol font</string>
@@ -436,14 +436,14 @@
     <string name="store_add">add</string>
     <string name="store_theme_title">community themes</string>
     <string name="store_theme_search">search %1$d themes</string>
-    <string name="store_theme_header">made by the community, listed on omarchy.org/themes · installed from GitHub</string>
+    <string name="store_theme_header">made by the community, listed on the Bellatrix theme catalog · installed from GitHub</string>
     <string name="store_theme_in_use">✓ in use</string>
     <string name="store_theme_install_confirm">install %1$s?</string>
     <string name="store_theme_install_message">From %1$s. Linux gets its colors and wallpapers, not its scripts or terminal configs.</string>
     <string name="store_theme_install_message_replaces">From %1$s. Linux gets its colors and wallpapers, not its scripts or terminal configs.\n\nIt replaces your %2$s.</string>
-    <string name="store_theme_install_message_over">From %1$s. Linux gets its colors and wallpapers, not its scripts or terminal configs.\n\nIt goes over Omarchy\'s %2$s; removing it brings that back.</string>
+    <string name="store_theme_install_message_over">From %1$s. Linux gets its colors and wallpapers, not its scripts or terminal configs.\n\nIt goes over Bellatrix\'s %2$s; removing it brings that back.</string>
     <string name="store_theme_installing">installing %1$s… %2$d MB</string>
-    <string name="store_theme_catalog_failed">couldn\'t load omarchy.org/themes: %1$s</string>
+    <string name="store_theme_catalog_failed">couldn\'t load the Bellatrix theme catalog: %1$s</string>
     <string name="store_theme_page_changed">the page changed and can\'t be read</string>
     <string name="store_theme_not_github">not a GitHub repo: %1$s</string>
     <string name="store_theme_not_on_github">%1$s isn\'t on GitHub</string>
@@ -540,10 +540,10 @@
     <string name="style_update">update</string>
     <string name="style_remove">remove</string>
     <string name="style_remove_theme_title">remove %1$s?</string>
-    <string name="style_remove_theme_builtin">Your changes to it go; Omarchy\'s version stays.</string>
+    <string name="style_remove_theme_builtin">Your changes to it go; Bellatrix\'s version stays.</string>
     <string name="style_remove_deleted">It\'s deleted from the phone and from Linux.</string>
-    <string name="style_themes_downloading">Omarchy\'s other themes are downloading from github.com/omacom/omarchy (~70 MB).</string>
-    <string name="style_themes_not_installed">Omarchy\'s themes aren\'t installed yet. They\'re downloaded from github.com/omacom/omarchy (~70 MB).</string>
+    <string name="style_themes_downloading">Bellatrix\'s other themes are downloading from the Bellatrix theme pack (~70 MB).</string>
+    <string name="style_themes_not_installed">Bellatrix\'s themes aren\'t installed yet. They\'re downloaded from the Bellatrix theme pack (~70 MB).</string>
     <string name="style_downloading">downloading… %1$d MB</string>
     <string name="style_failed">failed: %1$s</string>
     <string name="style_retry">retry</string>
@@ -584,7 +584,7 @@
     <string name="gestures_keybar_until_fixed">the terminal key bar is the stock one until it\'s fixed: %1$s</string>
     <string name="gestures_strip_until_fixed">the recent apps strip is the stock one until it\'s fixed: %1$s</string>
     <string name="agents_title">Coding Agents</string>
-    <string name="agents_intro">Installed the way Omarchy does, most with mise. Logins open in your browser; paste keys with the keyboard\'s clipboard.</string>
+    <string name="agents_intro">Installed the way Bellatrix does, most with mise. Logins open in your browser; paste keys with the keyboard\'s clipboard.</string>
     <string name="agents_open">open</string>
     <string name="agents_remove">remove</string>
     <string name="agents_install">install</string>

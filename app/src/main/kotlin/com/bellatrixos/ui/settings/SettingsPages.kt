@@ -33,8 +33,6 @@ enum class SettingsPage {
     /** Home's pages, to arrange, edit and remove. */
     Pages,
 
-    /** The community themes, over the style screen or from the home menu's theme strip. */
-    Themes,
     Agents,
     Store,
 
@@ -138,7 +136,7 @@ private fun SettingsPage(
                 onGestures = { stack.push(SettingsPage.Gestures) },
                 onPermissions = { stack.push(SettingsPage.Permissions) },
             )
-        SettingsPage.Style -> StyleScreen(runtime, onDismiss = close, onBrowse = { stack.push(SettingsPage.Themes) }, onAgent = ::agent)
+        SettingsPage.Style -> StyleScreen(runtime, onDismiss = close, onAgent = ::agent)
         SettingsPage.Pages -> {
             var sharing by remember { mutableStateOf<WidgetSpec?>(null) }
             PagesScreen(runtime, onDismiss = close, onAgent = ::agent, onShare = { sharing = it })
@@ -163,7 +161,6 @@ private fun SettingsPage(
                 )
             }
         }
-        SettingsPage.Themes -> ThemeCatalogScreen(runtime.themes, onDismiss = close)
         // Kept only for old intents: hand off to the Bellatrix Settings page instead of showing a ported screen.
         SettingsPage.Agents -> {
             close()

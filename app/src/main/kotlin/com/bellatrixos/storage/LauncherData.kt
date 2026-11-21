@@ -16,16 +16,16 @@ import java.nio.file.attribute.BasicFileAttributes
 /**
  * The launcher's own data that Linux also sees. It lives outside the rootfs,
  * so it exists without Linux and survives installing or removing it; proot
- * binds it to the paths Omarchy and agents expect (see [com.bellatrixos.linux.Proot]).
+ * binds it to the paths Bellatrix and agents expect (see [com.bellatrixos.linux.Proot]).
  */
 object LauncherData {
-    /** Omarchy's release: themes, wallpapers, templates. The guest sees ~/.local/share/omarchy. */
-    fun omarchyDir(context: Context) = File(context.filesDir, "omarchy")
+    /** Themes shipped with Bellatrix. The guest sees ~/.local/share/bellatrix/themes. */
+    fun bellatrixThemeDir(context: Context) = File(context.filesDir, "bellatrix-themes")
 
-    /** The user's own Omarchy themes. The guest sees ~/.config/omarchy/themes, where omarchy-theme-install puts them. */
+    /** The user's own Bellatrix themes. The guest sees ~/.config/bellatrix/themes. */
     fun userThemesDir(context: Context) = File(context.filesDir, "themes")
 
-    /** The user's extra backgrounds, per theme. The guest sees ~/.config/omarchy/backgrounds. */
+    /** The user's extra backgrounds, per theme. The guest sees ~/.config/bellatrix/backgrounds. */
     fun userBackgroundsDir(context: Context) = File(context.filesDir, "backgrounds")
 
     /** Widget files. The guest sees ~/.config/bellatrix/widgets. */
@@ -36,6 +36,9 @@ object LauncherData {
 
     /** layout.toml, where home's tiles and pages are; see [com.bellatrixos.widgets.HomeStore]. The guest sees ~/.config/bellatrix/home. */
     fun homeDir(context: Context) = File(context.filesDir, "home")
+
+    /** layout.toml, the taskbar's pinned apps; see [com.bellatrixos.taskbar.TaskBarStore]. The guest sees ~/.config/bellatrix/taskbar. */
+    fun taskbarDir(context: Context) = File(context.filesDir, "taskbar")
 
     /** Settings that belong to no one store: setup, gestures, the GPU, the home role. Keys carry their owner's prefix. */
     fun prefs(context: Context): SharedPreferences = context.getSharedPreferences("launcher", Context.MODE_PRIVATE)

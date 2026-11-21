@@ -891,7 +891,7 @@ class WidgetEngine(
 
     /**
      * Debug builds, for the widget store's per-theme previews (scripts/store-previews.sh): once
-     * [name]'s sources have loaded, renders its tile in every bundled Omarchy theme to
+     * [name]'s sources have loaded, renders its tile in every bundled Bellatrix theme to
      * .preview/themes/<theme>/<file>.png (an app: its view at the phone's size), then writes .preview/themes/<file>.done. Asked for by
      * writing .check/<file>.themes. The whole launcher takes each theme's colors while it runs.
      *
@@ -1188,8 +1188,8 @@ class WidgetEngine(
                 "the files Linux put there itself: save files for the user's other apps in /sdcard/Download or /sdcard/Documents " +
                 "(pictures in /sdcard/Pictures). The user's other files are in the phone folders they let Linux reach, which have " +
                 "no path: `bellatrix folders` lists them, `bellatrix ls`, `get` and `put` list and copy files in and out, and " +
-                "`bellatrix pick` lets the user choose any file on the phone. xdg-open opens http(s) links in Android's browser; `omarchy-edit <file>` opens a file in the " +
-                "launcher's editor and `omarchy-files [folder]` its file manager; GUI apps (Wayland) open as windows on the launcher.\n\n" +
+                "`bellatrix pick` lets the user choose any file on the phone. xdg-open opens http(s) links in Android's browser; `bellatrix-edit <file>` opens a file in the " +
+                "launcher's editor and `bellatrix-files [folder]` its file manager; GUI apps (Wayland) open as windows on the launcher.\n\n" +
                 "Home-screen widgets are `.owl` files in " +
                 "~/$GUEST_DIR, written in a small declarative language documented in README.md there (and docs/ next to it); so are apps for the " +
                 "app drawer (`app \"name\" { }`) and panels that swiping up or down on home opens (`panel \"name\" { }`, picked with " +

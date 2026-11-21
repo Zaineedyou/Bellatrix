@@ -62,7 +62,7 @@ class VoiceSession(
     /** The agents that can talk: installed, and with a link. */
     val voiceAgents: List<Agent> get() = agents.installed.filter { it.bin in VOICE_LINKS }
 
-    /** Every agent with a link, installed or not, in Omarchy's order: the ones to pick from, installed when picked. */
+    /** Every agent with a link, installed or not, in Bellatrix's order: the ones to pick from, installed when picked. */
     val linked: List<Agent> get() = AGENTS.filter { it.bin in VOICE_LINKS }
 
     /** Whether [agent] can talk here: one with a link. */

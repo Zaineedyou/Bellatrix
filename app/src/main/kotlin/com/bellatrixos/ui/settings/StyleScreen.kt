@@ -84,15 +84,14 @@ import com.bellatrixos.linux.LauncherFont
 import com.bellatrixos.linux.LinuxState
 import com.bellatrixos.linux.TerminalFont
 import com.bellatrixos.linux.TerminalText
-import com.bellatrixos.theme.OmarchyTheme
+import com.bellatrixos.theme.BellatrixTheme
 import com.bellatrixos.theme.Setting
 import com.bellatrixos.theme.Style
 import com.bellatrixos.theme.StyleStore
-import com.bellatrixos.theme.ThemeDirs
-import com.bellatrixos.theme.ThemeDownload
 import com.bellatrixos.theme.ThemeStore
 import com.bellatrixos.theme.Toml
 import com.bellatrixos.widgets.WidgetEngine
+import com.bellatrixos.widgets.editThemeCommand
 import com.bellatrixos.widgets.editWidgetCommand
 import android.os.Build
 import com.bellatrixos.theme.isLiveBackground
@@ -141,35 +140,24 @@ import com.bellatrixos.ui.passesKeys
 import com.bellatrixos.ui.tile
 
 /**
- * Omarchy's Style menu: the theme, its background, how the home screen
+ * Bellatrix's Style menu: the theme, its background, how the home screen
  * draws itself and, with Linux, the terminal's text size.
  */
 @Composable
 fun StyleScreen(
     runtime: Runtime,
     onDismiss: () -> Unit,
-    /** Opens the community themes over this screen. */
-    onBrowse: () -> Unit,
     /** Opens the agent on keybar.owl. */
     onAgent: (title: String, command: (bin: String) -> String) -> Unit,
 ) {
     val store = runtime.themes
     val scope = rememberCoroutineScope()
     RescanThemes(store)
-    var installOpen by remember { mutableStateOf(false) }
-    var removing by remember { mutableStateOf<OmarchyTheme?>(null) }
+    var removing by remember { mutableStateOf<BellatrixTheme?>(null) }
     val linux by runtime.bootstrap.state.collectAsState()
     OverlayPanel(stringResource(R.string.style_title), onDismiss) {
         Column(Modifier.verticalScroll(rememberScrollState())) {
-            ThemeSection(
-                store,
-                onBrowse = onBrowse,
-                onInstall = {
-                    store.clearInstallError()
-                    installOpen = true
-                },
-                onRemove = { removing = it },
-            )
+            ThemeSection(store, onAgent = onAgent, onRemove = { removing = it })
             store.current?.let { BackgroundSection(store, it) }
             // Style choices don't depend on a theme, so they're offered before themes are downloaded too.
             Heading(R.string.style_home_screen)
@@ -229,18 +217,6 @@ fun StyleScreen(
                     Modifier.padding(top = 20.dp),
                     style = Mono.copy(color = Palette.muted, fontSize = TextSize.Small),
                 )
-            }
-        }
-        if (installOpen) {
-            TextDialog(
-                stringResource(R.string.style_install_theme),
-                "",
-                stringResource(R.string.style_install),
-                hint = stringResource(R.string.style_install_hint),
-                onDismiss = { installOpen = false },
-            ) { url ->
-                installOpen = false
-                scope.launch { store.install(url) }
             }
         }
         removing?.let { theme ->
@@ -325,24 +301,17 @@ private enum class KeybarAction(@StringRes val label: Int) {
     Stock(R.string.style_keybar_back_to_stock),
 }
 
-/** The installed themes in a row, starting at the current one; browse has Omarchy's whole catalog. */
+/** The local Bellatrix themes in a row, starting at the current one; an agent can create or change them. */
 @Composable
 private fun ThemeSection(
     store: ThemeStore,
-    onBrowse: () -> Unit,
-    onInstall: () -> Unit,
-    onRemove: (OmarchyTheme) -> Unit,
+    onAgent: (title: String, command: (bin: String) -> String) -> Unit,
+    onRemove: (BellatrixTheme) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val current = store.current
     Heading(R.string.style_theme) {
-        BracketAction(stringResource(R.string.style_browse), Palette.accent, onClick = onBrowse)
-        BracketAction(stringResource(R.string.style_install), Palette.accent, onClick = onInstall)
-    }
-    InstallStatus(store)
-    if (!store.complete) {
-        DownloadPrompt(store.download, partial = store.themes.isNotEmpty()) { scope.launch { store.ensureRelease() } }
-        Spacer(Modifier.height(8.dp))
+        BracketAction("edit themes", Palette.accent) { onAgent("Edit Bellatrix themes") { bin -> editThemeCommand(bin) } }
     }
     if (store.themes.isNotEmpty()) {
         val start = store.themes.indexOfFirst { it.name == current?.name }.coerceAtLeast(0)
@@ -359,16 +328,14 @@ private fun ThemeSection(
         }
     }
     if (current?.own != null) {
-        val source = remember(current) { ThemeDirs.sourceOf(current) }
         Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             BasicText(
-                source?.label ?: stringResource(R.string.style_own_theme),
+                stringResource(R.string.style_own_theme),
                 Modifier.weight(1f),
                 style = Mono.copy(color = Palette.muted),
                 softWrap = false,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (source != null) BracketAction(stringResource(R.string.style_update), Palette.accent) { scope.launch { store.update(current) } }
             BracketAction(stringResource(R.string.style_remove), Palette.red) { onRemove(current) }
         }
     }
@@ -378,7 +345,7 @@ private fun ThemeSection(
 @Composable
 private fun BackgroundSection(
     store: ThemeStore,
-    theme: OmarchyTheme,
+    theme: BellatrixTheme,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -401,7 +368,7 @@ private fun BackgroundSection(
                 onLongClick = if (theme.isExtraBackground(file)) ({ removing = file }) else null,
             )
         }
-        // Omarchy's Install > Style > Background, with Android's image picker instead of a folder.
+        // Bellatrix's Install > Style > Background, with Android's image picker instead of a folder.
         item(key = "add") {
             Box(
                 Modifier
@@ -1001,31 +968,8 @@ private fun StyleOption(
 }
 
 @Composable
-private fun DownloadPrompt(
-    state: ThemeDownload,
-    /** Some themes are here already (first run fetches only the picked one). */
-    partial: Boolean,
-    onDownload: () -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        BasicText(
-            stringResource(if (partial) R.string.style_themes_downloading else R.string.style_themes_not_installed),
-            style = Mono,
-        )
-        when (state) {
-            is ThemeDownload.Running -> BasicText(stringResource(R.string.style_downloading, state.megabytes), style = Mono.copy(color = Palette.accent))
-            is ThemeDownload.Failed -> {
-                BasicText(stringResource(R.string.style_failed, state.message), style = Mono.copy(color = Palette.red))
-                BracketAction(stringResource(R.string.style_retry), Palette.accent, onClick = onDownload)
-            }
-            ThemeDownload.Idle -> BracketAction(stringResource(R.string.style_download_themes), Palette.accent, onClick = onDownload)
-        }
-    }
-}
-
-@Composable
 private fun ThemeCard(
-    theme: OmarchyTheme,
+    theme: BellatrixTheme,
     selected: Boolean,
     modifier: Modifier,
     onClick: () -> Unit,

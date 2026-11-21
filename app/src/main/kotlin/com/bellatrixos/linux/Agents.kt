@@ -20,7 +20,7 @@ import java.nio.file.Files
 import java.nio.file.LinkOption
 
 /**
- * A coding agent CLI, installed the way Omarchy's omarchy-default-agent does it: via mise, or with its
+ * A coding agent CLI, installed the way Bellatrix's bellatrix-default-agent does it: via mise, or with its
  * [own] installer when mise has no package for it.
  */
 data class Agent(
@@ -87,8 +87,8 @@ data class OwnInstaller(
 const val HERMES_CLEANUP = "rm -rf ~/.hermes/cache/pnpm ~/.hermes/cache/uv"
 
 /**
- * Omarchy's agent list (omarchy-default-agent), limited to ones mise can install on arm64, plus Hermes,
- * which Omarchy also installs with Hermes's own installer.
+ * Bellatrix's agent list (bellatrix-default-agent), limited to ones mise can install on arm64, plus Hermes,
+ * which Bellatrix also installs with Hermes's own installer.
  */
 val AGENTS =
     listOf(
@@ -115,7 +115,7 @@ val AGENTS =
             "Hermes",
             R.string.linux_agent_hermes,
             pkg = "",
-            // As Omarchy starts it: without asking before each command it runs.
+            // As Bellatrix starts it: without asking before each command it runs.
             command = "hermes --yolo",
             own =
                 OwnInstaller(
@@ -235,11 +235,11 @@ val MISE_NODE_FOR_AGENTS =
 /**
  * Starts [agentBin] with a first prompt; OpenCode takes it as --prompt, Antigravity and Copilot as -i (they
  * refuse a bare argument), the others as an argument. Hermes takes it as its chat's --query, which in a
- * terminal stays open after the answer, with --yolo as Omarchy starts it.
+ * terminal stays open after the answer, with --yolo as Bellatrix starts it.
  * Ori's agent is `ori code`, which stays open only with --interactive. Kimi takes a prompt only in
  * print mode, so the session it ran in is continued after the answer. Qwen Code and Kilo bind it to
  * an option, MiniMax Code, Kiro, Devin and Command Code take it after --, and Amp reads its first
- * message from stdin (an argument would be one turn that exits), as Omarchy's omarchy-agent starts them.
+ * message from stdin (an argument would be one turn that exits), as Bellatrix's bellatrix-agent starts them.
  * [readOnly], for reading something untrusted: Claude Code and Antigravity start in plan mode, where they
  * can read but not run commands or change files whatever the user's settings say. Hermes starts with its
  * file tools alone (-t file): no terminal, web or browser, so it can read and write files but not run or
@@ -302,7 +302,7 @@ class AgentStore(
         refresh()
     }
 
-    /** Installed agents in Omarchy's order; re-read from disk after installs and removals. */
+    /** Installed agents in Bellatrix's order; re-read from disk after installs and removals. */
     var installed by mutableStateOf<List<Agent>>(emptyList())
         private set
 
@@ -310,7 +310,7 @@ class AgentStore(
         installed = AGENTS.filter { isInstalled(it) }
     }
 
-    /** The agent the launcher opens for prompts and widget work: the picked one, else the first installed in Omarchy's order. */
+    /** The agent the launcher opens for prompts and widget work: the picked one, else the first installed in Bellatrix's order. */
     val default: Agent? get() = installed.firstOrNull { it.bin == preferred } ?: installed.firstOrNull()
 
     fun choose(agent: Agent) {

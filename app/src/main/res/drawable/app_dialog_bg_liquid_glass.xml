@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Frosted "Liquid Glass" surface used by the native Check for updates dialog. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- soft outer glow -->
+    <item
+      android:left="-3dp"
+      android:right="-3dp"
+      android:top="-3dp"
+      android:bottom="-3dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/liquid_glass_glow" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+    <!-- glass body: bright highlight at the top, tinted translucent bottom -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+              android:type="linear"
+              android:angle="270"
+              android:startColor="@color/liquid_glass_fill_top"
+              android:centerColor="@color/liquid_glass_fill_mid"
+              android:centerY="0.22"
+              android:endColor="@color/liquid_glass_fill_bottom" />
+            <corners android:radius="24dp" />
+            <stroke
+              android:width="1.5dp"
+              android:color="@color/liquid_glass_stroke" />
+        </shape>
+    </item>
+</layer-list>

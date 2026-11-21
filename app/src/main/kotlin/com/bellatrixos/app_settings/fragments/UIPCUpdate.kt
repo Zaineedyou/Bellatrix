@@ -2,6 +2,7 @@ package com.bellatrixos.app_settings.fragments
 
 import android.app.AlertDialog
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -104,9 +105,9 @@ class UIPCUpdate : Fragment() {
                     append("\n\n").append(getString(R.string.settings_update_dialog_latest_note))
                 }
             }
-        val dialog =
+        val builder =
             AlertDialog
-                .Builder(context, R.style.UIAlertDialog)
+                .Builder(context, R.style.UILiquidGlassDialog)
                 .setTitle(
                     if (release != null) {
                         getString(R.string.settings_update_dialog_available, version)
@@ -115,12 +116,18 @@ class UIPCUpdate : Fragment() {
                     },
                 ).setMessage(message)
         if (release != null && release.apk.isNotBlank()) {
-            dialog.setPositiveButton(R.string.settings_update_dialog_install) { _, _ -> launcher.install(context) }
-            dialog.setNeutralButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
+            builder.setPositiveButton(R.string.settings_update_dialog_install) { _, _ -> launcher.install(context) }
+            builder.setNeutralButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
         } else {
-            dialog.setPositiveButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
+            builder.setPositiveButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
         }
-        dialog.setNegativeButton(android.R.string.cancel, null)
+        builder.setNegativeButton(android.R.string.cancel, null)
+        val dialog = builder.create()
+        // Frost the content behind the glass on Android 12+; older versions keep
+        // the translucent drawable only, which is still a native Bellatrix dialog.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            dialog.window?.setBackgroundBlurRadius(20)
+        }
         dialog.show()
     }
 

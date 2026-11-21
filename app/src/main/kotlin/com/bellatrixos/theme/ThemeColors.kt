@@ -3,8 +3,8 @@ package com.bellatrixos.theme
 import java.io.File
 
 /**
- * Parses an Omarchy `colors.toml` and resolves the derived names that
- * templates use, mirroring the cascade in omarchy-theme-color.
+ * Parses an Bellatrix `colors.toml` and resolves the derived names that
+ * templates use, mirroring the cascade in bellatrix-theme-color.
  */
 object ThemeColors {
     private val LINE = Regex("""^\s*([A-Za-z0-9_]+)\s*=\s*"([^"]*)"""")
@@ -74,7 +74,7 @@ object ThemeColors {
 
     /**
      * The palette of a theme older than colors.toml, from its alacritty.toml,
-     * as omarchy-theme-colors-from-alacritty reads it. Null without all eight
+     * as bellatrix-theme-colors-from-alacritty reads it. Null without all eight
      * normal colors.
      */
     fun fromAlacritty(text: String): Map<String, String>? {
