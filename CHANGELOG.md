@@ -9,6 +9,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.21] - 2026-11-21
+
+### Added
+
+- Bellatrix home and taskbar can now be riced in place with OWL. `home.owl` and `taskbar.owl` are declarative `panel` files rendered inside Bellatrix's own bar with `Flex`, `Box`, `Anchor` and the `anchor` property (owl 24), Waybar-style — not a second launcher screen.
+- Long-press empty home now offers **new widget file**, **edit home bar** and **edit taskbar**. A widget tile's **edit file** action edits that widget, and empty-page invites create widget or face files directly. All open Bellatrix's native editor without Linux or a coding agent.
+- Agent prompts and bundled widget docs now name the exact home/taskbar OWL files and the Flex/Box/Anchor workflow.
+
+### Changed
+
+- `home.owl` and `taskbar.owl` are excluded from gesture panels so they can't be swiped open as a separate screen.
+- Bundled widget examples and docs use Bellatrix theme and state paths instead of the previous upstream names.
+
+### Important
+
+- DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
+- TOLOL, KAN UDAH GUA BILANG KALO MERGE FITUR OMALAUNCHER KE BELLATRIX TU TAMPILAN NYA SYNC SAMA TAMPILAN BELLATRIX NGENTOT, JANGAN MAKE TAMPILAN OMA LAUNCHER, LU TOLOL APA GIMANA? PINDAH CODING AGENTS NYA STANDALONE JANGAN ADA DI DALAM SETTING LINUX, DAN BUAT SCREEN NYA NYATU KE TAMPILAN SETTING BELLATRIX NYA JANGAN BUAT TERPISAH NGENTOT, INI WAJIB, ANJING
+
 ## [2.9.20] - 2026-11-21
 
 ### Fixed
@@ -41,7 +59,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 - Removed Omarchy theming completely: no upstream theme release, theme catalog, repo installer, Omarchy paths, shims, or UI strings. Themes are Bellatrix's own local files, using the shipped default palette.
 - Terminal keyboard toggle icon and click logic removed; tapping the terminal or a Coding Agents chat box still raises the keyboard.
 
-### Notes
+### Important
 
 - DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
 

@@ -90,6 +90,7 @@
     <string name="prompt_speech_mic_permission">microphone permission needed</string>
     <string name="prompt_speech_network">speech recognition needs a network connection</string>
     <string name="home_edit">edit</string>
+    <string name="home_edit_file">edit file</string>
     <string name="home_share">share</string>
     <string name="home_remove">remove</string>
     <string name="home_create_with">create with %1$s</string>
@@ -98,6 +99,9 @@
     <string name="home_create_widget">widget</string>
     <string name="home_create_app">app</string>
     <string name="home_create_panel">panel</string>
+    <string name="home_new_widget_file">new widget file</string>
+    <string name="home_edit_home">edit home bar</string>
+    <string name="home_edit_taskbar">edit taskbar</string>
     <string name="home_face_invite_title">a full-screen widget of your own</string>
     <string name="home_face_invite_text">This page is yours to fill with a full-screen widget: a feed, a dashboard, a start page, a game. Say what you want and %1$s builds it here.</string>
     <string name="home_face_invite_text_no_agent">This page is yours to fill with a full-screen widget: a feed, a dashboard, a start page, a game. Say what you want and an agent builds it here.</string>

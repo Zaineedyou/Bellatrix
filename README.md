@@ -51,13 +51,23 @@ using Bellatrix UI — there is no second home screen or parallel desktop to swi
 - Coding Agents as a standalone top-level page with one card per agent and per-agent dropdowns
 - Themes, wallpapers, colors, icon packs, fonts, taskbar, and home gestures
 - OWL widget engine with native schemas and live-data previews
-- PC Update with GitHub Release changelog, direct APK install, and Chrome fallback
+- PC Update with GitHub Release changelog, a **Download From Github** button, and Chrome fallback
 
 ### Reliability
 
 - Crash diagnostics copy a full report to the clipboard and save a backup locally
 - Release builds are signed, checksummed, and published only from CI
 - A `v*` tag without a matching changelog entry fails the release job
+
+### OWL ricing
+
+Long-press empty Bellatrix home to create a widget file or to edit the two declarative bar files:
+`~/.config/bellatrix/widgets/home.owl` and `~/.config/bellatrix/widgets/taskbar.owl`. These are ordinary
+OWL `panel` files rendered inside Bellatrix's own home bar and taskbar — never a second launcher screen.
+Lay their modules out with `Flex`, `Box`, `Anchor` and the `anchor` property (owl 24), Waybar-style.
+A widget tile's **edit file** action and the empty-page invites open the same native Bellatrix editor,
+so creating and editing OWL files never requires Linux or a coding agent. Agents can still work on the
+same files from the standalone Coding Agents settings page.
 
 ## Requirements
 

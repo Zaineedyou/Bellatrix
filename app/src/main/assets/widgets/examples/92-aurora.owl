@@ -29,6 +29,6 @@ widget "aurora" {
         }
       """
     }
-    Text { text: "omarchy"; style: huge; color: foreground; align: center }
+    Text { text: "bellatrix"; style: huge; color: foreground; align: center }
   }
 }

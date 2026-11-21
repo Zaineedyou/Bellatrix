@@ -20,6 +20,10 @@ their apps (a panel picked for swiping down that's broken opens nothing). Home's
 with "(has errors)". Compare `drawer.owl` with `.stock-drawer.owl` to see what changed in the stock drawer since. With
 nothing on swipe up, tapping the bar still opens the drawer.
 
+Two panel files are not swipe panels: `home.owl` and `taskbar.owl` render inside Bellatrix's own home
+bar and taskbar. Edit them from the long-press home menu to rice those strips with `Flex`, `Box`,
+`Anchor` and `anchor` (owl 24), like a Waybar; see docs/home.md.
+
 Behind a panel the launcher draws the theme's background, as opaque as the panel's `opacity` says: from 0, home shows
 through, to 1, solid; without one 0.97, so home barely shows (owl 13). `drawer.owl` and `controls.owl` both have 0.97. Leave
 a panel's outer node without a `background` of its own, or it covers home whatever `opacity` is; a background on the

@@ -96,6 +96,7 @@ import com.bellatrixos.ui.keyActivated
 import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.ui.tile
 import com.bellatrixos.ui.voice.Speech
+import com.bellatrixos.widgets.WidgetEngine
 
 /**
  * How the prompt bar was summoned from outside it; Send asks the agent with what's typed (the panel's ask row),
@@ -105,6 +106,15 @@ enum class PromptRequest { Type, Send, Listen, Release }
 
 /** Height of the collapsed bar; the home grid leaves this much room for it. */
 val PromptBarHeight = 48.dp
+
+/**
+ * Room for the two declarative OWL bars when their files exist: home.owl above the prompt bar and
+ * taskbar.owl below it. Each is an ordinary OWL panel rendered inside this bar (see [OwlBar]), so the
+ * home and taskbar can be riced Waybar-style without another launcher screen. A bar that hasn't been
+ * created renders nothing and takes no room.
+ */
+val OwlHomeBarHeight = 40.dp
+val OwlTaskbarHeight = 28.dp
 
 /**
  * The one input at the bottom of the home screen: it finds apps and asks agents.
@@ -288,7 +298,12 @@ internal fun PromptBar(
                 style = Mono.copy(color = Palette.red, fontSize = TextSize.Small),
             )
         }
-        Box(Modifier.onSizeChanged { frame = it.height }) {
+        // Bellatrix's own bar, with the user's declarative bars around it. These are part of this bar,
+        // not a separate OWL screen: home.owl and taskbar.owl are edited as files and render right here.
+        Column(Modifier.onSizeChanged { frame = it.height }) {
+            OwlBar(runtime, WidgetEngine.HOME_BAR, Modifier.fillMaxWidth().height(OwlHomeBarHeight))
+            // A Box keeps the native bar's overlays (menu, level line) in their own coordinates.
+            Box(Modifier.fillMaxWidth()) {
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -397,6 +412,9 @@ internal fun PromptBar(
                     },
                 )
             }
+            }
+            // The taskbar strip, below the native bar: another declarative OWL file, rendered in place.
+            OwlBar(runtime, WidgetEngine.TASKBAR_BAR, Modifier.fillMaxWidth().height(OwlTaskbarHeight))
         }
     }
 }

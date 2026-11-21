@@ -45,7 +45,9 @@ private fun OwlKind.what() =
         OwlKind.Panel ->
             "a panel (panel \"name\" { }: swiping up on my home screen opens it as my app drawer, or swiping down opens it from the top, " +
                 "as docs/panels.md says). Ask me which swipe it's for, and once it works, pick it for that swipe by setting " +
-                "gestures.swipe-up or gestures.swipe-down to its file name in ~/${StyleStore.GUEST_DIR}/style.toml"
+                "gestures.swipe-up or gestures.swipe-down to its file name in ~/${StyleStore.GUEST_DIR}/style.toml. " +
+                "Two names are NOT swipe panels: home.owl and taskbar.owl render inside Bellatrix's own home bar and taskbar " +
+                "(Waybar-style, with Flex/Box/Anchor); if you mean one of those, edit that file in place rather than picking a gesture"
         OwlKind.Keybar ->
             "a terminal key bar (keybar \"name\" { }: the bar over the soft keyboard while I type in a terminal, as docs/keybar.md " +
                 "says). The launcher shows ${WidgetEngine.KEYBAR}, so change that file rather than making a new one"

@@ -20,11 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.bellatrixos.R
 import com.bellatrixos.Runtime
 import com.bellatrixos.widgets.lang.OwlKind
 import com.bellatrixos.widgets.newOwlCommand
+import com.bellatrixos.widgets.OwlBars
+import com.bellatrixos.widgets.WidgetEngine
 import kotlinx.coroutines.launch
 import com.bellatrixos.ui.BracketAction
 import com.bellatrixos.ui.Mono
@@ -73,6 +76,7 @@ fun HomeMenu(
     // These need Linux; without it they open its install sheet.
     val linux = linuxPhase(runtime) == LinuxPhase.Installed
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     /** Recolors right away, then applies the full theme: its first background, like bellatrix-theme-set, and the guest's configs. */
     fun pickTheme(theme: com.bellatrixos.theme.BundledTheme) {
@@ -113,6 +117,20 @@ fun HomeMenu(
         MenuItem(stringResource(R.string.home_browse_store)) {
             state.homeMenuOpen = false
             state.show(SettingsPage.Store)
+        }
+        // The direct, on-device way to rice home: no Linux and no agent needed. These open Bellatrix's own
+        // editor on the .owl files, so the home and taskbar are editable right here, Waybar-style.
+        MenuItem(stringResource(R.string.home_new_widget_file)) {
+            state.homeMenuOpen = false
+            scope.launch { OwlBars.newWidget(context, runtime) }
+        }
+        MenuItem(stringResource(R.string.home_edit_home)) {
+            state.homeMenuOpen = false
+            scope.launch { OwlBars.edit(context, runtime, WidgetEngine.HOME_BAR) }
+        }
+        MenuItem(stringResource(R.string.home_edit_taskbar)) {
+            state.homeMenuOpen = false
+            scope.launch { OwlBars.edit(context, runtime, WidgetEngine.TASKBAR_BAR) }
         }
         Box(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
             ThemeStrip(

@@ -305,7 +305,7 @@ widget "today" {
   // A typed city wins; without one, the phone's place, to two decimals (about the kilometre a coarse fix knows), else
   // "" for wttr's guess from the IP. Null while the source starts, so it doesn't fetch the IP's weather first.
   let at = city != "" ? q : here == null ? null : here.available ? "${fixed(here.lat, 2)},${fixed(here.lon, 2)}" : ""
-  // One request. Icons and °F countries match omarchy's weather panel.
+  // One request. Icons and °F countries match the weather glyph table.
   source wx = http(at == null ? null : "https://wttr.in/${at}?format=j1") every 30m timeout 10s json
   let cur = wx.current_condition[0]
   let day = wx.weather[0]

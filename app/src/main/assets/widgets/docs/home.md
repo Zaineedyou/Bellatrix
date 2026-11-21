@@ -45,9 +45,22 @@ tiles = [
 
 ## Create and modify widgets on Bellatrix home
 
-Anything that can write files can create or change a home widget: a coding agent
-from **Settings → Coding Agents**, or a terminal in the launcher. There is no
+On the phone, long-press an empty part of home and use **new widget file**,
+**edit home bar** or **edit taskbar**: they open those `.owl` files in Bellatrix's own text editor,
+with no Linux or coding agent needed. Save, and the file appears on home within a
+second. Coding agents work too (the prompts point them at these same files), as
+does any other writer of files. A widget tile's **edit file** action opens just that file, and the
+empty-page invites create a widget or face file directly when Linux isn't installed. There is no
 second launcher screen — the files below are the ones Bellatrix home reads.
+
+The two bar files are ordinary OWL `panel` files that render **inside the bar
+Bellatrix already draws**, not swiped open as a panel and not a separate OWL home
+screen:
+
+- `~/.config/bellatrix/widgets/home.owl` — the strip above the prompt bar.
+- `~/.config/bellatrix/widgets/taskbar.owl` — the strip below it, over the taskbar.
+
+Both are created from a Flex/Box/Anchor starter the first time you edit them.
 
 1. Write `~/.config/bellatrix/widgets/<name>.owl` (a `widget`, `face`, `app`,
    `panel`, or `keybar` declaration; see `README.md` and `docs/nodes.md`).
@@ -67,20 +80,25 @@ Waybar-style declarative layout (owl 24):
   or `bottomEnd`. A bar panel with a left clock and right icons is:
 
 ```owl
-widget {
+panel "home" {
   meta { owl: 24 }
+  source now = clock every 1s
+  source bat = android.battery
   Anchor {
-    Text { anchor: topStart; text: clock() }
+    fill: width
+    height: 40
+    Text { anchor: topStart; text: fmtTime(now, "HH:mm") }
     Flex { anchor: topEnd; gap: 6
-      Text { text: battery() }
-      Text { text: network() }
+      Text { text: "${round(bat.level)}%" }
+      Text { text: "󰀂" }
     }
   }
 }
 ```
 
-`Box` accepts the same `anchor` property, so an existing panel can be converted
-without changing its structure.
+Save that as `home.owl` and the modules sit in Bellatrix's home bar. `taskbar.owl`
+uses the same shape for the taskbar strip. `Box` accepts the same `anchor`
+property, so an existing panel can be converted without changing its structure.
 
 ## Taskbar layout
 

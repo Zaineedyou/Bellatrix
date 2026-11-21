@@ -272,8 +272,25 @@ class WidgetEngine(
     /** App files that compile and can run here, for the app drawer. */
     fun apps(): List<WidgetSpec> = specs.filter { it.kind == OwlKind.App && it.program != null && !waitsForLinux(it) }
 
-    /** Panel files, which gesture settings offer for swiping up and down; ones that don't compile too, to say so. Not the stock drawer. */
-    fun panels(): List<WidgetSpec> = specs.filter { it.kind == OwlKind.Panel && it.file.name != STOCK_DRAWER }
+    /**
+     * Panel files, which gesture settings offer for swiping up and down; ones that don't compile too, to say so.
+     * The stock drawer and the two declarative bar files aren't swipe panels: [HOME_BAR] and [TASKBAR_BAR] render
+     * inside Bellatrix's own home bar, so offering them as a gesture target would open the bar as a full screen.
+     */
+    fun panels(): List<WidgetSpec> = specs.filter { spec ->
+        spec.kind == OwlKind.Panel && spec.file.name !in setOf(STOCK_DRAWER, HOME_BAR, TASKBAR_BAR)
+    }
+
+    /**
+     * A declarative bar file: a panel-kind OWL file rendered inside Bellatrix's home bar rather than swiped open.
+     * [HOME_BAR] is the home's status strip, [TASKBAR_BAR] the taskbar strip; both use Flex/Box/Anchor layout
+     * (owl 24) so the home and taskbar can be riced like a Waybar, without a second launcher screen.
+     */
+    fun barInstance(name: String): WidgetInstance? {
+        val spec = specs.firstOrNull { it.file.name == name && it.kind == OwlKind.Panel } ?: return null
+        if (waitsForLinux(spec)) return null
+        return instances[name]?.takeIf { it.program.kind == OwlKind.Panel }
+    }
 
     /**
      * The panel the drawer shows above the prompt bar: the one picked for swiping up, else drawer.owl, else the stock
@@ -283,6 +300,8 @@ class WidgetEngine(
 
     /** The running panel [name] with its spec, for home to show; null if it's gone, doesn't compile or can't run here. */
     fun panelInstance(name: String): Pair<WidgetSpec, WidgetInstance>? {
+        // Bars belong in the home bar, never in a swipe panel, even if style.toml names one by hand.
+        if (name in BAR_FILES) return null
         val spec = specs.firstOrNull { it.file.name == name && it.kind == OwlKind.Panel } ?: return null
         if (waitsForLinux(spec)) return null
         return instances[name]?.takeIf { it.program.kind == OwlKind.Panel }?.let { spec to it }
@@ -725,7 +744,8 @@ class WidgetEngine(
                         }
                     },
                     linux = { linux },
-                    foreground = { (shownApps[name] ?: 0) > 0 || openScreen == name || name in shownPanels },
+                    // Bars are drawn in the home bar whenever home shows, so their triggers and sounds count as foreground too.
+                    foreground = { (shownApps[name] ?: 0) > 0 || openScreen == name || name in shownPanels || name in BAR_FILES },
                 )
             prev?.let(inst::adopt)
             instances[spec.file.name] = inst
@@ -960,6 +980,8 @@ class WidgetEngine(
         // Over a Linux window too, while home is hidden.
         if (spec.kind == OwlKind.Keybar) return keybarShown > 0
         if (!visible) return false
+        // Declarative bars live for as long as home shows: they ARE part of the home bar, not a page or a swipe panel.
+        if (spec.file.name in BAR_FILES) return true
         // Its screen is open: it's on screen wherever the pages are.
         if (spec.file.name == openScreen) return true
         if (spec.kind == OwlKind.Panel) return spec.file.name in shownPanels || spec.file.name in gesturePanels()
@@ -1173,6 +1195,16 @@ class WidgetEngine(
 
         /** The extra keys as this launcher ships them, kept that way: the fallback, and what an edited keybar.owl compares with. */
         const val STOCK_KEYBAR = ".stock-keybar.owl"
+
+        /**
+         * Declarative bar files: panel-kind OWL files rendered inside Bellatrix's own home bar (not swiped open).
+         * Edit these to rice the home and the taskbar with Flex/Box/Anchor, Waybar-style. Both are user files,
+         * created on first edit from the templates in [OwlBars], and watched by the same file observer as every .owl.
+         */
+        const val HOME_BAR = "home.owl"
+        const val TASKBAR_BAR = "taskbar.owl"
+        val BAR_FILES = setOf(HOME_BAR, TASKBAR_BAR)
+
         private const val TERMINAL_PREFIX = "terminal-"
         private const val AGENT_PREFIX = "agent-"
 
@@ -1197,7 +1229,9 @@ class WidgetEngine(
                 "drawer.owl there: to change the drawer, edit it; .stock-drawer.owl is the drawer as this launcher ships it. " +
                 "Likewise keybar.owl (`keybar \"name\" { }`) is the terminal key bar over the soft keyboard while typing in a terminal, " +
                 "and .stock-keybar.owl the bar as shipped. " +
-                "Saved files show up on the phone within seconds. After saving, run `owl-check <file>`: it prints the errors " +
+                "The home and taskbar are riced with two more declarative files here: home.owl and taskbar.owl, both `panel \"name\" { }` files. " +
+                "They render inside Bellatrix's own home bar rather than swiping open: lay their modules out with Flex, Box and Anchor and " +
+                "the `anchor` property (owl 24) like a Waybar. Saved files show up on the phone within seconds. After saving, run `owl-check <file>`: it prints the errors " +
                 "and the path of a PNG of the tile or view, drawn with live data; look at it to check the layout. " +
                 "examples/ holds more widgets to learn from or move up to use. Scripts and hooks can set a running " +
                 "widget's state or refresh it with `owl-send <file> set <state> <value>` and `owl-send <file> refresh`.\n\n" +

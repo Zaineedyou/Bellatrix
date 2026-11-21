@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
 import com.bellatrixos.widgets.FACE_PAGE
+import com.bellatrixos.widgets.OwlBars
 import com.bellatrixos.widgets.isFacePage
 import com.bellatrixos.widgets.lang.OwlKind
 import com.bellatrixos.widgets.Folder
@@ -48,6 +49,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
@@ -64,6 +66,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.focusGroup
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -118,6 +121,8 @@ fun HomeScreen(
 ) {
     val engine = runtime.widgets
     val linuxState = linuxPhase(runtime)
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val arrange = remember { Arrange() }
     // A foldable's cover screen has a layout of its own (its cells and pages in the layout, [cover] in layout.toml), and
     // with home.unfolded-layout so does a Fold's unfolded inner screen ([unfolded]): home shows that one there, and the
@@ -334,6 +339,12 @@ fun HomeScreen(
         state.withAgent(runtime, "Edit ${spec.name}") { editWidgetCommand(it, spec) }
     }
 
+    /** Opens the file itself in Bellatrix's editor: no Linux, no agent, no second launcher screen. */
+    fun editFile(spec: WidgetSpec) {
+        state.editing = null
+        scope.launch { runtime.edit(OwlBars.guestPath(spec.file.name)) }
+    }
+
     // Overlays below are siblings of the pager inside this Box, so they never change the page's size.
     val density = LocalDensity.current
     val ime = WindowInsets.ime
@@ -492,6 +503,7 @@ fun HomeScreen(
                         // A widget's own file, or the owl app a pinned shortcut opens.
                         val spec = if (item is WidgetItem) item.spec else (item as? Shortcut)?.owl?.let(engine.specs::app)
                         if (spec != null) EditAction(stringResource(R.string.home_edit)) { edit(spec) }
+                        if (spec != null) EditAction(stringResource(R.string.home_edit_file)) { editFile(spec) }
                         // As a QR code or link, or (your own) to the store. An agent's tile is a terminal, not a widget to pass on.
                         if (spec != null && !engine.isAgentWidget(spec)) {
                             EditAction(stringResource(R.string.home_share)) {
@@ -524,7 +536,8 @@ fun HomeScreen(
                     if (linuxState == LinuxPhase.Installed) {
                         state.withAgent(runtime, "New face") { newOwlCommand(it, OwlKind.Face, page) }
                     } else {
-                        state.show(SettingsPage.Linux)
+                        // No Linux needed to make a face: the file opens in Bellatrix's own editor.
+                        scope.launch { OwlBars.newFace(context, runtime, page) }
                     }
                 }
             },
@@ -539,7 +552,8 @@ fun HomeScreen(
                     if (linuxState == LinuxPhase.Installed) {
                         state.withAgent(runtime, "New widget") { newOwlCommand(it, OwlKind.Widget) }
                     } else {
-                        state.show(SettingsPage.Linux)
+                        // No Linux needed to make a widget: the file opens in Bellatrix's own editor.
+                        scope.launch { OwlBars.newWidget(context, runtime) }
                     }
                 }
             },

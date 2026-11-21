@@ -34,6 +34,14 @@ lives in ~/.config/bellatrix/home/layout.toml, which you can edit too (see
 docs/home.md). The launcher puts a new file on home itself, by its `page:`, `order:` and `size:`:
 don't add it to layout.toml, move it there afterwards if it should be elsewhere.
 
+On the phone, long-pressing empty home offers **new widget file**,
+**edit home bar** and **edit taskbar**: those open `.owl` files in Bellatrix's own editor, no Linux or
+coding agent needed. A tile's **edit file** action edits that widget, and an empty page's invite makes
+a widget or face file directly. `home.owl` and `taskbar.owl` are `panel` files that render
+inside Bellatrix's own home bar and taskbar (not a separate OWL screen). Layout
+them with `Flex`, `Box`, `Anchor` and `anchor` (owl 24), Waybar-style; see
+docs/home.md for the starter and the exact paths.
+
 ```owl
 widget "memory" {
   page: 1                 // home page it starts on, 1-based; then layout.toml says
