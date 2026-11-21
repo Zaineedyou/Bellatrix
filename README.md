@@ -1,16 +1,65 @@
 # Bellatrix
 
-Bellatrix is a desktop-style Android launcher built entirely in Kotlin. It combines a floating-window workspace, a taskbar, an action center, and a set of built-in utilities in one coherent experience.
+[![Build Release APK](https://github.com/Zaineedyou/Bellatrix/actions/workflows/build-release.yml/badge.svg)](https://github.com/Zaineedyou/Bellatrix/actions/workflows/build-release.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/Zaineedyou/Bellatrix)](https://github.com/Zaineedyou/Bellatrix/releases/latest)
+
+**Production-ready desktop-style launcher for Android.**
+
+Bellatrix turns an Android device into a coherent desktop workspace: floating windows, a real
+taskbar, a start menu, an action center, and a full suite of built-in utilities. One runtime drives
+the whole shell. Guest apps, terminals, files, and coding agents all open inside Bellatrix windows
+using Bellatrix UI — there is no second home screen or parallel desktop to switch to.
+
+> [!IMPORTANT]
+> Signed release APKs are published **only** by GitHub Actions from `v*` tags. Do not distribute
+> locally assembled builds. Every release body is generated from [`CHANGELOG.md`](CHANGELOG.md)
+> and includes What's New, install steps, SHA-256, commit history, and a full changelog link.
+
+---
+
+## Status
+
+| Area | State |
+|---|---|
+| Shell | Production — desktop, taskbar, start menu, action center |
+| Runtime | Single `App.runtime` for all guest apps and agents |
+| UI | Native Bellatrix only |
+| Release channel | GitHub Releases only |
+| Signing | CI-held keystore via repository secrets |
+| License | GPL-3.0 — see [`LICENSE`](LICENSE) |
 
 ## Features
 
-- **Desktop workspace** — floating, movable windows with title bars and task switching
-- **Taskbar & action center** — pinned apps, quick controls for Wi‑Fi, mobile data, volume and battery
-- **App drawer** — searchable and sortable app list with folders and custom icons
-- **Themes & widgets** — configurable colors, wallpapers, icon packs and clock widgets
-- **Built-in apps** — file explorer, browser, notepad, music, video, photos and installer
-- **Gestures** — configurable swipe-up and swipe-down panels, plus a keybar for terminal input
-- **Crash diagnostics** — on any uncaught error, the full log is copied to the clipboard and saved locally
+### Desktop experience
+
+- Movable and resizable floating windows with title bars, minimize, maximize, and true close
+- Taskbar with pinned apps, running-window toggles, and per-window focus state
+- Start menu with search, folders, and sortable app list
+- Action center with Wi‑Fi, mobile data, volume, brightness, and battery controls
+- Gesture-configurable swipe panels and terminal keybar
+
+### Workspace apps
+
+- **File Explorer** — browse, edit, share, and open files in guest apps
+- **Browser** — tabs, downloads, finder, and address-bar search
+- **Notepad**, **music**, **video**, and **image viewer**
+- **Installer** for Android packages
+- **Terminal** with one taskbar window and reuse-on-tap behavior
+
+### Settings and customization
+
+- Native Bellatrix Settings with System, Linux, Coding Agents, and PC Update pages
+- Coding Agents as a standalone top-level page with one card per agent and per-agent dropdowns
+- Themes, wallpapers, colors, icon packs, fonts, taskbar, and home gestures
+- OWL widget engine with native schemas and live-data previews
+- PC Update with GitHub Release changelog, direct APK install, and Chrome fallback
+
+### Reliability
+
+- Crash diagnostics copy a full report to the clipboard and save a backup locally
+- Release builds are signed, checksummed, and published only from CI
+- A `v*` tag without a matching changelog entry fails the release job
 
 ## Requirements
 
@@ -19,60 +68,60 @@ Bellatrix is a desktop-style Android launcher built entirely in Kotlin. It combi
 | JDK | 17 or newer |
 | Android SDK Platform | 36 |
 | Android Build Tools | 36.0.0 |
+| NDK | 30.0.16248370 |
+| CMake | 3.31.1 |
 | Gradle wrapper | 8.11.1 |
 | Kotlin | 2.3.20 |
 | Android Gradle Plugin | 8.9.2 |
 
-Minimum SDK is **23**, target SDK is **36**.
+- Minimum SDK: **23** (Android 6.0)
+- Target SDK: **36**
+- Primary ABI: **arm64-v8a** — bundled guest binaries are arm64 only
+- Application ID: `com.bellatrixos`
 
-Third-party libraries (AndroidX, Media3, Glide, Gson, AdMob and others) are consumed as Gradle dependencies; no vendored library sources are kept in the project.
+Third-party libraries (AndroidX, Media3, Glide, Gson, AdMob, and others) are consumed as Gradle
+dependencies. Third-party components keep their own license terms.
 
-## Build
+## Install a release
 
-1. Create `local.properties` in the project root and point it at your Android SDK:
+1. Open the [latest GitHub Release](https://github.com/Zaineedyou/Bellatrix/releases/latest).
+2. Download the signed `Bellatrix-<version>-<sha>.apk` asset.
+3. Open the APK and accept Android's install prompt. If asked, allow Bellatrix to install unknown apps.
+4. You can also open the release page in Chrome and tap the APK directly.
+
+Inside Bellatrix, use **Settings → PC Update → Check for updates** to see the newest release version,
+its changelog, and buttons for **Install in launcher** or **Buka di Chrome**.
+
+If replacing a build signed with a different certificate, uninstall the old version first:
+
+```bash
+adb uninstall com.bellatrixos
+```
+
+## Build from source
+
+Local builds are for development and debugging. **Published releases must come from GitHub Actions.**
+
+1. Create `local.properties` in the project root:
 
    ```properties
    sdk.dir=/path/to/Android/Sdk
    ```
 
-   This file is intentionally not committed.
-
-2. Build the release APK:
+2. Run the checks and a debug build:
 
    ```bash
-   ./gradlew clean :app:assembleRelease
+   ./gradlew :owl:test :owl:owlJar --no-daemon --stacktrace
+   ./gradlew :app:assembleDebug --no-daemon --stacktrace
    ```
 
-3. The APK is written to:
+3. CI also compiles `patches/proot/fastpath/fastpath.c` into
+   `app/src/main/jniLibs/arm64-v8a/libfastpath.so` with the NDK before the APK build.
 
-   ```text
-   app/build/outputs/apk/release/app-release.apk
-   ```
+### Release signing secrets
 
-### Release signing
-
-No signing key is included in this repository. To produce a release APK with a
-stable signature, add the following to `local.properties`:
-
-```properties
-signing.keystore=/path/to/your/keystore.jks
-signing.storePassword=...
-signing.keyAlias=...
-signing.keyPassword=...
-```
-
-The same values can be supplied through the environment variables
-`ANDROID_KEYSTORE_FILE`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and
-`ANDROID_KEY_PASSWORD`. When neither is configured, release builds fall back to
-the standard Android debug keystore, so local and CI builds still succeed.
-
-## GitHub Actions
-
-`.github/workflows/build-release.yml` builds a release APK on pushes to
-`main`/`master`, on `v*` tags, and via manual dispatch. The APK is uploaded as a
-workflow artifact, and pushing a `v*` tag also publishes a GitHub Release.
-
-For a stable signature in CI, add these repository secrets:
+The release workflow requires all four repository secrets. Missing secrets fail the build instead
+of producing an unsigned or differently signed APK.
 
 | Secret | Description |
 |---|---|
@@ -81,32 +130,20 @@ For a stable signature in CI, add these repository secrets:
 | `ANDROID_KEY_ALIAS` | Key alias |
 | `ANDROID_KEY_PASSWORD` | Key password |
 
-All four secrets are required: the build fails immediately if any of them is
-missing, so CI never produces an APK with a different signing certificate.
-The keystore itself is never committed to this repository.
+The keystore is never committed to this repository.
 
-## Install
+## Release process
 
-```bash
-adb install -r app/build/outputs/apk/release/app-release.apk
-```
+1. Add the version section to [`CHANGELOG.md`](CHANGELOG.md).
+2. Bump `versionCode` and `versionName` in `app/build.gradle.kts`.
+3. Push `master` and wait for **Build Release APK** to succeed.
+4. Push the `v<version>` tag. GitHub Actions then:
+   - builds and signs the APK from CI,
+   - generates the release body from the changelog section,
+   - records SHA-256, version code, commit list, and full changelog link,
+   - uploads the APK to the GitHub Release.
 
-Application ID: `com.bellatrixos`.
-
-If an existing installation uses a different signing certificate, remove it first:
-
-```bash
-adb uninstall com.bellatrixos
-```
-
-## Crash logs
-
-When the app throws an uncaught exception, Bellatrix automatically:
-
-1. Builds a report containing device information, the full stack trace and recent logcat output.
-2. Copies that report to the clipboard, so it can be pasted anywhere immediately.
-3. Saves a backup to `Download/Bellatrix-crash.txt` (or the app's private files directory if external storage is unavailable).
-4. Continues with the normal system crash flow.
+A tag without a matching changelog section is rejected. This keeps every release documented.
 
 ## Project layout
 
@@ -116,12 +153,30 @@ app/src/main/res/                      Resources
 app/src/main/assets/                   Shaders and bundled assets
 app/src/main/AndroidManifest.xml       Manifest
 app/build.gradle.kts                   Build configuration and dependencies
+patches/proot/fastpath/                CI-built fast-path native source
 tools/                                 Legacy APK signing utility (no keys stored here)
-.github/workflows/                     GitHub Actions build workflow
+.github/workflows/                     GitHub Actions build and release workflow
+CHANGELOG.md                           Source of truth for release notes
+LICENSE                                GNU GPL v3
 ```
 
 ## Troubleshooting
 
 - **`SDK location not found`** — create `local.properties` as shown above.
-- **`aapt2` fails on ARM hosts** — run the build on an x86_64 machine with the Android SDK installed.
-- **Install fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`** — uninstall the previous build before installing.
+- **`aapt2` fails on ARM hosts** — build on x86_64 with a full Android SDK, or use GitHub Actions.
+- **Install fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`** — uninstall the previous build first.
+- **Release has empty notes** — add a `## [<version>]` section to `CHANGELOG.md` before tagging.
+
+## Crash reports
+
+On an uncaught exception, Bellatrix builds a report with device details, the full stack trace, and
+recent logcat output. It copies the report to the clipboard and saves a backup to
+`Download/Bellatrix-crash.txt`, falling back to private app storage when external storage is
+unavailable.
+
+## License
+
+Bellatrix is free software licensed under the **GNU General Public License, version 3**.
+See [`LICENSE`](LICENSE) for the full text.
+
+This project is not affiliated with Microsoft and is not Microsoft Windows or Windows 365.
