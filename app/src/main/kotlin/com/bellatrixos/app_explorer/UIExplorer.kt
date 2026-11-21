@@ -67,6 +67,10 @@ import java.util.ArrayList
 import java.util.HashSet
 import java.util.Stack
 
+/** The installed Linux home, at the proot path the guest calls /root. */
+private fun linuxHome(context: Context): File? =
+    (context.applicationContext as? App)?.runtime?.proot?.home?.takeIf { it.isDirectory }
+
 /** Fragment penjelajah berkas. */
 class UIExplorer : UIFragment(), BackPressHandler {
     companion object {
@@ -77,10 +81,6 @@ class UIExplorer : UIFragment(), BackPressHandler {
         private const val GUEST_EDITOR = GUEST_PREFIX + "editor"
         private const val GUEST_EDITOR_HOME = GUEST_PREFIX + "editor-home"
         private const val GUEST_SEPARATOR = "\u001f"
-
-        /** The installed Linux home, at the proot path the guest calls /root. */
-        private fun linuxHome(context: Context) =
-            (context.applicationContext as? App)?.runtime?.proot?.home?.takeIf { it.isDirectory }
 
         /** Encodes a guest Files request in the one string argument the window system carries. */
         fun filesArg(path: String?): String = GUEST_FILES + GUEST_SEPARATOR + path.orEmpty()
