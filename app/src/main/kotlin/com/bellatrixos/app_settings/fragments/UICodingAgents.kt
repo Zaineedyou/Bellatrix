@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.runtime.snapshotFlow
 import androidx.fragment.app.Fragment
@@ -16,24 +17,27 @@ import com.bellatrixos.linux.Agent
 import com.bellatrixos.linux.ALL_AGENTS_JOB
 import com.bellatrixos.linux.JobState
 import com.bellatrixos.linux.LinuxState
+import com.bellatrixos.widgets.cards.UISettingsCard
 import com.bellatrixos.widgets.cards.UISettingsCardCollapse
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
- * Coding Agents as one Bellatrix Settings card, like every other Settings page. There is no agent
- * picker: the card installs all missing agents together, in parallel, and its own expanded area
- * shows the combined output. No Compose screen and no nested Linux page.
+ * Coding Agents as one Bellatrix Settings page. The cards are the usual UISettingsCard views; the
+ * single collapse card installs every missing agent in parallel and keeps the combined log inside
+ * itself. The old "default agent" card is gone because installed agents live in the drawer now.
  */
 class UICodingAgents : Fragment() {
     private lateinit var runtime: Runtime
-    private lateinit var card: UISettingsCardCollapse
+    private lateinit var action: UISettingsCardCollapse
+    private lateinit var list: LinearLayout
     private lateinit var logText: TextView
     private var updates: Job? = null
-    private var current: JobState? = null
-    private var installedCount = 0
+    private var allState: JobState? = null
     private var ready = false
+    private var installed = emptyList<Agent>()
+    private var states = emptyMap<String, JobState>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,18 +51,19 @@ class UICodingAgents : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
         runtime = (requireContext().applicationContext as App).runtime
-        card = view.findViewById(R.id.coding_agents)
+        action = view.findViewById(R.id.coding_agents)
+        list = view.findViewById(R.id.coding_agents_list)
         logText = view.findViewById(R.id.coding_agents_log_text)
-        card.setOnCardClickListener { installOrOpen() }
+        action.setOnCardClickListener { installAll() }
 
         updates =
             viewLifecycleOwner.lifecycleScope.launch {
                 combine(
                     runtime.bootstrap.state,
                     snapshotFlow { runtime.agents.installed },
-                    snapshotFlow { runtime.agents.states[ALL_AGENTS_JOB] },
-                ) { linux, installed, state -> Triple(linux, installed, state) }
-                    .collect { (linux, installed, state) -> render(linux, installed, state) }
+                    snapshotFlow { runtime.agents.states.toMap() },
+                ) { linux, installed, states -> Triple(linux, installed, states) }
+                    .collect { (linux, installed, states) -> render(linux, installed, states) }
             }
     }
 
@@ -71,56 +76,142 @@ class UICodingAgents : Fragment() {
     private fun render(
         linux: LinuxState,
         installed: List<Agent>,
-        state: JobState?,
+        states: Map<String, JobState>,
     ) {
-        if (!::card.isInitialized) return
+        if (!::action.isInitialized) return
         ready = linux is LinuxState.Installed && runtime.isLinuxReady
-        installedCount = installed.size
-        current = state
-        val working = state is JobState.Working
-        card.findViewById<TextView>(R.id.title_ui_card)?.text = getString(R.string.agents_title)
-        card.findViewById<TextView>(R.id.subtitle_ui_card)?.text =
+        this.installed = installed
+        this.states = states
+        allState = states[ALL_AGENTS_JOB]
+        val working = allState is JobState.Working
+        action.findViewById<TextView>(R.id.title_ui_card)?.text = getString(R.string.agents_title)
+        action.findViewById<TextView>(R.id.subtitle_ui_card)?.text =
             when {
                 !ready -> getString(R.string.settings_needs_linux)
-                working -> getString(R.string.linux_job_working, getString((state as JobState.Working).action))
-                state is JobState.Failed -> getString(R.string.home_job_failed)
-                installedCount == AGENTS.size -> getString(R.string.agents_installed_count, installedCount, AGENTS.size)
+                working -> getString(R.string.linux_job_working, getString((allState as JobState.Working).action))
+                allState is JobState.Failed -> getString(R.string.home_job_failed)
+                installed.size == AGENTS.size -> getString(R.string.agents_installed_count, installed.size, AGENTS.size)
                 else -> getString(R.string.agents_install_all)
             }
-        card.u.isEnabled = ready && !working
-        card.u.alpha = if (ready && !working) 1.0f else 0.6f
-        updateLog(state)
+        action.u.isEnabled = ready && !working
+        action.u.alpha = if (ready && !working) 1.0f else 0.6f
+        updateLog()
+        renderList()
     }
 
-    private fun installOrOpen() {
-        if (!ready || current is JobState.Working) return
-        if (installedCount < AGENTS.size) {
-            viewLifecycleOwner.lifecycleScope.launch { runtime.agents.installAll() }
-        } else {
-            runtime.agents.default?.let { runtime.terminal(it.command, it.name, it) }
+    private fun renderList() {
+        list.removeAllViews()
+        for (agent in AGENTS) {
+            val state = states[agent.bin] ?: JobState.Idle
+            val isInstalled = installed.any { it.bin == agent.bin }
+            list.addView(agentCard(agent, isInstalled, state))
+            if (isInstalled) list.addView(removeCard(agent, state))
         }
     }
 
-    /** The output lives in the same card as the action, so there is no log box at the bottom. */
-    private fun updateLog(state: JobState?) {
-        val lines =
-            when (state) {
-                is JobState.Working ->
-                    listOf(getString(R.string.linux_job_working, getString(state.action))) +
-                        state.log.takeLast(10)
-                is JobState.Failed ->
-                    listOf(getString(R.string.home_job_failed)) + state.log.takeLast(20)
-                else -> emptyList()
+    private fun agentCard(
+        agent: Agent,
+        installed: Boolean,
+        state: JobState,
+    ): UISettingsCard {
+        val card = UISettingsCard(requireContext())
+        card.layoutParams = cardParams()
+        val icon =
+            resources.getIdentifier(
+                "agent_${agent.bin.replace('-', '_')}",
+                "drawable",
+                requireContext().packageName,
+            )
+        card.setImage(if (icon != 0) icon else R.drawable.img_app_terminal)
+        card.setTitle(agent.name)
+        card.setSubtitle(
+            when {
+                state is JobState.Working -> getString(R.string.linux_job_working, getString(state.action))
+                state is JobState.Failed -> getString(R.string.home_job_failed)
+                installed -> getString(R.string.agents_open)
+                else -> getString(R.string.agents_install)
+            },
+        )
+        card.isEnabled = ready && state !is JobState.Working
+        card.setOnCardClickListener {
+            if (!ready || state is JobState.Working) return@setOnCardClickListener
+            if (installed) {
+                open(agent)
+            } else {
+                viewLifecycleOwner.lifecycleScope.launch { runtime.agents.install(agent) }
             }
-        logText.text = lines.joinToString("\n")
-        if (lines.isNotEmpty() != card.x) setExpanded(lines.isNotEmpty())
+        }
+        return card
+    }
+
+    private fun removeCard(
+        agent: Agent,
+        state: JobState,
+    ): UISettingsCard {
+        val card = UISettingsCard(requireContext())
+        card.layoutParams = cardParams()
+        card.setImage(R.drawable.app_title_ic_close_16)
+        card.setTitle(getString(R.string.agents_remove))
+        card.setSubtitle(agent.name)
+        card.isEnabled = ready && state !is JobState.Working
+        card.setOnCardClickListener {
+            if (ready && state !is JobState.Working) {
+                viewLifecycleOwner.lifecycleScope.launch { runtime.agents.remove(agent) }
+            }
+        }
+        return card
+    }
+
+    private fun cardParams(): LinearLayout.LayoutParams =
+        LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+        ).apply { topMargin = (4 * resources.displayMetrics.density).toInt() }
+
+    private fun installAll() {
+        if (ready && allState !is JobState.Working) {
+            viewLifecycleOwner.lifecycleScope.launch { runtime.agents.installAll() }
+        }
+    }
+
+    private fun open(agent: Agent) {
+        runtime.terminal(agent.command, agent.name, agent)
+    }
+
+    /** The output stays in the same card as the action, so no log box is separated at the bottom. */
+    private fun updateLog() {
+        val lines =
+            AGENTS.flatMap { agent ->
+                when (val state = states[agent.bin] ?: JobState.Idle) {
+                    is JobState.Working ->
+                        listOf("${agent.name}: ${getString(R.string.linux_job_working, getString(state.action))}") +
+                            state.log.takeLast(4)
+                    is JobState.Failed ->
+                        listOf("${agent.name}: ${getString(R.string.home_job_failed)}") +
+                            state.log.takeLast(8)
+                    else -> emptyList()
+                }
+            } + (
+                allState?.let { state ->
+                    when (state) {
+                        is JobState.Working ->
+                            listOf(getString(R.string.linux_job_working, getString(state.action))) +
+                                state.log.takeLast(8)
+                        is JobState.Failed ->
+                            listOf(getString(R.string.home_job_failed)) + state.log.takeLast(12)
+                        else -> emptyList()
+                    }
+                } ?: emptyList()
+                )
+        logText.text = lines.takeLast(40).joinToString("\n")
+        if (lines.isNotEmpty() != action.x) setExpanded(lines.isNotEmpty())
     }
 
     private fun setExpanded(expanded: Boolean) {
-        card.x = expanded
-        card.v.visibility = if (expanded) View.VISIBLE else View.GONE
-        card.v.layoutParams.height =
+        action.x = expanded
+        action.v.visibility = if (expanded) View.VISIBLE else View.GONE
+        action.v.layoutParams.height =
             if (expanded) ViewGroup.LayoutParams.WRAP_CONTENT else 1
-        card.w.rotation = if (expanded) 180f else 0f
+        action.w.rotation = if (expanded) 180f else 0f
     }
 }
