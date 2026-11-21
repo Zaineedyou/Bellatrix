@@ -166,6 +166,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     @JvmField var P0: LinearLayout? = null
     @JvmField var Q0: LinearLayout? = null
     @JvmField var R0: LinearLayout? = null
+    private var pendingSettingsPage: String? = null
     @JvmField var S0: StartMenuViews? = null
     @JvmField var T0: StartMenuTextWatcher? = null
     @JvmField var U: View? = null
@@ -230,6 +231,9 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     @JvmField val p1: String = "TARGET_TASKBAR"
 
     companion object {
+        /** Runtime fallback: open Bellatrix Settings at this nav id once home is up. */
+        const val EXTRA_SETTINGS_PAGE = "bellatrix_settings_page"
+
         @JvmField
         val u1: IntentFilter = IntentFilter("android.intent.action.BATTERY_CHANGED")
     }
@@ -1011,6 +1015,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     override fun onCreate(bundle: Bundle?) {
+        pendingSettingsPage = intent?.getStringExtra(EXTRA_SETTINGS_PAGE)
         var i2 = 29
         var bByte: Byte = 6
         val i3 = 4
@@ -1451,12 +1456,29 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             // is a new conversation, not just a return from the taskbar.
             if (!isFinishing && !isDestroyed) runOnUiThread { c0("UIVoice", "reopen") }
         }
+        // Coding Agents and Linux are pages of this one Bellatrix Settings window, never OWL screens.
+        runtime.openCodingAgents = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "10") } }
+        runtime.openLinuxSettings = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "9") } }
+        runtime.onLinuxUnavailable = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "9") } }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent?.getStringExtra(EXTRA_SETTINGS_PAGE)?.let { page ->
+            pendingSettingsPage = page
+            if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", page) }
+        }
     }
 
     override fun onStart() {
         super.onStart()
         val runtime = (application as App).runtime
         installRuntimeHooks()
+        pendingSettingsPage?.let { page ->
+            pendingSettingsPage = null
+            c0("UISettings", page)
+        }
         // Agents install .desktop entries in the guest; coming home picks them up in the
         // same drawer, alongside Android apps and the built-in windows.
         lifecycleScope.launch {

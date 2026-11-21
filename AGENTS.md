@@ -49,6 +49,13 @@ repository; ignore any inherited Play/Foss flavour or workflow names.
   Compose home over it, add a mode/enable switch, a parallel backend, a
   separate button or screen, or branching like `useOwlHome`/`LinuxRuntime`.
   One runtime, one Bellatrix home, one drawer, no user choice to make.
+- **Merged features must use Bellatrix's UI, in every future release.** Never
+  ship a ported screen that keeps Omalauncher's Compose/Material look, even if it
+  is wrapped in a Bellatrix window or settings activity. Rebuild the feature
+  with Bellatrix's own views (`UISettingsCard`, settings fragments,
+  `UIFragment`/window cards, Bellatrix strings and style). Coding Agents is a
+  standalone top-level Bellatrix Settings page built from those cards: never
+  nested under Linux settings, never a separate Omalauncher-style screen.
 - **Existing installs must keep working.** A change to saved data, the rootfs
   setup or files the launcher writes goes
   through one of the four update mechanisms in ARCHITECTURE.md "Updates": a new

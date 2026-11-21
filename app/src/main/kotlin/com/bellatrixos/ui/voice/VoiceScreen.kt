@@ -154,7 +154,6 @@ import com.bellatrixos.ui.TextSize
 import com.bellatrixos.ui.card
 import com.bellatrixos.ui.home.MicIcon
 import com.bellatrixos.ui.home.VoiceIcon
-import com.bellatrixos.ui.settings.SettingsPage
 
 /**
  * The voice screen: a spoken conversation with a coding agent ([VoiceSession]). It listens as it opens; a tap on
@@ -381,7 +380,7 @@ fun VoiceScreen(
                     runCatching { context.startActivity(settings) }.onFailure { context.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                 }
             } else if (session.agent == null) {
-                Missing(Modifier.weight(1f).fillMaxWidth(), stringResource(R.string.voice_no_agent), stringResource(R.string.voice_agents)) { runtime.openSettings(SettingsPage.Agents) }
+                Missing(Modifier.weight(1f).fillMaxWidth(), stringResource(R.string.voice_no_agent), stringResource(R.string.voice_agents)) { runtime.showCodingAgents() }
             } else {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
                     // Typing: a small sign of what it's doing, out of the keyboard's way.

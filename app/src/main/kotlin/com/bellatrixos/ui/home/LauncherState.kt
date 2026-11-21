@@ -219,6 +219,6 @@ fun LauncherState.withAgent(
     title: String,
     command: (bin: String) -> String,
 ) {
-    val agent = runtime.agents.default ?: return show(SettingsPage.Agents)
+    val agent = runtime.agents.default ?: return runtime.showCodingAgents()
     runtime.terminal(command(agent.bin), title, agent)
 }

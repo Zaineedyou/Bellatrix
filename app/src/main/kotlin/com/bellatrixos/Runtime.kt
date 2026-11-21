@@ -222,7 +222,7 @@ class Runtime(
     /** Legacy home's callback when a guest command is attempted before Linux is installed. */
     @Volatile
     var onLinuxUnavailable: () -> Unit = {
-        openSettings(SettingsPage.Linux)
+        showLinuxSettings()
     }
 
     /** The home screen's floating-terminal host; set while a home is on screen, cleared as it leaves. */
@@ -236,6 +236,12 @@ class Runtime(
     var openBellatrixEditor: ((String?, String?) -> Unit)? = null
     @Volatile
     var openVoiceWindow: (() -> Unit)? = null
+
+    /** Agents and Linux settings live in Bellatrix's own Settings window, never in an OWL screen. */
+    @Volatile
+    var openCodingAgents: (() -> Unit)? = null
+    @Volatile
+    var openLinuxSettings: (() -> Unit)? = null
 
     /** The classic drawer re-reads the guest catalog when an agent or app is installed or removed. */
     @Volatile
@@ -387,8 +393,10 @@ class Runtime(
         openExplorer = null
         openBellatrixEditor = null
         openVoiceWindow = null
+        openCodingAgents = null
+        openLinuxSettings = null
         onAppsChanged = null
-        onLinuxUnavailable = { openSettings(SettingsPage.Linux) }
+        onLinuxUnavailable = { showLinuxSettings() }
     }
 
     /** Legacy settings' install button: no picked agents, the same default install OWL's setup uses. */
@@ -838,6 +846,30 @@ class Runtime(
         homePage: Int? = null,
     ) {
         InstantActivity.startInstantly(context, SettingsActivity.intent(context, page, homePage))
+    }
+
+    /**
+     * Coding Agents is a standalone page of Bellatrix's classic Settings window (nav id 10). A widget or
+     * voice screen asks for it through here instead of opening the ported Compose screen.
+     */
+    fun showCodingAgents() {
+        val hook = openCodingAgents
+        if (hook != null) hook() else showClassicSettings("10")
+    }
+
+    /** Same for the Linux page (nav id 9), used when a guest command is attempted before install. */
+    fun showLinuxSettings() {
+        val hook = openLinuxSettings
+        if (hook != null) hook() else showClassicSettings("9")
+    }
+
+    /** Away from home, bring the classic window up with the requested page instead of a new settings task. */
+    private fun showClassicSettings(page: String) {
+        val intent =
+            Intent(context, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                .putExtra(MainActivity.EXTRA_SETTINGS_PAGE, page)
+        context.startActivity(intent)
     }
 
     /** Opens the owl app in file [name] in its own task; nothing if it isn't running (removed, or broken). */

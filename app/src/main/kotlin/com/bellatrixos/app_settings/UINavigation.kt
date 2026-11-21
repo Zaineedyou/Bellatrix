@@ -29,6 +29,11 @@ class UINavigation {
 
         @JvmStatic
         fun b(i2: Int) {
+            // 10 is the tenth top-level page, not "1" after division; keep its radio checked.
+            if (i2 == 10) {
+                f4705a?.getOrNull(9)?.isChecked = true
+                return
+            }
             var abs = kotlin.math.abs(i2)
             while (abs >= 10) abs /= 10
             val index = abs - 1

@@ -83,7 +83,6 @@ import com.bellatrixos.ui.home.actionWords
 import com.bellatrixos.ui.home.kind
 import com.bellatrixos.ui.home.profileKind
 import com.bellatrixos.ui.LauncherStyle
-import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.ui.home.allApps
 import com.bellatrixos.ui.home.appIconOf
 import com.bellatrixos.ui.home.open
@@ -1034,7 +1033,7 @@ class WidgetServices(
         if (p.isEmpty()) return
         val agents = runtime.agents
         val agent = bin?.let { b -> agents.installed.firstOrNull { it.bin == b } } ?: agents.default
-        if (agent == null) return launcherAction?.invoke("agents") ?: runtime.openSettings(SettingsPage.Agents)
+        if (agent == null) return runtime.showCodingAgents()
         runtime.terminal("${agentInvocation(agent.bin, p)}; exec bash", agent.name, agent)
     }
 

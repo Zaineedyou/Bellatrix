@@ -111,6 +111,7 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         UINavigator.f4710h = navItems[6]
         UINavigator.f4711i = navItems[7]
         UINavigator.linuxTitle = navItems[8]
+        UINavigator.codingAgentsTitle = navItems[9]
         UINavigator.j = navSub[0]
         UINavigator.l = context.getString(R.string.settings_system_sound)
         UINavigator.f4712k = navSub[1]
@@ -179,11 +180,11 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         val fragment = UINavigator.a(i2, F0) ?: return
         val manager = childFragmentManager
         val toBack = Q0 > i2
-        val delay = if (i2 < 10) 64L else 204L
+        val delay = if (i2 <= 10) 64L else 204L
         AppExecutors.c().postDelayed({
             if (manager.isStateSaved) return@postDelayed
             val tx: FragmentTransaction = manager.beginTransaction()
-            if (i2 < 10 || toBack) {
+            if (i2 <= 10 || toBack) {
                 tx.setCustomAnimations(
                     R.anim.settings_page_enter_from_left,
                     R.anim.settings_page_exit_to_right,
@@ -284,7 +285,8 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
             scroll.findViewById(R.id.nav_time_lang),
             scroll.findViewById(R.id.nav_privacy),
             scroll.findViewById(R.id.nav_updates),
-            scroll.findViewById(R.id.nav_linux)
+            scroll.findViewById(R.id.nav_linux),
+            scroll.findViewById(R.id.nav_coding_agents)
         )
         val navItems = context.resources.getStringArray(R.array.settings_nav_items)
         val handler = NavClickHandler()
@@ -496,7 +498,7 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         if (bundle == null) {
             val args = arguments
             val parts = if (args == null) intArrayOf(1, -1) else UINavigation.a(args.getString("path", "1"))
-            if (parts[0] < 10) {
+            if (parts[0] <= 10) {
                 q0(parts[0])
             } else {
                 p0(parts[0], false, displayedListener(parts[1]))

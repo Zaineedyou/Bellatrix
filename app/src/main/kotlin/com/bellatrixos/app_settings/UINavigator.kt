@@ -6,6 +6,7 @@ import android.widget.RelativeLayout
 import androidx.fragment.app.Fragment
 import com.bellatrixos.app_settings.fragments.UIAbout
 import com.bellatrixos.app_settings.fragments.UIAccounts
+import com.bellatrixos.app_settings.fragments.UICodingAgents
 import com.bellatrixos.app_settings.fragments.UIApps
 import com.bellatrixos.app_settings.fragments.UIAppsInstalled
 import com.bellatrixos.app_settings.fragments.UIBackground
@@ -54,6 +55,7 @@ class UINavigator {
         @JvmField var f4710h: String? = null
         @JvmField var f4711i: String? = null
         @JvmField var linuxTitle: String? = null
+        @JvmField var codingAgentsTitle: String? = null
         @JvmField var j: String? = null
         @JvmField var f4712k: String? = null
         @JvmField var l: String? = null
@@ -89,6 +91,7 @@ class UINavigator {
                 7 -> UIPrivacy()
                 8 -> UIPCUpdate()
                 9 -> UILinux()
+                10 -> UICodingAgents()
                 11 -> UIDisplay()
                 12 -> UIStorage()
                 13 -> UIMultitasking()
@@ -151,6 +154,7 @@ class UINavigator {
                     7 -> return f4710h
                     8 -> return f4711i
                     9 -> return linuxTitle
+                    10 -> return codingAgentsTitle
                     11 -> {
                         sb = StringBuilder()
                         sb.append(b)

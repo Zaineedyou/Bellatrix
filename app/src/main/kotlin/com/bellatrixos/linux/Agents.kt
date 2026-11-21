@@ -151,6 +151,13 @@ val AGENTS =
 const val MISE_SELF_UPDATE = "{ mise self-update -y || true; }"
 
 /**
+ * Node's official aarch64 binary links against libatomic.so.1, which the Void rootfs doesn't ship.
+ * Install it before any `mise use -g node`, for a first install and for the update path alike.
+ */
+const val NODE_RUNTIME_LIBS =
+    "{ xbps-install -S >/dev/null 2>&1 || true; xbps-install -y libatomic libstdc++ libgcc; }"
+
+/**
  * `mise prune -y`, but deleting the unused versions itself first: under proot, mise can't delete a version
  * with a hard link in it (OpenCode's npm postinstall makes one), stops at "Directory not empty", and leaves
  * 255 MB behind. `mise ls --prunable` keeps versions a running program started from, like prune does.
@@ -172,9 +179,9 @@ const val MISE_CLEANUP = "mise cache clear && rm -rf ~/.local/share/mise/downloa
 val OWN_UPDATES =
     AGENTS.mapNotNull { it.own }.joinToString(" && ") { "if [ -e ~/${it.done} ]; then ${it.update}; fi" }
 
-/** Adds node to the global config when an installed agent needs it but was installed before it did (OpenCode 1). */
+/** Repairs the node runtime libs and adds node to the global config when an installed agent needs it. */
 val MISE_NODE_FOR_AGENTS =
-    AGENTS.filter { it.node }.joinToString(" ", prefix = "if [ -z \"\$(mise ls -g node)\" ] && [ -n \"\$(mise ls -g ", postfix = ")\" ]; then mise use -g node@lts; fi") {
+    AGENTS.filter { it.node }.joinToString(" ", prefix = "if [ -n \"\$(mise ls -g ", postfix = ")\" ]; then $NODE_RUNTIME_LIBS && { [ -n \"\$(mise ls -g node)\" ] || mise use -g node@lts; }; fi") {
         shellQuote(it.pkg)
     }
 
@@ -283,7 +290,7 @@ class AgentStore(
         agent.own?.install
             ?: buildString {
                 append(if (mise.exists()) "$MISE_SELF_UPDATE && " else "curl -fsSL https://mise.run | sh && ")
-                if (agent.node) append("mise use -g node@lts && ")
+                if (agent.node) append("$NODE_RUNTIME_LIBS && mise use -g node@lts && ")
                 append("mise use -g ${shellQuote(agent.pkg)} && $MISE_CLEANUP")
             }
 

@@ -8,7 +8,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.collectAsState
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Box
@@ -19,7 +18,6 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import com.bellatrixos.Runtime
-import com.bellatrixos.linux.LinuxState
 import com.bellatrixos.ui.LocalPanelBack
 import com.bellatrixos.ui.pane
 import com.bellatrixos.ui.home.GesturesScreen
@@ -107,14 +105,19 @@ private fun SettingsPage(
     onDismiss: () -> Unit,
 ) {
     val close = onDismiss
-    val linuxInstalled = runtime.bootstrap.state.collectAsState().value == LinuxState.Installed
 
-    // Settings has no home underneath: the agent opens in its own terminal, or the agents screen offers one.
+    // Settings has no home underneath: the agent opens in its own terminal, or Bellatrix Settings opens
+    // the standalone Coding Agents page (never the ported screen).
     fun agent(
         title: String,
         command: (String) -> String,
     ) {
-        val agent = runtime.agents.default ?: return stack.push(SettingsPage.Agents)
+        val agent = runtime.agents.default
+        if (agent == null) {
+            close()
+            runtime.showCodingAgents()
+            return
+        }
         runtime.terminal(command(agent.bin), title, agent)
     }
 
@@ -125,7 +128,10 @@ private fun SettingsPage(
                 onDismiss = close,
                 onStyle = { stack.push(SettingsPage.Style) },
                 onPages = { stack.push(SettingsPage.Pages) },
-                onAgents = { stack.push(SettingsPage.Agents) },
+                onAgents = {
+                    close()
+                    runtime.showCodingAgents()
+                },
                 onPackages = { stack.push(SettingsPage.Packages) },
                 onLinux = { stack.push(SettingsPage.Linux) },
                 onLicenses = { stack.push(SettingsPage.Licenses) },
@@ -158,20 +164,11 @@ private fun SettingsPage(
             }
         }
         SettingsPage.Themes -> ThemeCatalogScreen(runtime.themes, onDismiss = close)
-        // Agents install into Linux: every way here (a widget's edit, gestures, open("agents")) offers Linux first.
-        SettingsPage.Agents ->
-            if (!linuxInstalled) {
-                LinuxScreen(runtime, onDismiss = close)
-            } else {
-                AgentsScreen(
-                    runtime,
-                    onDismiss = close,
-                    onOpen = { agent ->
-                        close()
-                        runtime.terminal(agent.command, agent.name, agent)
-                    },
-                )
-            }
+        // Kept only for old intents: hand off to the Bellatrix Settings page instead of showing a ported screen.
+        SettingsPage.Agents -> {
+            close()
+            runtime.showCodingAgents()
+        }
         SettingsPage.Store -> StoreScreen(runtime.widgets, runtime.agents.installed, homePage, runtime.themes.picked, onDismiss = close, onOpenApp = runtime::openOwlApp)
         SettingsPage.FaceStore -> StoreScreen(runtime.widgets, runtime.agents.installed, homePage, runtime.themes.picked, onDismiss = close, initialKind = OwlKind.Face, onOpenApp = runtime::openOwlApp)
         SettingsPage.Packages -> PackagesScreen(runtime, onDismiss = close)

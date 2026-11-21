@@ -149,7 +149,7 @@ internal fun PromptBar(
         val target = runtime.agents.default
         if (target == null) {
             state.query = p
-            state.show(SettingsPage.Agents)
+            runtime.showCodingAgents()
             return
         }
         runtime.terminal("${agentInvocation(target.bin, p)}; exec bash", target.name, target)
@@ -173,7 +173,7 @@ internal fun PromptBar(
     /** The agent picker over the bar, opened from the agent's name at its start. */
     var agentsOpen by remember { mutableStateOf(false) }
 
-    fun manageAgents() = if (linux) state.show(SettingsPage.Agents) else offerLinux()
+    fun manageAgents() = if (linux) runtime.showCodingAgents() else offerLinux()
 
     /** Whether a finished recognition sends (hold-to-talk) or lands in the field for editing. */
     var sendWhenDone by remember { mutableStateOf(false) }
