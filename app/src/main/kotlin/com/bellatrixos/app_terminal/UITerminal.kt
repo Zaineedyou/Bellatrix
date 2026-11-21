@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.bellatrixos.App
-import com.bellatrixos.MainActivityIn
 import com.bellatrixos.UIFragment
+import com.bellatrixos.interfaces.MainActivityIn
 
 /**
  * A stale taskbar/Recents entry for the old Terminal tile. It draws nothing and
