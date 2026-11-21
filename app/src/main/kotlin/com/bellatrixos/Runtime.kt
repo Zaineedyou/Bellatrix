@@ -335,12 +335,17 @@ class Runtime(
                         "btop" -> "BtopWindow"
                         else -> agentOf(window?.appId.orEmpty(), name)?.windowAlias ?: "LinuxWindowActivity"
                     }
+                var flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                // A terminal falling back while home is stopped must not leave a Recents card.
+                if (activity == "TerminalWindow") {
+                    flags = flags or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                }
                 InstantActivity.startInstantly(
                     context,
                     Intent()
                         .setClassName(context, "com.bellatrixos.$activity")
                         .setData(Uri.parse("omarchy://window/$handle"))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK),
+                        .addFlags(flags),
                 )
             }
         }

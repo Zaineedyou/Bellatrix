@@ -17,7 +17,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.AdapterListUpdateCallback
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.compose.ui.graphics.asAndroidBitmap
 import com.bellatrixos.App
@@ -44,12 +43,11 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
 
         override fun performFiltering(constraint: CharSequence?): FilterResults {
             f4785a.clear()
-            val source = if (Global.f4842k == 3) y else x
+            val source = if (Global.f4842k == MODE_WORK) y else x
             val candidates = ArrayList<StartMenuItem>()
             for (item in source) {
-                // Section headers only make sense in the full, grouped list, not in search results.
-                if (isHeader(item)) continue
-                candidates.add(item)
+                // The drawer filter lives in the drop-down; keep search inside that selection.
+                if (matchesKind(item, Global.f4842k)) candidates.add(item)
             }
             if (TextUtils.isEmpty(constraint)) {
                 candidates.sortWith(startMenuOrderComparator(Global.l))
@@ -93,14 +91,15 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
         @JvmField val G: ConcurrentHashMap<String, Any> = ConcurrentHashMap()
         @JvmField var H: Boolean = false
 
-        private const val SECTION_PREFIX = "section:"
-        private const val SECTION_BELLATRIX = SECTION_PREFIX + "bellatrix"
-        private const val SECTION_ANDROID = SECTION_PREFIX + "android"
-        private const val SECTION_AGENTS = SECTION_PREFIX + "agents"
-        private const val SECTION_LINUX = SECTION_PREFIX + "linux"
+        const val MODE_ALL = 0
+        const val MODE_FREEFORM = 2
+        const val MODE_WORK = 3
 
-        private const val VIEW_TYPE_APP = 0
-        private const val VIEW_TYPE_HEADER = 1
+        /** App types live in the drawer drop-down, not as category rows inside All. */
+        const val FILTER_BELLATRIX = 4
+        const val FILTER_ANDROID = 5
+        const val FILTER_CODING_AGENTS = 6
+        const val FILTER_LINUX = 7
 
         /** Bellatrix's own windows; everything else with category 1 is an installed app. */
         private val BELLATRIX_TAGS =
@@ -118,24 +117,31 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
                 "UIPhotos",
             )
 
-        fun isHeader(item: StartMenuItem): Boolean = item.c()?.startsWith(SECTION_PREFIX) == true
+        fun labelRes(mode: Int): Int =
+            when (mode) {
+                FILTER_BELLATRIX -> R.string.start_filter_bellatrix
+                FILTER_ANDROID -> R.string.start_filter_android
+                FILTER_CODING_AGENTS -> R.string.start_filter_coding_agents
+                FILTER_LINUX -> R.string.start_filter_linux
+                MODE_WORK -> R.string.st_menu_apps_order_work
+                MODE_FREEFORM -> R.string.st_menu_apps_order_freeform
+                else -> R.string.st_menu_apps_order_all
+            }
 
-        /** Separates the drawer into Bellatrix, Android, coding agents and other Linux apps. */
-        private fun sectionRank(item: StartMenuItem): Int {
+        private fun kindRank(item: StartMenuItem): Int {
             val key = item.c().orEmpty()
-            return when (key) {
-                SECTION_BELLATRIX -> 0
-                SECTION_ANDROID -> 1
-                SECTION_AGENTS -> 2
-                SECTION_LINUX -> 3
-                else -> when {
-                    key.startsWith(LINUX_APP_PREFIX + "agent-") -> 2
-                    key.startsWith(LINUX_APP_PREFIX) -> 3
-                    key in BELLATRIX_TAGS -> 0
-                    else -> 1
-                }
+            return when {
+                key.startsWith(LINUX_APP_PREFIX + "agent-") -> FILTER_CODING_AGENTS - FILTER_BELLATRIX
+                key.startsWith(LINUX_APP_PREFIX) -> FILTER_LINUX - FILTER_BELLATRIX
+                key in BELLATRIX_TAGS -> FILTER_BELLATRIX - FILTER_BELLATRIX
+                else -> FILTER_ANDROID - FILTER_BELLATRIX
             }
         }
+
+        private fun matchesKind(
+            item: StartMenuItem,
+            mode: Int,
+        ): Boolean = mode !in FILTER_BELLATRIX..FILTER_LINUX || kindRank(item) == mode - FILTER_BELLATRIX
 
         /** 6/8 nama A-Z, 7/9 nama Z-A (mode dari androidx.core.provider.a). */
         private fun startMenuOrderComparator(mode: Int): Comparator<StartMenuItem> {
@@ -143,19 +149,11 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
                 7, 9 -> compareByDescending<StartMenuItem> { it.b().orEmpty() }
                 else -> compareBy<StartMenuItem> { it.b().orEmpty() }
             }
-            return Comparator { a, b ->
-                val bySection = sectionRank(a).compareTo(sectionRank(b))
-                if (bySection != 0) return@Comparator bySection
-                // Keep each header above the apps in its own section.
-                val byKind = isHeader(b).compareTo(isHeader(a))
-                if (byKind != 0) return@Comparator byKind
-                byName.compare(a, b)
-            }
+            return Comparator { a, b -> byName.compare(a, b) }
         }
     }
 
     @JvmField var A: AppFilter? = null
-    @Volatile private var attachedRecyclerView: RecyclerView? = null
     @JvmField val C: LayoutInflater = LayoutInflater.from(B)
     @JvmField var D: OnItemClickListener<Any>? = null
     @JvmField var E: OnContextMenuListener? = null
@@ -173,10 +171,11 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
         }
         // Mode 2 hid every APK; mode 3 shows ONLY work-profile apps and hides all
         // built-ins when there is no second profile. Collapse both to "all apps".
+        val validViews = setOf(MODE_ALL, MODE_FREEFORM, MODE_WORK, FILTER_BELLATRIX, FILTER_ANDROID, FILTER_CODING_AGENTS, FILTER_LINUX)
         val effectiveView = when {
-            savedView == 2 -> 0
-            savedView == 3 && !H -> 0
-            savedView !in 0..3 -> 0
+            savedView == MODE_FREEFORM -> MODE_ALL
+            savedView == MODE_WORK && !H -> MODE_ALL
+            savedView !in validViews -> MODE_ALL
             else -> savedView
         }
         if (effectiveView != savedView) {
@@ -213,20 +212,10 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
         notifyDataSetChanged()
     }
 
-    private fun addHeader(key: String, label: String) {
-        A(0, key, label)
-    }
-
     /** Isi daftar aplikasi dari launcher dan penyimpanan. */
     fun B() {
         G.clear()
-        // One drawer, four clearly separated kinds. Coding agents get their own section:
-        // install them from Settings, then they appear here as installed apps.
-        addHeader(SECTION_BELLATRIX, B.getString(R.string.start_section_bellatrix))
-        addHeader(SECTION_ANDROID, B.getString(R.string.start_section_android))
-        addHeader(SECTION_AGENTS, B.getString(R.string.settings_agents))
-        addHeader(SECTION_LINUX, B.getString(R.string.start_section_linux))
-
+        // Types are chosen in the drop-down; All stays one flat, alphabetised list.
         A(1, "UISettings", B.getString(R.string.app_settings))
         A(1, "UIExplorer", B.getString(R.string.app_explorer))
         A(1, "UINotepad", B.getString(R.string.app_notepad))
@@ -249,8 +238,8 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
             for (installed in InstalledAppsDB.b()) A(1, installed.c(), installed.b().orEmpty())
         } catch (_: RuntimeException) {
         }
-        // Guest apps keep their desktop id. Agents are agent-*.desktop, so the comparator
-        // puts them under "coding agents"; every other guest app under "Linux apps".
+        // Guest apps keep their desktop id. Agents are agent-*.desktop so the drop-down
+        // can show them as Coding Agents; every other guest app as Linux apps.
         try {
             val runtime = (B.applicationContext as? App)?.runtime ?: return
             for (app in runtime.linuxApps.apps) A(1, LINUX_APP_PREFIX + app.id, app.name)
@@ -294,19 +283,21 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
         val userManager = B.getSystemService(Context.USER_SERVICE) as? UserManager
         H = (userManager?.userProfiles?.size ?: 0) > 1
         B()
-        if (Global.f4842k == 3) C()
-        F(Global.l, false)
+        if (Global.f4842k == MODE_WORK) C()
+        E(Global.f4842k)
         notifyDataSetChanged()
         cVar?.run()
     }
 
     /** Ganti mode tampilan daftar aplikasi. */
     fun E(i2: Int) {
-        val selected: ArrayList<StartMenuItem> = when (i2) {
-            0 -> ArrayList(x)
-            2 -> ArrayList(x)
-            3 -> { C(); ArrayList(y) }
+        val source: ArrayList<StartMenuItem> = when (i2) {
+            MODE_WORK -> { C(); ArrayList(y) }
             else -> ArrayList(x)
+        }
+        val selected = ArrayList<StartMenuItem>()
+        for (item in source) {
+            if (matchesKind(item, i2)) selected.add(item)
         }
         selected.sortWith(startMenuOrderComparator(Global.l))
         val callback = StartMenuItemDiffCallback()
@@ -316,20 +307,19 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
         z.clear()
         z.addAll(selected)
         diff.dispatchUpdatesTo(AdapterListUpdateCallback(this))
-        if (i2 != 3) SharedPrefs.f4755a?.edit()?.putInt("start_menu_apps_view", i2)?.apply()
+        if (i2 != MODE_WORK) SharedPrefs.f4755a?.edit()?.putInt("start_menu_apps_view", i2)?.apply()
     }
 
-    /** Ubah urutan aplikasi. */
+    /** Ubah urutan aplikasi tanpa keluar dari filter drop-down yang aktif. */
     fun F(i2: Int, notify: Boolean) {
-        if (i2 != 0) {
-            @Suppress("UNCHECKED_CAST")
-            (z as? MutableList<StartMenuItem>)?.sortWith(startMenuOrderComparator(if (i2 == 1) 8 else 9))
-        } else {
-            z.clear()
-            z.addAll(x)
-            // x is built section by section; sort it so headers sit above their apps.
-            z.sortWith(startMenuOrderComparator(0))
+        val source = if (Global.f4842k == MODE_WORK) y else x
+        val selected = ArrayList<StartMenuItem>()
+        for (item in source) {
+            if (matchesKind(item, Global.f4842k)) selected.add(item)
         }
+        selected.sortWith(startMenuOrderComparator(if (i2 == 1) 8 else if (i2 == 0) 0 else 9))
+        z.clear()
+        z.addAll(selected)
         Global.l = i2
         if (notify) notifyDataSetChanged()
     }
@@ -346,46 +336,14 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
 
     override fun getItemCount(): Int = z.size
 
-    override fun getItemViewType(position: Int): Int =
-        if (isHeader(z[position])) VIEW_TYPE_HEADER else VIEW_TYPE_APP
-
     override fun getFilter(): Filter {
         if (A == null) A = AppFilter()
         return A!!
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        attachedRecyclerView = recyclerView
-        applySpanLookup(recyclerView)
-    }
-
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        if (attachedRecyclerView === recyclerView) attachedRecyclerView = null
-        super.onDetachedFromRecyclerView(recyclerView)
-    }
-
-    /** MainActivity replaces the GridLayoutManager on rotate; keep full-width headers working. */
-    private fun applySpanLookup(recyclerView: RecyclerView) {
-        val layoutManager = recyclerView.layoutManager as? GridLayoutManager ?: return
-        if (layoutManager.spanSizeLookup is SectionSpanLookup) return
-        layoutManager.spanSizeLookup = SectionSpanLookup(layoutManager)
-    }
-
-    private inner class SectionSpanLookup(private val layoutManager: GridLayoutManager) : GridLayoutManager.SpanSizeLookup() {
-        override fun getSpanSize(position: Int): Int =
-            if (getItemViewType(position) == VIEW_TYPE_HEADER) layoutManager.spanCount else 1
-    }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        attachedRecyclerView?.let(::applySpanLookup)
         val item = z[position]
         val key = item.c().orEmpty()
-        if (isHeader(item)) {
-            holder.u?.visibility = View.GONE
-            holder.v?.text = item.b().orEmpty()
-            return
-        }
         holder.u?.visibility = View.VISIBLE
         if (key.startsWith(LINUX_APP_PREFIX)) {
             // The runtime already decoded the guest's Icon=; reuse it instead of asking
@@ -409,24 +367,17 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view =
-            C.inflate(
-                if (viewType == VIEW_TYPE_HEADER) R.layout.start_menu_section else R.layout.start_menu_item,
-                parent,
-                false,
-            )
+        val view = C.inflate(R.layout.start_menu_item, parent, false)
         val holder = ViewHolder(view)
         holder.u = view.findViewById(R.id.appIconImageView)
         holder.v = view.findViewById(R.id.appNameTextView)
-        if (viewType == VIEW_TYPE_APP) {
-            ContextMenuManager.a(
-                0,
-                view,
-                { if (holder.bindingAdapterPosition == -1) null else z.getOrNull(holder.bindingAdapterPosition) },
-                { iArr, obj -> (obj as? StartMenuItem)?.let { item -> E?.c(iArr, item) } },
-                { D }
-            )
-        }
+        ContextMenuManager.a(
+            0,
+            view,
+            { if (holder.bindingAdapterPosition == -1) null else z.getOrNull(holder.bindingAdapterPosition) },
+            { iArr, obj -> (obj as? StartMenuItem)?.let { item -> E?.c(iArr, item) } },
+            { D }
+        )
         return holder
     }
 }

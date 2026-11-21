@@ -136,10 +136,30 @@ class i(@JvmField val u: Int, @JvmField val v: Any?) : View.OnClickListener {
                     )
                 )
                 arrayList2.add(UIMenuItem(1, 0, 0, ""))
+                // App types are selected here, not injected as category rows inside All.
+                val selectedDot = R.drawable.menu_ic_dot_6_accent_regular
+                val unselectedDot = R.drawable.menu_ic_blank_20_regular
+                val kindFilters =
+                    listOf(
+                        StartMenuAdapter.FILTER_BELLATRIX to R.string.start_filter_bellatrix,
+                        StartMenuAdapter.FILTER_ANDROID to R.string.start_filter_android,
+                        StartMenuAdapter.FILTER_CODING_AGENTS to R.string.start_filter_coding_agents,
+                        StartMenuAdapter.FILTER_LINUX to R.string.start_filter_linux,
+                    )
+                for ((mode, label) in kindFilters) {
+                    arrayList2.add(
+                        UIMenuItem(
+                            0, mode,
+                            if (Global.f4842k == mode) selectedDot else unselectedDot,
+                            act.getString(label)
+                        )
+                    )
+                }
+                arrayList2.add(UIMenuItem(1, 0, 0, ""))
                 arrayList2.add(
                     UIMenuItem(
                         0, R.id.action_list_freeform,
-                        if (Global.f4842k == 2) R.drawable.menu_ic_dot_6_accent_regular
+                        if (Global.f4842k == StartMenuAdapter.MODE_FREEFORM) R.drawable.menu_ic_dot_6_accent_regular
                         else R.drawable.ic_multitasking_24,
                         act.getString(R.string.st_menu_apps_order_freeform)
                     )

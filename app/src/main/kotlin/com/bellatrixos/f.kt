@@ -10,6 +10,7 @@ import com.bellatrixos.ads.ConsentManager
 import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.searchapp.b
 import com.bellatrixos.startmenu.StartMenu
+import com.bellatrixos.startmenu.StartMenuAdapter
 import com.bellatrixos.startmenu.StartMenuItem
 import com.bellatrixos.startmenu.StartMenuRecommend
 import com.bellatrixos.startmenu.StartMenuViews
@@ -93,12 +94,7 @@ class f(
                 val mainActivity3 = v
                 val act3: MainActivity = mainActivity3.W ?: mainActivity3
                 mainActivity3.c0 = true
-                mainActivity3.d1?.setText(
-                    act3.getString(
-                        if (Global.f4842k == 0) R.string.st_menu_apps_order_all
-                        else R.string.st_menu_apps_order_freeform
-                    )
-                )
+                mainActivity3.d1?.setText(act3.getString(StartMenuAdapter.labelRes(Global.f4842k)))
                 mainActivity3.z0(w)
                 mainActivity3.O0?.b()
                 val mainActivity4 = act3

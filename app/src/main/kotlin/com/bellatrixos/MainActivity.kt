@@ -320,12 +320,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         startMenuAdapter?.E(i2)
         val textView = this.d1!!
         val mainActivity = this.W!!
-        val i3 = if (i2 == 0) {
-            R.string.st_menu_apps_order_all
-        } else {
-            if (i2 == 3) R.string.st_menu_apps_order_work else R.string.st_menu_apps_order_freeform
-        }
-        textView.text = mainActivity.getString(i3)
+        textView.text = mainActivity.getString(StartMenuAdapter.labelRes(i2))
     }
 
     override fun F() {
@@ -394,6 +389,9 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         // The terminal never opens a placeholder tile: launch foot directly and let
         // its toplevel arrive as a floating UILinuxWindow.
         if (str == "UITerminal") {
+            // A taskbar tap can arrive while home is stopped; reinstall the hooks first so
+            // foot becomes a floating window instead of a new Android Recents document.
+            installRuntimeHooks()
             (application as App).runtime.terminal(null, "Terminal")
             return
         }
@@ -693,6 +691,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         // App drawer, taskbar, pinned shortcut and start menu all come through here.
         // Terminal must go straight to foot, never to the old "Open terminal" placeholder.
         if (str == "UITerminal") {
+            installRuntimeHooks()
             (application as App).runtime.terminal(null, "Terminal")
             return
         }
@@ -1427,8 +1426,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         outState.putParcelableArrayList("taskbar_items", ArrayList(this.C0))
     }
 
-    override fun onStart() {
-        super.onStart()
+    /** Keeps every guest window routed into a Bellatrix window, including taskbar Terminal taps. */
+    private fun installRuntimeHooks() {
         val runtime = (application as App).runtime
         // Every foot window, from any tile, becomes a floating home window. Missing Linux goes
         // to the one launcher Settings screen, never a separate legacy Linux window.
@@ -1436,7 +1435,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             if (!isFinishing && !isDestroyed) runOnUiThread { this@MainActivity.c0("UILinuxWindow", handle) }
         }
         // Installing or removing an agent rewrites its .desktop entry; the drawer is one
-        // list, so just rebuild that list. No agents button, no second screen.
+        // list, so just rebuild that list. No agents button, no separate screen.
         runtime.onAppsChanged = {
             if (!isFinishing && !isDestroyed) runOnUiThread { M0?.D(null) }
         }
@@ -1452,6 +1451,12 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             // is a new conversation, not just a return from the taskbar.
             if (!isFinishing && !isDestroyed) runOnUiThread { c0("UIVoice", "reopen") }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val runtime = (application as App).runtime
+        installRuntimeHooks()
         // Agents install .desktop entries in the guest; coming home picks them up in the
         // same drawer, alongside Android apps and the built-in windows.
         lifecycleScope.launch {

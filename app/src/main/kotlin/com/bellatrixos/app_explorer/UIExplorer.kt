@@ -402,7 +402,7 @@ class UIExplorer : UIFragment(), BackPressHandler {
         if (x0?.visibility == View.VISIBLE) x0?.visibility = View.GONE
         Q0?.isEnabled = false
         S0?.isEnabled = false
-        K0?.B(5)
+        selectNav(7)
         val str = c1
         a1 = str
         b1 = str
@@ -629,7 +629,7 @@ class UIExplorer : UIFragment(), BackPressHandler {
             1 -> Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
             2 -> Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             3 -> Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
-            4 -> Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+            4 -> Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
             5 -> Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
             else -> File(BuildConfig.FLAVOR)
         }
@@ -641,9 +641,14 @@ class UIExplorer : UIFragment(), BackPressHandler {
             val ctx = v0
             if (ctx != null) Files.a(ctx, ctx.getString(R.string.toast_folder_not_found))
         }
+        selectNav(i2)
+    }
+
+    /** Selects a navigation row by its stable id, never by its list position. */
+    private fun selectNav(id: Int) {
         val navigationAdapter = K0 ?: return
         for (i3 in navigationAdapter.z.indices) {
-            if (navigationAdapter.z[i3].f4689a == i2) {
+            if (navigationAdapter.z[i3].f4689a == id) {
                 navigationAdapter.B(i3)
                 return
             }

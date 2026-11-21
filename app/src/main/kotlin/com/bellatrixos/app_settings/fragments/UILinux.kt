@@ -15,6 +15,7 @@ import com.bellatrixos.Runtime
 import com.bellatrixos.linux.JobState
 import com.bellatrixos.linux.LinuxState
 import com.bellatrixos.linux.Stage
+import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.widgets.cards.UISettingsCard
 import com.bellatrixos.widgets.cards.UISettingsCardCollapse
 import com.bellatrixos.widgets.cards.UISettingsCardProgressBar
@@ -37,6 +38,7 @@ class UILinux : Fragment() {
     private lateinit var gpuLog: UISettingsCardCollapse
     private lateinit var gpuLogText: TextView
     private lateinit var terminal: UISettingsCard
+    private lateinit var agents: UISettingsCard
     private lateinit var remove: UISettingsCard
     private lateinit var processLogText: TextView
 
@@ -70,6 +72,7 @@ class UILinux : Fragment() {
         gpuLog = view.findViewById(R.id.linux_gpu_log)
         gpuLogText = view.findViewById(R.id.linux_gpu_log_text)
         terminal = view.findViewById(R.id.linux_terminal)
+        agents = view.findViewById(R.id.linux_agents)
         remove = view.findViewById(R.id.linux_remove)
         processLogText = view.findViewById(R.id.linux_process_log_text)
         processLogText.movementMethod = ScrollingMovementMethod()
@@ -82,6 +85,7 @@ class UILinux : Fragment() {
             runtime.setGpu(!runtime.gpu.wanted)
         }
         terminal.setOnCardClickListener { runtime.terminal(null, "Terminal") }
+        agents.setOnCardClickListener { runtime.openSettings(SettingsPage.Agents) }
         remove.setOnCardClickListener { runtime.remove() }
         installLog.setOnCardClickListener { updateLogs() }
         gpuLog.setOnCardClickListener { updateLogs() }

@@ -158,6 +158,7 @@
             android:name=".TerminalWindow"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|uiMode"
             android:enabled="true"
+            android:excludeFromRecents="true"
             android:exported="false"
             android:label="@string/linux_terminal_window"
             android:targetActivity=".LinuxWindowActivity"

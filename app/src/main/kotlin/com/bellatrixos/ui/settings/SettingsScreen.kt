@@ -127,12 +127,12 @@ fun SettingsScreen(
                 SettingsRow(R.string.settings_linux, linuxStatus, onLinux),
                 if (installed) {
                     SettingsRow(
-                        R.string.settings_agents,
+                        R.string.start_filter_coding_agents,
                         runtime.agents.default?.let { stringResource(R.string.settings_agents_default, it.name) } ?: stringResource(R.string.settings_agents_install),
                         onAgents,
                     )
                 } else {
-                    SettingsRow(R.string.settings_agents, needsLinux, onLinux)
+                    SettingsRow(R.string.start_filter_coding_agents, needsLinux, onLinux)
                 },
                 SettingsRow(R.string.settings_packages, if (installed) stringResource(R.string.settings_packages_subtitle) else needsLinux, if (installed) onPackages else onLinux),
                 if (notHome) {

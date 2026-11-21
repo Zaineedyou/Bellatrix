@@ -23,7 +23,8 @@ class d(
                 val listener = adapter.A ?: return
                 if (!item.b) return
                 val position = (x as? NavigationAdapter.ViewHolder)?.bindingAdapterPosition ?: return
-                listener.c(item.f4690d, position, item.f4689a)
+                // The listener expects the stable navigation id, not the list position.
+                listener.c(item.f4690d, item.f4689a, position)
             }
             1 -> {
                 val adapter = v as? AudioAdapter ?: return

@@ -240,6 +240,10 @@
     <string name="settings_linux_removing">removing…</string>
     <string name="settings_linux_not_installed">not installed · install Void Linux for terminal apps and agents</string>
     <string name="settings_agents">coding agents</string>
+    <string name="start_filter_bellatrix">Bellatrix</string>
+    <string name="start_filter_android">Android apps</string>
+    <string name="start_filter_coding_agents">Coding Agents</string>
+    <string name="start_filter_linux">Linux apps</string>
     <string name="start_section_bellatrix">Bellatrix</string>
     <string name="start_section_android">Android apps</string>
     <string name="start_section_linux">Linux apps</string>
@@ -579,7 +583,7 @@
     <string name="gestures_until_fixed">%1$s until it\'s fixed: %2$s</string>
     <string name="gestures_keybar_until_fixed">the terminal key bar is the stock one until it\'s fixed: %1$s</string>
     <string name="gestures_strip_until_fixed">the recent apps strip is the stock one until it\'s fixed: %1$s</string>
-    <string name="agents_title">coding agents</string>
+    <string name="agents_title">Coding Agents</string>
     <string name="agents_intro">Installed the way Omarchy does, most with mise. Logins open in your browser; paste keys with the keyboard\'s clipboard.</string>
     <string name="agents_open">open</string>
     <string name="agents_remove">remove</string>

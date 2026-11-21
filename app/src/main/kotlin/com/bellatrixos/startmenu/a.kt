@@ -16,9 +16,13 @@ class a(mainActivityIn: MainActivityIn, i2: Int) : UIContextMenu.OnMenuItemClick
         when (u) {
             0 -> {
                 val mode = when (i2) {
-                    R.id.action_list_freeform -> 2
-                    R.id.action_list_work -> 3
-                    else -> 0
+                    R.id.action_list_freeform -> StartMenuAdapter.MODE_FREEFORM
+                    R.id.action_list_work -> StartMenuAdapter.MODE_WORK
+                    StartMenuAdapter.FILTER_BELLATRIX,
+                    StartMenuAdapter.FILTER_ANDROID,
+                    StartMenuAdapter.FILTER_CODING_AGENTS,
+                    StartMenuAdapter.FILTER_LINUX -> i2
+                    else -> StartMenuAdapter.MODE_ALL
                 }
                 Global.f4842k = mode
                 v.E(mode)
