@@ -22,16 +22,39 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Omalauncher's permission set, merged here: widgets and Linux reach these through the
+         same Bellatrix permission screen (ui/settings/PermissionsScreen.kt). -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="com.bellatrixos.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature android:name="android.software.live_wallpaper" android:required="false" />
 
     <permission
         android:name="com.bellatrixos.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
 
     <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.BROWSABLE" />
@@ -51,6 +74,29 @@
         <intent>
             <action android:name="android.intent.action.DIAL" />
             <data android:path="tel:" />
+        </intent>
+        <!-- The rest of Omalauncher's visibility set, so its merged permission-backed
+             features (voice, icon packs, media output) can find the phone's services. -->
+        <intent>
+            <action android:name="org.adw.launcher.THEMES" />
+        </intent>
+        <intent>
+            <action android:name="com.novalauncher.THEME" />
+        </intent>
+        <intent>
+            <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG" />
+        </intent>
+        <intent>
+            <action android:name="com.android.systemui.action.LAUNCH_SYSTEM_MEDIA_OUTPUT_DIALOG" />
+        </intent>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
     </queries>
 
@@ -479,7 +525,8 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <service
             android:name=".widgets.runtime.AudioCaptureService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"

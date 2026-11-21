@@ -30,11 +30,10 @@ private fun entry(
  */
 private val CURATED =
     mapOf(
-        "foot" to entry("Terminal", "foot", terminal = false, icon = "foot"),
+        // Bellatrix owns the one Terminal tile; foot is still the guest terminal it launches.
         "btop" to entry("btop", "btop", icon = "btop"),
-        "omarchy-files" to entry("Files", FILES_COMMAND, terminal = false, icon = bundledIcon("files")),
-        "micro" to entry("Editor", EDIT_COMMAND, terminal = false, icon = bundledIcon("editor")),
-        "omarchy-voice" to entry("Voice", VOICE_COMMAND, terminal = false, icon = bundledIcon("voice")),
+        // Files, Editor and Voice are not drawer apps here: they use Bellatrix's
+        // Explorer, Notepad and the in-home voice window. Their shims stay for the guest.
         "cliamp" to entry("Cliamp", "cliamp", icon = bundledIcon("cliamp")),
     )
 
@@ -43,7 +42,23 @@ private val CURATED =
  * pulseaudio dependency), foot's server/client pair, and keyboard-only editors.
  * They stay installed; the drawer just doesn't list them.
  */
-private val HIDDEN = listOf("avahi-discover", "bssh", "bvnc", "footclient", "foot-server", "vim", "nvim", "yazi")
+// foot stays installed as Bellatrix's terminal backend, but its .desktop row would be a
+// second Terminal in the drawer. NoDisplay hides it without touching the binary.
+private val HIDDEN =
+    listOf(
+        "avahi-discover",
+        "bssh",
+        "bvnc",
+        "foot",
+        "footclient",
+        "foot-server",
+        "micro",
+        "omarchy-files",
+        "omarchy-voice",
+        "vim",
+        "nvim",
+        "yazi",
+    )
 
 /** The curated and hiding entries; ones the user edited are left alone. */
 fun defaultApps(applications: File): List<Managed> {

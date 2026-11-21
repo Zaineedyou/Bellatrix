@@ -1435,6 +1435,23 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         runtime.openFloatingTerminal = { handle ->
             if (!isFinishing && !isDestroyed) runOnUiThread { this@MainActivity.c0("UILinuxWindow", handle) }
         }
+        // Installing or removing an agent rewrites its .desktop entry; the drawer is one
+        // list, so just rebuild that list. No agents button, no second screen.
+        runtime.onAppsChanged = {
+            if (!isFinishing && !isDestroyed) runOnUiThread { M0?.D(null) }
+        }
+        // Guest Files and Editor use Bellatrix's Explorer window, never their old tasks.
+        runtime.openExplorer = { guestPath ->
+            if (!isFinishing && !isDestroyed) runOnUiThread { c0("UIExplorer", UIExplorer.filesArg(guestPath)) }
+        }
+        runtime.openBellatrixEditor = { guestPath, done ->
+            if (!isFinishing && !isDestroyed) runOnUiThread { c0("UIExplorer", UIExplorer.editorArg(guestPath, done)) }
+        }
+        runtime.openVoiceWindow = {
+            // A non-null marker makes an already hidden UIVoice call k0(): another mic tap
+            // is a new conversation, not just a return from the taskbar.
+            if (!isFinishing && !isDestroyed) runOnUiThread { c0("UIVoice", "reopen") }
+        }
         // Agents install .desktop entries in the guest; coming home picks them up in the
         // same drawer, alongside Android apps and the built-in windows.
         lifecycleScope.launch {

@@ -43,6 +43,7 @@ class IconEngine(context: Context) {
                     "UIInstaller" -> ContextCompat.getDrawable(c, R.drawable.img_app_installer)
                     "UINotepad" -> ContextCompat.getDrawable(c, R.drawable.img_app_notepad)
                     "UITerminal", "UILinuxWindow" -> ContextCompat.getDrawable(c, R.drawable.img_app_terminal)
+                    "UIVoice" -> ContextCompat.getDrawable(c, R.drawable.img_app_music)
                     "UISettings" -> ContextCompat.getDrawable(c, R.drawable.img_app_settings)
                     "UIExplorer" -> ContextCompat.getDrawable(c, R.drawable.img_app_explorer)
                     "UIMusic", "UIVideo" -> ContextCompat.getDrawable(c, R.drawable.img_app_music)

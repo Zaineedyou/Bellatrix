@@ -240,6 +240,9 @@
     <string name="settings_linux_removing">removing…</string>
     <string name="settings_linux_not_installed">not installed · install Void Linux for terminal apps and agents</string>
     <string name="settings_agents">coding agents</string>
+    <string name="start_section_bellatrix">Bellatrix</string>
+    <string name="start_section_android">Android apps</string>
+    <string name="start_section_linux">Linux apps</string>
     <string name="settings_agents_default">default: %1$s</string>
     <string name="settings_agents_install">install Claude Code, OpenCode, …</string>
     <string name="settings_needs_linux">needs linux</string>
@@ -581,6 +584,9 @@
     <string name="agents_open">open</string>
     <string name="agents_remove">remove</string>
     <string name="agents_install">install</string>
+    <string name="voice_title">voice</string>
+    <string name="guest_files_title">Files</string>
+    <string name="guest_editor_title">Editor</string>
     <string name="voice_listening">listening</string>
     <string name="voice_listening_working">listening · still working</string>
     <string name="voice_starting">starting</string>

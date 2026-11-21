@@ -79,6 +79,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -227,6 +229,18 @@ class Runtime(
     @Volatile
     var openFloatingTerminal: ((String) -> Unit)? = null
 
+    /** Files, Editor and Voice from the guest port use Bellatrix's own windows, never their old tasks. */
+    @Volatile
+    var openExplorer: ((String?) -> Unit)? = null
+    @Volatile
+    var openBellatrixEditor: ((String?, String?) -> Unit)? = null
+    @Volatile
+    var openVoiceWindow: (() -> Unit)? = null
+
+    /** The classic drawer re-reads the guest catalog when an agent or app is installed or removed. */
+    @Volatile
+    var onAppsChanged: (() -> Unit)? = null
+
     /** Compatibility with the legacy Linux settings and Terminal fragments. */
     val isLinuxReady get() = linux
 
@@ -365,6 +379,10 @@ class Runtime(
     /** Called as the home leaves: a terminal opened elsewhere uses the full-window fallback again. */
     fun clearHomeHooks() {
         openFloatingTerminal = null
+        openExplorer = null
+        openBellatrixEditor = null
+        openVoiceWindow = null
+        onAppsChanged = null
         onLinuxUnavailable = { openSettings(SettingsPage.Linux) }
     }
 
@@ -466,8 +484,22 @@ class Runtime(
     }
 
     /** Guest configs follow the theme and the installed agents; only while there is a guest. */
+    private var guestSync: Job? = null
+    private val guestSyncMutex = Mutex()
+
     private fun syncGuest() {
-        if (linux) provisioner.sync()
+        if (!linux) return
+        // Theme and agent changes often land together; let the last one write the whole set.
+        guestSync?.cancel()
+        guestSync =
+            scope.launch {
+                // A cancelled sync may be stuck in blocking file I/O; still never overlap writes.
+                guestSyncMutex.withLock {
+                    withContext(Dispatchers.IO) { provisioner.sync() }
+                    refreshApps()
+                    onAppsChanged?.invoke()
+                }
+            }
     }
 
     /** Whether the bridges and the Wayland server are up; they run until the process ends, even if Linux is removed. */
@@ -738,6 +770,20 @@ class Runtime(
         if (app.exec == FILES_COMMAND) return openFiles()
         if (app.exec == EDIT_COMMAND) return edit()
         if (app.exec == VOICE_COMMAND) return openVoice()
+        // Cliamp's binary is a downloaded optional step. A missing one used to make foot
+        // appear and vanish at once, so finish that step first and never open an empty window.
+        if (app.id == "cliamp") {
+            scope.launch {
+                bootstrap.runBacklog()
+                refreshApps()
+                onAppsChanged?.invoke()
+                terminal(
+                    "if command -v cliamp >/dev/null 2>&1; then cliamp; else echo 'Cliamp is still not installed. Check Linux settings > process log.'; exec bash; fi",
+                    app.name,
+                )
+            }
+            return
+        }
         if (app.terminal) return terminal(app.exec, app.name)
         // Like an Android icon: an app that already has a window comes back to it. Single-instance
         // apps would otherwise just exit on a second launch, showing nothing. Quickshell apps (App Finder)
@@ -794,24 +840,39 @@ class Runtime(
         if (widgets.isApp(name)) InstantActivity.startInstantly(context, OwlAppActivity.intent(context, name))
     }
 
-    /** Opens the voice screen, a spoken conversation with a coding agent. */
+    /** Opens voice in a Bellatrix window while home is up; the old task is only a fallback away from home. */
     fun openVoice() {
+        val inHome = openVoiceWindow
+        if (inHome != null) {
+            inHome()
+            return
+        }
         InstantActivity.startInstantly(context, Intent(context, VoiceActivity::class.java))
     }
 
-    /** Opens the Files app, at [path] (a guest path) if given. */
+    /** Opens the guest path in Bellatrix's Explorer, at [path] if given. */
     fun openFiles(path: String? = null) {
+        val inHome = openExplorer
+        if (inHome != null) {
+            inHome(path)
+            return
+        }
         InstantActivity.startInstantly(context, Intent(context, FilesActivity::class.java).putExtra(FilesActivity.EXTRA_PATH, path))
     }
 
     /**
-     * Opens [path] (a guest path) in the editor, or its start page without one.
-     * [done] is the host path of a FIFO that gets a reply once the file is closed (see OpenBridge's shim).
+     * Opens [path] in Bellatrix's Explorer, in its guest editor mode. [done] is the
+     * editor shim's reply FIFO, which the Explorer window answers when it closes.
      */
     fun edit(
         path: String? = null,
         done: String? = null,
     ) {
+        val inHome = openBellatrixEditor
+        if (inHome != null) {
+            inHome(path, done)
+            return
+        }
         InstantActivity.startInstantly(context, EditorActivity.intent(context, path, done))
     }
 

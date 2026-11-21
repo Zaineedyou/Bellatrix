@@ -213,7 +213,16 @@ class Bootstrap(
             Step("fonts-1", Stage.Packages, R.string.linux_step_fonts, network = true, optional = true) {
                 guest("timeout 400 sh -c ${shellQuote(distro.fontsScript())}")
             },
-            Step("cliamp-$CLIAMP_VERSION", Stage.Packages, R.string.linux_step_cliamp, network = true, optional = true) { installCliamp() },
+            Step(
+                "cliamp-$CLIAMP_VERSION",
+                Stage.Packages,
+                R.string.linux_step_cliamp,
+                network = true,
+                optional = true,
+                // A failed optional download isn't marked done, but a binary deleted later
+                // must be fetched again as well: the drawer only lists Cliamp if it runs.
+                isDone = { File(proot.rootfs, "usr/local/bin/cliamp").isFile },
+            ) { installCliamp() },
         )
 
     private fun Step.done() = isDone?.invoke() ?: (id in journal)
@@ -339,8 +348,12 @@ class Bootstrap(
     private var backlog: List<Step> = emptyList()
     private val backlogRunning = AtomicBoolean(false)
 
+    /**
+     * Runs queued optional steps. A caller that taps Cliamp while the first install is
+     * still running waits for it instead of briefly showing "not installed".
+     */
     suspend fun runBacklog() {
-        if (!backlogRunning.compareAndSet(false, true)) return
+        while (!backlogRunning.compareAndSet(false, true)) delay(100)
         try {
             runSteps()
         } finally {

@@ -3,6 +3,7 @@ package com.bellatrixos.windows
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import com.bellatrixos.UIFragment
+import com.bellatrixos.UIVoice
 import com.bellatrixos.app_browser.UIBrowser
 import com.bellatrixos.app_explorer.UIExplorer
 import com.bellatrixos.app_image_viewer.UIImageViewer
@@ -46,6 +47,7 @@ object WindowManager {
         "UIBrowser" -> UIBrowser()
         "UITerminal" -> UITerminal()
         "UILinuxWindow" -> UILinuxWindow()
+        "UIVoice" -> UIVoice()
         else -> when {
             str2 == null -> null
             str2.startsWith("http") || str2.startsWith("www") -> UIWebApp()
