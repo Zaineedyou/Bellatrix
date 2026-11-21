@@ -256,9 +256,9 @@ widget "shell" {
 }
 ```
 
-- The tile is inert until tapped, so swipes still turn pages. Tapping it gives it
+- The tile is inert until tapped; Bellatrix has one home page, so there is no page to swipe to. Tapping it gives it
   the keyboard and its touches (drag scrolls, hold-and-drag selects). A tap
-  outside it, Back or another page lets go. The ⌨ button toggles the soft keyboard,
+  outside it or Back lets go. The ⌨ button toggles the soft keyboard,
   and a tap on the line with the terminal's cursor (its prompt) brings it back.
 - The terminal keeps running while its page is off screen. It ends when the widget
   is removed or its file changes. When `command` exits, it stays stopped until you

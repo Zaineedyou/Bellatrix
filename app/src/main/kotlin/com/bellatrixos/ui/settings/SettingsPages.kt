@@ -1,13 +1,6 @@
 package com.bellatrixos.ui.settings
 
 import com.bellatrixos.widgets.lang.OwlKind
-import com.bellatrixos.widgets.checkSecretsCommand
-import com.bellatrixos.widgets.publishWidgetCommand
-import com.bellatrixos.widgets.WidgetSpec
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Box
@@ -21,22 +14,16 @@ import com.bellatrixos.Runtime
 import com.bellatrixos.ui.LocalPanelBack
 import com.bellatrixos.ui.pane
 import com.bellatrixos.ui.home.GesturesScreen
-import com.bellatrixos.ui.home.PagesScreen
-import com.bellatrixos.ui.store.ShareWidgetScreen
 import com.bellatrixos.ui.store.StoreScreen
 
 /** The screens of the settings activity; each can also be opened on its own, from home or a widget. */
 enum class SettingsPage {
     Settings,
     Style,
-
-    /** Home's pages, to arrange, edit and remove. */
-    Pages,
-
     Agents,
     Store,
 
-    /** The store on its faces, from the empty page left of page 1. */
+    /** The store filtered to faces, kept for old intents; faces are tiles on the one home page. */
     FaceStore,
     Packages,
 
@@ -125,7 +112,6 @@ private fun SettingsPage(
                 runtime,
                 onDismiss = close,
                 onStyle = { stack.push(SettingsPage.Style) },
-                onPages = { stack.push(SettingsPage.Pages) },
                 onAgents = {
                     close()
                     runtime.showCodingAgents()
@@ -137,30 +123,6 @@ private fun SettingsPage(
                 onPermissions = { stack.push(SettingsPage.Permissions) },
             )
         SettingsPage.Style -> StyleScreen(runtime, onDismiss = close, onAgent = ::agent)
-        SettingsPage.Pages -> {
-            var sharing by remember { mutableStateOf<WidgetSpec?>(null) }
-            PagesScreen(runtime, onDismiss = close, onAgent = ::agent, onShare = { sharing = it })
-            sharing?.let { spec ->
-                ShareWidgetScreen(
-                    spec,
-                    // Only your own: one from the store or from someone else isn't yours to submit.
-                    onPublish =
-                        if (runtime.widgets.isOwnWidget(spec)) {
-                            {
-                                sharing = null
-                                agent("Publish ${spec.name}") { publishWidgetCommand(it, spec) }
-                            }
-                        } else {
-                            null
-                        },
-                    onCheck = {
-                        sharing = null
-                        agent("Check ${spec.name}") { checkSecretsCommand(it, spec) }
-                    },
-                    onDismiss = { sharing = null },
-                )
-            }
-        }
         // Kept only for old intents: hand off to the Bellatrix Settings page instead of showing a ported screen.
         SettingsPage.Agents -> {
             close()

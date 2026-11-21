@@ -96,6 +96,12 @@ class HomeFileTest {
         assertEquals(TilePage(listOf(WidgetTile("a.owl", null), AppTile("b", Cell(2, 1, 0, 0)))), decoded.layout.pages.single())
     }
 
+    @Test fun faceTilesAreTilesOnTheOnePage() {
+        val decoded = HomeFile.decode(Toml.parse("[[page]]\ntiles = [ { face = \"a.owl\", x = 1, y = 2, w = 3, h = 3 } ]\n"), 6)
+        assertEquals(emptyList<String>(), decoded.problems)
+        assertEquals(TilePage(listOf(WidgetTile("a.owl", Cell(1, 2, 3, 3)))), decoded.layout.pages.single())
+    }
+
     @Test fun saysWhatItCouldntRead() {
         val text =
             """
@@ -110,7 +116,7 @@ class HomeFileTest {
         // The face, then its tiles on a page of their own; a bad size keeps the tile where it says, at its own.
         assertEquals(listOf(FacePage("a.owl"), TilePage(listOf(WidgetTile("b.owl", null), WidgetTile("e.owl", Cell(0, 0, 0, 0))))), decoded.layout.pages)
         val problems = decoded.problems.joinToString("\n")
-        for (part in listOf("columns:", "other isn't a page's", "its tiles went on the next", "tile 1: x and y", "tile 2: a tile is one of", "tile 3: app takes", "tile 4: w takes", "tile 5: write a tile")) {
+        for (part in listOf("columns:", "other isn't a page's", "a face is now a tile on the one home page", "tile 1: x and y", "tile 2: a tile is one of", "tile 3: app takes", "tile 4: w takes", "tile 5: write a tile")) {
             assertTrue(problems, part in problems)
         }
     }

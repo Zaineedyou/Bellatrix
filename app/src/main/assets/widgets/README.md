@@ -2,8 +2,8 @@
 
 Each `*.owl` file in this folder is a widget on the Android home screen,
 written in OWL, a small declarative language in the spirit of QML. Its first
-word says what it is: `widget "name" { }` is a home-screen tile, `face "name" { }` a face, a whole home page
-left of your first one (docs/faces.md), and `app "name" { }` an app in the app drawer that opens full screen
+word says what it is: `widget "name" { }` is a home-screen tile, `face "name" { }` a face (now a tile on that same
+one page, docs/faces.md), and `app "name" { }` an app in the app drawer that opens full screen
 (docs/apps.md). `panel "name" { }` is a view a swipe on home opens (docs/panels.md), and `keybar "name" { }` the terminal key bar
 over the keyboard while typing in a terminal (docs/keybar.md). Everything here and in docs/ is about widgets unless it says otherwise; the others are written
 the same way. Save a file and it appears within a second. Then run `owl-check <file>`:
@@ -27,25 +27,25 @@ can't see the phone. It's the running tile, so to see another state, set it and 
 you're done, since that's the tile on the user's home. Terminal and Browser tiles aren't previewed. Errors also
 go to `.errors/<file>.txt`, and the tile shows them.
 
-Widgets sit on a grid of roughly square cells, 6 columns by default (a phone
-has about 12 rows), bordered like Bellatrix windows and colored by the current
-Bellatrix theme. Users move and resize them on the phone; where everything is
-lives in ~/.config/bellatrix/home/layout.toml, which you can edit too (see
-docs/home.md). The launcher puts a new file on home itself, by its `page:`, `order:` and `size:`:
-don't add it to layout.toml, move it there afterwards if it should be elsewhere.
+Bellatrix's home is hard-coded to one page. Widgets, faces and pinned apps all sit on the same
+native grid of roughly square cells (6 columns by default), bordered like Bellatrix windows and colored
+by the current Bellatrix theme. Users move and resize them on the phone; where everything is lives in
+~/.config/bellatrix/home/layout.toml, which you can edit too (see docs/home.md). A `page:` in an owl
+file is ignored: the launcher puts the new tile on that one page by its `order:` and `size:`. If the
+page is full, the new tile takes the least crowded spot and is drawn on top.
 
 On the phone, long-pressing empty home offers **new widget file**,
 **edit home bar** and **edit taskbar**: those open `.owl` files in Bellatrix's own editor, no Linux or
-coding agent needed. A tile's **edit file** action edits that widget, and an empty page's invite makes
-a widget or face file directly. `home.owl` and `taskbar.owl` are `panel` files that render
-inside Bellatrix's own home bar and taskbar (not a separate OWL screen). Layout
-them with `Flex`, `Box`, `Anchor` and `anchor` (owl 24), Waybar-style; see
-docs/home.md for the starter and the exact paths.
+coding agent needed. A tile's **edit file** action edits that widget, and the empty home invite makes
+a widget or face tile directly. `home.owl` and `taskbar.owl` are seeded `panel` files that render
+inside Bellatrix's own home bar and taskbar (not a separate OWL screen), so Flex/Box/Anchor can be
+tested from the first install. Layout them with `Flex`, `Box`, `Anchor` and `anchor` (owl 24),
+Waybar-style; see docs/home.md for the starter and the exact paths.
 
 ```owl
 widget "memory" {
-  page: 1                 // home page it starts on, 1-based; then layout.toml says
-  order: 2                // placement order on the page when first placed (lower = first)
+  page: 1                 // ignored: Bellatrix home is one hard-coded page
+  order: 2                // placement order on that page when first placed (lower = first)
   size: 3x4               // size in grid cells when first placed: columns x rows
   minSize: 2x3            // users can't shrink it below this
   // lock: playing        // holds the home screen still while true, for a game or a drawing pad (owl 18)
@@ -110,7 +110,7 @@ declarations.md, nodes.md, expressions.md and handlers.md; a face, an app, a pan
 | docs/handlers.md | handlers, every action, sending to web APIs with `post`, tokens and passwords, sounds |
 | docs/drawing.md | Canvas, 3D scenes and Shader |
 | docs/screens.md | a widget's full-screen view behind its tile |
-| docs/faces.md | faces: a whole home page |
+| docs/faces.md | faces: tiles on Bellatrix's one home page |
 | docs/apps.md | apps in the app drawer, and their icons |
 | docs/browser.md | a web page in a tile: `Browser`, and `web` to steer it |
 | docs/panels.md | panels a swipe opens, the app drawer among them |
@@ -153,7 +153,7 @@ docs say what's current.
 | state, buttons and timers | `examples/91-focus` (persist, `at`, notify), `examples/87-breathe` (a session paced by the clock), `examples/88-notes` (Input, a saved list) |
 | drawing | `examples/90-analog-clock` (Canvas), `50-koi` (pixel art, taps), `60-owl` (sprites, a pet that keeps its state), `examples/92-aurora` and `examples/89-lava` (Shader) |
 | a game | `examples/space-bounce` (an app: `every frame` moving things by their speed, steering by tilting with `android.motion`, aiming with a finger, a Shader grid behind a Canvas), `examples/sky-raid` (a pixel-art scrolling shooter: sprites in one palette, a pixel font drawn with `sprite`, scrolling ground from a Shader, stages and a boss, keeping under the 2000 drawing calls), `examples/sunset-heist` (a 3D city seen from above, made from a seed: two scenes on one camera, the ground first; traffic on a road grid, police that chase, getting in and out of seven kinds of vehicle, each a convex body made with `mesh` so it never sorts wrong, jobs, guns with auto-aim and a held fire button, health and armor, pickups placed from the seed that come back after a while, police that follow the road grid and get out to chase on foot, a minimap; a joystick wherever the thumb goes down, from `onTouch`), `examples/canyon-run` (3D: a Canvas `scene` of terrain tiles laid end to end, models spawned ahead and dropped behind, hits as distances, a camera following the ship, `project` for a sun behind the scene) |
-| faces, a whole page | `examples/00-start` (frost, Grid, spans), `examples/01-minimal`, `examples/02-pixel`, `examples/03-matrix` |
+| faces, now tiles on the one page | `examples/00-start` (frost, Grid, spans), `examples/01-minimal`, `examples/02-pixel`, `examples/03-matrix` |
 | panels and the prompt bar | `drawer.owl` (lazy lists, search with rank, Popup), `examples/65-ai-bar` (android.agents, ask, open) |
 | the terminal key bar | `keybar.owl`, `examples/keybar-layers` (latch, layers), `examples/keybar-vim`, `examples/keybar-gamepad`, `examples/keybar-commands` (typeText) |
 | a live terminal | `45-terminal` |
@@ -162,7 +162,7 @@ docs say what's current.
 
 ## Limits
 
-A widget has at most 500 nodes (a page 1000), 2000 drawing calls per frame, lists of 1000
+A widget or face tile has at most 500 nodes, 2000 drawing calls per frame, lists of 1000
 items, 32 images and 128 SVGs on show at once (a view with more draws only those, and says so
 in `.errors/`), and a step budget per update. A widget that draws slowly animates at
 half rate (an app with `fps: 60` keeps its 60). Errors never take the home screen down: the failing value shows `…`

@@ -38,10 +38,10 @@ data class StoreMessage(
 /**
  * The marketplace for one [kind]: a reviewed catalog published from a GitHub repo to
  * GitHub Pages, widgets in index.json, faces in faces.json and apps in apps.json. Installs
- * are checked against the catalog's SHA-256, land on the current page (a face left of page
- * 1, an app in the drawer), and remember which version and commands were approved, so an
- * update that changes them asks again. A face with several pages installs them side by side;
- * each stays the user's to remove, and an update replaces only the ones still there.
+ * are checked against the catalog's SHA-256, land on Bellatrix's one home page (an app in the drawer),
+ * and remember which version and commands were approved, so an update that changes them asks again. A face with
+ * several files installs them all as ordinary tiles on that page; each stays the user's to remove, and an update
+ * replaces only the ones still there.
  */
 class Market(
     private val engine: WidgetEngine,
@@ -72,10 +72,10 @@ class Market(
         val requires: Map<String, List<String>>,
         /** The installed file's SHA-256, to tell it from one the user edited; null in records kept before it was. */
         val sha256: String? = null,
-        /** A face's other pages, from page 2 on; none in records kept before faces had pages. */
+        /** A face's other files beyond [file]; none in records kept before faces had more than one file. */
         val pages: List<PageFile> = emptyList(),
     ) {
-        /** Every page's file: [file] (page 1), then [pages]'. */
+        /** Every file in the entry: [file], then [pages]'. */
         val files get() = listOf(PageFile(file, sha256)) + pages
     }
 
@@ -198,8 +198,8 @@ class Market(
     fun changedSinceApproval(e: CatalogEntry) = installedVersion(e)?.let { it.commands != e.commands || it.requires != e.requires } == true
 
     /**
-     * Downloads, verifies and installs [e] on [page], or updates it: an update replaces only the pages still on home. Its
-     * packages install right after. Returns an error, or null.
+     * Downloads, verifies and installs [e] on Bellatrix's one home page, or updates it: an update replaces only the
+     * pages still on home. [page] is kept for old callers and ignored. Its packages install right after. Returns an error, or null.
      */
     suspend fun install(
         e: CatalogEntry,
@@ -209,10 +209,11 @@ class Market(
         return put(e, page, if (update) R.string.store_updating else R.string.store_installing) { exists -> !update || exists }
     }
 
-    /** Adds an installed face's [missingPages] at the installed version, leaving the pages still on home as they are. */
+    /** Adds an installed face's remaining files at the installed version, leaving the ones still on home as they are. */
     suspend fun addPages(e: CatalogEntry): StoreMessage? = put(e, 0, R.string.store_adding_pages) { exists -> !exists }
 
-    /** Downloads every page [which] picks (by whether its file exists), checks them all, then writes them. */
+    /** Downloads every file [which] picks (by whether its file exists), checks them all, then writes them. */
+    @Suppress("UNUSED_PARAMETER")
     private suspend fun put(
         e: CatalogEntry,
         page: Int,
@@ -225,23 +226,17 @@ class Market(
             val exists = withContext(Dispatchers.IO) { names.map { File(engine.dir, it).exists() } }
             val paths = listOf(e.path to e.sha256) + e.pages.map { it.path to it.sha256 }
             val picked = names.indices.filter { which(exists[it]) }
-            // All of them or none: a face whose second page failed to download would be half there.
+            // All of them or none: a face with several files isn't half there when one download fails.
             val bytes =
                 withContext(Dispatchers.IO) {
                     picked.associateWith { n -> httpGet(BASE + paths[n].first) }
                 }
             if (bytes.any { (n, b) -> sha256Hex(b) != paths[n].second }) return StoreMessage(R.string.store_download_mismatch)
-            // A page on home keeps its place; a new one goes where the user is. Apps go in the drawer, on no page, and a face's
-            // pages left of page 1, side by side from the empty page waiting there leftwards, page 1 leftmost. A face's pages
-            // added back take the ones still there along, so they stay in order. Their pages are all picked first: home
-            // doesn't know one is taken until its file loads.
+            // Bellatrix has one home page: a widget or face already there keeps its place, and a new one lands on
+            // that same page at the least crowded spot. Apps go in the drawer, on no page. All of an entry's
+            // pages are picked first: home doesn't know one is taken until its file loads.
             val fresh = picked.filter { !exists[it] }
-            if (kind == OwlKind.Widget) for (n in fresh) engine.setPage(names[n], page)
-            if (kind == OwlKind.Face && fresh.isNotEmpty()) {
-                val placed = names.indices.filter { exists[it] || it in picked }
-                val left = engine.newFacePage() - placed.size + 1
-                for ((k, n) in placed.withIndex()) engine.placeOnPage(names[n], left + k)
-            }
+            for (n in fresh) engine.placeOnPage(names[n], 1)
             val written = ArrayList<Int>()
             try {
                 withContext(Dispatchers.IO) {

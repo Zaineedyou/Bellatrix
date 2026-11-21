@@ -32,8 +32,8 @@ widget "lobsters" {
   bridge, can't reach this phone's files or a `content://` provider, opens no second window, and plays no
   sound before a tap. An https page can't pull in `http://` either.
 - `zoom` is the page's text size, 1 by default and kept between 0.5 and 3.
-- The tile is inert until tapped, so swipes still turn pages and a long press still lifts it. Tapping
-  it gives the page its touches (a tap, a scroll, a pinch); a tap outside it, another page or Back
+- The tile is inert until tapped, so a long press still lifts it; Bellatrix has one home page, so there is no
+  page to swipe to. Tapping it gives the page its touches (a tap, a scroll, a pinch); a tap outside it or Back
   lets go, and so does a tab switched away from it. A text field in the page raises the keyboard,
   and the tile lifts above it as a terminal's does.
 - `onNavigate` gets the `value` of each page it goes to, including a link's; `onTitle` its title, and

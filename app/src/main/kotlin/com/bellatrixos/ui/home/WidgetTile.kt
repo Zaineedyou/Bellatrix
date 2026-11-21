@@ -51,6 +51,7 @@ import com.bellatrixos.ui.TextSize
 import com.bellatrixos.ui.frame
 import com.bellatrixos.ui.tile
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 internal fun WidgetTile(
     spec: WidgetSpec,
@@ -66,11 +67,12 @@ internal fun WidgetTile(
     /** Where Linux stands, if the widget needs it and it isn't running: a placeholder keeps its cells. */
     waitsForLinux: LinuxPhase? = null,
     onInstallLinux: () -> Unit = {},
-    /** How much of a face the soft keyboard covers while one of its fields has it, in pixels: its `screenInset` then. */
+    /** Kept for callers from before Bellatrix's one home page; faces are ordinary tiles now. */
     keyboard: Float = 0f,
 ) {
-    // A face draws straight on the wallpaper, without a tile's frame; selected, it still shows the focus border.
-    val bare = spec.isFace && waitsForLinux == null && instance != null && needs.isEmpty()
+    @Suppress("UNUSED_VARIABLE")
+    // Bellatrix has one home page: a face is an ordinary tile, with the same native frame as a widget.
+    val bare = false
     Box(
         modifier
             .then(

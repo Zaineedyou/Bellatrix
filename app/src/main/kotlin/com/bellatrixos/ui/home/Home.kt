@@ -15,9 +15,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
-import com.bellatrixos.widgets.FACE_PAGE
 import com.bellatrixos.widgets.OwlBars
-import com.bellatrixos.widgets.isFacePage
 import com.bellatrixos.widgets.lang.OwlKind
 import com.bellatrixos.widgets.Folder
 import com.bellatrixos.widgets.HomeItem
@@ -135,38 +133,21 @@ fun HomeScreen(
             else -> Screen.MAIN
         }
     SideEffect { engine.show(screen) }
-    // One empty page always waits after the last one, to drop tiles on or pin apps to. Pages only exist
-    // while they hold something, so it becomes a real page once used and a new empty one follows.
-    // Left of page 1 the same, for faces: like a stock launcher's feed, but the user's own. An empty one waits left of
-    // the leftmost, page 0 at first, then -1, -2, ... as they fill.
-    // home.empty-page-left and home.empty-page-right turn each off; the right one still comes while a tile is carried,
-    // to drop it on.
-    // Not the left one: adding a page before the one on screen would shift the pager under the finger.
-    // Unfolded, tile pages show in pairs and a face across both halves: the pager counts slots (see slotsOf).
-    val per = if (showsTwoPages(windowSize())) 2 else 1
-    val pageNumbers =
-        pagerPages(
-            engine.pages,
-            lastEmpty = engine.itemsOn(engine.pages.last()).isEmpty(),
-            emptyPageLeft = LauncherStyle.emptyPageLeft,
-            emptyPageRight = LauncherStyle.emptyPageRight || arrange.carry != null,
-        )
-    // Only faces on screen, or the empty one waiting left of them: they get it whole, the bar's room too (see
-    // LauncherState.faceShowing), and the status bar's while all of them say statusBar: false.
-    fun faceOn(page: Int?) = page?.let { engine.layout.owner(engine.itemsOn(it)) as? WidgetItem }?.takeIf { it.isFace }
-    fun full(page: Int?) = page != null && (isFacePage(page) || faceOn(page) != null)
+    // Home is hard-coded to one page. Every widget, face, pinned app and folder lands there; no empty feed
+    // page, no second tile page, and no two-up page on a foldable. The native grid keeps all its tiles.
+    val per = 1
+    val pageNumbers = pagerPages(engine.pages, false, false, false)
+    // No face takes the page over: face files are tiles on the same native grid as every other widget.
+    fun full(page: Int?) = false
     // No pages until the widgets have loaded: pinned apps load first, and pages shown before them would fill in, then
     // shift as the widgets' pages joined, with home turning to page 1 among them.
     val slots = if (engine.loaded) slotsOf(pageNumbers, per, ::full) else emptyList()
     fun slotOf(page: Int) = slots.indexOfFirst { page in it }
     fun homePage() = homePageIn(engine.pages, LauncherStyle.homePage)
-    // Home opens on home.home-page, page 1 unless set, or the first page after it if none is numbered so. Among the pages
-    // that hold something: the empty ones waiting at either end aren't home.
-    // Made again once the widgets have loaded, so it starts on that page among all of them.
+    // Home always opens on its one hard-coded page, regardless of home.home-page or an old saved page number.
     val pager = key(engine.loaded) { rememberPagerState(initialPage = slotOf(homePage()).coerceAtLeast(0)) { slots.size } }
-    // A tile dropped on another page: show that page once the page list has caught up, by the list as it is then. The
-    // list the request was made with could be one from before (a store add spilling onto page 2 showed a face). A swipe
-    // meanwhile wins, and the request goes with it rather than firing later.
+    // Kept for drops that ask to show where a tile landed; on one page it is simply page 1. A swipe wins if one
+    // arrives before it settles.
     var showPage by remember { mutableStateOf<Int?>(null) }
     val currentSlots by rememberUpdatedState(slots)
     LaunchedEffect(showPage) {
@@ -174,7 +155,7 @@ fun HomeScreen(
         try {
             withTimeoutOrNull(2_000) { snapshotFlow { currentSlots.indexOfFirst { page in it } }.first { it >= 0 } }?.let { pager.scrollToPage(it) }
         } finally {
-            // Not when another page was asked for meanwhile: that one runs this again.
+            // Not when a newer drop asked meanwhile: that one runs this again.
             if (showPage == page) showPage = null
         }
     }
@@ -210,8 +191,8 @@ fun HomeScreen(
                 "linux" -> state.show(SettingsPage.Linux)
                 "drawer" -> state.open()
                 "settings" -> state.show()
-                // "page:0": turns home to that page, a face left of page 1 too, as Super+1…9 does. What covers home
-                // closes first, as for Home pressed, so the page is seen: a widget's screen, the drawer, a panel.
+                // "page:N" is kept for old widgets: the launcher closes what covers home and returns to its one page.
+                // A face left of page 1 no longer exists, so every page number means the same Bellatrix home.
                 else ->
                     action.removePrefix("page:").takeIf { it != action }?.toIntOrNull()?.let {
                         state.close()
@@ -244,10 +225,8 @@ fun HomeScreen(
         arrange.drop()
         showPage = lastPage[screen] ?: homePage()
     }
-    // The drawer pins apps to whichever page is showing (the left one of a pair); from a face, wherever it is, to page 1.
-    // Pages appearing before the one showing don't move home off it, unless home was just sent to another page. At
-    // start, pinned apps load before widgets, so page 1 may join after the faces and later pages: until widgets have
-    // loaded, home keeps to page 1 rather than whatever stands at its index.
+    // The drawer pins apps to Bellatrix's one home page, wherever a tile was dragged. At start, pinned apps load
+    // before widgets, so until widgets have loaded home keeps to that page rather than whatever stands at its index.
     val listed = remember { arrayOf(slots) }
     LaunchedEffect(pager.currentPage, slots, engine.loaded) {
         if (!engine.loaded) return@LaunchedEffect
@@ -266,10 +245,10 @@ fun HomeScreen(
         state.currentPage = engine.activePage.takeIf { it >= 1 && !full(it) } ?: 1
     }
     val shown = slots.getOrElse(pager.currentPage) { listOf(1) }
-    // A face showing has the keyboard, for one of its fields, terminals or pages: it isn't lifted, it makes room itself.
-    val faceTyping = shown.mapNotNull(::faceOn).any { f -> engine.instance(f.spec)?.let(terminals::typingIn) == true }
-    val faceShowing = shown.all(::full)
-    val statusBarAway = shown.all { faceOn(it)?.let { f -> engine.instance(f.spec) }?.showsStatusBar() == false }
+    // Faces are ordinary tiles on the one page, so they keep the native keyboard lift and status bar like widgets.
+    val faceTyping = false
+    val faceShowing = false
+    val statusBarAway = false
     // The widgets showing whose lock: holds keep the screen still, read here rather than in composition, so a game's state
     // changing doesn't recompose home. Only those showing: a page turned away from can't hold the one turned to.
     LaunchedEffect(engine, shown) {
@@ -526,22 +505,6 @@ fun HomeScreen(
             side = side,
             per = per,
             onLongPressEmpty = { openMenu(null) },
-            feed = { page ->
-                val agent = runtime.agents.default?.name
-                PageInvite(
-                    stringResource(R.string.home_face_invite_title),
-                    agent?.let { stringResource(R.string.home_face_invite_text, it) } ?: stringResource(R.string.home_face_invite_text_no_agent),
-                    agent,
-                    onBrowse = { state.show(SettingsPage.FaceStore) },
-                ) {
-                    if (linuxState == LinuxPhase.Installed) {
-                        state.withAgent(runtime, "New face") { newOwlCommand(it, OwlKind.Face, page) }
-                    } else {
-                        // No Linux needed to make a face: the file opens in Bellatrix's own editor.
-                        scope.launch { OwlBars.newFace(context, runtime, page) }
-                    }
-                }
-            },
             invite = {
                 val agent = runtime.agents.default?.name
                 PageInvite(
@@ -603,9 +566,7 @@ fun HomeScreen(
 
 
 /**
- * An invitation on an empty page to have [agent] build something, or to take one from the store: on the page left
- * of the first, while it's empty, a face of the user's own, where a stock launcher has its news feed; on an empty
- * tile page, the one after the last or page 1 of an empty home, a widget.
+ * An invitation on Bellatrix's one empty home page to have [agent] build a widget, or to take one from the store.
  */
 @Composable
 private fun PageInvite(
@@ -640,32 +601,25 @@ private fun PageInvite(
 internal fun createWithLabel(agent: String?): String =
     agent?.let { stringResource(R.string.home_create_with, it.lowercase()) } ?: stringResource(R.string.home_create_with_an_agent)
 
-/**
- * Home's page numbers as the pager has them: [pages], with the empty page waiting left of the leftmost for a new face
- * when [emptyPageLeft], and one after the last when [emptyPageRight], for tiles, unless that one is empty already
- * ([lastEmpty]). Neither (both settings off, no tile carried) leaves only [pages], so home ends at its own pages.
- */
+/** Bellatrix home is hard-coded to one page: no empty feed page, no second tile page, no face page. */
+@Suppress("UNUSED_PARAMETER")
 internal fun pagerPages(
     pages: List<Int>,
     lastEmpty: Boolean,
     emptyPageLeft: Boolean,
     emptyPageRight: Boolean,
-): List<Int> {
-    val withFace = if (emptyPageLeft) listOf(minOf(pages.first(), FACE_PAGE + 1) - 1) + pages else pages
-    return if (!emptyPageRight || lastEmpty) withFace else withFace + (withFace.last() + 1)
-}
+): List<Int> = listOf(1)
 
-/** The page [wanted] names among [pages]: the first at or after it, the last when it is beyond them all. */
+/** Home always opens on its one page, whatever an old style or layout says. */
+@Suppress("UNUSED_PARAMETER")
 internal fun homePageIn(
     pages: List<Int>,
     wanted: Int,
-): Int = pages.firstOrNull { it >= wanted } ?: pages.last()
+): Int = 1
 
 /**
- * The pager's slots, what each of its positions shows left to right: a page each with [per] 1. Unfolded ([per] 2), tile
- * pages in pairs, so every tile keeps its folded size, and a [full] page (a face's, or the empty one waiting for one)
- * alone across both halves, as a face is the whole screen. A tile page with a full one after it stands alone, its other
- * half empty; the last one gets the number after it as an empty partner, to drop tiles on.
+ * The pager's slots. Bellatrix always passes one page and [per] 1, so this is the one home page; the old paired and
+ * full-page branches stay only for callers from before the single hard-coded page.
  */
 internal fun slotsOf(
     pages: List<Int>,
@@ -691,9 +645,8 @@ internal fun slotsOf(
 }
 
 /**
- * Where the strip and the bar stand across at pager [position] (slots, fractional while swiping), in screen widths: 0
- * over a tile page; past a [full] slot (a face's, or the empty one waiting left of page 1) they slide out with the tile page beside it,
- * as its tiles do, and they're a whole width away between two full ones.
+ * Where the strip and the bar stand across at pager [position], in screen widths. With one home page [full] is all
+ * false and this stays 0, so the native strip and bar never slide away; the old face-page branches remain for old callers.
  */
 internal fun barShift(
     full: List<Boolean>,
@@ -756,16 +709,13 @@ private fun HomeTile(
             WidgetTile(
                 spec = item.spec,
                 instance = engine.instance(item.spec),
-                // As shown: on its side in landscape. A face is the whole grid.
-                cells = (if (item.isFace) engine.layout.grid else engine.layout.cell(item.key)?.let { it.w to it.h })?.let { (w, h) -> if (turned) h to w else w to h },
-                // Accent like Hyprland's active border: only while one of its terminals has the keyboard. A face
-                // has none, being the whole screen; its screenInset grows by what the keyboard covers instead.
-                focused = highlighted || (typing && !item.isFace),
-                keyboard = if (typing && item.isFace) terminals.cut else 0f,
+                // Faces are ordinary tiles on the one page, so they use their own cell like any widget.
+                cells = engine.layout.cell(item.key)?.let { it.w to it.h }?.let { (w, h) -> if (turned) h to w else w to h },
+                // Accent like Hyprland's active border: only while one of its terminals has the keyboard.
+                focused = highlighted || typing,
+                keyboard = 0f,
                 modifier =
-                    if (typing && item.isFace) {
-                        tile.onGloballyPositioned { terminals.tile = it.boundsInWindow().translate(0f, terminals.lift) }
-                    } else if (typing) {
+                    if (typing) {
                         tile
                             .onGloballyPositioned { terminals.tile = it.boundsInWindow().translate(0f, terminals.lift) }
                             .padding(bottom = with(density) { terminals.cut.toDp() })

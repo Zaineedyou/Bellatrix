@@ -71,18 +71,18 @@ class LauncherState {
     var barHeight by mutableIntStateOf(0)
 
     /**
-     * Only faces (`face "…" { }`), or the empty one waiting left of page 1, show on home: they run under the
-     * system bars, so the bands behind those make way. The strip and the bar slide away by [barShift].
+     * Deprecated: Bellatrix has one home page and faces are ordinary tiles, so this is always false. Kept for callers
+     * from before face pages were removed.
      */
     var faceShowing by mutableStateOf(false)
 
     /**
-     * Where the strip and the bar stand across, in screen widths ([barShift]): they belong to the tile pages and
-     * slide with them, out past a face. Read while drawing, so a swipe moves them without recomposing.
+     * Where the strip and the bar stand across, in screen widths ([barShift]). With one home page this stays 0,
+     * so the native bar and recent-apps strip never slide away.
      */
     var barShift by mutableStateOf<() -> Float>({ 0f })
 
-    /** Only faces show, and all of them say `statusBar: false` now. */
+    /** Deprecated: no face takes the one page over, so this is always false. */
     var statusBarAway by mutableStateOf(false)
 
     /** [statusBarAway], and nothing over it: no drawer, menu or panel. Then the status bar hides. */

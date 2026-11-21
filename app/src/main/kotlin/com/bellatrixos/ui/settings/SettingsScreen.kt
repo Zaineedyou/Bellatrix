@@ -28,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -68,7 +67,6 @@ fun SettingsScreen(
     runtime: Runtime,
     onDismiss: () -> Unit,
     onStyle: () -> Unit,
-    onPages: () -> Unit,
     onAgents: () -> Unit,
     onPackages: () -> Unit,
     onLinux: () -> Unit,
@@ -117,7 +115,6 @@ fun SettingsScreen(
         val rows =
             listOfNotNull(
                 SettingsRow(R.string.settings_style, runtime.themes.current?.title ?: stringResource(R.string.settings_style_subtitle), onStyle),
-                SettingsRow(R.string.settings_pages, pluralStringResource(R.plurals.settings_pages_subtitle, runtime.widgets.pages.size, runtime.widgets.pages.size), onPages),
                 SettingsRow(
                     R.string.settings_gestures,
                     stringResource(R.string.settings_gestures_subtitle, runtime.gestureLabel(runtime.gestures.swipeUp), runtime.gestureLabel(runtime.gestures.swipeDown)),

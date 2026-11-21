@@ -68,16 +68,14 @@ object HomeFile {
 
     val HEADER =
         """
-        |# Home's pages, left to right: a face, or tiles on a grid of `columns` columns (home.columns in
-        |# ../style/style.toml sets the grid). Moving things on the phone rewrites this file, and home
-        |# follows edits to it. A tile is { widget = "file.owl" }, { app = "…" } or { folder = "name", apps = [...] },
+        |# Bellatrix home is one hard-coded page of `columns` columns (home.columns in ../style/style.toml
+        |# sets the grid). Moving things on the phone rewrites this file, and home follows edits to it.
+        |# A tile is { widget = "file.owl" }, { face = "file.owl" }, { app = "…" } or { folder = "name", apps = [...] },
         |# at x, y (cells from the top left) and w, h wide and tall; without x and y it takes the first free spot.
-        |# A widget file left out stays where it is, and a new one goes by its own page:, order: and size:;
-        |# an app left out comes off home. An app is a package, "pkg/activity" (with "@profile" for a work
-        |# profile's), "linux:<desktop id>" or "owl:<file>".
-        |# A foldable's cover screen has pages of its own under [cover], as [[cover.page]]; without them it
-        |# starts from the pages above. With home.unfolded-layout, a Fold's inner screen has its own under
-        |# [unfolded] (its columns home.unfolded-columns), starting from the pages above side by side.
+        |# A `page:` in an owl file is ignored; every tile lands here. A file left out stays where it is,
+        |# and a new one goes by its own order: and size:. An app left out comes off home. An app is a package,
+        |# "pkg/activity" (with "@profile" for a work profile's), "linux:<desktop id>" or "owl:<file>".
+        |# [cover] and [unfolded] can change this one page's grid on those screens; they cannot add pages.
         |# What couldn't be read is in errors.txt next to this file.
         |
         """.trimMargin()
@@ -188,14 +186,14 @@ object HomeFile {
                 return@forEachIndexed
             }
             for (k in p.keys) if (k != "face" && k != "tiles") problems += "$where: $k isn't a page's; a page has a face or tiles"
+            // An old `face = "…"` page is read so the launcher can move that face onto the one home page.
             val face = p["face"]
             if (face != null) {
                 if (face is String && face.isNotBlank()) pages += FacePage(face) else problems += "$where: face takes a widget file name in quotes"
             }
             val tiles = p["tiles"]
             if (tiles != null) {
-                // A face fills its page: tiles written with it go on a page of their own, right after.
-                if (face != null) problems += "$where: a face fills its page; its tiles went on the next"
+                if (face != null) problems += "$where: a face is now a tile on the one home page; its tiles were kept here too"
                 if (tiles !is List<*>) {
                     problems += "$where: tiles takes a list, [ { widget = \"…\" }, … ]"
                 } else {
@@ -216,9 +214,9 @@ object HomeFile {
             problems += "$where: write a tile as { widget = \"…\" }, { app = \"…\" } or { folder = \"…\", apps = [...] }"
             return null
         }
-        val kinds = listOf("widget", "app", "folder").filter { it in t }
+        val kinds = listOf("widget", "face", "app", "folder").filter { it in t }
         if (kinds.size != 1) {
-            problems += "$where: a tile is one of widget, app or folder"
+            problems += "$where: a tile is one of widget, face, app or folder"
             return null
         }
         val kind = kinds[0]
@@ -229,9 +227,9 @@ object HomeFile {
             problems += "$where: $kind takes a name in quotes"
             return null
         }
-        val cell = cell(t, kind == "widget", where, problems)
+        val cell = cell(t, kind == "widget" || kind == "face", where, problems)
         return when (kind) {
-            "widget" -> WidgetTile(name, cell)
+            "widget", "face" -> WidgetTile(name, cell)
             "app" -> AppTile(name, cell)
             else -> {
                 val apps = (t["apps"] as? List<*>)?.filterIsInstance<String>()?.filter { it.isNotBlank() }.orEmpty()

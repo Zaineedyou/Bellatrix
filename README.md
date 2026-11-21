@@ -61,11 +61,14 @@ using Bellatrix UI — there is no second home screen or parallel desktop to swi
 
 ### OWL ricing
 
-Long-press empty Bellatrix home to create a widget file or to edit the two declarative bar files:
-`~/.config/bellatrix/widgets/home.owl` and `~/.config/bellatrix/widgets/taskbar.owl`. These are ordinary
-OWL `panel` files rendered inside Bellatrix's own home bar and taskbar — never a second launcher screen.
-Lay their modules out with `Flex`, `Box`, `Anchor` and the `anchor` property (owl 24), Waybar-style.
-A widget tile's **edit file** action and the empty-page invites open the same native Bellatrix editor,
+Bellatrix home is hard-coded to one page. Every widget, face and pinned app lands on that native grid;
+an owl file's `page:` is ignored, and a full page places the new tile at the least crowded spot so it
+is still visible. Long-press empty home to create a widget file or to edit the two declarative bar files:
+`~/.config/bellatrix/widgets/home.owl` and `~/.config/bellatrix/widgets/taskbar.owl`. These seeded files
+are ordinary OWL `panel` files rendered inside Bellatrix's own home bar and taskbar — never a second
+launcher screen. Lay their modules out with `Flex`, `Box`, `Anchor` and the `anchor` property (owl 24),
+Waybar-style; a new `widget-*.owl` or `face-*.owl` uses the same nodes as an ordinary home tile.
+A widget tile's **edit file** action and the empty home invite open the same native Bellatrix editor,
 so creating and editing OWL files never requires Linux or a coding agent. Agents can still work on the
 same files from the standalone Coding Agents settings page.
 

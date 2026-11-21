@@ -195,7 +195,7 @@ class EmbeddedBrowser internal constructor(
         view?.requestFocus()
     }
 
-    /** The page lets go (a tap outside, Back or another page): its field loses the keyboard with it. */
+    /** The page lets go (a tap outside or Back): its field loses the keyboard with it. */
     fun clearFocus() {
         val v = view ?: return
         v.clearFocus()

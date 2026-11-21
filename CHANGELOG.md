@@ -9,6 +9,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.22] - 2026-11-22
+
+### Added
+
+- Bellatrix home is now hard-coded to exactly one native page. Widgets, faces and pinned apps all land there; there is no empty feed page, no face page, no second tile page and no two-up page on a foldable.
+- `home.owl`, `taskbar.owl`, a new `widget-*.owl` and a new `face-*.owl` now ship with working `Flex`, `Box`, `Anchor` and `anchor` examples, so the declarative layouts can be tested immediately without waiting for an agent or a separate edit step.
+- When the one home page is full, a new tile takes the least crowded spot and is drawn on top, so a widget created by the user or an agent is still visible on home.
+
+### Changed
+
+- `page:` in any owl file is ignored; `order:` and `size:` still place a new tile, and `~/.config/bellatrix/home/layout.toml` owns its cell afterwards.
+- `home.empty-page-left`, `home.empty-page-right` and `home.home-page` are deprecated and removed from the Style menu; old `style.toml` files are migrated to the single-page behavior.
+- Face files are now ordinary tiles on the one home page instead of full-screen swipe pages. Widget docs, agent prompts and templates were updated to say so.
+
+### Important
+
+- DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
+- TOLOL, KAN UDAH GUA BILANG KALO MERGE FITUR OMALAUNCHER KE BELLATRIX TU TAMPILAN NYA SYNC SAMA TAMPILAN BELLATRIX NGENTOT, JANGAN MAKE TAMPILAN OMA LAUNCHER, LU TOLOL APA GIMANA? PINDAH CODING AGENTS NYA STANDALONE JANGAN ADA DI DALAM SETTING LINUX, DAN BUAT SCREEN NYA NYATU KE TAMPILAN SETTING BELLATRIX NYA JANGAN BUAT TERPISAH NGENTOT, INI WAJIB, ANJING
+
 ## [2.9.21] - 2026-11-21
 
 ### Added

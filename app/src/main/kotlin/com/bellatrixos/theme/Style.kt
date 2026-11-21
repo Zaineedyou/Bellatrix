@@ -162,20 +162,15 @@ class Style(
 
         val APP_TILES = Setting.Flag("home.app-tiles", true, "Apps on home in a tile like a widget; false draws bare icons on the wallpaper.")
         val RECENT_APPS = Setting.Flag("home.recent-apps", true, "The strip of recently used apps above the prompt bar.")
-        val EMPTY_PAGE_LEFT = Setting.Flag("home.empty-page-left", true, "The empty page left of home's leftmost, inviting a new face; false ends home at its own first page.")
-        val EMPTY_PAGE_RIGHT =
-            Setting.Flag(
-                "home.empty-page-right",
-                true,
-                "The empty page after home's last, for new tiles; false shows it only while a tile is carried, to drop it on.",
-            )
-        val HOME_PAGE = Setting.Count("home.home-page", 1, -99..99, "The page home opens on and Home returns to: 1 is the first page of tiles, 0 the face left of it, -1 the one left of that. A number with no page of its own takes the first page after it, or the last page when it is past them all.")
+        val EMPTY_PAGE_LEFT = Setting.Flag("home.empty-page-left", false, "Deprecated: Bellatrix home is hard-coded to one page; kept so old style.toml files still read.")
+        val EMPTY_PAGE_RIGHT = Setting.Flag("home.empty-page-right", false, "Deprecated: Bellatrix home is hard-coded to one page; kept so old style.toml files still read.")
+        val HOME_PAGE = Setting.Count("home.home-page", 1, -99..99, "Deprecated: Bellatrix home is hard-coded to one page; kept so old style.toml files still read.")
         val COLUMNS = Setting.Count("home.columns", 6, 4..9, "Columns of home's grid. Fewer make bigger cells, and apps show their names under their icons once a cell is tall enough.")
         val FORCE_SINGLE_PAGE =
             Setting.Flag(
                 "home.single-page",
                 false,
-                "One page even on a screen shaped like an unfolded foldable's; false shows two there, auto-detected from the screen's shape and width.",
+                "Deprecated: Bellatrix home is hard-coded to one page; kept so old style.toml files still read.",
             )
         val COVER_SCREEN =
             Setting.Flag(
@@ -187,9 +182,9 @@ class Style(
             Setting.Flag(
                 "home.unfolded-layout",
                 false,
-                "A home of its own on a foldable's unfolded inner screen, one wide page whose tiles can span the hinge, kept under [unfolded] in home/layout.toml; it starts from home's pages side by side. False shows home's pages there as home.single-page says.",
+                "Deprecated: Bellatrix home is one page on every screen; kept so old style.toml files still read.",
             )
-        val UNFOLDED_COLUMNS = Setting.Count("home.unfolded-columns", 12, 6..12, "Columns of the unfolded inner screen's grid, with home.unfolded-layout.")
+        val UNFOLDED_COLUMNS = Setting.Count("home.unfolded-columns", 12, 6..12, "Columns of the one home page on a foldable's unfolded inner screen.")
 
         val GAPS_IN = Setting.Number("widgets.gaps-in", 6.0, 0.0..24.0, "Space in dp between two of home's widgets (all of it, unlike Hyprland's gaps_in, which each window has on its side).")
         val GAPS_OUT = Setting.Number("widgets.gaps-out", 6.0, 0.0..48.0, "Space in dp from home's widgets, the strip and the prompt bar to the screen's edges.")
@@ -288,7 +283,7 @@ class Style(
  */
 object StyleFile {
     /** The file's format. Bump it with a step in [MIGRATIONS] when a key is renamed or a value's meaning changes. */
-    const val VERSION = 1
+    const val VERSION = 2
     const val VERSION_KEY = "version"
 
     /**
@@ -296,7 +291,12 @@ object StyleFile {
      * Adding a setting doesn't need one; renaming or reshaping one does, for
      * example `{ t -> t.remove("icons")?.let { t["icons.monochrome"] = it == "monochrome" } }`.
      */
-    val MIGRATIONS: List<(MutableMap<String, Any>) -> Unit> = emptyList()
+    val MIGRATIONS: List<(MutableMap<String, Any>) -> Unit> =
+        listOf { table ->
+            // Home is hard-coded to one page. Clear the old empty-page flags from existing installs.
+            table[Style.EMPTY_PAGE_LEFT.key] = false
+            table[Style.EMPTY_PAGE_RIGHT.key] = false
+        }
 
     val ALL: List<Setting<*>> =
         with(Style) {

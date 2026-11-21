@@ -103,8 +103,8 @@ import com.bellatrixos.ui.takesPassedKeys
  * and one per installed coding agent), then reviewed widgets from the marketplace repo as a grid of previews, with search
  * and category tabs (one for the newest, one for full-screen widgets, faces, as portrait screenshots).
  * Apps: the reviewed ones, the same way.
- * Tapping one opens its page, which shows what it installs and runs; from there a widget goes on the current page,
- * a face left of page 1 and an app in the drawer (or any of them updates). An installed app opens from its page too.
+ * Tapping one opens its detail view, which shows what it installs and runs; from there a widget or face goes on
+ * Bellatrix's one home page and an app in the drawer (or any of them updates). An installed app opens from home too.
  */
 @Composable
 fun StoreScreen(

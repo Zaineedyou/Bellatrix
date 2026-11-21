@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.zIndex
 import com.bellatrixos.widgets.Cell
-import com.bellatrixos.widgets.isFacePage
 import com.bellatrixos.widgets.Folder
 import com.bellatrixos.widgets.Shortcut
 import com.bellatrixos.widgets.HomeItem
@@ -75,7 +74,6 @@ import androidx.compose.ui.unit.toOffset
 import kotlinx.coroutines.launch
 import com.bellatrixos.ui.EdgeGap
 import com.bellatrixos.ui.HomeGap
-import com.bellatrixos.ui.LauncherStyle
 import com.bellatrixos.ui.Mono
 import com.bellatrixos.ui.Palette
 import com.bellatrixos.ui.glassBackground
@@ -128,11 +126,12 @@ private class Grid(
             rect(c.x, c.y, c.right, c.bottom)
         }
 
-    /** Where [item] shows at [c]: a face fills its page edge to edge, without the gaps around tiles. */
+    /** One home page: every item, faces included, uses the native grid cell. */
+    @Suppress("UNUSED_PARAMETER")
     fun rect(
         item: HomeItem,
         c: Cell,
-    ) = if (item.isFace) IntRect(0, 0, width, height) else rect(c)
+    ) = rect(c)
 
     /** Screen cells [x0] to [x1] across and [y0] to [y1] down, less the gap after the last. */
     private fun rect(
@@ -338,9 +337,7 @@ internal fun HomeGrid(
     render: @Composable (HomeItem, Modifier, Boolean) -> Unit,
     actions: @Composable (HomeItem) -> Unit,
     onLongPressEmpty: () -> Unit,
-    /** What a page left of the first ([isFacePage]) shows while no face is there; it gets the page's number. */
-    feed: @Composable (Int) -> Unit,
-    /** What an empty tile page shows while no tile is carried. */
+    /** What the one empty home page shows while no tile is carried. */
     invite: @Composable () -> Unit,
     onNoRoom: (HomeItem) -> Unit,
     onMove: (HomeItem, Int) -> Unit,
@@ -559,17 +556,13 @@ internal fun HomeGrid(
                             val others = placedOn(page, g).filter { it.first.key != item.key }
                             val under = others.lastOrNull { (o, r) -> g.rect(o, r).has(at) }
                             // Apps group with apps and folders; anything else swaps, except an app from a folder, which has no cell to
-                            // trade, and a face, whose page isn't a cell either: one lands only on an empty page, and nothing on its.
+                            // trade. Faces are ordinary tiles on the one home page, so they swap like widgets.
                             val groups = item is Shortcut && (under?.first is Shortcut || under?.first is Folder)
-                            val target = under?.takeIf { groups || (!inFolder && !item.isFace && !it.first.isFace) }
-                            // Left of page 1 only faces go.
-                            val onlyFaces = isFacePage(page) && !item.isFace
+                            val target = under?.takeIf { groups || !inFolder }
                             arrange.grouping = groups
                             arrange.swapWith = target?.first?.key
                             arrange.preview =
-                                if (onlyFaces) {
-                                    null
-                                } else if (under != null) {
+                                if (under != null) {
                                     target?.second
                                 } else {
                                     val x = g.colLine(at - hold).coerceIn(0, (g.cols - cell.w).coerceAtLeast(0))
@@ -595,7 +588,7 @@ internal fun HomeGrid(
                                     }
                                 }
                             drop != null && moved -> {
-                                if (!item.isFace) layout.set(item.key, drop)
+                                layout.set(item.key, drop)
                                 if (page != from || inFolder) onMove(item, page)
                             }
                         }
@@ -734,19 +727,7 @@ internal fun HomeGrid(
                         }
 
                         val hit = placed.lastOrNull { (i, c) -> g.rect(i, c).has(at) }
-                        // A face's long presses are its own nodes' (onLongPress), which it's not lifted by (it's
-                        // arranged in settings › pages). One that none of them takes opens the menu, as empty space does:
-                        // they take it as the press times out, so give them a moment to say so.
-                        if (hit?.first?.isFace == true) {
-                            if (!awaitLongPress(down.id, start)) return@awaitEachGesture
-                            val held = SystemClock.uptimeMillis()
-                            withTimeoutOrNull(CLAIM_MS) { while (true) awaitPointerEvent(PointerEventPass.Initial) }
-                            if (claims.at < held - viewConfiguration.longPressTimeoutMillis) {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onLongPressEmpty()
-                            }
-                            return@awaitEachGesture
-                        }
+                        // Faces are ordinary tiles on the one home page, so they long-press and move like widgets.
                         if (!awaitLongPress(down.id, start)) return@awaitEachGesture
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         if (hit == null) {
@@ -769,11 +750,10 @@ internal fun HomeGrid(
         ) {
             // A face's nodes say here when they take a long press, so the menu doesn't open for it too.
             CompositionLocalProvider(LocalLongPressClaim provides claims) {
-                // Two pages either side are made ahead: a swipe that starts bringing one in makes the page beyond it a neighbor,
-                // and composing that one, a face's shaders drawn with it, held up the swipe's first frames. Their animated
-                // widgets wait until some of the page shows.
+                // Bellatrix has one home page, so there is nothing to swipe to; the pager still gives the native grid
+                // its scroll/keyboard behavior. Widgets compose on the one page and wait for it to be visible.
                 val homeCovered = LocalHomeCovered.current
-                HorizontalPager(pager, Modifier.fillMaxSize(), beyondViewportPageCount = 2, key = { slots.getOrNull(it)?.first() ?: -it }, userScrollEnabled = !locked) { slot ->
+                HorizontalPager(pager, Modifier.fillMaxSize(), beyondViewportPageCount = 2, key = { slots.getOrNull(it)?.first() ?: -it }, userScrollEnabled = !locked && slots.size > 1) { slot ->
                     val shown = pagesAt(slot, slots)
                     val g = gridFor(shown, grid to wide)
                     val covered = remember(homeCovered, pager, slot) { { homeCovered() || pager.layoutInfo.visiblePagesInfo.none { it.index == slot } } }
@@ -782,7 +762,7 @@ internal fun HomeGrid(
                         Row(Modifier.fillMaxSize().focusProperties { onEnter = { if (slot != pager.currentPage) cancelFocusChange() } }.focusGroup()) {
                             for (page in shown) {
                                 Box(Modifier.width(with(density) { g.width.toDp() }).fillMaxHeight()) {
-                                    TiledPage(page, itemsOn(page), layout, g, arrange, selected, tile, actions, onNoRoom, feed, invite)
+                                    TiledPage(page, itemsOn(page), layout, g, arrange, selected, tile, actions, onNoRoom, invite)
                                 }
                             }
                         }
@@ -858,9 +838,6 @@ private fun DropPreview(
     )
 }
 
-/** How long after a long press times out a face's node may still take it before home opens its menu. */
-private const val CLAIM_MS = 100L
-
 /** How long a carried tile rests against a side edge before the page turns. */
 private const val PAGE_TURN_MS = 600L
 
@@ -882,7 +859,6 @@ private fun TiledPage(
     render: @Composable (HomeItem, Modifier, Boolean) -> Unit,
     actions: @Composable (HomeItem) -> Unit,
     onNoRoom: (HomeItem) -> Unit,
-    feed: @Composable (Int) -> Unit,
     invite: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -892,9 +868,8 @@ private fun TiledPage(
     }
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val pageWidth = constraints.maxWidth
-        // A face selected on its page has no cells to arrange.
-        val faceSelected = items.any { it.key == selected && it.isFace }
-        if ((selected != null && !faceSelected) || (carried != null && arrange.folder == null)) {
+        // Faces are ordinary tiles on the one page, so they get the same grid guides as widgets.
+        if (selected != null || (carried != null && arrange.folder == null)) {
             // Grid guides while arranging; not while sorting an open folder, which covers the grid.
             Canvas(Modifier.fillMaxSize()) {
                 for (x in 0 until grid.cols) {
@@ -910,17 +885,14 @@ private fun TiledPage(
                 }
             }
         }
-        if (isFacePage(page) && carried == null && items.isEmpty()) {
-            feed(page)
-        } else if (items.none { it.key != carried } && (carried != null || LauncherStyle.emptyPageRight || page == 1)) {
-            // An empty page is the one after the last, or unfolded the blank half beside an odd last page, but for page 1
-            // of an empty home. With home.empty-page-right off, that half stays blank rather than inviting a new page.
-            if (carried == null && !isFacePage(page)) {
+        // One home page: an empty home invites a new widget tile; a carried tile always drops on this page.
+        if (items.none { it.key != carried }) {
+            if (carried == null) {
                 invite()
             } else {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     BasicText(
-                        stringResource(if (isFacePage(page) && arrange.carry?.item?.isFace != true) R.string.home_drop_face_only else R.string.home_drop_here),
+                        stringResource(R.string.home_drop_here),
                         Modifier.glassBackground(Palette.card).padding(horizontal = 12.dp, vertical = 6.dp),
                         style = Mono,
                     )

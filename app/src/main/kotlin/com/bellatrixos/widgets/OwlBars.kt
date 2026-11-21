@@ -17,8 +17,8 @@ import java.io.File
  * using Flex/Box/Anchor and the `anchor` property (owl 24). The classic Bellatrix home and taskbar stay
  * exactly where they are; these files only add the user's own Waybar-style modules to them.
  *
- * They are created lazily, on the first "edit home"/"edit taskbar" action, from the templates below, so
- * a fresh install still opens into a plain Bellatrix home and nothing is added without the user asking.
+ * They are seeded from the templates below so a fresh install already has a working Flex/Box/Anchor
+ * example on the native bar; editing either file just opens what is there.
  */
 object OwlBars {
     /** Guest paths, which [Runtime.edit] maps back to [LauncherData.widgetsDir] through proot's binds. */
@@ -102,47 +102,62 @@ object OwlBars {
         runtime.edit(guestPath(name))
     }
 
-    /** A fresh widget template, opened in the editor: the native way to make a widget without a Linux agent. */
+    /** A fresh widget template, opened in the editor: Flex/Box/Anchor on Bellatrix's one home page. */
     val widgetTemplate =
         """
-        // A home-screen widget. Edit it here and save: it appears on Bellatrix home within a second.
-        // Run `owl-check <file>` in Linux for a preview with live data. See README.md and docs/ in this folder.
+        // A home-screen widget. Bellatrix has one hard-coded home page; this tile lands there.
+        // Flex, Box and Anchor are live here, so you can test them without an agent. Save and it shows within a second.
         widget "new widget" {
           page: 1
-          size: 3x3
-          minSize: 2x2
+          order: 999
+          size: 2x2
+          minSize: 1x1
 
           meta { owl: 24; description: "My widget" }
 
           source now = clock every 1s
 
-          Column {
-            gap: 8
-            Text { text: "new widget"; style: title; color: accent }
-            Text { text: fmtTime(now, "HH:mm") }
+          Box {
+            fill: width
+            Anchor {
+              fill: width
+              Flex { anchor: topStart; gap: 6
+                Text { text: "new widget"; style: title; color: accent }
+              }
+              Flex { anchor: bottomEnd
+                Text { text: fmtTime(now, "HH:mm"); style: small; color: muted }
+              }
+            }
           }
         }
         """.trimIndent() + "\n"
 
-    /** A fresh face template: the empty face page becomes a full-screen OWL page the user owns. */
+    /** A fresh face template: a tile on the same one home page, using the same declarative layout nodes. */
+    @Suppress("UNUSED_PARAMETER")
     fun faceTemplate(page: Int) =
         """
-        // A full-screen face. Edit it here and save: it fills its home page within a second.
-        // Faces sit left of page 1; `page:` picks which one. See docs/faces.md.
+        // A face is a tile on Bellatrix's one home page, not a second screen. Edit and save: it updates within a second.
         face "new face" {
-          page: $page
+          page: 1
+          order: 999
+          size: 3x3
+          minSize: 2x2
+
           meta { owl: 24; description: "My face" }
 
           source now = clock every 1s
 
-          Column {
-            gap: 12
-            padding: [24, 32]
-            Spacer { weight: 1 }
-            Text { text: fmtTime(now, "HH:mm"); style: huge; color: accent }
-            Text { text: "new face"; style: muted }
-            Spacer { weight: 1 }
-            Spacer { height: screenInset }
+          Box {
+            fill: width
+            Anchor {
+              fill: width
+              Flex { anchor: topStart
+                Text { text: fmtTime(now, "HH:mm"); style: huge; color: accent }
+              }
+              Flex { anchor: bottomEnd
+                Text { text: "new face"; style: muted }
+              }
+            }
           }
         }
         """.trimIndent() + "\n"

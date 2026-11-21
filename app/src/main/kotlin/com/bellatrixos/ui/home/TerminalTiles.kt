@@ -64,12 +64,11 @@ import com.bellatrixos.ui.linuxWindowInput
  * app_id, and the window manager hands that toplevel to the tile rather than
  * opening an activity for it.
  *
- * A tile is inert until tapped, so swipes still turn pages and open the
- * drawer; tapping it gives it the keyboard and its touches, until a tap
- * outside, Back, or leaving the page. A widget's own text field (an Input)
- * that takes the keyboard is treated the same way: its tile lifts above the
- * keyboard and lets go on the same tap outside, Back or page turn. A Browser tile's page too:
- * a WebView would take every touch meant for the page swipe or a long press, so its tile is
+ * A tile is inert until tapped; Bellatrix has one home page, so there is no page swipe to handle, and the drawer
+ * opens from its own gesture. Tapping gives the tile the keyboard and its touches, until a tap outside, Back, or
+ * the tile losing focus. A widget's own text field (an Input) that takes the keyboard is treated the same way: its
+ * tile lifts above the keyboard and lets go on the same tap outside or Back. A Browser tile's page too:
+ * a WebView would take every touch meant for a long press, so its tile is
  * inert until tapped and, once tapped, the page is the one lifted and the one that lets go. The
  * lock lives here too, beside focus and the lift: a widget showing whose `lock:` holds keeps the
  * whole home screen still (see [holdWidgets]). Main thread only.

@@ -4,42 +4,38 @@ Part of the widget docs: README.md, one folder up, comes first, and paths here a
 
 ## Home's layout
 
-`~/.config/bellatrix/home/layout.toml` is home as it is: its pages left to
-right, and where each tile sits. Moving things on the phone rewrites it, and
-home follows your edits within a second. A widget's `page:`, `order:` and
-`size:` only place it the first time; after that, move it here.
+Bellatrix home is hard-coded to one page. There is no face page, no empty feed page, and no second tile
+page on a foldable. `face "name" { }` files are tiles on that same native grid, just like `widget` files.
+A `page:` in any owl file is ignored; the tile still lands on the one home page.
+
+`~/.config/bellatrix/home/layout.toml` holds that page's grid: where each tile sits, and which apps and
+folders are pinned. Moving things on the phone rewrites it, and home follows your edits within a second.
+A new file's `order:` and `size:` place it the first time; after that, move it here.
 
 ```toml
 version = 1
 columns = 6   # the grid the cells are on; home.columns in ../style/style.toml sets the grid
 
-[[page]]                  # left of page 1: a face fills its page
-face = "terminal.owl"
-
-[[page]]                  # page 1, where home opens by default: the first page of tiles
+[[page]]                  # Bellatrix's only home page
 tiles = [
   { widget = "50-memory.owl", x = 0, y = 0, w = 3, h = 4 },
   { app = "org.mozilla.firefox", x = 3, y = 0 },
   { folder = "Work", x = 4, y = 0, apps = ["com.slack", "linux:foot"] },
   { widget = "20-fetch.owl" },   # no x and y: the first free spot, at its size:
+  { face = "morning.owl" },      # a face is a tile here, not another page
 ]
 ```
 
-- Pages are `[[page]]` blocks in order: move a block to move the page. The
-  first one with tiles is page 1; faces before it are left of it.
-  Home opens on page 1 and returns to it when Home is pressed with nothing
-  open; `home.home-page` in ../style/style.toml picks another (0 is the face
-  left of page 1).
 - `x` and `y` count cells from the top left; `w` and `h` are a widget's size.
-  Apps and folders are one cell. A tile off the grid or on top of one before it
-  takes the first free spot instead.
+  Apps, folders and faces are one cell unless they declare a size. A tile off the grid or on top of
+  one before it takes the first free spot instead; if the page is full it takes the least crowded spot
+  and is drawn above the others.
 - `app` is an Android package (`"org.mozilla.firefox"`), an activity with its
   profile when there's more than one (`"com.android.chrome/.Main@10"`),
   `"linux:<desktop id>"`, or `"owl:<file>"` for an owl app. Adding one pins it;
   removing it takes it off home (it stays installed).
-- A widget file left out of the file stays where it is, and a new file goes by
-  its `page:`, `order:` and `size:`. To take a widget off home, move its file to
-  `.removed/`.
+- A file left out of layout.toml stays where it is. A new `.owl` lands on the one page by its
+  `order:` and `size:`. To take a widget or face off home, move its file to `.removed/`.
 - What couldn't be read is in `errors.txt` next to it, and on the phone's home.
   A file that doesn't parse changes nothing, and isn't saved over until it's fixed.
 
@@ -50,24 +46,25 @@ On the phone, long-press an empty part of home and use **new widget file**,
 with no Linux or coding agent needed. Save, and the file appears on home within a
 second. Coding agents work too (the prompts point them at these same files), as
 does any other writer of files. A widget tile's **edit file** action opens just that file, and the
-empty-page invites create a widget or face file directly when Linux isn't installed. There is no
+empty home invite creates a widget or face tile directly when Linux isn't installed. There is no
 second launcher screen — the files below are the ones Bellatrix home reads.
 
 The two bar files are ordinary OWL `panel` files that render **inside the bar
 Bellatrix already draws**, not swiped open as a panel and not a separate OWL home
-screen:
+screen. They are seeded from Flex/Box/Anchor starters on the first install, so they can be tested
+without editing anything first:
 
 - `~/.config/bellatrix/widgets/home.owl` — the strip above the prompt bar.
 - `~/.config/bellatrix/widgets/taskbar.owl` — the strip below it, over the taskbar.
-
-Both are created from a Flex/Box/Anchor starter the first time you edit them.
+- `~/.config/bellatrix/widgets/widget-1.owl` — a new widget template using the same nodes on home.
+- `~/.config/bellatrix/widgets/face-1.owl` — a face tile using the same nodes on home.
 
 1. Write `~/.config/bellatrix/widgets/<name>.owl` (a `widget`, `face`, `app`,
    `panel`, or `keybar` declaration; see `README.md` and `docs/nodes.md`).
 2. Run `owl-check ~/.config/bellatrix/widgets/<name>.owl`. It prints errors and
    the path of a PNG drawn with live data; open that PNG to check the layout.
-3. Add `{ widget = "<name>.owl", x, y, w, h }` to a `[[page]]` in
-   `~/.config/bellatrix/home/layout.toml` (or let it take the first free spot).
+3. Move it with `{ widget = "<name>.owl", x, y, w, h }` in
+   `~/.config/bellatrix/home/layout.toml`, or let it take the first free spot.
 4. `owl-send ~/.config/bellatrix/widgets/<name>.owl set <state> <value>` changes
    live state; `owl-send <file> refresh` redraws it.
 
@@ -98,7 +95,9 @@ panel "home" {
 
 Save that as `home.owl` and the modules sit in Bellatrix's home bar. `taskbar.owl`
 uses the same shape for the taskbar strip. `Box` accepts the same `anchor`
-property, so an existing panel can be converted without changing its structure.
+property, so an existing panel can be converted without changing its structure. The shipped
+`widget-*.owl` and `face-*.owl` files use `Box` around `Anchor` too, so the same nodes can be checked
+as ordinary home tiles.
 
 ## Taskbar layout
 
@@ -117,35 +116,27 @@ Names are the same keys home and the taskbar use: `UIExplorer`, `UISettings`,
 `UITerminal`, `linux:<desktop id>`, or an Android package. A file that doesn't
 parse changes nothing, and isn't overwritten until it's fixed.
 
-On a foldable, the cover screen has pages of its own, under `[cover]`: the
-same tiles, placed for a screen a third as tall. The pages at the top say
-what's on home; `[cover]` only says where it goes there. A tile left out of
-`[cover]` keeps its place on the cover screen, and without the section the
-cover screen starts from the pages at the top, each tile at its own size and
-what doesn't fit on to the next page. The launcher writes the section the
-first time it's shown on the cover screen; deleting it starts over.
+Bellatrix home is one page on every screen. A foldable's cover screen has its own single grid under `[cover]`:
+the same tiles, placed for a screen a third as tall. The `[[page]]` at the top says what's on home; `[cover]` only
+says where those tiles go there. A tile left out of `[cover]` keeps its place; without the section, the cover screen
+starts from the one home page with each tile at its own size. The launcher writes the section the first time it's
+shown on the cover screen; deleting it starts over.
 
 ```toml
 [cover]
 columns = 6
 
-[[cover.page]]
+[[cover.page]]              # the cover screen's one page
 tiles = [
   { widget = "10-today.owl", x = 0, y = 0, w = 3, h = 3 },
   { widget = "20-fetch.owl", x = 3, y = 0, w = 3, h = 3 },
+  { widget = "45-terminal.owl", x = 0, y = 3, w = 6, h = 3 },
 ]
-
-[[cover.page]]
-tiles = [ { widget = "45-terminal.owl", x = 0, y = 0, w = 6, h = 3 } ]
 ```
 
-A Fold's unfolded inner screen shows home's pages two side by side. With
-`home.unfolded-layout = true` in style.toml it has pages of its own instead,
-under `[unfolded]`, the same way as `[cover]`: one wide page whose tiles can
-span the hinge, on a grid of `home.unfolded-columns` (12 by default). The first
-time it shows, it starts from the pages at the top as it showed them, pages 1
-and 2 side by side as its page 1, 3 and 4 as page 2; after that the two go
-their own ways.
+The Fold's unfolded inner screen also has one page. Its `[unfolded]` section can only change that page's cell grid,
+never add another page. `home.unfolded-columns` in style.toml sets that one wide grid, so tiles can span the hinge;
+`home.unfolded-layout` is kept only so old files still read. The old two-page stories in older docs no longer apply.
 
 ```toml
 [unfolded]

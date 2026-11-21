@@ -40,13 +40,14 @@ data class Cell(
 }
 
 /**
- * The page left of the first, like a stock launcher's feed; pages further left count down from it. Each holds one face
- * ([HomeItem.isFace]) and no tiles, and an empty one always waits left of the leftmost.
+ * Deprecated: Bellatrix home is hard-coded to one page, so no face page exists. Kept so old saved data and callers
+ * still compile; every tile, faces included, is on page 1.
  */
 const val FACE_PAGE = 0
 
-/** Left of page 1: a face's place, never a tile's. */
-fun isFacePage(page: Int) = page <= FACE_PAGE
+/** Deprecated: always false on Bellatrix's one home page. */
+@Suppress("UNUSED_PARAMETER")
+fun isFacePage(page: Int) = false
 
 /** The home grid's columns before they could be set: a saved layout that doesn't say has this many. */
 const val CLASSIC_COLUMNS = 6
@@ -69,37 +70,33 @@ enum class Screen(
     ;
 
     /**
-     * The page a tile on main page [page] starts on here: the same, but unfolded, where home showed the main pages in
-     * pairs side by side, the pair's (main pages 2k-1 and 2k are unfolded page k). Faces keep theirs.
+     * Every screen has Bellatrix's one hard-coded home page. [page] is kept for old saved layouts and ignored.
      */
-    fun fromMain(page: Int) = if (this == UNFOLDED && page >= 1) (page + 1) / 2 else page
+    @Suppress("UNUSED_PARAMETER")
+    fun fromMain(page: Int) = 1
 }
 
 /**
- * Where tiles start on an unfolded screen the first time it shows: where home showed them there before it had a layout
- * of its own, the main pages side by side. Each of [main]'s tiles (key to main page and cell, null before its page was
- * laid out) goes to the pair's page (see [Screen.fromMain]), the second page of a pair shifted right by
- * [mainColumns]; the pair, twice that wide, then moves onto the unfolded grid's [columns] (see [Cell.rescaled]), each
- * tile at least its [minWidth]. A tile that lands on one before it on its page loses its cell (null), so that page
- * places it afresh; a face keeps its page and has no cell.
+ * Where tiles start on an unfolded screen the first time it shows: the same one home page, with each of [main]'s
+ * cells (key, old page number, cell) rescaled from [mainColumns] to the unfolded grid's [columns]. Faces are tiles
+ * with their own cells now. A tile that would land on one already there loses its cell (null), so the page places
+ * it afresh at the least crowded spot. The old page number is ignored.
  */
+@Suppress("UNUSED_PARAMETER")
 fun seedUnfolded(
     main: List<Triple<String, Int, Cell?>>,
     mainColumns: Int,
     columns: Int,
     minWidth: (String) -> Int,
 ): Map<String, Pair<Int, Cell?>> {
-    val kept = HashMap<Int, MutableList<Cell>>()
-    return main.associate { (key, page, cell) ->
-        val to = Screen.UNFOLDED.fromMain(page)
+    val kept = ArrayList<Cell>()
+    return main.associate { (key, _, cell) ->
         val placed =
             cell
-                ?.takeIf { page >= 1 }
-                ?.let { if (page % 2 == 0) it.copy(x = it.x + mainColumns) else it }
-                ?.rescaled(2 * mainColumns, columns, minWidth(key))
-                ?.takeIf { c -> kept[to].orEmpty().none { it.overlaps(c) } }
-                ?.also { kept.getOrPut(to) { ArrayList() } += it }
-        key to (to to placed)
+                ?.rescaled(mainColumns, columns, minWidth(key))
+                ?.takeIf { c -> kept.none { it.overlaps(c) } }
+                ?.also { kept += it }
+        key to (1 to placed)
     }
 }
 
@@ -247,35 +244,37 @@ class WidgetLayout(
         save()
     }
 
-    /** The page [name] was moved to on the phone, if it was; on [screen], the one shown unless said. */
+    /** Always page 1 when [name] has a saved page; on [screen], the one shown unless said. */
     fun page(
         name: String,
         screen: Screen = this.screen,
-    ): Int? = pagesOf.getValue(screen)[name]
+    ): Int? = pagesOf.getValue(screen)[name]?.let { 1 }
 
     /**
-     * The page [name] is on on [screen] by choice: the one chosen for it there, or, on another screen than the main
-     * one, the one chosen for it on the main screen (unfolded, the pair's; see [Screen.fromMain]), so a screen without a
-     * layout of its own starts from the main one's pages; null when neither was, and it goes by its file.
+     * Bellatrix has one page: every saved page number reads as 1 (see [Screen.fromMain]). Kept so old layout files
+     * still load; it never puts a tile on a second page.
      */
     fun chosenPage(
         name: String,
         screen: Screen = this.screen,
-    ): Int? = pagesOf.getValue(screen)[name] ?: if (screen == Screen.MAIN) null else pagesOf.getValue(Screen.MAIN)[name]?.let(screen::fromMain)
+    ): Int? =
+        if (pagesOf.getValue(screen).containsKey(name) || (screen != Screen.MAIN && pagesOf.getValue(Screen.MAIN).containsKey(name))) 1 else null
 
     /** The page [name] is on on [screen]: as [chosenPage], else its file's [filePage] as it is on that screen (see [Screen.fromMain]). */
+    @Suppress("UNUSED_PARAMETER")
     fun pageOn(
         name: String,
         filePage: Int,
         screen: Screen = this.screen,
-    ): Int = chosenPage(name, screen) ?: screen.fromMain(filePage)
+    ): Int = 1
 
     fun setPage(
         name: String,
         page: Int,
         screen: Screen = this.screen,
     ) {
-        pagesOf.getValue(screen)[name] = page
+        // Hard-coded single page: every home item lands on Bellatrix's one page, whatever a file or layout says.
+        pagesOf.getValue(screen)[name] = 1
         pageStamp++
         save()
     }
@@ -313,27 +312,20 @@ class WidgetLayout(
         private set
 
     /**
-     * The face ([HomeItem.isFace]) that [items], one page's, show: the first of them, while no tile
-     * there has a cell. A face keeps no cell, so the tiles that were there first keep the page, and
-     * a widget that becomes a face (or back) never overlaps them or comes back as a tile the page's size.
-     * One placed on the phone comes before one there by its file's `page:` alone, so a new face file
-     * (`page: 0` by default) doesn't push the face already on that page away.
+     * Home is hard-coded to one page: no face takes a page over. Face files are ordinary tiles on that page,
+     * so every item keeps its own cell and the classic Bellatrix grid stays visible.
      */
-    fun owner(items: List<HomeItem>): HomeItem? {
-        val face = items.filter { it.isFace }.sortedBy { !pages.containsKey(it.key) }.firstOrNull() ?: return null
-        return face.takeIf { items.none { !it.isFace && cells[it.key] != null } }
-    }
+    @Suppress("UNUSED_PARAMETER")
+    fun owner(items: List<HomeItem>): HomeItem? = null
 
     /**
      * Gives widgets that have no cell yet one at their declared size, in the
      * first free spot. Saved cells are never rewritten here: a temporarily
      * small page (keyboard, rotation) must not destroy the user's layout.
      *
-     * Returns the items that don't fit at their size; they get no cell, so
-     * the caller can move them to a page with room instead of squeezing them
-     * in or stacking them on top of other tiles. That includes apps pinned to
-     * a full page, such as page 1 of a fresh install, and on a face's page everything but it: the
-     * tiles had no cell there yet. A face that finds tiles on its page is homeless itself.
+     * Bellatrix home is hard-coded to one page, so nothing is homeless: every item gets a cell. When the grid
+     * is full, the newcomer uses the spot that overlaps existing tiles least, and is drawn last so it is
+     * the one on top. Never returns anything; callers keep the old signature for compatibility.
      */
     fun place(
         items: List<HomeItem>,
@@ -341,33 +333,20 @@ class WidgetLayout(
         rows: Int,
     ): List<HomeItem> {
         grid = cols to rows
-        val owner = owner(items)
-        if (owner != null) return items.filter { it.key != owner.key }
         var changed = false
-        val homeless = ArrayList<HomeItem>()
         for (item in items) {
-            if (item.isFace) {
-                homeless += item
-                continue
-            }
             if (cells[item.key] != null) continue
-            val spot = freeSpot(item, items, cols, rows)
-            if (spot == null) {
-                homeless += item
-                continue
-            }
-            cells[item.key] = spot
+            cells[item.key] = freeSpot(item, items, cols, rows) ?: crowdSpot(item, items, cols, rows)
             changed = true
         }
         if (changed) save()
-        return homeless
+        return emptyList()
     }
 
     /**
-     * Gives [item] a free spot at its size among [others]; false when there's none, or no page was laid out yet.
-     * Those of [others] without a cell yet (their page hasn't been laid out, or is being laid out this very frame,
-     * with two pages showing) get theirs first: the page's own tiles keep their spots, the newcomer takes what's left.
-     * A face claims only an empty page, and takes no cell; nothing claims a spot beside one.
+     * Gives [item] a spot at its size among [others]. Items without a cell yet get theirs first, so the
+     * page's own tiles keep their spots and the newcomer takes what's left. Home has only one page, so
+     * a full page falls back to the least crowded spot instead of sending the item to another page.
      */
     fun claim(
         item: HomeItem,
@@ -375,10 +354,8 @@ class WidgetLayout(
     ): Boolean {
         val (cols, rows) = grid ?: return false
         val rest = others.filter { it.key != item.key }
-        if (item.isFace) return rest.isEmpty()
-        if (rest.any { it.isFace }) return false
         place(rest, cols, rows)
-        cells[item.key] = freeSpot(item, others, cols, rows) ?: return false
+        cells[item.key] = freeSpot(item, others, cols, rows) ?: crowdSpot(item, others, cols, rows)
         save()
         return true
     }
@@ -401,6 +378,35 @@ class WidgetLayout(
         }
         return null
     }
+
+    /** A spot on the one home page even when it is full: the one covering the fewest existing cells. */
+    private fun crowdSpot(
+        item: HomeItem,
+        items: List<HomeItem>,
+        cols: Int,
+        rows: Int,
+    ): Cell {
+        val (pw, ph) = item.size ?: (cols / 2 to 3)
+        val w = pw.coerceIn(1, cols)
+        val h = ph.coerceIn(1, rows)
+        val occupied = items.mapNotNull { other -> if (other.key == item.key) null else cells[other.key] }
+        var best = Cell(0, 0, w, h)
+        var fewest = Int.MAX_VALUE
+        for (y in 0..rows - h) for (x in 0..cols - w) {
+            val c = Cell(x, y, w, h)
+            val covered = occupied.sumOf { c.overlapWith(it) }
+            if (covered < fewest) {
+                best = c
+                fewest = covered
+            }
+            if (covered == 0) return c
+        }
+        return best
+    }
+
+    private fun Cell.overlapWith(other: Cell): Int =
+        maxOf(0, minOf(right, other.right) - maxOf(x, other.x)) *
+            maxOf(0, minOf(bottom, other.bottom) - maxOf(y, other.y))
 
     /** Takes [name]'s cell, so its page places it afresh in its first free spot. */
     fun clearCell(

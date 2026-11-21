@@ -158,22 +158,22 @@ object LauncherStyle {
     /** The strip of recently used apps above the bar on home. */
     val recentApps get() = style[Style.RECENT_APPS]
 
-    /** The empty page left of home's leftmost, for a new face. */
+    /** Deprecated: Bellatrix has one home page; kept so old style files still read. */
     val emptyPageLeft get() = style[Style.EMPTY_PAGE_LEFT]
 
-    /** The empty page after home's last, always (true) or only while a tile is carried (false). */
+    /** Deprecated: Bellatrix has one home page; kept so old style files still read. */
     val emptyPageRight get() = style[Style.EMPTY_PAGE_RIGHT]
 
-    /** The page home opens on and returns to when Home is pressed; see [homePageIn]. */
+    /** Deprecated: home always opens on its one page; see [homePageIn]. */
     val homePage get() = style[Style.HOME_PAGE]
 
-    /** Forces one home page even on a screen [SideRail]'s auto-detect would otherwise split in two. */
+    /** Deprecated: home is always one page; kept so old style files still read. */
     val forceSinglePage get() = style[Style.FORCE_SINGLE_PAGE]
 
     /** Keeps home upright on a foldable's cover screen, whose window is wider than tall while the phone stands upright. */
     val coverScreen get() = style[Style.COVER_SCREEN]
 
-    /** A home of its own on a foldable's unfolded inner screen, rather than the phone's pages side by side. */
+    /** Deprecated: the unfolded screen also has one page; kept so old style files still read. */
     val unfoldedLayout get() = style[Style.UNFOLDED_LAYOUT]
 
     /** The outline of tiles, the prompt bar and the rails. */

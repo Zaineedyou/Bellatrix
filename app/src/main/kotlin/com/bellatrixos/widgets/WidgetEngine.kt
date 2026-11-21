@@ -344,17 +344,18 @@ class WidgetEngine(
     /** The page on screen; widgets on it and its neighbours stay live, the rest pause. */
     var activePage by mutableIntStateOf(1)
 
-    /** Pages chosen on the phone override the file's own `page:`, so store installs land where you are without editing the file. */
+    /** Hard-coded single page: every home item is on page 1, whatever a file, a store or a drag asks for. */
+    @Suppress("UNUSED_PARAMETER")
     fun setPage(
         fileName: String,
         page: Int,
-    ) = layout.setPage(fileName, page)
+    ) = layout.setPage(fileName, 1)
 
     /**
-     * Home moves to [screen] (a foldable's cover screen or unfolded inner screen, or back): the layout's cells and pages
-     * are that screen's from here on, and every widget is on the page it has there, its file's own `page:` where none was
-     * chosen. No file is compiled again. The unfolded screen, the first time it shows once the widgets have loaded,
-     * starts from the main pages side by side, as home showed them there before (see [seedUnfolded]).
+     * Home moves to [screen] (a foldable's cover screen or unfolded inner screen, or back): the layout's cells are that
+     * screen's from here on, and every widget stays on Bellatrix's one page. No file is compiled again. The unfolded
+     * screen, the first time it shows once the widgets have loaded, rescales the main page's cells onto its wider grid
+     * (see [seedUnfolded]).
      */
     fun show(screen: Screen) {
         val seeding = screen == Screen.UNFOLDED && loaded && !layout.has(screen)
@@ -381,84 +382,59 @@ class WidgetEngine(
 
     /** Every widget onto the page the layout has for it on the screen shown, else its file's. */
     private fun repage() {
+        // Hard-coded single page: every widget, face and pinned app is on Bellatrix's one home page.
         for (i in specs.indices) {
             val spec = specs[i]
-            val page = layout.pageOn(spec.file.name, spec.program?.page ?: if (spec.isFace) FACE_PAGE else 1)
-            if (spec.page != page) specs[i] = spec.onPage(page)
+            if (spec.page != 1) specs[i] = spec.onPage(1)
         }
     }
 
     /**
-     * The user put [item] where it is: an app they pinned, or a widget with a page chosen on the phone (a store add, a
-     * share, a drag). A shipped widget is on its file's own `page:` until then.
+     * The user put [item] on home: an app they pinned, or a widget given a cell on the phone (a store add, a share, a
+     * drag). Bellatrix has one page, so a file's `page:` never matters.
      */
     fun placedOnPhone(item: HomeItem) = item !is WidgetItem || layout.page(item.key) != null
 
-    /**
-     * A widget with no room on its page moves to the next page with room at its size, or a new one after the last. A face
-     * left of page 1 whose place is taken goes further left instead, to a new one left of the leftmost. Returns the page.
-     */
+    /** No extra pages: a tile that doesn't fit is placed on the one page at the least crowded spot. */
+    @Suppress("UNUSED_PARAMETER")
     fun moveToFreePage(item: HomeItem): Int {
-        val page =
-            if (item.isFace && item.page <= FACE_PAGE) {
-                newFacePage()
-            } else {
-                pages.firstOrNull { it > item.page && layout.claim(item, itemsOn(it)) } ?: ((pages.maxOrNull() ?: 1) + 1)
-            }
-        moveToPage(item, page)
-        return page
+        moveToPage(item, 1)
+        return 1
     }
 
-    /** The empty page waiting left of the leftmost, where a new face goes. */
-    fun newFacePage() = minOf(pages.minOrNull() ?: 1, FACE_PAGE + 1) - 1
+    /** There is only one home page, so a new face lands there like every other tile. */
+    fun newFacePage() = 1
 
-    /**
-     * Puts home's pages in [order] (page numbers, as [pages] lists them) and numbers them again: the first one with tiles
-     * becomes page 1, where home opens, the ones before it 0, -1, ... and the rest 2, 3, ..., so tiles never go left of
-     * page 1 and no numbers are left between pages. Every move happens before home draws again, so pages never meet.
-     */
-    fun arrangePages(order: List<Int>) {
-        // Before the first load the pages are only partly known, and an order made from an older list (pages came or went
-        // since) names pages that aren't these: moving by either would mix them up.
-        if (!loaded || order.sorted() != pages) return
-        val first = order.indexOfFirst { p -> itemsOn(p).any { !it.isFace } }.let { if (it < 0) order.size else it }
-        val moves = order.mapIndexed { i, p -> itemsOn(p) to i - first + 1 }
-        for ((items, to) in moves) for (item in items) if (item.page != to) moveToPage(item, to)
-    }
+    /** Page order is fixed: Bellatrix always shows one home page. */
+    @Suppress("UNUSED_PARAMETER")
+    fun arrangePages(order: List<Int>) = Unit
 
-    /** Takes [page] off home: its widgets and faces go to .removed/, its apps and folders come off home (they stay installed). */
-    fun removePage(page: Int) {
-        if (!loaded) return
-        for (item in itemsOn(page)) {
-            when (item) {
-                is WidgetItem -> removeWidget(item.spec)
-                is Shortcut, is Folder -> shortcuts.remove(item.key)
-            }
-            layout.remove(item.key)
-        }
-        arrangePages(pages)
-    }
+    /** Page removal is gone with the extra pages; remove an item or its file instead. */
+    @Suppress("UNUSED_PARAMETER")
+    fun removePage(page: Int) = Unit
 
-    /** Puts [item] on [page] of [screen] (the one shown unless said): a widget through its page override, a shortcut in place. */
+    /** Puts [item] on Bellatrix's one home page of [screen] (the one shown unless said). */
+    @Suppress("UNUSED_PARAMETER")
     fun moveToPage(
         item: HomeItem,
         page: Int,
         screen: Screen = layout.screen,
     ) {
         when (item) {
-            is WidgetItem -> if (screen == layout.screen) placeOnPage(item.key, page) else layout.setPage(item.key, page, screen)
-            is Shortcut, is Folder -> shortcuts.move(item.key, page, screen)
+            is WidgetItem -> if (screen == layout.screen) placeOnPage(item.key, 1) else layout.setPage(item.key, 1, screen)
+            is Shortcut, is Folder -> shortcuts.move(item.key, 1, screen)
         }
     }
 
-    /** Puts the widget or face in [fileName] on [page], loaded already or not. */
+    /** Puts the widget or face in [fileName] on the one page, loaded already or not. */
+    @Suppress("UNUSED_PARAMETER")
     fun placeOnPage(
         fileName: String,
         page: Int,
     ) {
-        setPage(fileName, page)
+        setPage(fileName, 1)
         val i = specs.indexOfFirst { it.file.name == fileName }
-        if (i >= 0) specs[i] = specs[i].onPage(page)
+        if (i >= 0) specs[i] = specs[i].onPage(1)
     }
 
     private fun agentWidgetFile(agent: Agent) = "$AGENT_PREFIX${agent.bin}.owl"
@@ -481,24 +457,27 @@ class WidgetEngine(
     /** [agent]'s terminal tile is on the home screen. */
     fun hasAgentWidget(agent: Agent) = specs.any { it.file.name == agentWidgetFile(agent) }
 
-    /** Adds a terminal tile running [agent] to [page]; see [agentWidget]. */
+    /** Adds an agent's terminal tile to Bellatrix's one home page; [page] is kept for old callers and ignored. */
+    @Suppress("UNUSED_PARAMETER")
     suspend fun addAgentWidget(
         agent: Agent,
         page: Int,
     ) = withContext(Dispatchers.IO) {
         val name = agentWidgetFile(agent)
-        setPage(name, page)
+        setPage(name, 1)
         File(dir, name).writeText(agentWidget(agent))
     }
 
     /**
-     * Adds another plain terminal tile to [page], a copy of the default one. Each is a file of its own, so there
-     * can be any number, and one removed (the default included) is always a tap away in the store.
+     * Adds another plain terminal tile to Bellatrix's one home page, a copy of the default one. Each is a file of its
+     * own, so there can be any number, and one removed (the default included) is always a tap away in the store.
+     * [page] is kept for old callers and ignored.
      */
+    @Suppress("UNUSED_PARAMETER")
     suspend fun addTerminalWidget(page: Int) =
         withContext(Dispatchers.IO) {
             val name = TERMINAL_PREFIX + System.currentTimeMillis().toString(36) + ".owl"
-            setPage(name, page)
+            setPage(name, 1)
             File(dir, name).writeBytes(context.assets.open("widgets/$TERMINAL_ASSET").use { it.readBytes() })
         }
 
@@ -506,16 +485,17 @@ class WidgetEngine(
     fun sharedWidgetIsSame(shared: Shared): Boolean? = File(dir, shared.fileName).takeIf { it.exists() }?.let { it.readText() == shared.text }
 
     /**
-     * Adds a widget from a share link, once the user has read what it runs: on [page], its packages installed
-     * right after, as a store install. One shared before under the same name is replaced and keeps its page. A face
-     * goes left of page 1 instead, to the empty one waiting there.
+     * Adds a widget from a share link, once the user has read what it runs: on Bellatrix's one home page, its packages
+     * installed right after, as a store install. One shared before under the same name is replaced and keeps its place.
+     * [page] is kept for old callers and ignored; faces are ordinary tiles too.
      */
+    @Suppress("UNUSED_PARAMETER")
     suspend fun addSharedWidget(
         shared: Shared,
         page: Int,
     ) = withContext(Dispatchers.IO) {
         val name = shared.fileName
-        if (!File(dir, name).exists()) setPage(name, if (OwlKind.of(shared.text) == OwlKind.Face) newFacePage() else page)
+        if (!File(dir, name).exists()) setPage(name, 1)
         installDependenciesWhenLoaded(name)
         File(dir, name).writeText(shared.text)
     }
@@ -559,26 +539,30 @@ class WidgetEngine(
     /** Widgets, pinned apps and folders on [page]. Wrappers compare by spec, so unchanged pages skip recomposition. */
     fun itemsOn(page: Int): List<HomeItem> = itemsByPage[page].orEmpty()
 
+    /** Bellatrix has one home page on every screen: ignore a file's or a saved layout's page number. */
+    private fun HomeItem.onSinglePage(): HomeItem =
+        when (this) {
+            is WidgetItem -> WidgetItem(spec.onPage(1))
+            is Shortcut -> copy(page = 1)
+            is Folder -> copy(page = 1, apps = apps.map { it.copy(page = 1) })
+        }
+
     /**
-     * Home's items by page as [screen] has them, shown or not: a widget on the page the layout keeps for it there, else its
-     * file's; an app or folder on its page there. For layout.toml, which holds every screen; home draws from [itemsOn].
+     * Home's items by page as [screen] has them, shown or not. For layout.toml, which holds every screen; home
+     * draws from [itemsOn]. Every item is on the one page, whatever its file or saved layout says.
      */
     fun itemsByPageOn(screen: Screen): Map<Int, List<HomeItem>> {
         if (screen == layout.screen) return itemsByPage
-        val widgets = specs.filter(::onHome).map { spec -> WidgetItem(spec.onPage(layout.pageOn(spec.file.name, spec.program?.page ?: if (spec.isFace) FACE_PAGE else 1, screen))) }
-        return (widgets + shortcuts.onGrid(screen)).groupBy { it.page }
+        val widgets = specs.filter(::onHome).map { WidgetItem(it.onPage(1)) }
+        return (widgets + shortcuts.onGrid(screen).map { it.onSinglePage() }).groupBy { it.page }
     }
 
     /** Built once per change rather than per call: home asks for every page on each recomposition, and drags ask often. */
     private val itemsByPage by derivedStateOf {
-        (specs.filter(::onHome).map(::WidgetItem) + shortcuts.onGrid()).groupBy { it.page }
+        (specs.filter(::onHome).map { WidgetItem(it.onPage(1)) } + shortcuts.onGrid().map { it.onSinglePage() }).groupBy { it.page }
     }
 
-    private val pageList by derivedStateOf {
-        (specs.filter(::onHome).map { it.page } + shortcuts.onGrid().map { it.page }).distinct().sorted().ifEmpty { listOf(1) }
-    }
-
-    val pages: List<Int> get() = pageList
+    val pages: List<Int> get() = listOf(1)
 
     fun instance(spec: WidgetSpec): WidgetInstance? = instances[spec.file.name]?.takeIf { it.program === spec.program }
 
@@ -749,7 +733,7 @@ class WidgetEngine(
                 )
             prev?.let(inst::adopt)
             instances[spec.file.name] = inst
-            // The spec as it is now, not as loaded: a move to another page (placeOnPage) replaces it without a reload.
+            // The spec as it is now, not as loaded: placing it again replaces it without a reload.
             inst.start(scope) { isLive(specs.firstOrNull { it.file.name == name } ?: spec) }
         }
         // A screen whose widget went away, stopped compiling or lost its screen { } closes.
@@ -1027,7 +1011,7 @@ class WidgetEngine(
     ): WidgetSpec {
         writeError(file, error)
         writeCheck(file, hash, "error")
-        return WidgetSpec(file, file.nameWithoutExtension, previous?.page ?: layout.pageOn(file.name, if (kind == OwlKind.Face) FACE_PAGE else 1), previous?.order ?: 999, null, error, previous?.size, previous?.minSize ?: (1 to 1), stamp, kind)
+        return WidgetSpec(file, file.nameWithoutExtension, previous?.page ?: layout.pageOn(file.name, 1), previous?.order ?: 999, null, error, previous?.size, previous?.minSize ?: (1 to 1), stamp, kind)
     }
 
     /** Error files are written in order: a clear must never land after the error that follows it. */
@@ -1148,6 +1132,9 @@ class WidgetEngine(
             for (name in assets.list("widgets/docs").orEmpty()) add(asset("widgets/docs/$name", File(dir, "docs/$name"), Policy.Owned))
             for (name in assets.list("widgets/examples").orEmpty()) add(asset("widgets/examples/$name", File(dir, "examples/$name"), Policy.Seeded))
             for (name in assets.list("widgets").orEmpty().filter { it.endsWith(".owl") }) add(asset("widgets/$name", File(dir, name), Policy.Seeded))
+            // The Flex/Box/Anchor examples on Bellatrix's native bar, there from the first install so they can be tested.
+            add(Managed.text(File(dir, HOME_BAR), Policy.Seeded) { OwlBars.homeTemplate })
+            add(Managed.text(File(dir, TASKBAR_BAR), Policy.Seeded) { OwlBars.taskbarTemplate })
             // Always as this launcher ships them, whatever became of drawer.owl and keybar.owl.
             add(asset("widgets/$DRAWER", File(dir, STOCK_DRAWER), Policy.Owned))
             add(asset("widgets/$KEYBAR", File(dir, STOCK_KEYBAR), Policy.Owned))
@@ -1238,9 +1225,9 @@ class WidgetEngine(
                 "The launcher's look (theme, background, tile spacing and borders, corners, the system bars' colors, the " +
                 "terminals' font) is ~/${StyleStore.GUEST_DIR}/${StyleStore.FILE}; ${StyleStore.DEFAULTS} next to it lists every " +
                 "setting with its default and range. Changes show within a second; ${StyleStore.ERRORS} there says what was ignored and why.\n\n" +
-                "Where everything on home is (pages in order, faces, widgets, pinned apps and folders, each tile's cell) is " +
-                "~/${HomeStore.GUEST_DIR}/${HomeStore.FILE}; edit it to move, resize or pin things or reorder pages. " +
-                "docs/home.md in the widgets folder explains it.\n\n" +
+                "Everything on Bellatrix's one hard-coded home page (faces as tiles, widgets, pinned apps and folders, each tile's cell) is " +
+                "~/${HomeStore.GUEST_DIR}/${HomeStore.FILE}; edit it to move, resize or pin things. There are no extra pages to reorder; " +
+                "a `page:` in an owl file is ignored and the tile lands on that one page. docs/home.md in the widgets folder explains it.\n\n" +
                 "The phone's approximate location, its calendar, the AirPods connected to it and its battery are `bellatrix location`, " +
                 "`bellatrix calendar [days]`, `bellatrix airpods` and `bellatrix battery` (JSON; `bellatrix --help` says more), where the " +
                 "launcher was allowed them. `bellatrix notify <title> [text]` puts a notification on the phone, to tell the user something " +

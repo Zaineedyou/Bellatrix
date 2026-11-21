@@ -113,8 +113,15 @@ class HomeStore(
         // At the start, a widget deleted while the launcher was off isn't a mistake in the file: it's left out, quietly.
         if (atStart && gone) problems.removeAll { it.endsWith(MISSING) }
         synced.setProblems(problems)
-        // Cells on another grid than home's were moved onto it: the file says so, rather than which grid it was.
-        if ((atStart && gone) || decoded.screens.any { (screen, l) -> l.columns != layout.columnsOf(screen) }) synced.save()
+        // Rewrite old multi-page and face-page files to Bellatrix's one page, and save cells that came in on another grid.
+        val multiPage = { l: HomeLayout -> l.pages.size != 1 || l.pages.any { it is FacePage } }
+        if (
+            (atStart && gone) ||
+            multiPage(decoded.layout) ||
+            decoded.screens.any { (screen, l) -> multiPage(l) || l.columns != layout.columnsOf(screen) }
+        ) {
+            synced.save()
+        }
     }
 
     /** Home on [screen] as the file has it now, from what home draws there. */
@@ -123,11 +130,9 @@ class HomeStore(
         val byPage = engine.itemsByPageOn(screen)
         for (page in byPage.keys.sorted()) {
             val items = byPage.getValue(page)
-            // A face sharing its page with tiles is on its way to a page of its own; it goes before them.
-            for (item in items) if (item is WidgetItem && item.isFace) pages += FacePage(item.key)
+            // Faces are ordinary tiles on the one home page, with the same cells as widgets.
             val tiles =
                 items
-                    .filterNot { it.isFace }
                     .sortedWith(compareBy({ layout.cell(it.key, screen)?.y ?: Int.MAX_VALUE }, { layout.cell(it.key, screen)?.x ?: Int.MAX_VALUE }))
                     .map { item ->
                         val cell = layout.cell(item.key, screen)
@@ -184,19 +189,16 @@ class HomeStore(
             val page = numbers[i]
             val where = "${prefix}page ${i + 1}"
             when (entry) {
+                // An old `face = "..."` page is just a tile on the one home page now.
                 is FacePage -> {
                     val item = item(WidgetTile(entry.file), where) ?: return@forEachIndexed
-                    if (!item.isFace) problems += "$where: ${entry.file} isn't a face; write it as a tile" else moves += item to page
+                    moves += item to page
                 }
                 is TilePage -> {
                     val taken = ArrayList<Cell>()
                     entry.tiles.forEachIndexed { j, tile ->
                         val at = "$where, tile ${j + 1}"
                         val item = item(tile, at) ?: return@forEachIndexed
-                        if (item.isFace) {
-                            problems += "$at: ${item.key} is a face; write it as a page, face = \"${item.key}\""
-                            return@forEachIndexed
-                        }
                         moves += item to page
                         cells[item.key] = cell(tile.cell, sizeOf(item.key, screen, specs, cols), section.columns, cols, item.resizable, taken, at, problems)
                     }
@@ -233,11 +235,10 @@ class HomeStore(
         val cells = HashMap<String, Cell?>()
         val known = shortcuts.items.associateBy { it.key }
 
-        /** Whether [name] goes on [page]. */
+        /** Whether [name] goes on [page]. Faces are ordinary tiles on the one hard-coded home page. */
         fun widget(
             name: String,
             page: Int,
-            face: Boolean,
             where: String,
         ): Boolean {
             val spec = specs[name]
@@ -246,7 +247,6 @@ class HomeStore(
                     gone = true
                     problems += "$where: $name$MISSING"
                 }
-                spec.isFace != face -> problems += if (face) "$where: $name isn't a face; write it as a tile" else "$where: $name is a face; write it as a page, face = \"$name\""
                 !placed.add(name) -> problems += "$where: $name is on home already; left out here"
                 else -> {
                     widgets += spec to page
@@ -275,7 +275,8 @@ class HomeStore(
             val page = numbers[i]
             val where = "page ${i + 1}"
             when (entry) {
-                is FacePage -> widget(entry.file, page, face = true, where)
+                // Old `face = "..."` pages still work: the face is placed as a tile on the one page.
+                is FacePage -> widget(entry.file, page, where)
                 is TilePage -> {
                     val taken = ArrayList<Cell>()
                     entry.tiles.forEachIndexed { j, tile ->
@@ -284,7 +285,7 @@ class HomeStore(
                         val size: Pair<Int, Int>
                         when (tile) {
                             is WidgetTile -> {
-                                if (!widget(tile.file, page, face = false, at)) return@forEachIndexed
+                                if (!widget(tile.file, page, at)) return@forEachIndexed
                                 key = tile.file
                                 size = sizeOf(key, Screen.MAIN, specs, cols)
                             }

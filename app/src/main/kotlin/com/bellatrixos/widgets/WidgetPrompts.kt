@@ -40,7 +40,7 @@ fun editThemeCommand(agentBin: String) =
 private fun OwlKind.what() =
     when (this) {
         OwlKind.Widget -> "a home-screen widget (widget \"name\" { }, a tile on my home screen)"
-        OwlKind.Face -> "a face (face \"name\" { }: a whole page of my home screen, the whole screen, as docs/faces.md says)"
+        OwlKind.Face -> "a face (face \"name\" { }: a tile on Bellatrix's one hard-coded home page, like a widget, as docs/faces.md says)"
         OwlKind.App -> "an app (app \"name\" { }: it shows up in my app drawer and opens full screen; give it an icon: as docs/apps.md says)"
         OwlKind.Panel ->
             "a panel (panel \"name\" { }: swiping up on my home screen opens it as my app drawer, or swiping down opens it from the top, " +
@@ -53,7 +53,8 @@ private fun OwlKind.what() =
                 "says). The launcher shows ${WidgetEngine.KEYBAR}, so change that file rather than making a new one"
     }
 
-/** A session in the widgets dir that creates an owl file of [kind]; a face for the empty [page] left of page 1, if given. */
+/** A session in the widgets dir that creates an owl file of [kind]; [page] is ignored: home is one page. */
+@Suppress("UNUSED_PARAMETER")
 fun newOwlCommand(
     agentBin: String,
     kind: OwlKind,
@@ -61,7 +62,7 @@ fun newOwlCommand(
 ) = agentCommand(
     agentBin,
     "Read README.md, then ask me what to create: ${kind.what()}. " +
-        (page?.let { "It's for the empty page left of my home pages, which is waiting for it: give it page: $it. " } ?: "") +
+        "Bellatrix home is one hard-coded page; ignore any `page:` in the file and put the tile there. " +
         "$DEPENDENCIES $CHECK",
 )
 
@@ -103,9 +104,7 @@ fun publishWidgetCommand(
             OwlKind.Widget -> "home-screen widget" to "the widget as widgets/<my GitHub username in lowercase>/<a short name>/widget.owl, with the preview.png owl-check points to next to it"
             OwlKind.Face ->
                 "face" to "the face as faces/<my GitHub username in lowercase>/<a short name>/face.owl, with the preview.png owl-check points to next to it. " +
-                    "First ask me whether it goes with other faces of mine (the .owl files here that start with face) as one face with several " +
-                    "pages; if so, add the ones I pick beside it as page-2.owl, page-3.owl, ... in the order I want, as the README says, and " +
-                    "let face.owl's description cover them all"
+                    "Bellatrix has one home page, so don't describe it as a set of pages; each face file is its own tile there."
             OwlKind.App ->
                 "app" to "the app as apps/<my GitHub username in lowercase>/<a short name>/app.owl (not a name a widget there has), " +
                     "with the screen picture owl-check points to next to it as preview.png. It needs an icon: (see docs/apps.md)"

@@ -64,7 +64,7 @@ fun SharedWidgetScreen(
             }
     }
     var showSource by remember(link) { mutableStateOf(false) }
-    // An app goes in the drawer rather than on a page, and a face left of page 1; known from its first word, even before it compiles.
+    // An app goes in the drawer; a widget or face goes on Bellatrix's one home page. Known from its first word, even before it compiles.
     val kind = result?.getOrNull()?.let { OwlKind.of(it.text) } ?: OwlKind.Widget
     val app = kind == OwlKind.App
     OverlayPanel(stringResource(R.string.store_shared_title, stringResource(kindName(kind))), onDismiss, contentWidth = ReadingWidth) {

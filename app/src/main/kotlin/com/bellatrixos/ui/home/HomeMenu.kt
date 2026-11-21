@@ -97,7 +97,7 @@ fun HomeMenu(
                     val kinds: List<Triple<Int, String, (String) -> String>> =
                         listOf(
                             Triple(R.string.home_create_widget, "widget") { newOwlCommand(it, OwlKind.Widget) },
-                            // Faces are made from the empty page left of them, which says where the new one goes.
+                            // Agents write `face` files too; they land on Bellatrix's one home page like widgets.
                             Triple(R.string.home_create_app, "app") { newOwlCommand(it, OwlKind.App) },
                             Triple(R.string.home_create_panel, "panel") { newOwlCommand(it, OwlKind.Panel) },
                         )

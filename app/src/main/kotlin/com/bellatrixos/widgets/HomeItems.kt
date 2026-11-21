@@ -34,7 +34,8 @@ data class WidgetItem(
     override val page get() = spec.page
     override val size get() = spec.size
     override val minSize get() = spec.minSize
-    override val resizable get() = !spec.isFace
+    // One home page: a face is an ordinary tile, so it can be resized like a widget.
+    override val resizable get() = true
     override val isFace get() = spec.isFace
 }
 
