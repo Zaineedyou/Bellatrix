@@ -150,6 +150,9 @@ val AGENTS =
  */
 const val MISE_SELF_UPDATE = "{ mise self-update -y || true; }"
 
+/** State key for the single Coding Agents card's combined install job. */
+const val ALL_AGENTS_JOB = "__all"
+
 /**
  * Node's official aarch64 binary links against libatomic.so.1, which the Void rootfs doesn't ship.
  * Install it before any `mise use -g node`, for a first install and for the update path alike.
@@ -280,10 +283,44 @@ class AgentStore(
      */
     suspend fun install(agent: Agent): Boolean =
         try {
-            run(agent, R.string.linux_job_installing) { installScript(agent) }
+            run(agent.bin, R.string.linux_job_installing) { installScript(agent) }
         } finally {
             if (isInstalled(agent)) onInstalled(agent)
         }
+
+    /**
+     * Installs every missing agent as one job: mise downloads its packages together in a single
+     * invocation and self-installers run alongside it, so the downloads happen in parallel. One
+     * job also means one config write, so mise's lock never fights itself.
+     */
+    suspend fun installAll(): Boolean {
+        val missing = AGENTS.filterNot(::isInstalled)
+        if (missing.isEmpty()) return true
+        return try {
+            run(ALL_AGENTS_JOB, R.string.linux_job_installing) { installAllScript(missing) }
+        } finally {
+            refresh()
+            onChanged()
+        }
+    }
+
+    /** One shell job: mise handles its packages in parallel, each other installer runs beside it. */
+    fun installAllScript(missing: List<Agent>): String {
+        val misePkgs = missing.filter { it.own == null }.map { it.pkg }
+        val own = missing.mapNotNull { it.own?.install }
+        return buildString {
+            append(if (mise.exists()) "$MISE_SELF_UPDATE && " else "curl -fsSL https://mise.run | sh && ")
+            if (missing.any { it.node }) append("$NODE_RUNTIME_LIBS && mise use -g node@lts && ")
+            append("ok=1; ")
+            if (misePkgs.isNotEmpty()) {
+                append("{ mise use -g ${misePkgs.joinToString(" ") { shellQuote(it) }}; } & mise_job=\$!; ")
+            }
+            own.forEachIndexed { i, script -> append("{ $script; } & own_job_$i=\$!; ") }
+            if (misePkgs.isNotEmpty()) append("wait \$mise_job || ok=0; ")
+            own.indices.forEach { append("wait \$own_job_$it || ok=0; ") }
+            append("[ \$ok -eq 1 ] && { $MISE_CLEANUP; }")
+        }
+    }
 
     /** Installs [agent] with its own installer, or with mise, bootstrapping mise itself if needed. */
     fun installScript(agent: Agent) =
@@ -319,7 +356,7 @@ class AgentStore(
         if (release(agent)) delay(1500)
         val ok =
             try {
-                run(agent, R.string.linux_job_removing) { agent.own?.remove ?: "mise unuse -g ${shellQuote(agent.pkg)} && $MISE_PRUNE" }
+                run(agent.bin, R.string.linux_job_removing) { agent.own?.remove ?: "mise unuse -g ${shellQuote(agent.pkg)} && $MISE_PRUNE" }
             } finally {
                 // Also when its screen closed while mise worked, as with install.
                 refresh()
@@ -358,11 +395,11 @@ class AgentStore(
         }
 
     private suspend fun run(
-        agent: Agent,
+        key: String,
         @StringRes action: Int,
         script: () -> String,
     ): Boolean {
-        val publish: (JobState) -> Unit = { states[agent.bin] = it }
+        val publish: (JobState) -> Unit = { states[key] = it }
         val waiting = JobState.Working(R.string.linux_job_waiting, emptyList())
         publish(waiting)
         // The script is made once it's this job's turn: the one before may have installed mise.
@@ -371,7 +408,7 @@ class AgentStore(
                 lock.withLock { proot.trackedJob(action, withContext(Dispatchers.IO) { script() }, publish = publish) }
             } catch (e: CancellationException) {
                 // Its screen closed before its turn: the row isn't left "waiting…", which also blocks installing it again.
-                if (states[agent.bin] === waiting) states.remove(agent.bin)
+                if (states[key] === waiting) states.remove(key)
                 throw e
             }
         Log.i("agents", "${agent.bin}: ${if (ok) "ok" else "failed"}")
