@@ -49,6 +49,7 @@ object Windows {
         if (taskBarAdapter != null) {
             tx.runOnCommit(a(taskBarAdapter, 2, fragment))
         }
+        tx.runOnCommit { focusTopVisible(fragment) }
         i(manager, tx)
     }
 
@@ -60,7 +61,6 @@ object Windows {
     @JvmStatic
     fun close(uIFragment: UIFragment?, taskBarAdapter: TaskBarAdapter?) {
         val fragment = uIFragment ?: return
-        val adapter = taskBarAdapter ?: return
         val manager = f4881d ?: return
         if (f4882e === fragment) f4882e = null
         fragment.setWindowFocused(false)
@@ -70,7 +70,42 @@ object Windows {
             tx.remove(fragment)
             i(manager, tx)
         }
-        j(0, adapter, fragment)
+        if (taskBarAdapter != null) {
+            j(0, taskBarAdapter, fragment)
+        } else {
+            TaskBarAdapter.J = "Blank"
+            b = -1
+        }
+        focusTopVisible(fragment)
+    }
+
+    /**
+     * After a window goes away, another visible window must own focus and the taskbar
+     * selection. Without this, every remaining FloatingLayout stays unfocused and the
+     * shell looks frozen even though the fragments are still on screen.
+     */
+    private fun focusTopVisible(exclude: UIFragment?) {
+        val manager = f4881d ?: return
+        val next = manager.fragments
+            .asSequence()
+            .filterIsInstance<UIFragment>()
+            .firstOrNull { it !== exclude && !it.isRemoving && !it.isHidden && it.isVisible }
+        if (next == null) {
+            f4882e = null
+            TaskBarAdapter.J = "Blank"
+            b = -1
+            return
+        }
+        val prev = f4882e
+        if (prev != null && prev !== next) prev.setWindowFocused(false)
+        next.setWindowFocused(true)
+        f4882e = next
+        val tag = taskTag(next)
+        val index = if (tag == null) -1 else TaskBarDB.a(tag)
+        if (index >= 0) {
+            TaskBarAdapter.J = tag ?: "Blank"
+            b = index
+        }
     }
 
     @JvmStatic

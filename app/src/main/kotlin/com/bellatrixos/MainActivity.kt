@@ -425,11 +425,19 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         desktopAdapter?.notifyDataSetChanged()
     }
 
+    /**
+     * Bellatrix's X button. It used to call Windows.a(), which only hid the fragment:
+     * the window stayed alive in the taskbar, focus was never handed back, and the
+     * start-menu touch overlay could stay visible and swallow touches on other windows.
+     * Every X in the shell now goes through the real close path.
+     */
     override fun P(fragment: UIFragment) {
-        windowsCall("a", fragment, t0)
+        closeWindow(fragment)
     }
 
     override fun closeWindow(fragment: UIFragment) {
+        // Never leave a clickable full-screen overlay behind when a window is closed.
+        hideStartMenu()
         windowsCall("close", fragment, t0)
     }
 

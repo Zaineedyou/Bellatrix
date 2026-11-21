@@ -500,17 +500,9 @@ class UIExplorer : UIFragment(), BackPressHandler {
     }
 
     fun p0() {
-        if (f1) {
-            try {
-                val manager = parentFragmentManager
-                val tx = manager.beginTransaction()
-                tx.remove(this)
-                tx.commitAllowingStateLoss()
-            } catch (_: Exception) {
-            }
-        } else {
-            J0?.P(this)
-        }
+        // The shell X button must really close every Explorer/Editor/Files window,
+        // not just hide it and leave a dead taskbar entry and stale focus behind.
+        J0?.closeWindow(this)
         if (Windows.f4883f == this) Windows.f4883f = null
     }
 
