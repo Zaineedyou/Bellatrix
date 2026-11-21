@@ -92,11 +92,15 @@ object Windows {
     }
 
     @JvmStatic
-    fun c(str: String): ArrayList<UIFragment> {
+    fun c(str: String): ArrayList<UIFragment> = c(str, null)
+
+    /** Instances of [str], optionally ignoring one that is being closed right now. */
+    @JvmStatic
+    fun c(str: String, exclude: UIFragment?): ArrayList<UIFragment> {
         val manager = f4881d ?: return ArrayList()
         val list = ArrayList<UIFragment>()
         for (fragment in manager.fragments) {
-            if (fragment is UIFragment && !fragment.isRemoving) {
+            if (fragment is UIFragment && fragment !== exclude && !fragment.isRemoving) {
                 val tag = fragment.tag
                 if (tag != null && tag.startsWith(str)) {
                     list.add(fragment)
@@ -112,6 +116,22 @@ object Windows {
         val tag = fragment.tag ?: return null
         val base = tag.substringBefore("::::")
         return if (base == UILinuxWindow.TAG) "UITerminal" else base
+    }
+
+    /** Remaining windows for a taskbar key, excluding one that is closing. */
+    private fun countTaskTag(taskTagValue: String, exclude: UIFragment?): Int {
+        val manager = f4881d ?: return 0
+        var count = 0
+        for (fragment in manager.fragments) {
+            if (fragment is UIFragment &&
+                fragment !== exclude &&
+                !fragment.isRemoving &&
+                taskTag(fragment) == taskTagValue
+            ) {
+                count++
+            }
+        }
+        return count
     }
 
     @JvmStatic
@@ -268,7 +288,7 @@ object Windows {
         val itemIndex = TaskBarDB.a(tagStr)
         if (i2 == 0) {
             if (itemIndex == -1) return
-            val count = c(tagStr).size
+            val count = countTaskTag(tagStr, uIFragment)
             if (count > 0) {
                 taskBarAdapter.g(tagStr, true, count > 1)
                 return
