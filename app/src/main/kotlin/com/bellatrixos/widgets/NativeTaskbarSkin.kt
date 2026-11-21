@@ -16,6 +16,7 @@ import com.bellatrixos.widgets.lang.Str
 import com.bellatrixos.widgets.lang.Value
 import com.bellatrixos.widgets.lang.WNode
 import com.bellatrixos.widgets.lang.num
+import com.bellatrixos.widgets.runtime.WidgetInstance
 import java.util.WeakHashMap
 import kotlin.math.roundToInt
 
@@ -74,15 +75,15 @@ object NativeTaskbarSkin {
             return
         }
 
-        val bg = valueOf(program, instance, root, "background")
+        val bg = valueOf(instance, root, "background")
         val color = bg?.let { Builtins.argb(it, instance) }
         val transparent = bg == null || bg is Str && bg.v.equals("transparent", true) || color == 0 || color == null
         if (transparent) {
             bar.background = original.background
         } else {
-            val radius = valueOf(program, instance, root, "radius")?.num()?.toFloat() ?: 0f
-            val strokeColor = valueOf(program, instance, root, "borderColor")?.let { Builtins.argb(it, instance) }
-            val strokeWidth = valueOf(program, instance, root, "border")?.num()?.toFloat() ?: 0f
+            val radius = valueOf(instance, root, "radius")?.num()?.toFloat() ?: 0f
+            val strokeColor = valueOf(instance, root, "borderColor")?.let { Builtins.argb(it, instance) }
+            val strokeWidth = valueOf(instance, root, "border")?.num()?.toFloat() ?: 0f
             bar.background =
                 GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
@@ -92,7 +93,7 @@ object NativeTaskbarSkin {
                 }
         }
 
-        val pad = valueOf(program, instance, root, "padding")?.num()?.roundToInt() ?: 0
+        val pad = valueOf(instance, root, "padding")?.num()?.roundToInt() ?: 0
         bar.setPadding(
             original.padding[0] + pad,
             original.padding[1] + pad,
@@ -105,8 +106,8 @@ object NativeTaskbarSkin {
             program.screen
                 ?.asSequence()
                 ?.elements()
-                ?.firstOrNull { node -> node.kind in setOf("Flex", "Row", "Column") && valueOf(program, instance, node, "visible")?.truthy != false }
-                ?.let { node -> valueOf(program, instance, node, "gap")?.num()?.roundToInt() }
+                ?.firstOrNull { node -> node.kind in setOf("Flex", "Row", "Column") && valueOf(instance, node, "visible")?.truthy != false }
+                ?.let { node -> valueOf(instance, node, "gap")?.num()?.roundToInt() }
                 ?: 0
         if (list != null) {
             for (i in 0 until list.childCount) {
@@ -124,8 +125,8 @@ object NativeTaskbarSkin {
             program.screen
                 ?.asSequence()
                 ?.elements()
-                ?.firstOrNull { node -> node.kind == "Text" && valueOf(program, instance, node, "visible")?.truthy != false }
-                ?.let { node -> valueOf(program, instance, node, "color")?.let { Builtins.argb(it, instance) } }
+                ?.firstOrNull { node -> node.kind == "Text" && valueOf(instance, node, "visible")?.truthy != false }
+                ?.let { node -> valueOf(instance, node, "color")?.let { Builtins.argb(it, instance) } }
         for (button in buttons) {
             if (iconColor == null) button.u.colorFilter = original.filters[button.u]
             else button.u.setColorFilter(iconColor, PorterDuff.Mode.SRC_IN)
@@ -152,12 +153,11 @@ object NativeTaskbarSkin {
     }
 
     private fun valueOf(
-        program: com.bellatrixos.widgets.lang.Program,
         instance: WidgetInstance,
         node: WNode.Element,
         key: String,
     ): Value? =
-        node.props[key]?.let { ev -> runCatching { program.eval(ev, instance.root) }.getOrNull() }
+        node.props[key]?.let { ev -> runCatching { instance.eval(ev, instance.root, "taskbar $key") }.getOrNull() }
 
     private fun WNode.elements(): Sequence<WNode.Element> =
         when (this) {
