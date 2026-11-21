@@ -289,6 +289,8 @@ class UILinuxWindow : UIFragment() {
             host.closeWindow(this)
             return
         }
+        setWindowFocused(false)
+        if (Windows.f4882e === this) Windows.f4882e = null
         runCatching {
             parentFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
         }

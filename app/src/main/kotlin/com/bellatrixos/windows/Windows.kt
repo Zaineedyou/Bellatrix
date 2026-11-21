@@ -223,6 +223,7 @@ object Windows {
             3
         }
         j(event, adapter, fragment)
+        if (event == 3) focusTopVisible(fragment)
     }
 
     @JvmStatic

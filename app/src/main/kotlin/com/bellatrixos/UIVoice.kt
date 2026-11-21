@@ -151,6 +151,10 @@ class UIVoice : UIFragment() {
         if (inHome != null) {
             inHome.P(this)
         } else {
+            // No host means we cannot use the shell close path; still drop focus so a
+            // hidden window never keeps the rest of the desktop from being touched.
+            setWindowFocused(false)
+            if (Windows.f4882e === this) Windows.f4882e = null
             runCatching {
                 if (!parentFragmentManager.isStateSaved) {
                     parentFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
