@@ -64,7 +64,7 @@ internal data class NativeGrid(
     val padTop: Int,
 )
 
-internal data class Edges(
+private data class TileEdges(
     val left: Boolean,
     val top: Boolean,
     val right: Boolean,
@@ -73,20 +73,20 @@ internal data class Edges(
     val any get() = left || top || right || bottom
 }
 
-internal val NO_EDGES = Edges(false, false, false, false)
+private val NO_TILE_EDGES = TileEdges(false, false, false, false)
 
 /** Which edges a press grabs. A corner grabs two; the top-right corner belongs to the dropdown button. */
-private fun edgesAt(
+private fun tileEdgesAt(
     rect: IntRect,
     p: Offset,
     grab: Int,
     sideGrab: Int,
-): Edges {
+): TileEdges {
     val inY = p.y > rect.top - grab && p.y < rect.bottom + grab
     val inX = p.x > rect.left - grab && p.x < rect.right + grab
     val gx = minOf(sideGrab, rect.width / 3)
     val gy = minOf(grab, rect.height / 3)
-    return Edges(
+    return TileEdges(
         left = inY && p.x > rect.left - grab && p.x < rect.left + gx,
         top = inX && p.y > rect.top - grab && p.y < rect.top + gy,
         right = inY && p.x < rect.right + grab && p.x > rect.right - gx,
@@ -126,7 +126,7 @@ private fun moved(
 
 private fun resized(
     start: PixelRect,
-    edges: Edges,
+    edges: TileEdges,
     dx: Float,
     dy: Float,
     grid: NativeGrid,
@@ -214,7 +214,7 @@ internal fun OwlHomeTiles(
                         Modifier.pointerInput("owl-edit-${item.key}") {
                             var start = current.value
                             var total = Offset.Zero
-                            var edges = NO_EDGES
+                            var edges = NO_TILE_EDGES
                             var ignore = false
                             detectDragGestures(
                                 onDragStart = { pos ->
@@ -223,9 +223,9 @@ internal fun OwlHomeTiles(
                                     ignore = pos.x >= start.w - buttonPx && pos.y <= buttonPx
                                     edges =
                                         if (ignore) {
-                                            NO_EDGES
+                                            NO_TILE_EDGES
                                         } else {
-                                            edgesAt(
+                                            tileEdgesAt(
                                                 IntRect(start.x, start.y, start.x + start.w, start.y + start.h),
                                                 pos,
                                                 grab,
