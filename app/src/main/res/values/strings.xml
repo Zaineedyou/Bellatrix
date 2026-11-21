@@ -643,7 +643,7 @@ We will share more once you're back online."</string>
     <string name="settings_update_dialog_changelog">Changelog</string>
     <string name="settings_update_dialog_current">Versi terpasang: %1$s</string>
     <string name="settings_update_dialog_failed">Gagal mengecek rilis GitHub. Coba lagi nanti.</string>
-    <string name="settings_update_dialog_install">Install di Launcher</string>
+    <string name="settings_update_dialog_download_github">Download From Github</string>
     <string name="settings_update_dialog_install_failed">Gagal mengunduh atau memasang APK. Coba lewat Chrome.</string>
     <string name="settings_update_dialog_latest">Sudah versi terbaru</string>
     <string name="settings_update_dialog_latest_note">Tidak ada pembaruan di GitHub Releases.</string>

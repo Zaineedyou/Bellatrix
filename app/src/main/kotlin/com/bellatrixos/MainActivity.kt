@@ -166,7 +166,6 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     @JvmField var O0: UIProgressCircular? = null
     @JvmField var P0: LinearLayout? = null
     @JvmField var Q0: LinearLayout? = null
-    @JvmField var R0: LinearLayout? = null
     private var pendingSettingsPage: String? = null
     @JvmField var S0: StartMenuViews? = null
     @JvmField var T0: StartMenuTextWatcher? = null
@@ -1003,8 +1002,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             editText.requestFocus()
         }
         StartMenu.f4779d = i2
-        if (z) {
-            val view = startMenuViews.g
+        // The App Drawer no longer has a Recommended section.
+        startMenuViews.g?.let { view ->
             val context = view.context
             if (StartMenuRecommend.c) {
                 if (StartMenuRecommend.b && StartMenuRecommend.f4787a != null) {
@@ -1233,7 +1232,6 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         this.I0 = findViewById(R.id.startMenuLayout)
         this.q0 = findViewById(R.id.desktop_icons)
         this.S0 = StartMenuViews(this.L0!!)
-        this.R0 = findViewById(R.id.recommendedUi)
         this.Y0 = findViewById(R.id.startmenu_btn_sort)
         this.d1 = findViewById(R.id.startmenu_btn_type)
         this.O0 = findViewById(R.id.start_menu_progress)

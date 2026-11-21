@@ -115,20 +115,20 @@ class UIPCUpdate : Fragment() {
                         getString(R.string.settings_update_dialog_latest)
                     },
                 ).setMessage(message)
-        if (release != null && release.apk.isNotBlank()) {
-            builder.setPositiveButton(R.string.settings_update_dialog_install) { _, _ -> launcher.install(context) }
-            builder.setNeutralButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
-        } else {
-            builder.setPositiveButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
-        }
+        // The launcher no longer downloads or installs APKs; the button goes straight to the release.
+        builder.setPositiveButton(R.string.settings_update_dialog_download_github) { _, _ -> launcher.openRelease(context) }
         builder.setNegativeButton(android.R.string.cancel, null)
         val dialog = builder.create()
-        // Frost the content behind the glass on Android 12+; older versions keep
-        // the translucent drawable only, which is still a native Bellatrix dialog.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            dialog.window?.setBackgroundBlurRadius(20)
-        }
         dialog.show()
+        // Frost the content behind the glass on Android 12+, after the window and its
+        // decor view exist. Some vendors leave DecorView null until the first frame,
+        // so guard it and never take down the launcher over an OEM blur implementation.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            dialog.window?.decorView?.post {
+                val window = dialog.window
+                if (window?.decorView != null) runCatching { window.setBackgroundBlurRadius(20) }
+            }
+        }
     }
 
     fun a0(status: STATUS) {

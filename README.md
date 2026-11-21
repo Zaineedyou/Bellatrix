@@ -4,8 +4,6 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/Zaineedyou/Bellatrix)](https://github.com/Zaineedyou/Bellatrix/releases/latest)
 
-**Production-ready desktop-style launcher for Android.**
-
 Bellatrix turns an Android device into a coherent desktop workspace: floating windows, a real
 taskbar, a start menu, an action center, and a full suite of built-in utilities. One runtime drives
 the whole shell. Guest apps, terminals, files, and coding agents all open inside Bellatrix windows
@@ -14,7 +12,7 @@ using Bellatrix UI — there is no second home screen or parallel desktop to swi
 > [!IMPORTANT]
 > Signed release APKs are published **only** by GitHub Actions from `v*` tags. Do not distribute
 > locally assembled builds. Every release body is generated from [`CHANGELOG.md`](CHANGELOG.md)
-> and includes What's New, install steps, SHA-256, commit history, and a full changelog link.
+> and includes What's New, install steps, SHA-256, and a full changelog link.
 
 ---
 

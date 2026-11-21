@@ -169,20 +169,10 @@ jobs:
             echo "- Version code: ${VERSION_CODE}"
             echo "- Signed and assembled by GitHub Actions only, from commit \`${GITHUB_SHA}\`."
             echo
-            echo "## Notes"
-            echo
-            echo "Releases are published only through GitHub Actions. The changelog above comes from"
-            echo "[CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/master/CHANGELOG.md)."
-            echo
             if [ -n "$PREV_TAG" ]; then
               echo "## Full Changelog"
               echo
               echo "https://github.com/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${TAG}"
-              echo
-              echo "## Commits since ${PREV_TAG}"
-              echo
-              git --no-pager log --no-merges --pretty=format:'- %h %s' "${PREV_TAG}..${TAG}"
-              echo
             else
               echo "## Full Changelog"
               echo

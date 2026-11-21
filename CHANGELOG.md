@@ -9,6 +9,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.20] - 2026-11-21
+
+### Fixed
+
+- PC Update dialog no longer crashes on Android 12+ vendors whose `DecorView` is null before the first frame; background blur is applied after `show()` and guarded.
+- Guest foot theme now uses the correct color section (`[colors-dark]` on foot 1.26+) and the correct `regularN`/`brightN` keys without a `#` prefix, so terminals start without `invalid section name: colors`.
+
+### Changed
+
+- Launcher update action is now **Download From Github**; the launcher no longer downloads or installs APKs itself.
+- Release notes no longer include **Notes** or **Commits since** sections.
+- Removed the **Recommended** section from the App Drawer.
+- Removed the "Production-ready desktop-style launcher for Android." line from README.
+
+### Important
+
+- DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
+
 ## [2.9.19] - 2026-11-21
 
 ### Added

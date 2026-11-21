@@ -21,6 +21,7 @@ class GuestThemeConfig(
 ) {
     private val home = proot.home
     private val currentDir = File(home, ".local/state/bellatrix/current")
+    @Volatile private var footColorSection: String? = null
 
     /** Renders [theme] into current/theme, which foot, btop and the rest include. */
     fun render(theme: BellatrixTheme) {
@@ -30,7 +31,7 @@ class GuestThemeConfig(
         theme.guestFiles().forEach { (name, file) -> file.copyTo(File(themeDir, name)) }
         File(currentDir, "theme.name").writeText(theme.name + "\n")
         // A theme may provide its own terminal colors; otherwise generate them from its palette.
-        if (!File(themeDir, "foot.ini").isFile) File(themeDir, "foot.ini").writeText(footTheme(theme.colors))
+        if (!File(themeDir, "foot.ini").isFile) File(themeDir, "foot.ini").writeText(footTheme(theme.colors, footColorSection()))
         if (!File(themeDir, "btop.theme").isFile) File(themeDir, "btop.theme").writeText(btopTheme(theme.colors))
         symlink("${Proot.GUEST_HOME}/.local/state/bellatrix/current/theme/btop.theme", File(home, ".config/btop/themes/current.theme"))
         val agentTheme = File(themeDir, if (File(home, ".claude").isDirectory) "claude.json" else "pi.json")
@@ -80,6 +81,25 @@ class GuestThemeConfig(
         return files
     }
 
+    /**
+     * foot 1.26 renamed `[colors]` to `[colors-dark]`; newer builds reject the old
+     * name outright. Ask the installed binary instead of guessing a version.
+     */
+    private fun footColorSection(): String {
+        footColorSection?.let { return it }
+        val version = StringBuilder()
+        runCatching { proot.run("foot --version 2>/dev/null") { version.append(it).append('\n') } }
+        val numbers = Regex("""foot version:\s*(\d+)\.(\d+)""").find(version.toString())?.destructured
+        val modern = numbers?.let { (major, minor) ->
+            val ma = major.toIntOrNull() ?: 0
+            val mi = minor.toIntOrNull() ?: 0
+            ma > 1 || ma == 1 && mi >= 26
+        } ?: false
+        val section = if (modern) "[colors-dark]" else "[colors]"
+        footColorSection = section
+        return section
+    }
+
     /** Live-recolors running foot terminals with OSC sequences. Blocking. */
     fun recolorTerminals(theme: BellatrixTheme) {
         val c = footColors(theme.colors)
@@ -108,14 +128,26 @@ class GuestThemeConfig(
             return c + mapOf("selection_background" to accent, "selection_foreground" to background)
         }
 
-        fun footTheme(c: Map<String, String>): String {
+        fun footTheme(
+            c: Map<String, String>,
+            section: String,
+        ): String {
             val colors = footColors(c)
+            // foot's color values are RRGGBB without a leading '#', and its palette
+            // keys are regular0..7 / bright0..7 rather than color0..15.
+            fun hex(value: String) = value.removePrefix("#")
             return buildString {
-                append("[colors]\n")
-                listOf("foreground", "background", "cursor", "selection_background", "selection_foreground").forEach { key ->
-                    colors[key]?.let { append("$key=$it\n") }
+                append(section).append('\n')
+                colors["foreground"]?.let { append("foreground=${hex(it)}\n") }
+                colors["background"]?.let { append("background=${hex(it)}\n") }
+                colors["selection_foreground"]?.let { append("selection-foreground=${hex(it)}\n") }
+                colors["selection_background"]?.let { append("selection-background=${hex(it)}\n") }
+                for (i in 0..15) {
+                    colors["color$i"]?.let { value ->
+                        val key = if (i < 8) "regular$i" else "bright${i - 8}"
+                        append("$key=${hex(value)}\n")
+                    }
                 }
-                for (i in 0..15) colors["color$i"]?.let { append("color$i=$it\n") }
             }
         }
 
