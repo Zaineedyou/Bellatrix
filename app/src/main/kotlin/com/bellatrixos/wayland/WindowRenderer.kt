@@ -49,7 +49,7 @@ internal fun fitScale(
  * vsync: each frame snapshots the scene under the server lock (no pixels
  * move under it), redraws only what changed, posts, and then tells the
  * clients the frame is done, so they draw at most once per display frame,
- * 60 times a second at most, and not at all while the window is hidden.
+ * 90 times a second at most, and not at all while the window is hidden.
  */
 class WindowRenderer(
     private val server: WaylandServer,
@@ -275,10 +275,10 @@ class WindowRenderer(
 
     private companion object {
         /**
-         * At most 60 frames a second, whatever the screen's rate: Linux apps draw in software under proot, and on a
-         * 120 Hz screen following it took twice the CPU and battery. The least time between frames, less a quarter so
-         * a frame a little early still takes its vsync.
+         * At most 90 frames a second, whatever the screen's rate: Linux apps draw in software under proot, so this is a
+         * budget, not a promise to fill every vsync. The least time between frames, less a quarter so a frame a little
+         * early still takes its vsync.
          */
-        const val MIN_INTERVAL = 1_000_000_000L / 60 * 3 / 4
+        const val MIN_INTERVAL = 1_000_000_000L / 90 * 3 / 4
     }
 }

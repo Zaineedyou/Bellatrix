@@ -2236,9 +2236,10 @@ class LangTest {
         assertTrue(p.fps != null)
         // A fixed one is checked as it's written: a number of frames a second, at most what the launcher draws.
         assertEquals(Num(12.0), Compiler.compile("widget {\n meta { owl: 19 }\n fps: 12\n $canvas\n}").fps?.const)
-        for (wrong in listOf("0", "61", "-5", "\"fast\"", "true")) {
+        assertEquals(Num(90.0), Compiler.compile("widget {\n meta { owl: 19 }\n fps: 90\n $canvas\n}").fps?.const)
+        for (wrong in listOf("0", "91", "-5", "\"fast\"", "true")) {
             val e = compileError("widget {\n meta { owl: 19 }\n fps: $wrong\n $canvas\n}")
-            assertTrue(e, e.contains("fps is a number of frames a second, from 1 to 60"))
+            assertTrue(e, e.contains("fps is a number of frames a second, from 1 to 90"))
         }
         // Faces, apps and panels animate too.
         assertTrue(Compiler.compile("face {\n meta { owl: 19 }\n fps: 20\n $canvas\n}").fps != null)

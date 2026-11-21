@@ -664,7 +664,7 @@ class WidgetInstance(
     }
 
     /**
-     * An app that asks for `fps: 60` keeps it however long it draws: it has the screen to itself while it's used, and a
+     * An app that asks for the top rate keeps it however long it draws: it has the screen to itself while it's used, and a
      * game at half rate lags behind the finger. Widgets, faces and panels on home keep the governor, which holds the home
      * screen smooth and the battery spared.
      */

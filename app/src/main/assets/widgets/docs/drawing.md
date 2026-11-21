@@ -34,7 +34,7 @@ Canvas {
 Styles: `fill:` (a color or gradient), `stroke:`, `width:` (stroke width),
 `cap: round/butt/square`. Without either, a shape is filled with `color:` or
 the foreground. A widget that reads `time` animates while it's on screen, up to
-60 frames a second on any screen, and only while it reads it: a `time` under an `if` that's false, like a
+90 frames a second on a screen that offers it (60 on a 60 Hz screen), and only while it reads it: a `time` under an `if` that's false, like a
 backdrop drawn only while music plays, costs nothing (older launchers
 animate whenever `time` appears at all). Each frame costs battery for as long as the page shows, so say how many
 the animation needs with `fps:` (owl 19, see docs/declarations.md): `fps: 10` for a pet that blinks and breathes,
@@ -47,7 +47,7 @@ moves them in `every frame` by `dt` (owl 21, see Triggers in docs/declarations.m
 
 `scene(camera) { }` in a Canvas draws 3D models (owl 22). Each `model(mesh, ...)` inside it is placed,
 turned, lit and seen through the camera; the launcher does that work, not the widget, so a scene of a
-few thousand triangles keeps up at 60 frames a second. A scene holds only `model` calls (with `if`, `for`
+few thousand triangles keeps up at up to 90 frames a second. A scene holds only `model` calls (with `if`, `for`
 and `let` around them); draw the Canvas's 2D calls before it, to show behind, or after it, over it.
 
 ```owl

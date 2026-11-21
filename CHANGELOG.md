@@ -9,6 +9,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.27] - 2026-11-22
+
+### Added
+
+- Widget and face tiles now have a window-style `▾` menu with **remove** and **edit**. Remove moves the `.owl` file to `.removed/`; edit starts a Coding Agent session for that file, or opens the standalone Coding Agents page if no agent is installed.
+- A tile's starting rectangle is declared on its root `Box`/`Flex`/`Anchor` with `width`, `height`, `size`, `fill`, `offset` and `anchor`. Tiles can overlap, and drag/resize geometry is saved as free pixels rather than grid cells.
+
+### Changed
+
+- Long-press selects a tile; dragging it moves it anywhere, and dragging any edge or corner resizes it freely. The home area is clipped to its real bounds with no visible border line.
+- The APK requests 90 Hz where the device offers it, makes hardware acceleration explicit, and lets OWL animations and Linux window compositing run up to 90 fps. OWL 3D scenes were already implemented and were left unchanged.
+
 ## [2.9.26] - 2026-11-22
 
 ### Added

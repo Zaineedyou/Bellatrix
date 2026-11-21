@@ -27,6 +27,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.Filter
@@ -1032,6 +1033,10 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         var bByte: Byte = 6
         val i3 = 4
         super.onCreate(bundle)
+        // Full GPU acceleration and the highest common smooth rate: 90 Hz where the panel offers it,
+        // otherwise the device's default. OWL's frame clock follows the display up to 90 fps.
+        window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+        window.attributes = window.attributes.apply { preferredRefreshRate = 90f }
         // One runtime owns Linux for this process, for both the classic grid and the OWL layout.
         (application as App).runtime.start()
 

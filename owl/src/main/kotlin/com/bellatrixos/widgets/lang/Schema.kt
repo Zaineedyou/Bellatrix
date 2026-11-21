@@ -278,7 +278,7 @@ internal const val APP_STATUS_BAR = "an app's statusBar"
 internal const val FRAME_RATE = "fps"
 
 /** The most frames a second `fps:` asks for, and what an animation gets without it. */
-const val MAX_FPS = 60
+const val MAX_FPS = 90
 
 /** A widget's or a face's `lock:`, named like this in [SINCE]. */
 internal const val HOME_LOCK = "lock"

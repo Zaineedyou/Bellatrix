@@ -1,10 +1,11 @@
 package com.bellatrixos.ui.home
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -15,26 +16,38 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import com.bellatrixos.R
 import com.bellatrixos.Runtime
 import com.bellatrixos.ui.Mono
 import com.bellatrixos.ui.Palette
 import com.bellatrixos.ui.TextSize
+import com.bellatrixos.ui.files.MenuPopup
 import com.bellatrixos.widgets.Cell
-import com.bellatrixos.widgets.OwlBars
+import com.bellatrixos.widgets.OwlTileGeometry
+import com.bellatrixos.widgets.PixelRect
 import com.bellatrixos.widgets.WidgetItem
+import com.bellatrixos.widgets.editWidgetCommand
 import com.bellatrixos.widgets.render.WidgetContent
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
- * Geometry of Bellatrix's real desktop grid, measured from `R.id.desktop_icons`.
+ * Geometry of Bellatrix's real desktop area, measured from `R.id.desktop_icons`.
  * The home OWL surface is constrained to the same bounds, so these pixels are already in its coordinates.
  */
 internal data class NativeGrid(
@@ -44,156 +57,294 @@ internal data class NativeGrid(
     val rows: Int,
     val cellW: Float,
     val cellH: Float,
-    /** Space after a cell: a native icon is narrower than the column GridAutofillLayoutManager gives it. */
+    /** Space after a cell: used for OWL's `cols`/`rows` preview globals, not for tile placement. */
     val gapX: Float,
     val gapY: Float,
     val padLeft: Int,
     val padTop: Int,
 )
 
-/** Never let a saved cell (from a rotation or another screen) put a tile outside the native home area. */
-private fun fit(
-    cell: Cell,
-    item: WidgetItem,
-    grid: NativeGrid,
-): Cell {
-    val x = cell.x.coerceIn(0, (grid.cols - 1).coerceAtLeast(0))
-    val y = cell.y.coerceIn(0, (grid.rows - 1).coerceAtLeast(0))
-    val w = if (item.resizable) cell.w.coerceIn(1, grid.cols - x) else 1
-    val h = if (item.resizable) cell.h.coerceIn(1, grid.rows - y) else 1
-    return if (cell.x == x && cell.y == y && cell.w == w && cell.h == h) cell else Cell(x, y, w, h)
+private data class Edges(
+    val left: Boolean,
+    val top: Boolean,
+    val right: Boolean,
+    val bottom: Boolean,
+) {
+    val any get() = left || top || right || bottom
 }
 
+private val NO_EDGES = Edges(false, false, false, false)
+
+/** Which edges a press grabs. A corner grabs two; the top-right corner belongs to the dropdown button. */
+private fun edgesAt(
+    rect: IntRect,
+    p: Offset,
+    grab: Int,
+    sideGrab: Int,
+): Edges {
+    val inY = p.y > rect.top - grab && p.y < rect.bottom + grab
+    val inX = p.x > rect.left - grab && p.x < rect.right + grab
+    val gx = minOf(sideGrab, rect.width / 3)
+    val gy = minOf(grab, rect.height / 3)
+    return Edges(
+        left = inY && p.x > rect.left - grab && p.x < rect.left + gx,
+        top = inX && p.y > rect.top - grab && p.y < rect.top + gy,
+        right = inY && p.x < rect.right + grab && p.x > rect.right - gx,
+        bottom = inX && p.y < rect.bottom + grab && p.y > rect.bottom - gy,
+    )
+}
+
+/** Keeps a free rect inside the native home area. Overlaps are allowed; escaping the border is not. */
+private fun contained(
+    rect: PixelRect,
+    grid: NativeGrid,
+    minW: Int,
+    minH: Int,
+): PixelRect {
+    val w = rect.w.coerceIn(minW.coerceAtMost(grid.width), grid.width)
+    val h = rect.h.coerceIn(minH.coerceAtMost(grid.height), grid.height)
+    return rect.copy(
+        x = rect.x.coerceIn(0, grid.width - w),
+        y = rect.y.coerceIn(0, grid.height - h),
+        w = w,
+        h = h,
+    )
+}
+
+private fun moved(
+    start: PixelRect,
+    dx: Float,
+    dy: Float,
+    grid: NativeGrid,
+): PixelRect =
+    contained(
+        start.copy(x = start.x + dx.roundToInt(), y = start.y + dy.roundToInt()),
+        grid,
+        start.w,
+        start.h,
+    )
+
+private fun resized(
+    start: PixelRect,
+    edges: Edges,
+    dx: Float,
+    dy: Float,
+    grid: NativeGrid,
+    minW: Int,
+    minH: Int,
+): PixelRect {
+    val left = start.x
+    val top = start.y
+    val right = start.x + start.w
+    val bottom = start.y + start.h
+    val x0 = if (edges.left) (left + dx).roundToInt().coerceIn(0, right - minW) else left
+    val x1 = if (edges.right) (right + dx).roundToInt().coerceIn(x0 + minW, grid.width) else right
+    val y0 = if (edges.top) (top + dy).roundToInt().coerceIn(0, bottom - minH) else top
+    val y1 = if (edges.bottom) (bottom + dy).roundToInt().coerceIn(y0 + minH, grid.height) else bottom
+    return contained(PixelRect(x0, y0, x1 - x0, y1 - y0), grid, minW, minH)
+}
+
+private fun legacyRect(
+    cell: Cell?,
+    grid: NativeGrid,
+): PixelRect? =
+    cell?.let {
+        PixelRect(
+            grid.padLeft + it.x * grid.cellW,
+            grid.padTop + it.y * grid.cellH,
+            it.w * grid.cellW - grid.gapX,
+            it.h * grid.cellH - grid.gapY,
+        ).let { px -> px.copy(x = px.x.roundToInt(), y = px.y.roundToInt(), w = px.w.roundToInt(), h = px.h.roundToInt()) }
+    }
+
 /**
- * Oma-style declarative tiles on the native home grid, clipped to the real desktop bounds.
+ * Declarative OWL tiles on Bellatrix's native home.
  *
- * These are ordinary `widget`/`face` files from the one [App.runtime]. [WidgetLayout] still decides the cell
- * (first free spot, or the least crowded one when the page is full), but the pixels come from the native
- * RecyclerView's columns. A long-press selects a tile; its bottom-right handle resizes it in whole cells,
- * and its top-right button edits the `.owl` file. The surface is clipped to the native home view, so no
- * tile can be dragged or restored outside the home border or over the taskbar.
+ * A tile's starting rectangle comes from its root `Box`/`Flex`/`Anchor` props (`width`, `height`,
+ * `size`, `fill`, `offset`, `anchor`), not from a grid. After that, a long-press selects it, a drag
+ * moves it anywhere, and its edges/corners resize it freely; tiles may overlap. The small ▾ button
+ * opens Remove/Edit, with Edit starting a Coding Agent session (or the Coding Agents page when no
+ * agent is installed). Geometry is clipped to the native home view, with no visible boundary line.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun OwlHomeTiles(
     runtime: Runtime,
     grid: NativeGrid,
 ) {
     val engine = runtime.widgets
-    val density = LocalDensity.current
-    var selected by remember { mutableStateOf<String?>(null) }
-
-    // HomeGrid does the same in the Compose launcher: place once per geometry change, then draw from the cells.
-    val items = engine.specs.filter(engine::onHome).map(::WidgetItem)
     val layout = engine.layout
+    val density = LocalDensity.current
+    val densityFloat = density.density
+    val haptics = LocalHapticFeedback.current
+    var selected by remember { mutableStateOf<String?>(null) }
+    var menuFor by remember { mutableStateOf<String?>(null) }
+
+    val items = engine.specs.filter(engine::onHome).map(::WidgetItem)
     layout.geometry = Triple(grid.cellW, grid.cellH, grid.gapX.toInt())
     layout.pageSize = null
-    layout.place(items, grid.cols, grid.rows)
+    layout.setGrid(grid.cols, grid.rows)
 
-    // The border makes the home boundary explicit; clipToBounds is the hard guarantee that no tile escapes it.
-    Box(Modifier.fillMaxSize().clipToBounds().border(1.dp, Palette.border)) {
+    val grab = with(LocalDensity.current) { 12.dp.toPx() }.roundToInt()
+    val sideGrab = with(LocalDensity.current) { 24.dp.toPx() }.roundToInt()
+    val buttonPx = with(LocalDensity.current) { 22.dp.toPx() }.roundToInt()
+    val absoluteMin = with(LocalDensity.current) { 56.dp.toPx() }.roundToInt()
+
+    // No visible border: clipToBounds is the hard guarantee that no tile escapes into the taskbar.
+    Box(Modifier.fillMaxSize().clipToBounds()) {
         for (item in items) {
-            val raw = layout.cell(item.key) ?: continue
-            val at = fit(raw, item, grid)
             val spec = item.spec
             val instance = engine.instance(spec)
-            val minW = item.minSize.first.coerceAtMost(grid.cols)
-            val minH = item.minSize.second.coerceAtMost(grid.rows)
-            val taken = items.filter { it.key != item.key }.mapNotNull { other ->
-                layout.cell(other.key)?.let { fit(it, other, grid) }
-            }
+            val raw =
+                layout.nativeRect(item.key)
+                    ?: if (instance != null) {
+                        OwlTileGeometry.initialRect(spec, instance, grid, densityFloat)
+                    } else {
+                        legacyRect(layout.cell(item.key), grid)
+                            ?: OwlTileGeometry.initialRect(spec, null, grid, densityFloat)
+                    }
+            val minW = max(absoluteMin, (item.minSize.first * grid.cellW).roundToInt()).coerceAtMost(grid.width)
+            val minH = max(absoluteMin, (item.minSize.second * grid.cellH).roundToInt()).coerceAtMost(grid.height)
+            val at = contained(raw, grid, minW, minH)
             key(item.key) {
-                val x = grid.padLeft + at.x * grid.cellW
-                val y = grid.padTop + at.y * grid.cellH
-                val w =
-                    (at.w * grid.cellW - grid.gapX)
-                        .coerceAtLeast(1f)
-                        .coerceAtMost((grid.width - x).coerceAtLeast(1f))
-                val h =
-                    (at.h * grid.cellH - grid.gapY)
-                        .coerceAtLeast(1f)
-                        .coerceAtMost((grid.height - y).coerceAtLeast(1f))
+                val current = rememberUpdatedState(at)
+                val isSelected = selected == item.key
+
+                val dragModifier =
+                    if (isSelected) {
+                        Modifier.pointerInput("owl-edit-${item.key}") {
+                            var start = current.value
+                            var total = Offset.Zero
+                            var edges = NO_EDGES
+                            var ignore = false
+                            detectDragGestures(
+                                onDragStart = { pos ->
+                                    start = current.value
+                                    total = Offset.Zero
+                                    ignore = pos.x >= start.w - buttonPx && pos.y <= buttonPx
+                                    edges =
+                                        if (ignore) {
+                                            NO_EDGES
+                                        } else {
+                                            edgesAt(
+                                                IntRect(start.x, start.y, start.x + start.w, start.y + start.h),
+                                                pos,
+                                                grab,
+                                                sideGrab,
+                                            )
+                                        }
+                                },
+                                onDrag = { change, amount ->
+                                    if (ignore) return@detectDragGestures
+                                    change.consume()
+                                    total += amount
+                                    val next =
+                                        if (edges.any) {
+                                            resized(start, edges, total.x, total.y, grid, minW, minH)
+                                        } else {
+                                            moved(start, total.x, total.y, grid)
+                                        }
+                                    layout.setNativeRect(item.key, next)
+                                },
+                                onDragEnd = { if (!ignore) layout.saveNativeRects() },
+                                onDragCancel = { if (!ignore) layout.saveNativeRects() },
+                            )
+                        }
+                    } else {
+                        Modifier.pointerInput("owl-raise-${item.key}") {
+                            var start = current.value
+                            var total = Offset.Zero
+                            detectDragGesturesAfterLongPress(
+                                onDragStart = {
+                                    start = current.value
+                                    total = Offset.Zero
+                                },
+                                onDrag = { change, amount ->
+                                    change.consume()
+                                    total += amount
+                                    layout.setNativeRect(item.key, moved(start, total.x, total.y, grid))
+                                },
+                                onDragEnd = {
+                                    layout.saveNativeRects()
+                                    selected = null
+                                },
+                                onDragCancel = {
+                                    layout.saveNativeRects()
+                                    selected = null
+                                },
+                            )
+                        }
+                    }
+
                 Box(
                     Modifier
-                        .offset { IntOffset(x.toInt(), y.toInt()) }
-                        .size(width = with(density) { w.toDp() }, height = with(density) { h.toDp() })
-                        .combinedClickable(
-                            onClick = {
-                                if (selected == item.key) selected = null else engine.tap(spec)
-                            },
-                            onLongClick = { selected = item.key },
-                        ),
+                        .offset { IntOffset(at.x, at.y) }
+                        .size(width = with(density) { at.w.toDp() }, height = with(density) { at.h.toDp() })
+                        .zIndex(if (isSelected) 2f else 0f)
+                        .then(dragModifier)
+                        .pointerInput("owl-tap-${item.key}") {
+                            detectTapGestures(
+                                onTap = {
+                                    if (selected == item.key) selected = null else engine.tap(spec)
+                                },
+                                onLongPress = {
+                                    selected = item.key
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                },
+                            )
+                        },
                 ) {
                     if (instance != null) {
-                        WidgetContent(instance, Modifier.fillMaxSize(), cells = at.w to at.h)
+                        val cols = (at.w / grid.cellW).roundToInt().coerceAtLeast(1)
+                        val rows = (at.h / grid.cellH).roundToInt().coerceAtLeast(1)
+                        WidgetContent(instance, Modifier.fillMaxSize(), cells = cols to rows)
                     }
                     spec.error?.let { error ->
+                        BasicText(error, style = Mono.copy(color = Palette.red, fontSize = TextSize.Small))
+                    }
+
+                    if (isSelected) {
+                        Box(Modifier.fillMaxSize().border(1.dp, Palette.accent))
+                        for (align in listOf(Alignment.TopStart, Alignment.BottomStart, Alignment.BottomEnd, Alignment.CenterStart, Alignment.CenterEnd, Alignment.BottomCenter)) {
+                            Box(Modifier.align(align).size(8.dp).background(Palette.accent))
+                        }
+                    }
+
+                    // Window-style dropdown: always available, and it never starts a move/resize.
+                    Box(
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .size(22.dp)
+                            .background(Palette.card.copy(alpha = 0.82f))
+                            .clickable { menuFor = if (menuFor == item.key) null else item.key },
+                    ) {
                         BasicText(
-                            error,
-                            style = Mono.copy(color = Palette.red, fontSize = TextSize.Small),
+                            "▾",
+                            Modifier.align(Alignment.Center),
+                            style = Mono.copy(color = Palette.foreground, fontSize = TextSize.Small),
                         )
                     }
 
-                    if (selected == item.key) {
-                        Box(Modifier.fillMaxSize().border(2.dp, Palette.accent))
-
-                        // A small edit button keeps the old long-press action available without stealing the resize gesture.
-                        Box(
-                            Modifier
-                                .align(Alignment.TopEnd)
-                                .size(24.dp)
-                                .background(Palette.card)
-                                .combinedClickable(onClick = { runtime.edit(OwlBars.guestPath(spec.file.name)) }),
-                        ) {
-                            BasicText(
-                                "✎",
-                                Modifier.align(Alignment.Center),
-                                style = Mono.copy(color = Palette.foreground, fontSize = TextSize.Small),
-                            )
-                        }
-
-                        if (item.resizable) {
-                            Box(
-                                Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .size(28.dp)
-                                    .background(Palette.accent)
-                                    .pointerInput("${item.key}:${at.x}:${at.y}:${at.w}:${at.h}") {
-                                        var totalX = 0f
-                                        var totalY = 0f
-                                        var start = at
-                                        detectDragGestures(
-                                            onDragStart = {
-                                                totalX = 0f
-                                                totalY = 0f
-                                                start = at
-                                            },
-                                            onDrag = { change, drag ->
-                                                change.consume()
-                                                totalX += drag.x
-                                                totalY += drag.y
-                                                val nw =
-                                                    (start.w + totalX / grid.cellW).roundToInt()
-                                                        .coerceIn(minW, grid.cols - start.x)
-                                                val nh =
-                                                    (start.h + totalY / grid.cellH).roundToInt()
-                                                        .coerceIn(minH, grid.rows - start.y)
-                                                val next = Cell(start.x, start.y, nw, nh)
-                                                // Same rule as HomeGrid: a resize that covers another tile is refused.
-                                                if (taken.none { it.overlaps(next) }) layout.set(item.key, next)
-                                            },
-                                            onDragEnd = { layout.save() },
-                                            onDragCancel = { layout.save() },
-                                        )
+                    if (menuFor == item.key) {
+                        MenuPopup(
+                            items =
+                                listOf(
+                                    stringResource(R.string.home_edit) to {
+                                        menuFor = null
+                                        val agent = runtime.agents.default
+                                        if (agent == null) {
+                                            runtime.showCodingAgents()
+                                        } else {
+                                            runtime.terminal(editWidgetCommand(agent.bin, spec), "Edit ${spec.name}", agent)
+                                        }
                                     },
-                            ) {
-                                BasicText(
-                                    "⇲",
-                                    Modifier.align(Alignment.Center),
-                                    style = Mono.copy(color = Palette.foreground, fontSize = TextSize.Small),
-                                )
-                            }
-                        }
+                                    stringResource(R.string.home_remove) to {
+                                        menuFor = null
+                                        selected = null
+                                        engine.removeWidget(spec)
+                                    },
+                                ),
+                            onDismiss = { menuFor = null },
+                        )
                     }
                 }
             }

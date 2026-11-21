@@ -10,6 +10,14 @@ import com.bellatrixos.upgrade.Versioned
 import com.bellatrixos.upgrade.mapEntries
 import org.json.JSONObject
 
+/** A widget's free-form rectangle on Bellatrix's native home, in device pixels. */
+data class PixelRect(
+    val x: Int,
+    val y: Int,
+    val w: Int,
+    val h: Int,
+)
+
 /** A widget's place on its page's grid, in cells. */
 data class Cell(
     val x: Int,
@@ -113,6 +121,8 @@ class WidgetLayout(
 ) {
     private val prefs = context.getSharedPreferences("widget_grid", Context.MODE_PRIVATE)
     private val cellsOf = Screen.entries.associateWith { mutableStateMapOf<String, Cell>() }
+    /** Free pixel geometry set by dragging on the native home; separate from layout.toml's agent-owned cells. */
+    private val nativeRectsOf = mutableStateMapOf<String, PixelRect>()
     /** Read while compiling widgets, off the main thread. */
     private val pagesOf = Screen.entries.associateWith { java.util.concurrent.ConcurrentHashMap<String, Int>() }
 
@@ -170,6 +180,13 @@ class WidgetLayout(
             mainColumns = savedColumns(data, Screen.MAIN)
             for ((screen, c) in columnsBy) c.intValue = savedColumns(data, screen)
             load(data)
+        }
+        (Versioned.read(prefs.getString(NATIVE_RECTS, null), NATIVE_RECTS_VERSION) as? JSONObject)?.let { data ->
+            for (key in data.keys()) {
+                data.optJSONObject(key)?.let { r ->
+                    nativeRectsOf[key] = PixelRect(r.optInt("x"), r.optInt("y"), r.optInt("w", 1), r.optInt("h", 1))
+                }
+            }
         }
     }
 
@@ -283,6 +300,40 @@ class WidgetLayout(
         name: String,
         screen: Screen = this.screen,
     ) = cellsOf.getValue(screen)[name]
+
+    /** The free pixel rectangle a tile was dragged to on native home, if it has one. */
+    fun nativeRect(name: String) = nativeRectsOf[name]
+
+    /** Live update while dragging native home tiles; [saveNativeRects] persists. Equal values don't recompose. */
+    fun setNativeRect(
+        name: String,
+        rect: PixelRect,
+    ) {
+        if (nativeRectsOf[name] != rect) nativeRectsOf[name] = rect
+    }
+
+    fun clearNativeRect(name: String) = nativeRectsOf.remove(name)
+
+    /** Persists only the free geometry; it must never rewrite layout.toml or the agent-owned grid cells. */
+    fun saveNativeRects() {
+        val data = JSONObject()
+        for ((name, rect) in nativeRectsOf) {
+            data.put(name, JSONObject().put("x", rect.x).put("y", rect.y).put("w", rect.w).put("h", rect.h))
+        }
+        prefs.edit().putString(NATIVE_RECTS, Versioned.write(NATIVE_RECTS_VERSION, data)).apply()
+    }
+
+    /**
+     * Sets the measured native grid for previews without assigning cells. The native home places its tiles with
+     * declarative Box/Flex/Anchor geometry and free pixel drags, not with these cells; layout.toml keeps them for
+     * agents and the classic grid.
+     */
+    fun setGrid(
+        cols: Int,
+        rows: Int,
+    ) {
+        grid = cols to rows
+    }
 
     /** Live update while dragging; [save] persists. An unchanged cell isn't written, so pointer moves within it don't recompose the page. */
     fun set(
@@ -416,10 +467,12 @@ class WidgetLayout(
         cellsOf.getValue(screen).remove(name)
     }
 
-    /** Forgets everything about [name] on every screen: its cells and pages. */
+    /** Forgets everything about [name] on every screen: its cells, pages and free native-home rectangle. */
     fun remove(name: String) {
         for (c in cellsOf.values) c.remove(name)
         for (p in pagesOf.values) p.remove(name)
+        nativeRectsOf.remove(name)
+        saveNativeRects()
         pageStamp++
         save()
     }
@@ -470,6 +523,8 @@ class WidgetLayout(
     private companion object {
         const val LAYOUT = "layout"
         const val VERSION = 1
+        const val NATIVE_RECTS = "native_tile_rects"
+        const val NATIVE_RECTS_VERSION = 1
         const val PORTRAIT_ROWS = "portrait_rows_"
     }
 }

@@ -53,7 +53,7 @@ widget "memory" {
   size: 3x4               // size in grid cells when first placed: columns x rows
   minSize: 2x3            // users can't shrink it below this
   // lock: playing        // holds the home screen still while true, for a game or a drawing pad (owl 18)
-  // fps: busy ? 30 : 10  // frames a second a `time` animation needs, up to 60; fewer save battery (owl 19)
+  // fps: busy ? 30 : 10  // frames a second a `time` animation needs, up to 90; fewer save battery (owl 19)
 
   source mem = cmd("free -b | awk '/Mem:/ {print $2, $3}'") every 5s
   let used = num(words(mem)[1])
@@ -169,7 +169,7 @@ docs say what's current.
 A widget or face tile has at most 500 nodes, 2000 drawing calls per frame, lists of 1000
 items, 32 images and 128 SVGs on show at once (a view with more draws only those, and says so
 in `.errors/`), and a step budget per update. A widget that draws slowly animates at
-half rate (an app with `fps: 60` keeps its 60). Errors never take the home screen down: the failing value shows `…`
+half rate (an app asking for the top rate keeps it). Errors never take the home screen down: the failing value shows `…`
 and the message goes to `.errors/`.
 
 ## Tips

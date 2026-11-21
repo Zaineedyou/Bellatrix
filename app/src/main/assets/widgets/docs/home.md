@@ -5,12 +5,15 @@ Part of the widget docs: README.md, one folder up, comes first, and paths here a
 ## Home's layout
 
 Bellatrix home is hard-coded to one page. There is no face page, no empty feed page, and no second tile
-page on a foldable. `face "name" { }` files are tiles on that same native grid, just like `widget` files.
-A `page:` in any owl file is ignored; the tile still lands on the one home page.
+page on a foldable. `face "name" { }` files are ordinary tiles on that same native home, just like
+`widget` files. A `page:` in any owl file is ignored; the tile still lands on the one home page.
 
-`~/.config/bellatrix/home/layout.toml` holds that page's grid: where each tile sits, and which apps and
-folders are pinned. Moving things on the phone rewrites it, and home follows your edits within a second.
-A new file's `order:` and `size:` place it the first time; after that, move it here.
+A widget tile's initial rectangle comes from its own root `Box`/`Flex`/`Anchor` declaration: `width`,
+`height`, `size`, `fill`, `offset` and `anchor` are read in device-independent pixels relative to the
+native home area. There is no grid snapping and no free-spot search: tiles may start anywhere and cover
+each other. A drag or resize on the phone saves a free pixel rectangle, so it wins over the file on the
+next load. `~/.config/bellatrix/home/layout.toml` still holds the classic grid used by pinned apps and
+folders; widget geometry is kept separately so agents and the grid do not fight over it.
 
 ```toml
 version = 1
@@ -26,10 +29,9 @@ tiles = [
 ]
 ```
 
-- `x` and `y` count cells from the top left; `w` and `h` are a widget's size.
-  Apps, folders and faces are one cell unless they declare a size. A tile off the grid or on top of
-  one before it takes the first free spot instead; if the page is full it takes the least crowded spot
-  and is drawn above the others.
+- `x` and `y` count cells from the top left for pinned apps, folders and the classic grid preview;
+  widget tiles are no longer placed from these cells. A widget with no geometry in its root uses its
+  declared `size:` as a starting size, near its `order:` position.
 - `app` is an Android package (`"org.mozilla.firefox"`), an activity with its
   profile when there's more than one (`"com.android.chrome/.Main@10"`),
   `"linux:<desktop id>"`, or `"owl:<file>"` for an owl app. Adding one pins it;
@@ -44,11 +46,16 @@ tiles = [
 On the phone, long-press an empty part of home and use **new widget file**,
 **edit home surface** or **edit taskbar surface**: they open those `.owl` files in Bellatrix's own
 text editor, with no Linux or coding agent needed. Save, and the file appears on the real native
-home grid within a second. Coding agents work too (the prompts point them at these same files), as
-does any other writer of files. Tap a widget tile to open its OWL screen. Long-press the tile to select
-it: drag the bottom-right handle to resize it in whole grid cells, or tap the top-right button to edit
-just that file. The empty home invite creates a widget or face tile directly when Linux isn't installed.
-There is no second launcher screen — the files below are the ones Bellatrix home reads.
+home within a second. Coding agents work too (the prompts point them at these same files), as does
+any other writer of files.
+
+Every widget tile has a small **▾** menu at its top-right: **remove** moves the `.owl` file to
+`.removed/` and takes the tile off home, while **edit** starts a Coding Agent session for that file
+(or opens the standalone Coding Agents page when no agent is installed). Long-press a tile to select
+it; with it selected, drag anywhere on it to move it freely, or drag any edge/corner to resize it in
+pixels. Tiles may overlap, and the home area is clipped without a visible border. The empty home
+invite creates a widget or face tile directly when Linux isn't installed. There is no second launcher
+screen — the files below are the ones Bellatrix home reads.
 
 `home.owl` is an ordinary OWL `panel` drawn **over the Bellatrix desktop view you already see**, above
 the taskbar and below app windows. Its tiles are clipped to that area, so they never escape the home
@@ -72,8 +79,9 @@ They are seeded from Flex/Box/Anchor starters on the first install:
    sizes; a transparent surface gives a transparent PNG, which is how it leaves
    Bellatrix's native look visible. Add nodes or an opaque `background` if you
    want something to see in the preview.
-3. Move it with `{ widget = "<name>.owl", x, y, w, h }` in
-   `~/.config/bellatrix/home/layout.toml`, or let it take the first free spot.
+3. Give it a starting rectangle with `width:`/`height:`/`size:`, `fill:`, `offset: [x, y]` and
+   `anchor:` on its root `Box`/`Flex`/`Anchor`, or drag it on the phone. `layout.toml` keeps the
+   classic grid for pinned apps and folders, not widget geometry.
 4. `owl-send ~/.config/bellatrix/widgets/<name>.owl set <state> <value>` changes
    live state; `owl-send <file> refresh` redraws it.
 
@@ -107,9 +115,10 @@ panel "home" {
 
 Save that as `home.owl` and the modules sit on the native home surface at the size of the real
 desktop area. `taskbar.owl` uses the same shape at the taskbar's size. `Box` accepts the same `anchor`
-property, so an existing panel can be converted without changing its structure. The shipped
-`widget-*.owl` and `face-*.owl` files use `Box` around `Anchor` too, so the same nodes can be checked
-as ordinary home tiles.
+property, so an existing panel can be converted without changing its structure. The same root props
+place a `widget` or `face` tile on home: `width: 320; height: 180; offset: [40, 24]` starts at 40×24 dp,
+and `anchor: bottomEnd` pins it to the bottom-right corner. The shipped `widget-*.owl` and
+`face-*.owl` files use `Box` around `Anchor`, so the same nodes can be checked as ordinary home tiles.
 
 ## Taskbar layout
 
