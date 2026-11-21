@@ -16,10 +16,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 - Widget removal on the one home page now uses the original compiled spec, so removing a tile no longer leaves a ghost until the next reload.
 - Face files and old owl files with a `page:` no longer sort by that stale page number; every file is normalized to page 1 before placement and instance startup.
 
-### Important
-
-- DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
-- TOLOL, KAN UDAH GUA BILANG KALO MERGE FITUR OMALAUNCHER KE BELLATRIX TU TAMPILAN NYA SYNC SAMA TAMPILAN BELLATRIX NGENTOT, JANGAN MAKE TAMPILAN OMA LAUNCHER, LU TOLOL APA GIMANA? PINDAH CODING AGENTS NYA STANDALONE JANGAN ADA DI DALAM SETTING LINUX, DAN BUAT SCREEN NYA NYATU KE TAMPILAN SETTING BELLATRIX NYA JANGAN BUAT TERPISAH NGENTOT, INI WAJIB, ANJING
 
 ## [2.9.22] - 2026-11-22
 
@@ -35,10 +31,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 - `home.empty-page-left`, `home.empty-page-right` and `home.home-page` are deprecated and removed from the Style menu; old `style.toml` files are migrated to the single-page behavior.
 - Face files are now ordinary tiles on the one home page instead of full-screen swipe pages. Widget docs, agent prompts and templates were updated to say so.
 
-### Important
-
-- DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
-- TOLOL, KAN UDAH GUA BILANG KALO MERGE FITUR OMALAUNCHER KE BELLATRIX TU TAMPILAN NYA SYNC SAMA TAMPILAN BELLATRIX NGENTOT, JANGAN MAKE TAMPILAN OMA LAUNCHER, LU TOLOL APA GIMANA? PINDAH CODING AGENTS NYA STANDALONE JANGAN ADA DI DALAM SETTING LINUX, DAN BUAT SCREEN NYA NYATU KE TAMPILAN SETTING BELLATRIX NYA JANGAN BUAT TERPISAH NGENTOT, INI WAJIB, ANJING
 
 ## [2.9.21] - 2026-11-21
 
@@ -53,10 +45,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 - `home.owl` and `taskbar.owl` are excluded from gesture panels so they can't be swiped open as a separate screen.
 - Bundled widget examples and docs use Bellatrix theme and state paths instead of the previous upstream names.
 
-### Important
-
-- DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
-- TOLOL, KAN UDAH GUA BILANG KALO MERGE FITUR OMALAUNCHER KE BELLATRIX TU TAMPILAN NYA SYNC SAMA TAMPILAN BELLATRIX NGENTOT, JANGAN MAKE TAMPILAN OMA LAUNCHER, LU TOLOL APA GIMANA? PINDAH CODING AGENTS NYA STANDALONE JANGAN ADA DI DALAM SETTING LINUX, DAN BUAT SCREEN NYA NYATU KE TAMPILAN SETTING BELLATRIX NYA JANGAN BUAT TERPISAH NGENTOT, INI WAJIB, ANJING
 
 ## [2.9.20] - 2026-11-21
 
@@ -72,9 +60,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 - Removed the **Recommended** section from the App Drawer.
 - Removed the "Production-ready desktop-style launcher for Android." line from README.
 
-### Important
-
-- DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
 
 ## [2.9.19] - 2026-11-21
 
@@ -90,9 +75,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 - Removed Omarchy theming completely: no upstream theme release, theme catalog, repo installer, Omarchy paths, shims, or UI strings. Themes are Bellatrix's own local files, using the shipped default palette.
 - Terminal keyboard toggle icon and click logic removed; tapping the terminal or a Coding Agents chat box still raises the keyboard.
 
-### Important
-
-- DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
 
 ## [2.9.18] - 2026-11-21
 
