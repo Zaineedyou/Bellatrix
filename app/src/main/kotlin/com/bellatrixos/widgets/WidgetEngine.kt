@@ -434,7 +434,7 @@ class WidgetEngine(
     ) {
         setPage(fileName, 1)
         val i = specs.indexOfFirst { it.file.name == fileName }
-        if (i >= 0) specs[i] = specs[i].onPage(1)
+        if (i >= 0 && specs[i].page != 1) specs[i] = specs[i].onPage(1)
     }
 
     private fun agentWidgetFile(agent: Agent) = "$AGENT_PREFIX${agent.bin}.owl"
@@ -539,10 +539,11 @@ class WidgetEngine(
     /** Widgets, pinned apps and folders on [page]. Wrappers compare by spec, so unchanged pages skip recomposition. */
     fun itemsOn(page: Int): List<HomeItem> = itemsByPage[page].orEmpty()
 
-    /** Bellatrix has one home page on every screen: ignore a file's or a saved layout's page number. */
+    /** Bellatrix has one home page on every screen: ignore a file's or a saved layout's page number. Widget specs are
+     * already normalized to page 1 in [reload], so keep the same object and its identity for removal and recomposition. */
     private fun HomeItem.onSinglePage(): HomeItem =
         when (this) {
-            is WidgetItem -> WidgetItem(spec.onPage(1))
+            is WidgetItem -> this
             is Shortcut -> copy(page = 1)
             is Folder -> copy(page = 1, apps = apps.map { it.copy(page = 1) })
         }
@@ -553,13 +554,13 @@ class WidgetEngine(
      */
     fun itemsByPageOn(screen: Screen): Map<Int, List<HomeItem>> {
         if (screen == layout.screen) return itemsByPage
-        val widgets = specs.filter(::onHome).map { WidgetItem(it.onPage(1)) }
+        val widgets = specs.filter(::onHome).map(::WidgetItem)
         return (widgets + shortcuts.onGrid(screen).map { it.onSinglePage() }).groupBy { it.page }
     }
 
     /** Built once per change rather than per call: home asks for every page on each recomposition, and drags ask often. */
     private val itemsByPage by derivedStateOf {
-        (specs.filter(::onHome).map { WidgetItem(it.onPage(1)) } + shortcuts.onGrid().map { it.onSinglePage() }).groupBy { it.page }
+        (specs.filter(::onHome).map(::WidgetItem) + shortcuts.onGrid().map { it.onSinglePage() }).groupBy { it.page }
     }
 
     val pages: List<Int> get() = listOf(1)
@@ -696,12 +697,15 @@ class WidgetEngine(
             }
         }
         val changed = parsed.filter { old[it.file.name] !== it }.map { it.file.name }
+        // A file's old `page:` (a face's default 0, for example) must not order tiles on Bellatrix's one page.
+        // Normalize here, before sorting and before home wraps specs in tiles, so removal keeps the same object.
+        val normalized = parsed.map { if (it.page == 1) it else it.onPage(1) }
         specs.clear()
-        specs += parsed.sortedWith(compareBy({ it.page }, { it.order }, { it.file.name }))
+        specs += normalized.sortedWith(compareBy({ it.page }, { it.order }, { it.file.name }))
         // Unchanged files keep their running instance; changed ones start fresh but keep their values.
         val previous = HashMap(instances)
         instances.clear()
-        for (spec in parsed) {
+        for (spec in normalized) {
             val program = spec.program ?: continue
             // Stopped below with the other leftovers.
             if (program.needsLinux && !linux) continue
@@ -1011,7 +1015,7 @@ class WidgetEngine(
     ): WidgetSpec {
         writeError(file, error)
         writeCheck(file, hash, "error")
-        return WidgetSpec(file, file.nameWithoutExtension, previous?.page ?: layout.pageOn(file.name, 1), previous?.order ?: 999, null, error, previous?.size, previous?.minSize ?: (1 to 1), stamp, kind)
+        return WidgetSpec(file, file.nameWithoutExtension, layout.pageOn(file.name, 1), previous?.order ?: 999, null, error, previous?.size, previous?.minSize ?: (1 to 1), stamp, kind)
     }
 
     /** Error files are written in order: a clear must never land after the error that follows it. */

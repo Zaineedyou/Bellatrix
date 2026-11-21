@@ -9,6 +9,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.23] - 2026-11-22
+
+### Fixed
+
+- Widget removal on the one home page now uses the original compiled spec, so removing a tile no longer leaves a ghost until the next reload.
+- Face files and old owl files with a `page:` no longer sort by that stale page number; every file is normalized to page 1 before placement and instance startup.
+
+### Important
+
+- DAN PERINTAH ITU (UNTUK TIDAK MEMAKAI TAMPILAN OMALAUNCHER) WAJIB UNTUK UPDATE SETERUSNYA, BUKAN UPDATE INI AJA.
+- TOLOL, KAN UDAH GUA BILANG KALO MERGE FITUR OMALAUNCHER KE BELLATRIX TU TAMPILAN NYA SYNC SAMA TAMPILAN BELLATRIX NGENTOT, JANGAN MAKE TAMPILAN OMA LAUNCHER, LU TOLOL APA GIMANA? PINDAH CODING AGENTS NYA STANDALONE JANGAN ADA DI DALAM SETTING LINUX, DAN BUAT SCREEN NYA NYATU KE TAMPILAN SETTING BELLATRIX NYA JANGAN BUAT TERPISAH NGENTOT, INI WAJIB, ANJING
+
 ## [2.9.22] - 2026-11-22
 
 ### Added
