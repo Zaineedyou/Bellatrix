@@ -40,6 +40,12 @@ repository; ignore any inherited Play/Foss flavour or workflow names.
 
 ## Rules the code doesn't show
 
+- **Omalauncher ports are merged into Bellatrix, never added beside it.** A
+  ported feature belongs in the existing home, drawer, settings and runtime.
+  Never add a second home activity, a mode/enable switch, a parallel backend,
+  a separate button or screen, or branching like `useOwlHome`/`LinuxRuntime`.
+  One runtime, one home, one drawer: the feature appears where the launcher
+  already draws apps and home, with no user choice to make.
 - **Existing installs must keep working.** A change to saved data, the rootfs
   setup or files the launcher writes goes
   through one of the four update mechanisms in ARCHITECTURE.md "Updates": a new
