@@ -35,6 +35,7 @@ import com.bellatrixos.linux.Packages
 import com.bellatrixos.linux.Proot
 import com.bellatrixos.linux.SystemUpdates
 import com.bellatrixos.linux.LauncherFont
+import com.bellatrixos.linux.LINUX_AGENT_TAG_PREFIX
 import com.bellatrixos.linux.TerminalFont
 import com.bellatrixos.linux.bundledIcons
 import com.bellatrixos.linux.defaultApps
@@ -761,12 +762,16 @@ class Runtime(
             onLinuxUnavailable()
             return
         }
+        // Drawer entries and OWL commands don't carry the Agent; infer it so every launch gets the
+        // same service/daemon policy and the right taskbar icon, not a generic terminal one.
+        val effectiveAgent = agent ?: inferAgent(command, name)
         // Per agent, so a Claude and a Grok "New app" don't share an app_id.
-        val slug = if (agent == null || agent.name == name) name else "${agent.bin} $name"
+        val slug = if (effectiveAgent == null || effectiveAgent.name == name) name else "${effectiveAgent.bin} $name"
         val appId = "omarchy." + slug.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-')
         launchedNames[appId] = name
-        if (agent != null) launchedAgents[appId] = agent
-        val args = command?.let { " -e bash -c " + shellQuote(it) }.orEmpty()
+        if (effectiveAgent != null) launchedAgents[appId] = effectiveAgent
+        val script = command?.let { effectiveAgent?.prepared(it) ?: it }
+        val args = script?.let { " -e bash -c " + shellQuote(it) }.orEmpty()
         launch("foot --app-id=$appId${terminalFont.optionFor(appId, command)}$args")
     }
 
@@ -833,6 +838,31 @@ class Runtime(
         appId: String,
         name: String?,
     ): Agent? = launchedAgents[appId] ?: AGENTS.firstOrNull { it.name == name }
+
+    /** Recovers the agent from a drawer command (plain, with arguments or prompt) or an exact window name. */
+    private fun inferAgent(
+        command: String?,
+        name: String,
+    ): Agent? {
+        if (command.isNullOrBlank()) return null
+        val commandBin = command.trimStart().substringBefore(' ')
+        return AGENTS.firstOrNull { it.bin == commandBin || it.command == command.trim() || command.trimStart().startsWith(it.bin + " ") }
+            ?: AGENTS.firstOrNull { it.name == name }
+    }
+
+    /**
+     * A floating terminal keeps the pinned Terminal button; a coding agent gets its own taskbar/
+     * Recents entry so its logo and name show instead of a second generic Terminal.
+     */
+    fun floatingWindowTag(handle: String): String {
+        val window = wm.windowByHandle(handle) ?: return com.bellatrixos.linux.UILinuxWindow.TAG
+        val agent = agentOf(window.appId, displayName(window.appId, window.title))
+        return if (agent == null) {
+            com.bellatrixos.linux.UILinuxWindow.TAG
+        } else {
+            LINUX_AGENT_TAG_PREFIX + agent.bin
+        }
+    }
 
     /** The drawer icon of the app called [name] (an agent's logo, say); null until loaded, or if it has none. */
     fun iconNamed(name: String): ImageBitmap? = linuxApps.apps.firstOrNull { it.name == name }?.let { linuxApps.icons[it.id] }

@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.bellatrixos.R
 import com.bellatrixos.database.SharedPrefs
+import com.bellatrixos.linux.LINUX_AGENT_TAG_PREFIX
 import com.bellatrixos.windows.installed_apps.AppsDatabase
 import java.io.File
 import java.util.Collections
@@ -33,22 +34,33 @@ class IconEngine(context: Context) {
         Runnable, Comparable<IconTask> {
         override fun compareTo(other: IconTask): Int = 0
 
+        /** A coding-agent window keeps its own logo in the taskbar and Recents, never the terminal one. */
+        private fun agentDrawable(base: String): Drawable? {
+            val bin = base.removePrefix(LINUX_AGENT_TAG_PREFIX)
+            if (bin.isEmpty()) return null
+            val id = c.resources.getIdentifier("agent_${bin.replace('-', '_')}", "drawable", c.packageName)
+            return if (id == 0) null else ContextCompat.getDrawable(c, id)
+        }
+
         override fun run() {
             val pack = g
             val pm = c.packageManager
             // Urutan sama dengan Java asli: ikon app bawaan -> ikon dari DB -> icon pack -> ikon paket.
             // Exception apa pun jatuh ke ikon generik (img_file_exe), bukan bitmap kosong.
             val bitmap: Bitmap? = try {
-                var drawable: Drawable? = when (pkg.substringBefore("::::")) {
-                    "UIInstaller" -> ContextCompat.getDrawable(c, R.drawable.img_app_installer)
-                    "UINotepad" -> ContextCompat.getDrawable(c, R.drawable.img_app_notepad)
-                    "UITerminal", "UILinuxWindow" -> ContextCompat.getDrawable(c, R.drawable.img_app_terminal)
-                    "UIVoice" -> ContextCompat.getDrawable(c, R.drawable.img_app_music)
-                    "UISettings" -> ContextCompat.getDrawable(c, R.drawable.img_app_settings)
-                    "UIExplorer" -> ContextCompat.getDrawable(c, R.drawable.img_app_explorer)
-                    "UIMusic", "UIVideo" -> ContextCompat.getDrawable(c, R.drawable.img_app_music)
-                    "UIPhotos" -> ContextCompat.getDrawable(c, R.drawable.img_app_photos)
-                    "UIBrowser" -> ContextCompat.getDrawable(c, R.drawable.img_app_chrome)
+                val base = pkg.substringBefore("::::")
+                var drawable: Drawable? = when {
+                    base.startsWith(LINUX_AGENT_TAG_PREFIX) -> agentDrawable(base)
+                    base == "UIInstaller" -> ContextCompat.getDrawable(c, R.drawable.img_app_installer)
+                    base == "UINotepad" -> ContextCompat.getDrawable(c, R.drawable.img_app_notepad)
+                    base == "UITerminal" || base == "UILinuxWindow" ->
+                        ContextCompat.getDrawable(c, R.drawable.img_app_terminal)
+                    base == "UIVoice" -> ContextCompat.getDrawable(c, R.drawable.img_app_music)
+                    base == "UISettings" -> ContextCompat.getDrawable(c, R.drawable.img_app_settings)
+                    base == "UIExplorer" -> ContextCompat.getDrawable(c, R.drawable.img_app_explorer)
+                    base == "UIMusic" || base == "UIVideo" -> ContextCompat.getDrawable(c, R.drawable.img_app_music)
+                    base == "UIPhotos" -> ContextCompat.getDrawable(c, R.drawable.img_app_photos)
+                    base == "UIBrowser" -> ContextCompat.getDrawable(c, R.drawable.img_app_chrome)
                     else -> null
                 }
                 if (drawable == null) {

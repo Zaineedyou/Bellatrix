@@ -71,6 +71,7 @@ import com.bellatrixos.app_settings.searchbar.SuggestionItem
 import com.bellatrixos.context_menu.UIContextMenu
 import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.desktop.DesktopAdapter
+import com.bellatrixos.linux.LINUX_AGENT_TAG_PREFIX
 import com.bellatrixos.linux.LINUX_APP_PREFIX
 import com.bellatrixos.desktop.DesktopDB
 import com.bellatrixos.desktop.DesktopItem
@@ -390,19 +391,20 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     override fun M(str: String, item: StartMenuItem?, str2: String) {
-        // The terminal never opens a placeholder tile: launch foot directly and let
-        // its toplevel arrive as a floating UILinuxWindow.
+        // The terminal never opens a placeholder tile: focus the one already open, or launch foot.
         if (str == "UITerminal") {
-            // A taskbar tap can arrive while home is stopped; reinstall the hooks first so
-            // foot becomes a floating window instead of a new Android Recents document.
-            installRuntimeHooks()
-            (application as App).runtime.terminal(null, "Terminal")
+            openOrFocusTerminal()
             return
         }
         // Guest .desktop entries (including installed coding agents) live in the same drawer
         // as every other app. They open through the one runtime, never a separate screen.
         if (str.startsWith(LINUX_APP_PREFIX)) {
             openLinuxApp(str.removePrefix(LINUX_APP_PREFIX))
+            return
+        }
+        // A coding-agent taskbar entry is a window tag, not an installed Android package.
+        if (str.startsWith(LINUX_AGENT_TAG_PREFIX)) {
+            c0(str, null)
             return
         }
         val callbackA = { s: String -> IntentApps.b(this.W ?: this, s, item, this) }
@@ -693,10 +695,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
 
     override fun c0(str: String, str2: String?) {
         // App drawer, taskbar, pinned shortcut and start menu all come through here.
-        // Terminal must go straight to foot, never to the old "Open terminal" placeholder.
         if (str == "UITerminal") {
-            installRuntimeHooks()
-            (application as App).runtime.terminal(null, "Terminal")
+            openOrFocusTerminal()
             return
         }
         if (str.startsWith(LINUX_APP_PREFIX)) {
@@ -1431,13 +1431,32 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         outState.putParcelableArrayList("taskbar_items", ArrayList(this.C0))
     }
 
+    /**
+     * Taskbar Terminal behaves like Settings and Explorer: one window, focused on the next tap.
+     * A new foot is launched only when no plain terminal window is open, so repeated taps never
+     * pile new Terminal entries into Recents.
+     */
+    private fun openOrFocusTerminal() {
+        installRuntimeHooks()
+        val runtime = (application as App).runtime
+        val existing =
+            Windows.c(com.bellatrixos.linux.UILinuxWindow.TAG).firstOrNull { fragment ->
+                val handle = fragment.d0() ?: return@firstOrNull false
+                val window = runtime.wm.windowByHandle(handle) ?: return@firstOrNull false
+                runtime.agentOf(window.appId, runtime.displayName(window.appId, window.title)) == null
+            }
+        if (existing != null) p(existing) else runtime.terminal(null, "Terminal")
+    }
+
     /** Keeps every guest window routed into a Bellatrix window, including taskbar Terminal taps. */
     private fun installRuntimeHooks() {
         val runtime = (application as App).runtime
         // Every foot window, from any tile, becomes a floating home window. Missing Linux goes
         // to the one launcher Settings screen, never a separate legacy Linux window.
         runtime.openFloatingTerminal = { handle ->
-            if (!isFinishing && !isDestroyed) runOnUiThread { this@MainActivity.c0("UILinuxWindow", handle) }
+            if (!isFinishing && !isDestroyed) {
+                runOnUiThread { this@MainActivity.c0(runtime.floatingWindowTag(handle), handle) }
+            }
         }
         // Installing or removing an agent rewrites its .desktop entry; the drawer is one
         // list, so just rebuild that list. No agents button, no separate screen.
@@ -1570,8 +1589,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         if (!uIFragment.isAdded || removing) {
             return
         }
-        val str = fragmentString(uIFragment, "T") ?: uIFragment.tag
-        val idx = if (str != null) TaskBarDB.a(str.split("::::", limit = 2)[0]) else -1
+        val idx = TaskBarDB.a(Windows.taskTag(uIFragment) ?: "")
         val visible = if (fragmentBool(uIFragment, "t")) true else uIFragment.isVisible
         if (Windows.b != idx) {
             if (!visible) {

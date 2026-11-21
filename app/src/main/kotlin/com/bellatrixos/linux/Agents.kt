@@ -35,10 +35,36 @@ data class Agent(
     val node: Boolean = pkg.startsWith("npm:"),
     /** Set for an agent that installs itself instead of through mise. */
     val own: OwnInstaller? = null,
+    /** Global flags placed right after the binary in every way of starting this agent. */
+    val startupFlags: String = "",
+    /** Best-effort guest command run before it, for agents that manage a background service. */
+    val prepare: String = "",
 ) {
     /** Its activity alias in the manifest (cursor-agent -> CursorAgentWindow), so Recents names its window after it. */
     val windowAlias get() = bin.split('-').joinToString("") { it.replaceFirstChar(Char::uppercase) } + "Window"
+
+    /** Adds this agent's flags after its binary, even when the caller supplied its own arguments. */
+    fun flags(command: String): String {
+        if (startupFlags.isBlank()) return command
+        val trimmed = command.trimStart()
+        val space = trimmed.indexOfFirst { it.isWhitespace() }
+        return if (space < 0) {
+            "$trimmed $startupFlags"
+        } else {
+            "${trimmed.substring(0, space)} $startupFlags${trimmed.substring(space)}"
+        }
+    }
+
+    /** Every launch path (terminal, drawer, prompt, voice) gets the same proot-safe preparation. */
+    fun prepared(command: String): String {
+        val prefix = if (prepare.isBlank()) "" else "{ $prepare; } && "
+        return prefix + flags(command)
+    }
 }
+
+/** OpenCode 2 and Kilo start a shared background server by default; proot kills it with its window. */
+private fun noService(bin: String) =
+    "command -v $bin >/dev/null 2>&1 && $bin service set disabled true || true"
 
 /** How an agent that mise has no package for installs, updates and removes itself; all run in the guest. */
 data class OwnInstaller(
@@ -68,7 +94,15 @@ val AGENTS =
     listOf(
         Agent("claude", "Claude Code", R.string.linux_agent_claude, "claude"),
         // mise installs OpenCode 2 from npm (@opencode/cli).
-        Agent("opencode", "OpenCode", R.string.linux_agent_opencode, "opencode", node = true),
+        Agent(
+            "opencode",
+            "OpenCode",
+            R.string.linux_agent_opencode,
+            "opencode",
+            node = true,
+            startupFlags = "--standalone",
+            prepare = noService("opencode"),
+        ),
         Agent("codex", "Codex", R.string.linux_agent_codex, "codex"),
         Agent("grok", "Grok", R.string.linux_agent_grok, "npm:@xai-official/grok"),
         Agent("copilot", "GitHub Copilot", R.string.linux_agent_copilot, "copilot"),
@@ -125,7 +159,14 @@ val AGENTS =
                 "version_list_url=https://prod.download.cli.kiro.dev/stable/latest/manifest.json,version_json_path=.version]",
             command = "kiro-cli chat",
         ),
-        Agent("kilo", "Kilo", R.string.linux_agent_kilo, "npm:@kilocode/cli"),
+        Agent(
+            "kilo",
+            "Kilo",
+            R.string.linux_agent_kilo,
+            "npm:@kilocode/cli",
+            startupFlags = "--standalone",
+            prepare = noService("kilo"),
+        ),
         Agent(
             "devin",
             "Devin CLI",
@@ -152,6 +193,9 @@ const val MISE_SELF_UPDATE = "{ mise self-update -y || true; }"
 
 /** State key for the single Coding Agents card's combined install job. */
 const val ALL_AGENTS_JOB = "__all"
+
+/** Taskbar/Recents tag for a floating coding-agent window; the suffix is the agent's bin name. */
+const val LINUX_AGENT_TAG_PREFIX = "LinuxAgent."
 
 /**
  * Node's official aarch64 binary links against libatomic.so.1, which the Void rootfs doesn't ship.

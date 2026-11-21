@@ -1,8 +1,10 @@
 package com.bellatrixos
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -21,6 +23,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.compose.ui.graphics.toArgb
+import com.bellatrixos.ui.Palette
 import com.bellatrixos.wayland.ActiveLinuxBackend
 import com.bellatrixos.wayland.KeyBarView
 import com.bellatrixos.wayland.KeyboardSink
@@ -99,7 +103,20 @@ class LinuxWindowActivity : AppCompatActivity() {
             insets
         }
 
-        setTitle(backend.displayName(window.appId, window.title))
+        val name = backend.displayName(window.appId, window.title)
+        setTitle(name)
+        // The manifest alias already names agent windows; this keeps their logo in Recents even
+        // when the task was started through the generic fallback instead of that alias.
+        val agent = (application as App).runtime.agentOf(window.appId, name)
+        if (agent != null) {
+            val iconId = resources.getIdentifier("agent_${agent.bin.replace('-', '_')}", "drawable", packageName)
+            if (iconId != 0) {
+                @Suppress("DEPRECATION")
+                setTaskDescription(
+                    ActivityManager.TaskDescription(name, BitmapFactory.decodeResource(resources, iconId), Palette.background.toArgb()),
+                )
+            }
+        }
     }
 
     override fun onStart() {

@@ -549,7 +549,7 @@ class VoiceSession(
         complaints.clear()
         phase = Phase.Starting
         val p =
-            runCatching { proot.process(l.command(session)).redirectErrorStream(false).start() }.getOrElse {
+            runCatching { proot.process(a.prepared(l.command(session))).redirectErrorStream(false).start() }.getOrElse {
                 phase = Phase.Off
                 notice = str(R.string.voice_cant_start, a.name, it.message.orEmpty())
                 return

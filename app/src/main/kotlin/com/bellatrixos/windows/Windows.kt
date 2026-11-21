@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentTransaction
 import com.bellatrixos.R
 import com.bellatrixos.UIFragment
 import com.bellatrixos.app_explorer.UIExplorer
+import com.bellatrixos.linux.UILinuxWindow
 import com.bellatrixos.taskbar.TaskBarAdapter
 import com.bellatrixos.taskbar.TaskBarDB
 import com.bellatrixos.taskbar.TaskBarItem
@@ -80,6 +81,14 @@ object Windows {
         return list
     }
 
+    /** The taskbar key of a window. Plain terminals use the pinned Terminal button, not a new recent. */
+    @JvmStatic
+    fun taskTag(fragment: UIFragment): String? {
+        val tag = fragment.tag ?: return null
+        val base = tag.substringBefore("::::")
+        return if (base == UILinuxWindow.TAG) "UITerminal" else base
+    }
+
     @JvmStatic
     fun d(window: Window, str: String): InstalledApp {
         val existing = InstalledAppsDB.c(str)
@@ -111,8 +120,7 @@ object Windows {
         val fragment = uIFragment ?: return
         val adapter = taskBarAdapter ?: return
         if (!fragment.isAdded || fragment.isRemoving) return
-        val tag = fragment.tag
-        val targetIndex = if (tag != null) TaskBarDB.a(tag.split("::::", limit = 2)[0]) else -1
+        val targetIndex = TaskBarDB.a(taskTag(fragment) ?: "")
         val event = if (b != targetIndex) {
             if (!fragment.isVisible) {
                 e(f4881d ?: return, fragment)
@@ -230,11 +238,7 @@ object Windows {
 
     @JvmStatic
     fun j(i2: Int, taskBarAdapter: TaskBarAdapter, uIFragment: UIFragment) {
-        var tag = uIFragment.tag
-        if (tag != null) {
-            val idx = tag.indexOf("::::")
-            if (idx != -1) tag = tag.substring(0, idx)
-        }
+        val tag = taskTag(uIFragment)
         val tagStr = tag ?: ""
         val itemIndex = TaskBarDB.a(tagStr)
         if (i2 == 0) {
