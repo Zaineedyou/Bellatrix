@@ -1462,10 +1462,10 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         runtime.onLinuxUnavailable = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "9") } }
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        intent?.getStringExtra(EXTRA_SETTINGS_PAGE)?.let { page ->
+        intent.getStringExtra(EXTRA_SETTINGS_PAGE)?.let { page ->
             pendingSettingsPage = page
             if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", page) }
         }
