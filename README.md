@@ -64,16 +64,17 @@ using Bellatrix UI — there is no second home screen or parallel desktop to swi
 Bellatrix home is hard-coded to one page. Every widget, face and pinned app lands on that native grid;
 an owl file's `page:` is ignored, and a full page places the new tile at the least crowded spot so it
 is still visible. Long-press empty home to create a widget file or to edit the two declarative surface
-files: `~/.config/bellatrix/widgets/home.owl` and `~/.config/bellatrix/widgets/taskbar.owl`. These seeded
-files are ordinary OWL `panel` files drawn over Bellatrix's real home and taskbar views — never a second
-launcher screen. They start transparent, so the shipped Bellatrix look stays; set an opaque `background`
-or add anchored nodes to cover or decorate those native surfaces. Lay their modules out with `Flex`,
-`Box`, `Anchor` and the `anchor` property (owl 24), Waybar-style; a new `widget-*.owl` or `face-*.owl`
-uses the same nodes as an ordinary home tile and is drawn on the real native desktop grid, not only in
-the Compose launcher. A widget tile's tap opens its OWL screen and a long-press edits its `.owl` file;
-the empty home invite opens the same native Bellatrix editor, so creating and editing OWL files never
-requires Linux or a coding agent. Agents can still work on the same files from the standalone Coding
-Agents settings page.
+files: `~/.config/bellatrix/widgets/home.owl` and `~/.config/bellatrix/widgets/taskbar.owl`. `home.owl`
+draws over the real desktop area; `taskbar.owl` restyles the real native taskbar views themselves —
+there is no second taskbar. They start transparent, so the shipped Bellatrix look stays; set an opaque
+`background`, `radius`, `border`/`borderColor`, `padding`, a visible `Flex`/`Row`/`Column` `gap`,
+or a visible `Text` color in `taskbar.owl` to change the native bar. Lay home modules out with `Flex`, `Box`, `Anchor` and the
+`anchor` property (owl 24), Waybar-style; a new `widget-*.owl` or `face-*.owl` uses the same nodes as an
+ordinary home tile and is drawn on the real native desktop grid, clipped to the home area. Tap a tile to
+open its OWL screen; long-press it to select it, then drag the bottom-right handle to resize or tap the
+top-right button to edit its `.owl` file. The empty home invite opens the same native Bellatrix editor,
+so creating and editing OWL files never requires Linux or a coding agent. Agents can still work on the
+same files from the standalone Coding Agents settings page.
 
 ## Requirements
 

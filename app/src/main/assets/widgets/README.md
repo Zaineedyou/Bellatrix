@@ -36,13 +36,14 @@ page is full, the new tile takes the least crowded spot and is drawn on top.
 
 On the phone, long-pressing empty home offers **new widget file**,
 **edit home surface** and **edit taskbar surface**: those open `.owl` files in Bellatrix's own editor,
-no Linux or coding agent needed. A `widget` or `face` tile is now drawn on the real native home grid too;
-tap it to open its OWL screen, or long-press it to edit its file. The empty home invite makes a tile directly.
-`home.owl` and `taskbar.owl` are seeded `panel` files drawn over Bellatrix's
-real home and taskbar views (not a separate OWL screen), so Flex/Box/Anchor can be tested from the first
-install. They start transparent to keep the native look; set a `background` on the root `Box` to cover the
-native surface, or add anchored modules to draw on it. Bellatrix's icons, windows, search and start
-button stay in place underneath. Layout them with `Flex`, `Box`, `Anchor` and `anchor` (owl 24),
+no Linux or coding agent needed. A `widget` or `face` tile is drawn on the real native home grid, clipped
+to the home area above the taskbar. Tap it to open its OWL screen; long-press it to select it, then drag
+the bottom-right handle to resize in whole cells or tap the top-right button to edit its file. The empty
+home invite makes a tile directly. `home.owl` draws over the real desktop; `taskbar.owl` restyles the real
+native taskbar views — no second taskbar is created. Its root `Box` reads `background`, `radius`,
+`border`, `borderColor` and `padding`; a visible `Flex`/`Row`/`Column` `gap` spaces task buttons,
+and a visible `Text` color tints native icons. Both start
+transparent to keep the native look. Layout home modules with `Flex`, `Box`, `Anchor` and `anchor` (owl 24),
 Waybar-style; see docs/home.md for the starter and the exact paths.
 
 ```owl

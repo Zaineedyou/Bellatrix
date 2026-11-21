@@ -45,17 +45,19 @@ On the phone, long-press an empty part of home and use **new widget file**,
 **edit home surface** or **edit taskbar surface**: they open those `.owl` files in Bellatrix's own
 text editor, with no Linux or coding agent needed. Save, and the file appears on the real native
 home grid within a second. Coding agents work too (the prompts point them at these same files), as
-does any other writer of files. Tap a widget tile to open its OWL screen, or long-press the tile to
-edit just that file; the empty home invite creates a widget or face tile directly when Linux isn't
-installed. There is no second launcher screen — the files below are the ones Bellatrix home reads.
+does any other writer of files. Tap a widget tile to open its OWL screen. Long-press the tile to select
+it: drag the bottom-right handle to resize it in whole grid cells, or tap the top-right button to edit
+just that file. The empty home invite creates a widget or face tile directly when Linux isn't installed.
+There is no second launcher screen — the files below are the ones Bellatrix home reads.
 
-The two surface files are ordinary OWL `panel` files drawn **over the Bellatrix views you already
-see**: `home.owl` fills the desktop area above the taskbar, and `taskbar.owl` fills the taskbar itself.
-They are not swiped open as panels and not a separate OWL home screen. Native desktop icons, app
-windows, the start menu, search and task buttons stay in place underneath; a transparent OWL file
-leaves the shipped Bellatrix look alone, while an opaque `background` or a node with its own drawing
-covers that part of the native surface. Taps still reach the native view unless an OWL node has an
-`onTap`. They are seeded from Flex/Box/Anchor starters on the first install:
+`home.owl` is an ordinary OWL `panel` drawn **over the Bellatrix desktop view you already see**, above
+the taskbar and below app windows. Its tiles are clipped to that area, so they never escape the home
+border. `taskbar.owl` does **not** create another taskbar: its compiled root `Box` properties
+`background`, `radius`, `border`, `borderColor` and `padding` are applied to the real native
+taskbar views; a visible `Flex`/`Row`/`Column` `gap` spaces task buttons, and a visible `Text` color
+tints native icons. A transparent file restores Bellatrix's
+shipped look. Native desktop icons, app windows, the start menu, search and task buttons stay in place.
+They are seeded from Flex/Box/Anchor starters on the first install:
 
 - `~/.config/bellatrix/widgets/home.owl` — the native home surface above the taskbar.
 - `~/.config/bellatrix/widgets/taskbar.owl` — the native taskbar surface.

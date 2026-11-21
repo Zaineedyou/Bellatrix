@@ -6,6 +6,7 @@ import android.view.ViewTreeObserver
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,11 +28,11 @@ import kotlin.math.max
 /**
  * Attaches the declarative OWL surfaces to the Bellatrix views MainActivity actually uses.
  *
- * Nothing is replaced or hidden: the home surface is inserted just above the native desktop grid and
- * below the app windows, start menu and taskbar; the taskbar surface is the last child of the native
- * taskbar. The home surface also draws `widget`/`face` files as tiles on the real native grid, the way an
- * Oma-style launcher puts declarative widgets on home. The ComposeViews are transparent outside those
- * tiles, so Bellatrix's icons, search and start button keep working.
+ * The home surface is inserted just above the native desktop grid and below the app windows, start menu
+ * and taskbar; it draws `home.owl` and `widget`/`face` tiles on the real native grid. There is no second
+ * taskbar: `taskbar.owl` is applied to the native taskbar views themselves by [NativeTaskbarSkin], so the
+ * start button, app list and tray stay the real Bellatrix views and remain clickable. The home surface is
+ * clipped to the native desktop bounds and transparent outside its tiles.
  */
 object OwlNativeSurfaces {
     fun attach(activity: AppCompatActivity) {
@@ -53,6 +54,8 @@ object OwlNativeSurfaces {
         val home =
             ComposeView(activity).apply {
                 id = View.generateViewId()
+                clipChildren = true
+                clipToPadding = true
                 layoutParams =
                     ConstraintLayout.LayoutParams(0, 0).apply {
                         startToStart = ConstraintLayout.LayoutParams.PARENT_ID
@@ -72,13 +75,6 @@ object OwlNativeSurfaces {
                 )
             }
         parent.addView(home, (parent.indexOfChild(desktop) + 1).coerceAtMost(parent.childCount))
-
-        val bar =
-            ComposeView(activity).apply {
-                id = View.generateViewId()
-                setOwlContent(activity, runtime, WidgetEngine.TASKBAR_BAR)
-            }
-        taskBar.addView(bar, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     }
 
     /** The columns and rows GridAutofillLayoutManager gives the native desktop, in pixels. */
@@ -95,6 +91,8 @@ object OwlNativeSurfaces {
         val rows = max(1, floor(down / rowHeight).toInt())
         val cellH = down / rows.toFloat()
         return NativeGrid(
+            width = desktop.width,
+            height = desktop.height,
             cols = cols,
             rows = rows,
             cellW = cellW,
@@ -121,6 +119,12 @@ object OwlNativeSurfaces {
         setContent {
             // Frosted OWL nodes blur the same wallpaper the Compose launcher would blur.
             val backdrop = remember(runtime) { Backdrop({ runtime.themes.background }, { 0f }) }
+            if (name == WidgetEngine.HOME_BAR) {
+                // The one home surface also watches the taskbar file; a save restyles the real native bar.
+                LaunchedEffect(runtime.widgets.specs.map { "${it.file.name}:${it.stamp}" }.joinToString("|")) {
+                    NativeTaskbarSkin.apply(activity, runtime)
+                }
+            }
             CompositionLocalProvider(LocalBackdrop provides backdrop) {
                 OwlSurface(runtime, name, Modifier.fillMaxSize())
                 if (name == WidgetEngine.HOME_BAR && grid != null) OwlHomeTiles(runtime, grid())

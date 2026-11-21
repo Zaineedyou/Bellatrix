@@ -65,9 +65,10 @@ object OwlBars {
         """
         // TASKBAR SURFACE — Bellatrix's native taskbar, skinned with OWL.
         // Long-press empty home → "edit taskbar surface" opens this file in Bellatrix's own editor.
-        // The root Box fills the real taskbar. Keep its background transparent to leave Bellatrix's
-        // start button, search and icons alone, or set one to cover them. Taps still reach the native
-        // view unless a node has its own onTap.
+        // There is no second taskbar: the root Box's background, radius, border, borderColor and padding
+        // restyle the real native taskbar views. A visible Flex/Row/Column gap spaces task buttons, and a
+        // visible Text's color tints native icons. Keep background transparent to leave Bellatrix's
+        // shipped look untouched; save to apply.
         panel "taskbar" {
           meta { owl: 24; description: "OWL skin for Bellatrix taskbar" }
 

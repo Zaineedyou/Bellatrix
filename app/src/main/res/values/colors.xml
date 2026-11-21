@@ -23,12 +23,12 @@
     <color name="app_dialog_border_footer_alpha">#26858585</color>
     <color name="app_dialog_border_light">#d6d6d6</color>
     <color name="app_dialog_border_solid">#cfcfcf</color>
-    <!-- Liquid Glass update dialog -->
-    <color name="liquid_glass_glow">#1A3D7BFF</color>
-    <color name="liquid_glass_fill_top">#F2FFFFFF</color>
-    <color name="liquid_glass_fill_mid">#D9EDF4FF</color>
-    <color name="liquid_glass_fill_bottom">#CCB9CEE8</color>
-    <color name="liquid_glass_stroke">#99FFFFFF</color>
+    <!-- Liquid Glass update dialog: dark frosted surface, bright edge highlight -->
+    <color name="liquid_glass_glow">#33273A5A</color>
+    <color name="liquid_glass_fill_top">#E0242836</color>
+    <color name="liquid_glass_fill_mid">#D41B1E2B</color>
+    <color name="liquid_glass_fill_bottom">#C8121520</color>
+    <color name="liquid_glass_stroke">#66FFFFFF</color>
     <color name="app_dialog_btn_danger">#c73f30</color>
     <color name="app_dialog_btn_danger_hover">#c42b1c</color>
     <color name="app_dialog_fg">#f9f9f9</color>

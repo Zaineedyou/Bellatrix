@@ -9,6 +9,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.26] - 2026-11-22
+
+### Added
+
+- Native home widget tiles can be resized by hand: long-press a tile to select it, then drag its bottom-right handle in whole grid cells. The top-right button edits that tile's `.owl` file. The size is saved to `layout.toml` immediately.
+
+### Fixed
+
+- `taskbar.owl` now restyles the real native taskbar views instead of adding a second Compose taskbar on top. The root `Box` properties `background`, `radius`, `border`, `borderColor` and `padding`, a visible `Flex`/`Row`/`Column` `gap` for task-button spacing, and a visible `Text` color for icon tint change the native bar; a transparent file restores Bellatrix's shipped look. This removes the stray oval/press spot caused by the overlay.
+- Widget tiles are clipped and clamped to the native home area above the taskbar, with a visible home border, so they cannot escape the home view after rotation or resize.
+- The native Liquid Glass **Check for updates** dialog is now dark in both light and dark system modes.
+
 ## [2.9.25] - 2026-11-22
 
 ### Fixed

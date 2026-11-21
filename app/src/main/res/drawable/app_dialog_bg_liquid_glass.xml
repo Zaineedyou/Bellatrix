@@ -12,7 +12,7 @@
             <corners android:radius="28dp" />
         </shape>
     </item>
-    <!-- glass body: bright highlight at the top, tinted translucent bottom -->
+    <!-- glass body: dark frosted top fading into a deeper translucent bottom -->
     <item>
         <shape android:shape="rectangle">
             <gradient
