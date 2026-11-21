@@ -692,7 +692,9 @@ class FloatingLayout @JvmOverloads constructor(c: Context, a: AttributeSet? = nu
     }
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        if (!B && event.action == MotionEvent.ACTION_DOWN && event.y > A) C?.a()
+        // Any press restores focus, including the titlebar band. Limiting this to
+        // the content area left an unfocused window unable to be dragged or resized.
+        if (!B && event.action == MotionEvent.ACTION_DOWN) C?.a()
         if (event.action == MotionEvent.ACTION_DOWN) D?.c()
         return super.dispatchTouchEvent(event)
     }

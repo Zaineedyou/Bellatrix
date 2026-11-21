@@ -39,6 +39,10 @@ object Windows {
         val tag = fragment.tag ?: return
         val existing = manager.findFragmentByTag(tag) ?: return
         if (existing.isRemoving) return
+        if (f4882e === fragment) {
+            fragment.setWindowFocused(false)
+            f4882e = null
+        }
         val tx = manager.beginTransaction()
         tx.setCustomAnimations(0, R.anim.app_anim_close, 0, 0)
         tx.hide(existing)
@@ -46,6 +50,27 @@ object Windows {
             tx.runOnCommit(a(taskBarAdapter, 2, fragment))
         }
         i(manager, tx)
+    }
+
+    /**
+     * True close: remove the window from the fragment manager and from the taskbar.
+     * Hiding (`a`) is only a minimise; the X button must not leave a dead window in
+     * Recents/taskbar after the Linux toplevel is gone.
+     */
+    @JvmStatic
+    fun close(uIFragment: UIFragment?, taskBarAdapter: TaskBarAdapter?) {
+        val fragment = uIFragment ?: return
+        val adapter = taskBarAdapter ?: return
+        val manager = f4881d ?: return
+        if (f4882e === fragment) f4882e = null
+        fragment.setWindowFocused(false)
+        if (fragment.isAdded && !fragment.isRemoving) {
+            val tx = manager.beginTransaction()
+            tx.setCustomAnimations(0, f4884h, 0, 0)
+            tx.remove(fragment)
+            i(manager, tx)
+        }
+        j(0, adapter, fragment)
     }
 
     @JvmStatic
@@ -71,7 +96,7 @@ object Windows {
         val manager = f4881d ?: return ArrayList()
         val list = ArrayList<UIFragment>()
         for (fragment in manager.fragments) {
-            if (fragment is UIFragment) {
+            if (fragment is UIFragment && !fragment.isRemoving) {
                 val tag = fragment.tag
                 if (tag != null && tag.startsWith(str)) {
                     list.add(fragment)
@@ -262,7 +287,7 @@ object Windows {
                 taskBarAdapter.notifyItemChanged(itemIndex)
             } else {
                 list.removeAt(itemIndex)
-                TaskBarDB.c(list)
+                TaskBarDB.d(list)
                 taskBarAdapter.B = list.size
                 taskBarAdapter.notifyItemRemoved(itemIndex)
             }
@@ -278,8 +303,8 @@ object Windows {
                 TaskBarAdapter.J = tag ?: "Blank"
                 b = itemIndex
                 val prev = f4882e
-                if (prev != null) prev.j0(false)
-                uIFragment.j0(true)
+                if (prev != null && prev !== uIFragment) prev.setWindowFocused(false)
+                uIFragment.setWindowFocused(true)
                 f4882e = uIFragment
                 return
             } else if (i2 == 3) {
@@ -302,6 +327,8 @@ object Windows {
                 taskBarAdapter.y = 4
                 taskBarAdapter.j(itemIndex, true)
                 taskBarAdapter.notifyItemChanged(itemIndex)
+                f4882e?.setWindowFocused(false)
+                uIFragment.setWindowFocused(false)
                 f4882e = null
                 return
             } else if (i2 != 4) {
@@ -316,8 +343,8 @@ object Windows {
                 TaskBarAdapter.J = tag ?: "Blank"
                 b = itemIndex
                 val prev = f4882e
-                if (prev != null) prev.j0(false)
-                uIFragment.j0(true)
+                if (prev != null && prev !== uIFragment) prev.setWindowFocused(false)
+                uIFragment.setWindowFocused(true)
                 f4882e = uIFragment
                 return
             }
@@ -349,8 +376,8 @@ object Windows {
                 b = newIndex
             }
             val prev = f4882e
-            if (prev != null) prev.j0(false)
-            uIFragment.j0(true)
+            if (prev != null && prev !== uIFragment) prev.setWindowFocused(false)
+            uIFragment.setWindowFocused(true)
             f4882e = uIFragment
         }
     }

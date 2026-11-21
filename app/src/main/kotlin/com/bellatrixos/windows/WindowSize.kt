@@ -74,6 +74,10 @@ object WindowSize {
             val rawY = event.rawY
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    // The resize grip is a sibling of FloatingLayout, so it never
+                    // goes through dispatchTouchEvent. Restore focus here as well.
+                    val focus = layout.C
+                    if (!layout.B && focus != null) focus.a() else layout.D?.c()
                     state.f4878a = rawX
                     state.b = rawY
                     state.c = view.width
@@ -204,7 +208,7 @@ object WindowSize {
                     MotionEvent.ACTION_DOWN -> {
                         if (!fragment.f0()) {
                             view.bringToFront()
-                            fragment.j0(true)
+                            fragment.setWindowFocused(true)
                             activity.d(fragment)
                         }
                         offsetX = event.rawX - view.x

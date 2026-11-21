@@ -429,6 +429,10 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         windowsCall("a", fragment, t0)
     }
 
+    override fun closeWindow(fragment: UIFragment) {
+        windowsCall("close", fragment, t0)
+    }
+
     override fun Q(i2: Int) {
         if (i2 == -1) return
         AppExecutors.c().post {

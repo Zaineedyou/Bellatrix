@@ -159,9 +159,8 @@ class UILinuxWindow : UIFragment() {
             object : Window.OnResizeStateChangeListener, FloatingLayout.OnAppFocusListener {
                 override fun a() {
                     view.bringToFront()
-                    j0(true)
+                    setWindowFocused(true)
                     activityIn?.d(this@UILinuxWindow)
-                    f.setFocusState(true)
                 }
 
                 override fun b(i2: Int) {
@@ -174,7 +173,7 @@ class UILinuxWindow : UIFragment() {
         f.setOnFocusListener(focusResize)
         f.setOnWindowTapListener {
             if (!f0()) {
-                j0(true)
+                setWindowFocused(true)
                 activityIn?.d(this@UILinuxWindow)
             }
         }
@@ -273,6 +272,7 @@ class UILinuxWindow : UIFragment() {
     }
 
     private fun closeWindow() {
+        if (closing) return
         closing = true
         val w = toplevel
         if (this::backend.isInitialized && w != null && backend.wm.appWindows.contains(w)) {
@@ -281,11 +281,16 @@ class UILinuxWindow : UIFragment() {
         removeSelf()
     }
 
+    /** Take the window out of the fragment registry and the taskbar, even if state was saved. */
     private fun removeSelf() {
+        closing = true
+        val host = activityIn
+        if (host != null) {
+            host.closeWindow(this)
+            return
+        }
         runCatching {
-            if (!parentFragmentManager.isStateSaved) {
-                parentFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
-            }
+            parentFragmentManager.beginTransaction().remove(this).commitAllowingStateLoss()
         }
     }
 

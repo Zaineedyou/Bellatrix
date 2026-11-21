@@ -30,6 +30,10 @@ interface MainActivityIn {
     fun M(str: String, item: StartMenuItem?, str2: String)
     fun N()
     fun P(fragment: UIFragment)
+
+    /** Full close (remove fragment and taskbar entry). Legacy hosts fall back to minimise. */
+    fun closeWindow(fragment: UIFragment) { P(fragment) }
+
     fun Q(i2: Int)
     fun R(z: Boolean)
     fun S()

@@ -47,5 +47,15 @@ open class UIFragment : Fragment() {
     open fun o0() {}
     open fun l0() {}
 
+    /**
+     * Single entry point for window focus. Subclasses keep their own visual flag in
+     * [j0]; going through here prevents the two from drifting apart when the taskbar
+     * or a window tap changes focus.
+     */
+    fun setWindowFocused(focused: Boolean) {
+        t0 = focused
+        j0(focused)
+    }
+
     open fun n0(): Boolean = this is UIImageViewer
 }
