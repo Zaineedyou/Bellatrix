@@ -1134,7 +1134,7 @@ class LangTest {
         assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: appAction(\"delete\", \"a:x\") } }").contains("appAction takes pin, info, uninstall, remove, edit and an app's key"))
         // Sharing was removed from the drawer's menu: reject it here without touching share(...).
         assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: appAction(\"share\", \"a:x\") } }").contains("appAction takes pin, info"))
-        Compiler.compile("widget {\n Text { text: 1; onTap: share(\"hi\") } }")
+        Compiler.compile("widget {\n meta { owl: 7 }\n Text { text: 1; onTap: share(\"hi\") } }")
         assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: workApps(\"off\") } }").contains("workApps takes pause, resume, toggle"))
         for (old in listOf("source d = android.drawer\n Text { text: 1 }", "Text { text: 1; onTap: appAction(\"pin\", \"l:foot\") }", "Text { text: 1; onTap: workApps(\"pause\") }")) {
             assertTrue(compileError("widget {\n meta { owl: 10 }\n $old }").contains("needs owl 11"))
