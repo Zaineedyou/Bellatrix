@@ -378,16 +378,45 @@ class WidgetServices(
     }
 
     /** The phone itself, which the guest can't identify: it has no DMI tables, and /system isn't mounted. */
-    private fun device(): Value =
-        Obj(
+    private fun device(): Value {
+        fun known(value: String) =
+            value.takeUnless { it.isBlank() || it.equals(Build.UNKNOWN, ignoreCase = true) }
+        fun field(value: String?) = value?.let(::Str) ?: Null
+
+        // Some phones leave MODEL or MANUFACTURER generic. Expose every Android identity field as
+        // null when absent, and one ready-made label built from the first name the phone actually has.
+        val model = known(Build.MODEL)
+        val maker = known(Build.MANUFACTURER)?.replaceFirstChar { it.uppercase() }
+        val brand = known(Build.BRAND)?.replaceFirstChar { it.uppercase() }
+        val codename = known(Build.DEVICE)
+        val product = known(Build.PRODUCT)
+        val board = known(Build.BOARD)
+        val hardware = known(Build.HARDWARE)
+        val name = model ?: product ?: codename ?: board ?: hardware ?: brand ?: "phone"
+        val vendor = maker ?: brand.orEmpty()
+        val label =
+            if (vendor.isBlank() || vendor.equals(name, ignoreCase = true)) {
+                name
+            } else {
+                "$vendor $name"
+            }
+
+        return Obj(
             mapOf(
-                "model" to Str(Build.MODEL),
-                "maker" to Str(Build.MANUFACTURER.replaceFirstChar { it.uppercase() }),
+                "label" to Str(label),
+                "model" to field(model),
+                "maker" to field(maker),
+                "brand" to field(brand),
+                "device" to field(codename),
+                "product" to field(product),
+                "board" to field(board),
+                "hardware" to field(hardware),
                 "android" to Str(Build.VERSION.RELEASE),
                 "sdk" to Num(Build.VERSION.SDK_INT.toDouble()),
-                "soc" to Str(if (Build.VERSION.SDK_INT >= 31) Build.SOC_MODEL.takeUnless { it == Build.UNKNOWN }.orEmpty() else ""),
+                "soc" to field(if (Build.VERSION.SDK_INT >= 31) known(Build.SOC_MODEL) else null),
             ),
         )
+    }
 
     /**
      * What a fetch shows about the phone, all from Android, so it works without Linux:

@@ -71,11 +71,18 @@ so the shipped Bellatrix look stays; set an opaque `background`, `radius`, `bord
 the native bar. Lay modules out with `Flex`, `Box`, `Anchor` and the `anchor` property (owl 24),
 Waybar-style. A new `widget-*.owl` or `face-*.owl` uses its root Box/Flex/Anchor `width`, `height`,
 `size`, `fill`, `offset` and `anchor` for its starting rectangle, then can be dragged and resized
-freely in pixels — no grid snapping and no visible home border. Holding a tile opens Bellatrix's own
+freely in pixels — drag the body to move, drag only the one bottom-right grip to resize. There is no
+grid snapping, no visible home border and no ring of edge dots. Holding a tile opens Bellatrix's own
 native context-menu popup with remove and edit; there is no always-visible dropdown button. Edit starts
 a Coding Agent session, or opens the standalone Coding Agents settings page when no agent is installed.
 The empty home invite opens Bellatrix's native editor, so creating files never requires Linux or a
 coding agent.
+
+This is the Linux-style ricing path: every widget is one ordinary `.owl` text file. Edit it, save it,
+and the native home redraws within a second; run `owl-check <file>` for an error report and a PNG
+preview before saving if you want the same feedback loop as a Linux status bar config. `home.owl` and
+`taskbar.owl` are the two declarative surface files; `taskbar.owl` restyles the real native taskbar
+views, while the rest of Bellatrix — windows, start menu, settings and themes — stays native.
 
 ## Requirements
 

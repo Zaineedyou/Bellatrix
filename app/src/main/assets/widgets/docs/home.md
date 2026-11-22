@@ -52,10 +52,18 @@ any other writer of files.
 Hold a widget tile and release without dragging to open Bellatrix's own native popup window: **remove**
 moves the `.owl` file to `.removed/` and takes the tile off home, while **edit** starts a Coding Agent
 session for that file (or opens the standalone Coding Agents page when no agent is installed). There is
-no always-visible dropdown button. Drag a tile to move it freely, or start the drag on an edge or corner
-to resize it in pixels. Tiles may overlap, and the home area is clipped without a visible border. The
-empty home invite creates a widget or face tile directly when Linux isn't installed. There is no second
-launcher screen — the files below are the ones Bellatrix home reads.
+no always-visible dropdown button and no ring of handles. Drag the tile body to move it; drag only the
+single bottom-right corner grip left/right/up/down to resize it in pixels. Tiles may overlap, and the
+home area is clipped without a visible border. The empty home invite creates a widget or face tile
+directly when Linux isn't installed. There is no second launcher screen — the files below are the ones
+Bellatrix home reads.
+
+That is the Linux-style rice: each widget is a plain `.owl` file, not a database row or a Compose
+theme. Write it with the native editor, a coding agent, `adb`, or anything else that can write a file,
+save, and Bellatrix's one runtime redraws the tile. Use `owl-check <file>` for errors and a PNG made
+with live data, and `owl-send <file> set <state> <value>` or `owl-send <file> refresh` to drive a live
+tile. The shipped Bellatrix shell stays authoritative; only these files change how its native home and
+taskbar look.
 
 `home.owl` is an ordinary OWL `panel` drawn **over the Bellatrix desktop view you already see**, above
 the taskbar and below app windows. Its tiles are clipped to that area, so they never escape the home

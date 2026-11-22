@@ -9,6 +9,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.29] - 2026-11-22
+
+### Added
+
+- `android.device` now exposes `label`, `brand`, `device`, `product`, `board` and `hardware`. Missing Android identity fields are null, and `label` is the first real name the phone reports. The fetch widget uses it for its host line, so a generic `MODEL` no longer leaves the device blank.
+
+### Changed
+
+- Native home tiles now have exactly one resize grip, at the bottom-right corner. Drag it right or down to grow, left or up to shrink; the tile body still moves the widget. The edge/corner dot ring is gone.
+- Drag geometry is held in the layout/offset phase instead of the widget's composition phase, so moving or resizing no longer rebuilds the OWL scene on every pointer event.
+- Documentation now describes the `.owl` file workflow as Bellatrix's Linux-style ricing loop: edit a plain file, preview with `owl-check`, and drive live state with `owl-send`, while the native shell stays authoritative.
+
+### Fixed
+
+- Resize used the tile's screen origin against pointer coordinates that were already tile-local, so grips missed except near the top-left. The bottom-right grip now uses tile-local coordinates directly.
+- Fastfetch-style device detection falls back from model to product, device, board, brand and finally `phone` instead of showing an empty host.
+
 ## [2.9.28] - 2026-11-22
 
 ### Added

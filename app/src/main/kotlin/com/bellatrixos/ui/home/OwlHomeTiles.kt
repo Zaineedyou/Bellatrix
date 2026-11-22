@@ -7,14 +7,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -28,13 +28,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.bellatrixos.MainActivity
@@ -73,36 +74,6 @@ internal data class NativeGrid(
     val padTop: Int,
 )
 
-private data class TileEdges(
-    val left: Boolean,
-    val top: Boolean,
-    val right: Boolean,
-    val bottom: Boolean,
-) {
-    val any get() = left || top || right || bottom
-}
-
-private val NO_TILE_EDGES = TileEdges(false, false, false, false)
-
-/** Which edges a press grabs. A corner grabs two. [p] is tile-local, never a screen rect. */
-private fun tileEdgesAt(
-    rect: IntRect,
-    p: Offset,
-    grab: Int,
-    sideGrab: Int,
-): TileEdges {
-    val inY = p.y > -grab.toFloat() && p.y < rect.height + grab
-    val inX = p.x > -grab.toFloat() && p.x < rect.width + grab
-    val gx = minOf(sideGrab, rect.width / 3)
-    val gy = minOf(grab, rect.height / 3)
-    return TileEdges(
-        left = inY && p.x > -grab && p.x < gx,
-        top = inX && p.y > -grab && p.y < gy,
-        right = inY && p.x < rect.width + grab && p.x > rect.width - gx,
-        bottom = inX && p.y < rect.height + grab && p.y > rect.height - gy,
-    )
-}
-
 /** Keeps a free rect inside the native home area. Overlaps are allowed; escaping the border is not. */
 private fun contained(
     rect: PixelRect,
@@ -133,24 +104,36 @@ private fun moved(
         start.h,
     )
 
-private fun resized(
+/**
+ * Only the bottom-right corner resizes. Dragging it left/up shrinks, right/down grows, within the
+ * minimum size and the native home bounds. [p] is tile-local.
+ */
+private fun bottomRightGrabbed(
+    rect: PixelRect,
+    p: Offset,
+    grip: Int,
+): Boolean {
+    val gx = grip.coerceAtMost(maxOf(1, rect.w / 2))
+    val gy = grip.coerceAtMost(maxOf(1, rect.h / 2))
+    return p.x >= rect.w - gx && p.y >= rect.h - gy
+}
+
+private fun resizedFromBottomRight(
     start: PixelRect,
-    edges: TileEdges,
     dx: Float,
     dy: Float,
     grid: NativeGrid,
     minW: Int,
     minH: Int,
 ): PixelRect {
-    val left = start.x
-    val top = start.y
-    val right = start.x + start.w
-    val bottom = start.y + start.h
-    val x0 = if (edges.left) (left + dx).roundToInt().coerceIn(0, right - minW) else left
-    val x1 = if (edges.right) (right + dx).roundToInt().coerceIn(x0 + minW, grid.width) else right
-    val y0 = if (edges.top) (top + dy).roundToInt().coerceIn(0, bottom - minH) else top
-    val y1 = if (edges.bottom) (bottom + dy).roundToInt().coerceIn(y0 + minH, grid.height) else bottom
-    return contained(PixelRect(x0, y0, x1 - x0, y1 - y0), grid, minW, minH)
+    val right = (start.x + start.w + dx).roundToInt().coerceIn(start.x + minW, grid.width)
+    val bottom = (start.y + start.h + dy).roundToInt().coerceIn(start.y + minH, grid.height)
+    return contained(
+        PixelRect(start.x, start.y, right - start.x, bottom - start.y),
+        grid,
+        minW,
+        minH,
+    )
 }
 
 private fun legacyRect(
@@ -226,10 +209,10 @@ private fun showNativeWidgetMenu(
  * Declarative OWL tiles on Bellatrix's native home.
  *
  * A tile's starting rectangle comes from its root `Box`/`Flex`/`Anchor` props (`width`, `height`,
- * `size`, `fill`, `offset`, `anchor`), not from a grid. Drag moves it anywhere and an edge or corner
- * resizes it freely; tiles may overlap. Holding a tile opens Bellatrix's own popup window with
- * Edit (a Coding Agent on the `.owl` file) and Remove. Geometry is clipped to the native home view,
- * with no visible boundary line.
+ * `size`, `fill`, `offset`, `anchor`), not from a grid. Drag the body to move; drag the one bottom-right
+ * grip in any direction to resize freely. Tiles may overlap. Holding a tile opens Bellatrix's own
+ * native popup window with Edit (a Coding Agent on the `.owl` file) and Remove. Geometry is clipped to
+ * the native home view, with no visible boundary line.
  */
 @Composable
 internal fun OwlHomeTiles(
@@ -251,8 +234,7 @@ internal fun OwlHomeTiles(
     layout.pageSize = null
     layout.setGrid(grid.cols, grid.rows)
 
-    val grab = with(LocalDensity.current) { 20.dp.toPx() }.roundToInt()
-    val sideGrab = with(LocalDensity.current) { 36.dp.toPx() }.roundToInt()
+    val grip = with(LocalDensity.current) { 32.dp.toPx() }.roundToInt()
     val absoluteMin = with(LocalDensity.current) { 56.dp.toPx() }.roundToInt()
 
     // No visible border: clipToBounds is the hard guarantee that no tile escapes into the taskbar.
@@ -260,8 +242,9 @@ internal fun OwlHomeTiles(
         for (item in items) {
             val spec = item.spec
             val instance = engine.instance(spec)
+            val saved = layout.nativeRect(item.key)
             val raw =
-                layout.nativeRect(item.key)
+                saved
                     ?: if (instance != null) {
                         OwlTileGeometry.initialRect(spec, instance, grid, density.density)
                     } else {
@@ -273,14 +256,28 @@ internal fun OwlHomeTiles(
             val at = contained(raw, grid, minW, minH)
             key(item.key) {
                 val current = rememberUpdatedState(at)
+                // Live drag geometry: read only in layout/offset lambdas, so a move doesn't
+                // recompose every tile (or the OWL scene) on every pointer event.
+                val live = remember { mutableStateOf<PixelRect?>(null) }
                 val isSelected = selected == item.key
+
+                LaunchedEffect(saved) {
+                    if (live.value != null && live.value == saved) live.value = null
+                }
 
                 Box(
                     Modifier
-                        .offset { IntOffset(at.x, at.y) }
-                        .size(width = with(density) { at.w.toDp() }, height = with(density) { at.h.toDp() })
+                        .offset {
+                            val r = live.value ?: current.value
+                            IntOffset(r.x, r.y)
+                        }
+                        .layout { measurable, _ ->
+                            val r = live.value ?: current.value
+                            val placeable = measurable.measure(Constraints.fixed(r.w, r.h))
+                            layout(r.w, r.h) { placeable.place(0, 0) }
+                        }
                         .zIndex(if (isSelected) 2f else 0f)
-                        .then(if (isSelected) Modifier.systemGestureExclusion() else Modifier)
+                        .systemGestureExclusion()
                         .pointerInput("owl-tile-${item.key}") {
                             awaitEachGesture {
                                 val down =
@@ -321,28 +318,25 @@ internal fun OwlHomeTiles(
                                 selected = item.key
                                 if (longPressed) haptics.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                val origin = current.value
-                                val local = start - Offset(origin.x.toFloat(), origin.y.toFloat())
-                                val edges =
-                                    tileEdgesAt(
-                                        IntRect(0, 0, origin.w, origin.h),
-                                        local,
-                                        grab,
-                                        sideGrab,
-                                    )
+                                val origin = live.value ?: current.value
+                                // down.position is already local to this tile's pointerInput node. Subtracting
+                                // the tile's screen origin made every grip miss unless the tile sat at 0,0.
+                                val resizing = bottomRightGrabbed(origin, start, grip)
                                 var total = last - start
                                 var previous = last
                                 var didDrag = movedEarly
 
-                                if (movedEarly) {
+                                fun apply(dx: Float, dy: Float) {
                                     val next =
-                                        if (edges.any) {
-                                            resized(origin, edges, total.x, total.y, grid, minW, minH)
+                                        if (resizing) {
+                                            resizedFromBottomRight(origin, dx, dy, grid, minW, minH)
                                         } else {
-                                            moved(origin, total.x, total.y, grid)
+                                            moved(origin, dx, dy, grid)
                                         }
-                                    layout.setNativeRect(item.key, next)
+                                    live.value = next
                                 }
+
+                                if (movedEarly) apply(total.x, total.y)
 
                                 while (true) {
                                     val change =
@@ -359,21 +353,19 @@ internal fun OwlHomeTiles(
                                     didDrag = true
                                     change.consume()
                                     total += delta
-                                    val next =
-                                        if (edges.any) {
-                                            resized(origin, edges, total.x, total.y, grid, minW, minH)
-                                        } else {
-                                            moved(origin, total.x, total.y, grid)
-                                        }
-                                    layout.setNativeRect(item.key, next)
+                                    apply(total.x, total.y)
                                 }
 
-                                if (didDrag) layout.saveNativeRects()
-                                if (longPressed && !didDrag) {
+                                if (didDrag) {
+                                    val final = live.value ?: origin
+                                    layout.setNativeRect(item.key, final)
+                                    layout.saveNativeRects()
+                                }
+                                if (longPressed && !didDrag && !resizing) {
                                     showNativeWidgetMenu(
                                         context = context,
                                         anchor = anchor,
-                                        rect = current.value,
+                                        rect = finalRect(live.value, current.value),
                                         editLabel = editLabel,
                                         removeLabel = removeLabel,
                                         onEdit = {
@@ -404,19 +396,23 @@ internal fun OwlHomeTiles(
                         BasicText(error, style = Mono.copy(color = Palette.red, fontSize = TextSize.Small))
                     }
 
-                    if (isSelected) {
-                        Box(Modifier.fillMaxSize().border(1.dp, Palette.accent))
-                        for (align in listOf(Alignment.TopStart, Alignment.BottomStart, Alignment.BottomEnd, Alignment.CenterStart, Alignment.CenterEnd, Alignment.BottomCenter)) {
-                            Box(
-                                Modifier
-                                    .align(align)
-                                    .size(9.dp)
-                                    .background(Palette.accent, CircleShape),
-                            )
-                        }
-                    }
+                    if (isSelected) Box(Modifier.fillMaxSize().border(1.dp, Palette.accent))
+
+                    // The only grip: bottom-right. Drag it any direction to resize.
+                    Box(
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(16.dp)
+                            .background(Palette.accent.copy(alpha = if (isSelected) 1f else 0.55f))
+                            .border(1.dp, Palette.popup),
+                    )
                 }
             }
         }
     }
 }
+
+private fun finalRect(
+    live: PixelRect?,
+    saved: PixelRect,
+) = live ?: saved
