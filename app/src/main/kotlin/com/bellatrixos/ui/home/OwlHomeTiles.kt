@@ -163,9 +163,13 @@ private fun showNativeWidgetMenu(
     context: Context,
     anchor: View,
     rect: PixelRect,
+    locked: Boolean,
     editLabel: String,
+    lockLabel: String,
+    unlockLabel: String,
     removeLabel: String,
     onEdit: () -> Unit,
+    onLock: () -> Unit,
     onRemove: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -178,6 +182,15 @@ private fun showNativeWidgetMenu(
     edit.f4750f = true
     menu.f4745d.add(edit)
     menu.f4745d.add(UIMenuItem(1, 0, 0, ""))
+    menu.f4745d.add(
+        UIMenuItem(
+            0,
+            3,
+            R.drawable.ic_lock_closed_24_regular,
+            if (locked) unlockLabel else lockLabel,
+        ),
+    )
+    menu.f4745d.add(UIMenuItem(1, 0, 0, ""))
     menu.f4745d.add(UIMenuItem(0, 2, R.drawable.menu_ic_delete_20_regular, removeLabel))
 
     menu.c =
@@ -185,6 +198,7 @@ private fun showNativeWidgetMenu(
             when (id) {
                 1 -> onEdit()
                 2 -> onRemove()
+                3 -> onLock()
             }
             menu.dismiss()
         }
@@ -207,10 +221,11 @@ private fun showNativeWidgetMenu(
  * Declarative OWL tiles on Bellatrix's native home.
  *
  * A tile's starting rectangle comes from its root `Box`/`Flex`/`Anchor` props (`width`, `height`,
- * `size`, `fill`, `offset`, `anchor`), not from a grid. Drag the body to move; drag the one bottom-right
- * grip in any direction to resize freely. Tiles may overlap. Holding a tile opens Bellatrix's own
- * native popup window with Edit (a Coding Agent on the `.owl` file) and Remove. Geometry is clipped to
- * the native home view, with no visible boundary line.
+ * `size`, `fill`, `offset`, `anchor`), not from a grid. Hold a tile, then drag its body to move; hold
+ * and drag the one bottom-right grip in any direction to resize freely. A quick swipe never moves a
+ * tile, so taps keep working. Holding and releasing opens Bellatrix's own native popup window with
+ * Edit, Lock/Unlock and Remove. A locked tile still opens on tap but cannot move or resize. Tiles may
+ * overlap. Geometry is clipped to the native home view, with no visible boundary line.
  */
 @Composable
 internal fun OwlHomeTiles(
@@ -224,6 +239,8 @@ internal fun OwlHomeTiles(
     val density = LocalDensity.current
     val haptics = LocalHapticFeedback.current
     val editLabel = stringResource(R.string.home_edit)
+    val lockLabel = stringResource(R.string.home_lock)
+    val unlockLabel = stringResource(R.string.home_unlock)
     val removeLabel = stringResource(R.string.home_remove)
     var selected by remember { mutableStateOf<String?>(null) }
 
@@ -241,6 +258,7 @@ internal fun OwlHomeTiles(
             val spec = item.spec
             val instance = engine.instance(spec)
             val saved = layout.nativeRect(item.key)
+            val locked = layout.locked(item.key)
             val raw =
                 saved
                     ?: if (instance != null) {
@@ -275,6 +293,8 @@ internal fun OwlHomeTiles(
                         .zIndex(if (isSelected) 2f else 0f)
                         .systemGestureExclusion()
                         .pointerInput("owl-tile-${item.key}") {
+                            // A finger can wander a little while waiting for the hold without cancelling it.
+                            val holdSlop = viewConfiguration.touchSlop * 2
                             awaitEachGesture {
                                 val down =
                                     awaitFirstDown(
@@ -284,9 +304,10 @@ internal fun OwlHomeTiles(
                                 val id = down.id
                                 val start = down.position
                                 var last = start
-                                var movedEarly = false
+                                var cancelled = false
 
-                                // Hold to select; a move before the timeout is an immediate drag.
+                                // A quick tap opens the widget. Moving before the hold finishes only cancels;
+                                // dragging never starts from a swipe, so taps can't turn into moves.
                                 val longPressed =
                                     withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
                                         while (true) {
@@ -297,8 +318,8 @@ internal fun OwlHomeTiles(
                                                     ?: return@withTimeoutOrNull false
                                             if (!change.pressed) return@withTimeoutOrNull false
                                             last = change.position
-                                            if ((last - start).getDistance() > viewConfiguration.touchSlop) {
-                                                movedEarly = true
+                                            if ((last - start).getDistance() > holdSlop) {
+                                                cancelled = true
                                                 change.consume()
                                                 return@withTimeoutOrNull false
                                             }
@@ -306,21 +327,24 @@ internal fun OwlHomeTiles(
                                         false
                                     } == null
 
-                                if (!longPressed && !movedEarly) {
+                                if (cancelled) return@awaitEachGesture
+
+                                if (!longPressed) {
                                     if (selected == item.key) selected = null else engine.tap(spec)
                                     return@awaitEachGesture
                                 }
 
                                 selected = item.key
-                                if (longPressed) haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
 
                                 val origin = live.value ?: current.value
-                                // down.position is already local to this tile's pointerInput node. Subtracting
-                                // the tile's screen origin made every grip miss unless the tile sat at 0,0.
-                                val resizing = bottomRightGrabbed(origin, start, grip)
-                                var total = last - start
-                                var previous = last
-                                var didDrag = movedEarly
+                                val dragStart = last
+                                // down.position is already tile-local; subtracting the screen origin made
+                                // the grip miss unless the tile sat at 0,0.
+                                val resizing = !locked && bottomRightGrabbed(origin, start, grip)
+                                var previous = dragStart
+                                var total = Offset.Zero
+                                var didDrag = false
 
                                 fun apply(dx: Float, dy: Float) {
                                     val next =
@@ -332,8 +356,6 @@ internal fun OwlHomeTiles(
                                     live.value = next
                                 }
 
-                                if (movedEarly) apply(total.x, total.y)
-
                                 while (true) {
                                     val change =
                                         awaitPointerEvent(PointerEventPass.Initial)
@@ -341,14 +363,22 @@ internal fun OwlHomeTiles(
                                             .firstOrNull { it.id == id }
                                             ?: break
                                     if (!change.pressed) break
-                                    val delta = change.position - previous
-                                    previous = change.position
-                                    if (!didDrag && (change.position - start).getDistance() <= viewConfiguration.touchSlop) {
+                                    if (locked) {
+                                        change.consume()
                                         continue
                                     }
-                                    didDrag = true
+                                    if (!didDrag && (change.position - dragStart).getDistance() <= viewConfiguration.touchSlop) {
+                                        previous = change.position
+                                        continue
+                                    }
                                     change.consume()
-                                    total += delta
+                                    if (didDrag) {
+                                        total += change.position - previous
+                                    } else {
+                                        didDrag = true
+                                        total = change.position - dragStart
+                                    }
+                                    previous = change.position
                                     apply(total.x, total.y)
                                 }
 
@@ -356,13 +386,15 @@ internal fun OwlHomeTiles(
                                     val final = live.value ?: origin
                                     layout.setNativeRect(item.key, final)
                                     layout.saveNativeRects()
-                                }
-                                if (longPressed && !didDrag && !resizing) {
+                                } else {
                                     showNativeWidgetMenu(
                                         context = context,
                                         anchor = anchor,
                                         rect = finalRect(live.value, current.value),
+                                        locked = locked,
                                         editLabel = editLabel,
+                                        lockLabel = lockLabel,
+                                        unlockLabel = unlockLabel,
                                         removeLabel = removeLabel,
                                         onEdit = {
                                             val agent = runtime.agents.default
@@ -376,6 +408,7 @@ internal fun OwlHomeTiles(
                                                 )
                                             }
                                         },
+                                        onLock = { layout.setLocked(item.key, !locked) },
                                         onRemove = { engine.removeWidget(spec) },
                                         onDismiss = { selected = null },
                                     )
@@ -394,14 +427,17 @@ internal fun OwlHomeTiles(
 
                     if (isSelected) Box(Modifier.fillMaxSize().border(1.dp, Palette.accent))
 
-                    // The only grip: bottom-right. Drag it any direction to resize.
-                    Box(
-                        Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(16.dp)
-                            .background(Palette.accent.copy(alpha = if (isSelected) 1f else 0.55f))
-                            .border(1.dp, Palette.popup),
-                    )
+                    // The only grip: bottom-right. Drag it any direction to resize. No grip on a
+                    // locked tile, so there is nothing there to drag by accident.
+                    if (!locked) {
+                        Box(
+                            Modifier
+                                .align(Alignment.BottomEnd)
+                                .size(16.dp)
+                                .background(Palette.accent.copy(alpha = if (isSelected) 1f else 0.55f))
+                                .border(1.dp, Palette.popup),
+                        )
+                    }
                 }
             }
         }

@@ -70,11 +70,13 @@ so the shipped Bellatrix look stays; set an opaque `background`, `radius`, `bord
 `padding`, a visible `Flex`/`Row`/`Column` `gap`, or a visible `Text` color in `taskbar.owl` to change
 the native bar. Lay modules out with `Flex`, `Box`, `Anchor` and the `anchor` property (owl 24),
 Waybar-style. A new `widget-*.owl` or `face-*.owl` uses its root Box/Flex/Anchor `width`, `height`,
-`size`, `fill`, `offset` and `anchor` for its starting rectangle, then can be dragged and resized
-freely in pixels — drag the body to move, drag only the one bottom-right grip to resize. There is no
-grid snapping, no visible home border and no ring of edge dots. Holding a tile opens Bellatrix's own
-native context-menu popup with remove and edit; there is no always-visible dropdown button. Edit starts
-a Coding Agent session, or opens the standalone Coding Agents settings page when no agent is installed.
+`size`, `fill`, `offset` and `anchor` for its starting rectangle. Hold a tile, then drag its body to
+move or drag only the one bottom-right grip to resize freely in pixels — a quick swipe never moves a
+tile, so taps keep working. There is no grid snapping, no visible home border and no ring of edge dots.
+Holding a tile and releasing opens Bellatrix's own native context-menu popup with remove, edit and
+lock/unlock; a locked tile keeps its exact pixels and cannot be moved or resized. There is no
+always-visible dropdown button. Edit starts a Coding Agent session, or opens the standalone Coding
+Agents settings page when no agent is installed.
 The empty home invite opens Bellatrix's native editor, so creating files never requires Linux or a
 coding agent.
 

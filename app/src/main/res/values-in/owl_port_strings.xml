@@ -90,6 +90,8 @@
     <string name="prompt_speech_network">pengenalan suara memerlukan koneksi jaringan</string>
     <string name="home_edit">edit</string>
     <string name="home_share">bagikan</string>
+    <string name="home_lock">kunci widget</string>
+    <string name="home_unlock">buka kunci widget</string>
     <string name="home_remove">hapus</string>
     <string name="home_create_with">buat dengan %1$s</string>
     <string name="home_create_with_an_agent">buat dengan agen</string>

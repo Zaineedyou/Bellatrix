@@ -11,6 +11,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [2.9.30] - 2026-11-22
 
+### Added
+
+- **Lock widget** in the native tile popup. A locked tile keeps its exact pixel rectangle, still opens on tap, but cannot be moved or resized; its resize grip is hidden. The same menu item becomes **Unlock widget**. The lock persists per widget across restarts.
+
+### Changed
+
+- Moving or resizing a widget now requires a deliberate hold first. A quick swipe is ignored instead of dragging the tile, so tapping a widget (or its controls) no longer turns into an accidental move. Hold the tile, then drag; or hold and release to open the popup menu.
+
 ### Fixed
 
 - Widget drag/resize is now applied in one Compose layout pass instead of separate offset and size passes. That removes the one-frame size/position mismatch that showed up as judder or blinking while moving a tile.

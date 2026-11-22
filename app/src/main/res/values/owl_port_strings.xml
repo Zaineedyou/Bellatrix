@@ -92,6 +92,8 @@
     <string name="home_edit">edit</string>
     <string name="home_edit_file">edit file</string>
     <string name="home_share">share</string>
+    <string name="home_lock">lock widget</string>
+    <string name="home_unlock">unlock widget</string>
     <string name="home_remove">remove</string>
     <string name="home_create_with">create with %1$s</string>
     <string name="home_create_with_an_agent">create with an agent</string>

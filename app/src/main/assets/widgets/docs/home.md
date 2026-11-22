@@ -50,13 +50,15 @@ home within a second. Coding agents work too (the prompts point them at these sa
 any other writer of files.
 
 Hold a widget tile and release without dragging to open Bellatrix's own native popup window: **remove**
-moves the `.owl` file to `.removed/` and takes the tile off home, while **edit** starts a Coding Agent
-session for that file (or opens the standalone Coding Agents page when no agent is installed). There is
-no always-visible dropdown button and no ring of handles. Drag the tile body to move it; drag only the
-single bottom-right corner grip left/right/up/down to resize it in pixels. Tiles may overlap, and the
-home area is clipped without a visible border. The empty home invite creates a widget or face tile
-directly when Linux isn't installed. There is no second launcher screen — the files below are the ones
-Bellatrix home reads.
+moves the `.owl` file to `.removed/` and takes the tile off home, **edit** starts a Coding Agent
+session for that file (or opens the standalone Coding Agents page when no agent is installed), and
+**lock widget** pins its pixel rectangle so it cannot be moved or resized — the same item becomes
+**unlock widget** when locked. A locked tile still opens on tap. There is no always-visible dropdown
+button and no ring of handles. A quick swipe never moves a tile: hold it first, then drag the body to
+move it, or hold and drag only the single bottom-right grip left/right/up/down to resize it in pixels.
+A locked tile has no grip. Tiles may overlap, and the home area is clipped without a visible border.
+The empty home invite creates a widget or face tile directly when Linux isn't installed. There is no
+second launcher screen — the files below are the ones Bellatrix home reads.
 
 That is the Linux-style rice: each widget is a plain `.owl` file, not a database row or a Compose
 theme. Write it with the native editor, a coding agent, `adb`, or anything else that can write a file,

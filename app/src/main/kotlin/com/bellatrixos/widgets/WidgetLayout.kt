@@ -123,6 +123,8 @@ class WidgetLayout(
     private val cellsOf = Screen.entries.associateWith { mutableStateMapOf<String, Cell>() }
     /** Free pixel geometry set by dragging on the native home; separate from layout.toml's agent-owned cells. */
     private val nativeRectsOf = mutableStateMapOf<String, PixelRect>()
+    /** Locked tiles keep their rect: home still taps them, but cannot move or resize them. */
+    private val lockedOf = mutableStateMapOf<String, Boolean>()
     /** Read while compiling widgets, off the main thread. */
     private val pagesOf = Screen.entries.associateWith { java.util.concurrent.ConcurrentHashMap<String, Int>() }
 
@@ -188,6 +190,7 @@ class WidgetLayout(
                 }
             }
         }
+        for (name in prefs.getStringSet(NATIVE_LOCKS, emptySet()).orEmpty()) lockedOf[name] = true
     }
 
     private fun suffix(screen: Screen) = if (screen == Screen.MAIN) "" else "_${screen.key}"
@@ -313,6 +316,18 @@ class WidgetLayout(
     }
 
     fun clearNativeRect(name: String) = nativeRectsOf.remove(name)
+
+    /** Whether [name] is locked against move/resize on native home. */
+    fun locked(name: String) = lockedOf[name] == true
+
+    /** Locks or unlocks [name]. A locked tile still opens on tap and keeps its exact pixel rect. */
+    fun setLocked(
+        name: String,
+        value: Boolean,
+    ) {
+        if (value) lockedOf[name] = true else lockedOf.remove(name)
+        prefs.edit().putStringSet(NATIVE_LOCKS, lockedOf.keys.toSet()).apply()
+    }
 
     /** Persists only the free geometry; it must never rewrite layout.toml or the agent-owned grid cells. */
     fun saveNativeRects() {
@@ -472,6 +487,8 @@ class WidgetLayout(
         for (c in cellsOf.values) c.remove(name)
         for (p in pagesOf.values) p.remove(name)
         nativeRectsOf.remove(name)
+        lockedOf.remove(name)
+        prefs.edit().putStringSet(NATIVE_LOCKS, lockedOf.keys.toSet()).apply()
         saveNativeRects()
         pageStamp++
         save()
@@ -525,6 +542,7 @@ class WidgetLayout(
         const val VERSION = 1
         const val NATIVE_RECTS = "native_tile_rects"
         const val NATIVE_RECTS_VERSION = 1
+        const val NATIVE_LOCKS = "native_tile_locks"
         const val PORTRAIT_ROWS = "portrait_rows_"
     }
 }
