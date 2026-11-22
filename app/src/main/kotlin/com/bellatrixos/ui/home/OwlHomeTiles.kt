@@ -9,7 +9,6 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.text.BasicText
@@ -35,7 +34,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.bellatrixos.MainActivity
@@ -256,7 +254,7 @@ internal fun OwlHomeTiles(
             val at = contained(raw, grid, minW, minH)
             key(item.key) {
                 val current = rememberUpdatedState(at)
-                // Live drag geometry: read only in layout/offset lambdas, so a move doesn't
+                // Live drag geometry: read once in the layout modifier, so a move doesn't
                 // recompose every tile (or the OWL scene) on every pointer event.
                 val live = remember { mutableStateOf<PixelRect?>(null) }
                 val isSelected = selected == item.key
@@ -267,14 +265,12 @@ internal fun OwlHomeTiles(
 
                 Box(
                     Modifier
-                        .offset {
-                            val r = live.value ?: current.value
-                            IntOffset(r.x, r.y)
-                        }
+                        // Size and position are applied in the same layout pass. Two separate state
+                        // reads (offset + size) could land on different frames and look like a jerk.
                         .layout { measurable, _ ->
                             val r = live.value ?: current.value
                             val placeable = measurable.measure(Constraints.fixed(r.w, r.h))
-                            layout(r.w, r.h) { placeable.place(0, 0) }
+                            layout(r.w, r.h) { placeable.place(r.x, r.y) }
                         }
                         .zIndex(if (isSelected) 2f else 0f)
                         .systemGestureExclusion()

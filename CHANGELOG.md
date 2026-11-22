@@ -9,6 +9,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.30] - 2026-11-22
+
+### Fixed
+
+- Widget drag/resize is now applied in one Compose layout pass instead of separate offset and size passes. That removes the one-frame size/position mismatch that showed up as judder or blinking while moving a tile.
+- The native home overlay still avoids recomposing OWL content on every pointer event; only the tile's layout node is invalidated during a drag.
+
 ## [2.9.29] - 2026-11-22
 
 ### Added
