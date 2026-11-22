@@ -22,7 +22,7 @@ Part of the widget docs: README.md, one folder up, comes first, and paths here a
 | `asset logo = base64"iVBOR..."` | an embedded image (under 2 MB) for `Image { src: logo }`, or a font for `font: logo` (owl 10, see Fonts in docs/nodes.md), so the widget is one self-contained file |
 | `strings { en { title: "today" } id { title: "hari ini" } }` | the text a person reads, in more than one language: `str.title` is the phone's language's, or en's where it has none. See Text in more languages (owl 16) |
 | `requires { xbps: ["jq", "curl"] }` | packages the widget's commands need (`pacman` lists, from widgets written for Arch, are read as a fallback); see Dependencies |
-| `meta { description: "..."; version: "1.0"; license: "MIT"; category: "news" }` | needed to publish to the widget store (see docs/sharing.md) |
+| `meta { description: "..."; version: "1.0"; license: "MIT"; category: "news" }` | needed by the widget store (see docs/store.md) |
 | `meta { owl: 12 }` | the language version the file needs (this launcher has 19; the default is 1). Older launchers say "update the launcher" instead of failing on what they don't know. Using what a later level added without declaring it is an error; docs/versions.md lists what came when |
 | `onTap: ...` | runs when the tile (not a button inside it) is tapped |
 | `screen { ... }` | a full-screen view of the widget, opened with `screen()`; see docs/screens.md (owl 5) |
@@ -70,8 +70,7 @@ onTap: run("notify-send \"${sh(title)}\"")    // wrong: sh() inside quotes doesn
 
 Work on the value inside `sh()`: `${sh(upper(title))}`. Numbers from `int`, `round`, `floor`,
 `ceil`, `abs`, `fixed`, `len`, `count`, `sum`, `min`, `max` and `clamp` need no `sh()`. A command
-with a heredoc (`<<`) can't take values. The widget store only takes commands built this way;
-one shared as a link shows a warning instead.
+with a heredoc (`<<`) can't take values. The widget store only takes commands built this way.
 
 ## Values in URLs
 

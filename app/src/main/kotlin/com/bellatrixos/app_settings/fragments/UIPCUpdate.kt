@@ -17,6 +17,7 @@ import com.bellatrixos.BuildConfig
 import com.bellatrixos.LauncherUpdates
 import com.bellatrixos.R
 import com.bellatrixos.database.SharedPrefs
+import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.variables.Global
 import com.bellatrixos.widgets.UIProgressBarLinear
 import com.bellatrixos.widgets.cards.UISettingsCard
@@ -43,6 +44,7 @@ class UIPCUpdate : Fragment() {
 
     @JvmField var A0: UISettingsCard? = null
     @JvmField var B0: UISettingsCard? = null
+    @JvmField var systemUpdates: UISettingsCard? = null
     @JvmField var C0: UISettingsCardSwitch? = null
     @JvmField var D0: UIProgressBarLinear? = null
     @JvmField var s0: Context? = null
@@ -62,6 +64,7 @@ class UIPCUpdate : Fragment() {
         u0?.setOnClickListener(null)
         B0?.setOnClickListener(null)
         A0?.setOnClickListener(null)
+        systemUpdates?.setOnCardClickListener(null)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,6 +73,10 @@ class UIPCUpdate : Fragment() {
         C0?.setSwitchChecked(SharedPrefs.f4755a?.getBoolean("system_notify_updates", false) ?: false)
         A0?.setOnCardClickListener(w(this, 1))
         B0?.setOnCardClickListener(w(this, 2))
+        systemUpdates = view.findViewById(R.id.update_system)
+        systemUpdates?.setOnCardClickListener {
+            (s0?.applicationContext as? App)?.runtime?.openSettings(SettingsPage.Settings)
+        }
         if (Global.B == 1) c0()
         C0?.setOnSwitchCheckedChangeListener(com.bellatrixos.app_settings.fragments.u(2))
     }

@@ -98,6 +98,8 @@ import com.bellatrixos.taskbar.center_widgets.WidgetManager
 import com.bellatrixos.taskbar.center_widgets.callbacks.WidgetBindCallback
 import com.bellatrixos.taskbar.utils.HorizontalDragCallback
 import com.bellatrixos.taskbar.utils.ObservableList
+import com.bellatrixos.ui.BrowserPages
+import com.bellatrixos.ui.WidgetAsks
 import com.bellatrixos.ui.keyPressed
 import com.bellatrixos.ui.keysFocused
 import com.bellatrixos.ui.keysStartAgain
@@ -153,6 +155,7 @@ import java.util.Locale
 import java.util.Objects
 
 class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener {
+    private val asks = WidgetAsks(this)
     @JvmField var A0: LinearLayout? = null
     @JvmField var B0: LinearLayout? = null
     @JvmField var D0: RecyclerView? = null
@@ -1419,6 +1422,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
 
     override fun onPause() {
         super.onPause()
+        asks.paused((application as App).runtime)
         try { UINotification.c.removeCallbacksAndMessages(null) } catch (_: Throwable) {}
         val wallpaperVideoManager = this.l1
         if (wallpaperVideoManager != null) {
@@ -1434,6 +1438,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
 
     override fun onResume() {
         super.onResume()
+        asks.resumed((application as App).runtime)
         if (Global.c != 0 && this.V == 2) {
             val view = this.Y
             if (this.V == 2) {
@@ -1511,6 +1516,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     override fun onStart() {
         super.onStart()
         val runtime = (application as App).runtime
+        runtime.widgets.homeStarted()
+        BrowserPages.started(true)
         installRuntimeHooks()
         pendingSettingsPage?.let { page ->
             pendingSettingsPage = null
@@ -1565,8 +1572,11 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     override fun onStop() {
-        (application as App).runtime.clearHomeHooks()
-        (application as App).runtime.screenStopped()
+        val runtime = (application as App).runtime
+        runtime.clearHomeHooks()
+        runtime.widgets.homeStopped()
+        BrowserPages.started(false)
+        runtime.screenStopped()
         super.onStop()
         val volumeObserver = this.r1
         try {

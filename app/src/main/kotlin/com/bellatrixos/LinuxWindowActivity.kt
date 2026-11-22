@@ -23,6 +23,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.compose.ui.graphics.toArgb
 import com.bellatrixos.ui.Palette
+import com.bellatrixos.ui.WidgetAsks
 import com.bellatrixos.wayland.ActiveLinuxBackend
 import com.bellatrixos.wayland.KeyBarView
 import com.bellatrixos.wayland.KeyboardSink
@@ -38,6 +39,7 @@ import com.bellatrixos.wayland.XdgToplevel
  * Android only supplies input, the keybar and the soft keyboard.
  */
 class LinuxWindowActivity : AppCompatActivity() {
+    private val asks = WidgetAsks(this)
     private lateinit var backend: LinuxViewBackend
     private var window: XdgToplevel? = null
     private var keyboardHeight = 0
@@ -122,6 +124,7 @@ class LinuxWindowActivity : AppCompatActivity() {
         super.onResume()
         window?.let(backend.wm::focus)
         backend.keyboard.picker = imagePicker
+        asks.resumed((application as App).runtime)
         relayout()
     }
 
@@ -129,6 +132,7 @@ class LinuxWindowActivity : AppCompatActivity() {
         super.onPause()
         backend.keyboard.releaseHeld()
         if (backend.keyboard.picker === imagePicker) backend.keyboard.picker = null
+        asks.paused((application as App).runtime)
     }
 
     override fun onStop() {

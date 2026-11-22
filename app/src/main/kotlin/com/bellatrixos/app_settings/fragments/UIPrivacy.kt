@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.bellatrixos.App
 import com.bellatrixos.R
+import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.widgets.cards.UISettingsCard
 import com.bellatrixos.windows.config.UIPermissions
 import com.bellatrixos.windows.installed_apps.IntentSites
@@ -18,6 +20,7 @@ class UIPrivacy : Fragment() {
     @JvmField var t0: UISettingsCard? = null
     @JvmField var u0: UISettingsCard? = null
     @JvmField var v0: UISettingsCard? = null
+    @JvmField var permissions: UISettingsCard? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT >= 30) {
@@ -27,6 +30,9 @@ class UIPrivacy : Fragment() {
         }
         u0?.setOnCardClickListener(permissionClick(1))
         v0?.setOnCardClickListener(permissionClick(2))
+        permissions?.setOnCardClickListener {
+            (s0?.applicationContext as? App)?.runtime?.openSettings(SettingsPage.Permissions)
+        }
     }
 
     private fun permissionClick(mode: Int) = View.OnClickListener {
@@ -46,6 +52,7 @@ class UIPrivacy : Fragment() {
         val view = inflater.inflate(R.layout.settings_privacy, container, false)
         s0 = view.context
         t0 = view.findViewById(R.id.btn_app_storage_permission)
+        permissions = view.findViewById(R.id.privacy_permissions)
         u0 = view.findViewById(R.id.btn_device_app_info)
         v0 = view.findViewById(R.id.btn_device_privacy_policy)
         return view

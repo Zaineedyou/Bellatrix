@@ -19,8 +19,6 @@ open class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // Before anything reads SharedPreferences: a restore leaves the settings it brought for this.
-        Backup.applyPendingPrefs(this)
         CrashLog.install(this)
     }
 

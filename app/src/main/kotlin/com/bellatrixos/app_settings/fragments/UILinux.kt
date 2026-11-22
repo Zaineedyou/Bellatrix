@@ -1,7 +1,9 @@
 package com.bellatrixos.app_settings.fragments
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.provider.Settings
 import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +17,7 @@ import com.bellatrixos.Runtime
 import com.bellatrixos.linux.JobState
 import com.bellatrixos.linux.LinuxState
 import com.bellatrixos.linux.Stage
+import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.widgets.cards.UISettingsCard
 import com.bellatrixos.widgets.cards.UISettingsCardCollapse
 import com.bellatrixos.widgets.cards.UISettingsCardProgressBar
@@ -36,6 +39,9 @@ class UILinux : Fragment() {
     private lateinit var gpu: UISettingsCard
     private lateinit var gpuLog: UISettingsCardCollapse
     private lateinit var gpuLogText: TextView
+    private lateinit var fastCalls: UISettingsCard
+    private lateinit var stayAlive: UISettingsCard
+    private lateinit var packages: UISettingsCard
     private lateinit var terminal: UISettingsCard
     private lateinit var remove: UISettingsCard
     private lateinit var processLogText: TextView
@@ -69,6 +75,9 @@ class UILinux : Fragment() {
         gpu = view.findViewById(R.id.linux_gpu)
         gpuLog = view.findViewById(R.id.linux_gpu_log)
         gpuLogText = view.findViewById(R.id.linux_gpu_log_text)
+        fastCalls = view.findViewById(R.id.linux_fast_calls)
+        stayAlive = view.findViewById(R.id.linux_stay_alive)
+        packages = view.findViewById(R.id.linux_packages)
         terminal = view.findViewById(R.id.linux_terminal)
         remove = view.findViewById(R.id.linux_remove)
         processLogText = view.findViewById(R.id.linux_process_log_text)
@@ -81,6 +90,13 @@ class UILinux : Fragment() {
             // A failed check clears `wanted`, so a tap on the card is a retry, like Bellatrix.
             runtime.setGpu(!runtime.gpu.wanted)
         }
+        fastCalls.setOnCardClickListener { runtime.proot.changeCpuPinning(!runtime.proot.cpuPinning); update() }
+        stayAlive.setOnCardClickListener {
+            runCatching {
+                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }
+        }
+        packages.setOnCardClickListener { runtime.openSettings(SettingsPage.Packages) }
         terminal.setOnCardClickListener { runtime.terminal(null, "Terminal") }
         remove.setOnCardClickListener { runtime.remove() }
         installLog.setOnCardClickListener { updateLogs() }
@@ -127,6 +143,10 @@ class UILinux : Fragment() {
         cancel.isEnabled = working != null
         remove.isEnabled = state is LinuxState.Installed
         terminal.isEnabled = state is LinuxState.Installed && runtime.isLinuxReady
+        fastCalls.isEnabled = state is LinuxState.Installed
+        stayAlive.isEnabled = state is LinuxState.Installed
+        packages.isEnabled = state is LinuxState.Installed
+        fastCalls.setSubtitle(getString(if (runtime.proot.cpuPinning) R.string.linux_cpu_pinning_on else R.string.linux_cpu_pinning_off))
 
         updateGpu()
         updateLogs()

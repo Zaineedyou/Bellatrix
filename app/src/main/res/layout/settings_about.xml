@@ -32,4 +32,5 @@
             <TextView android:textSize="14.0sp" android:textColor="@color/text_muted" android:id="@id/about_installed_date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0-00-2000" />
         </TableRow>
     </TableLayout>
+    <com.bellatrixos.widgets.cards.UISettingsCard android:id="@+id/about_licenses" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16.0dp" android:layout_marginBottom="1.5999756dp" app:ui_icon_src="@drawable/ic_info_26_regular" app:ui_subtitle="@string/settings_licenses_subtitle" app:ui_title="@string/settings_licenses" />
 </LinearLayout>

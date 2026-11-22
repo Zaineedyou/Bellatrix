@@ -165,6 +165,33 @@
         </com.bellatrixos.widgets.cards.UISettingsCardCollapse>
 
         <com.bellatrixos.widgets.cards.UISettingsCard
+            android:id="@+id/linux_fast_calls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="1.5999756dp"
+            app:ui_icon_src="@drawable/ic_info_26_regular"
+            app:ui_subtitle="@string/linux_cpu_pinning_off"
+            app:ui_title="@string/linux_cpu_pinning_title" />
+
+        <com.bellatrixos.widgets.cards.UISettingsCard
+            android:id="@+id/linux_stay_alive"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="1.5999756dp"
+            app:ui_icon_src="@drawable/ic_info_26_regular"
+            app:ui_subtitle="@string/linux_stay_alive_subtitle"
+            app:ui_title="@string/linux_stay_alive_title" />
+
+        <com.bellatrixos.widgets.cards.UISettingsCard
+            android:id="@+id/linux_packages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="1.5999756dp"
+            app:ui_icon_src="@drawable/img_app_terminal"
+            app:ui_subtitle="@string/settings_packages_subtitle"
+            app:ui_title="@string/settings_packages" />
+
+        <com.bellatrixos.widgets.cards.UISettingsCard
             android:id="@+id/linux_terminal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -29,24 +29,16 @@ class LauncherState {
     /** Opens settings, or one of its screens on its own; the store puts widgets on the page showing now. */
     fun show(page: SettingsPage = SettingsPage.Settings) = onSettings(page, currentPage)
 
-    /** The widget whose share panel is open: a QR code and link, or the store. */
-    var sharing by mutableStateOf<com.bellatrixos.widgets.WidgetSpec?>(null)
-
-    /** A widget link that was opened (scanned from a QR code), waiting for the user to read it and add it. */
-    var shared by mutableStateOf<String?>(null)
-
     /** The menu from long-pressing empty home space. */
     var homeMenuOpen by mutableStateOf(false)
 
-    /** The open drawer or a full-screen panel hides the home screen; animated widgets stop ticking under it. */
+    /** The open drawer hides the home screen; animated widgets stop ticking under it. */
     val homeCovered: Boolean
-        get() = drawer.value > 0.99f || shared != null || sharing != null
+        get() = drawer.value > 0.99f
 
-    /** Closes every overlay screen (the home menu, widget sharing). */
+    /** Closes every overlay screen (the home menu). */
     fun closeScreens() {
         homeMenuOpen = false
-        shared = null
-        sharing = null
     }
 
     /** Key of the home tile in edit mode (handles and action bar shown), if any. */
@@ -87,7 +79,7 @@ class LauncherState {
 
     /** [statusBarAway], and nothing over it: no drawer, menu or panel. Then the status bar hides. */
     val fullScreen: Boolean
-        get() = statusBarAway && drawer.value < 0.01f && !homeMenuOpen && shared == null && sharing == null
+        get() = statusBarAway && drawer.value < 0.01f && !homeMenuOpen
 
     /** Home page currently showing (1-based); the drawer pins apps there. */
     var currentPage by mutableStateOf(1)

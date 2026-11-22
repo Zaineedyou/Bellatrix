@@ -148,7 +148,6 @@ private val COMPONENTS =
             "https://commons.apache.org/proper/commons-compress/",
         ),
         Component("AndroidSVG", R.string.licenses_use_androidsvg, APACHE, "Copyright 2013 Paul LeBeau, Cave Rock Software Ltd.", "https://bigbadaboom.github.io/androidsvg/"),
-        Component("ZXing", R.string.licenses_use_zxing, APACHE, "Copyright 2007-2025 ZXing authors", "https://github.com/zxing/zxing"),
         Component("JSON-java", R.string.licenses_use_json, "public-domain", "Public Domain.", "https://github.com/stleary/JSON-java"),
         Component("XZ for Java", R.string.licenses_use_xz, "public-domain", "XZ for Java by Lasse Collin and Igor Pavlov. Public Domain.", "https://tukaani.org/xz/java.html"),
     )

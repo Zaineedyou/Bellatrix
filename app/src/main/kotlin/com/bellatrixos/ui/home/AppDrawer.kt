@@ -145,7 +145,7 @@ internal fun allApps(runtime: Runtime): List<AppHit> =
     runtime.widgets.apps().map { AppHit.Owl(it) } + runtime.linuxApps.apps.map { AppHit.Linux(it) } + runtime.androidApps.apps.map { AppHit.Android(it) } +
         runtime.androidApps.shortcuts.map { AppHit.Shortcut(it) }
 
-/** What the app cells do: open, pin to home, the Android app's info and uninstall, removing a shortcut, and an owl app's edit, share and remove. */
+/** What the app cells do: open, pin to home, the Android app's info and uninstall, removing a shortcut, and an owl app's edit and remove. */
 internal class AppHandlers(
     val launch: (AppHit) -> Unit,
     val pin: (AppHit) -> Unit,
@@ -156,8 +156,6 @@ internal class AppHandlers(
     val shortcuts: (AndroidApp) -> ShortcutMenu,
     /** Opens the default agent on an owl app's file. */
     val edit: (WidgetSpec) -> Unit,
-    /** Shares an owl app as a link or QR code, as a widget is shared. */
-    val share: (WidgetSpec) -> Unit,
     /** Removes an owl app's file, and its icon from home. */
     val removeOwl: (WidgetSpec) -> Unit,
 )
@@ -185,13 +183,13 @@ internal val AppHit.profileKind: String?
         }
 
 /**
- * The long-press menu's entries, as the words `appAction(word, key)` takes: pin to home, for owl apps editing,
- * sharing and removing, for Android apps their info and uninstall, and for shortcuts removing them.
+ * The long-press menu's entries, as the words `appAction(word, key)` takes: pin to home, for owl apps editing
+ * and removing, for Android apps their info and uninstall, and for shortcuts removing them.
  */
 internal fun AppHit.actionWords(): List<String> =
     when (this) {
         is AppHit.Linux -> listOf("pin")
-        is AppHit.Owl -> listOf("pin", "edit", "share", "remove")
+        is AppHit.Owl -> listOf("pin", "edit", "remove")
         is AppHit.Android -> listOfNotNull("pin", "info", if (app.system) null else "uninstall")
         is AppHit.Shortcut -> listOf("pin", "remove")
     }
@@ -202,7 +200,6 @@ private val ACTION_LABELS =
         "info" to R.string.drawer_action_info,
         "uninstall" to R.string.drawer_action_uninstall,
         "edit" to R.string.home_edit,
-        "share" to R.string.home_share,
         "remove" to R.string.home_remove,
     )
 
@@ -223,7 +220,6 @@ internal fun AppHit.act(
                 else -> {}
             }
         "edit" -> (this as? AppHit.Owl)?.let { handlers.edit(it.spec) }
-        "share" -> (this as? AppHit.Owl)?.let { handlers.share(it.spec) }
     }
 }
 

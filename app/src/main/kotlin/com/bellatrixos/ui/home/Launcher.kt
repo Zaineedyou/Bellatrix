@@ -61,10 +61,7 @@ import com.bellatrixos.theme.Style
 import com.bellatrixos.theme.StyleStore
 import com.bellatrixos.widgets.HomeStore
 import com.bellatrixos.widgets.WidgetEngine
-import com.bellatrixos.widgets.checkSecretsCommand
 import com.bellatrixos.widgets.editWidgetCommand
-import com.bellatrixos.widgets.publishWidgetCommand
-import com.bellatrixos.widgets.reviewSharedWidgetCommand
 import com.bellatrixos.widgets.render.Backdrop
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -87,8 +84,6 @@ import com.bellatrixos.ui.frame
 import com.bellatrixos.ui.holdsKeys
 import com.bellatrixos.ui.keysRoot
 import com.bellatrixos.ui.settings.SetupScreen
-import com.bellatrixos.ui.store.ShareWidgetScreen
-import com.bellatrixos.ui.store.SharedWidgetScreen
 import com.bellatrixos.ui.wallpaperCrop
 
 @Composable
@@ -118,8 +113,6 @@ private fun DesktopScreen(
     val context = LocalContext.current
     BackHandler {
         when {
-            state.shared != null -> state.shared = null
-            state.sharing != null -> state.sharing = null
             runtime.widgets.openScreen != null -> runtime.widgets.openScreen = null
             state.pulled != null -> state.closePull()
             else -> state.close()
@@ -182,11 +175,6 @@ private fun DesktopScreen(
                 edit = { spec ->
                     state.closeNow()
                     state.withAgent(runtime, "Edit ${spec.name}") { editWidgetCommand(it, spec) }
-                },
-                // The same screen a widget is shared from: a link or QR code, or the store.
-                share = { spec ->
-                    state.closeNow()
-                    state.sharing = spec
                 },
                 // Its file goes to .removed/, as a removed widget's does.
                 removeOwl = { spec -> runtime.widgets.removeWidget(spec) },
@@ -298,7 +286,7 @@ private fun DesktopScreen(
     // Over home and the bar, as it comes down from the top.
     PulledPanel(runtime, state)
     // Full-screen panels draw over the bar.
-    ThemesOverlay(runtime, state)
+    ThemesOverlay(runtime)
     FileErrors(listOf(StyleStore.FILE to runtime.style.errors, HomeStore.FILE to runtime.widgets.home.errors) + runtime.gestureProblems())
 }
 
@@ -337,47 +325,12 @@ private fun FileErrors(files: List<Pair<String, List<String>>>) {
 private const val MAX_ERRORS = 3
 
 @Composable
-private fun ThemesOverlay(
-    runtime: Runtime,
-    state: LauncherState,
-) {
+private fun ThemesOverlay(runtime: Runtime) {
     // A widget's screen first: what it opens (themes, agents) draws on top of it.
     runtime.widgets.screenInstance()?.let { (spec, inst) ->
         CompositionLocalProvider(LocalInputFocus provides true) {
             WidgetScreenPanel(spec, inst, onDismiss = { runtime.widgets.openScreen = null })
         }
-    }
-    state.shared?.let { link ->
-        SharedWidgetScreen(
-            runtime.widgets,
-            link,
-            state.currentPage,
-            // Stays open underneath, to add it once the agent has had its say.
-            onReview = { path -> state.withAgent(runtime, "Review widget") { reviewSharedWidgetCommand(it, path) } },
-            onDismiss = { state.shared = null },
-        )
-    }
-    state.sharing?.let { spec ->
-        ShareWidgetScreen(
-            spec,
-            // Only your own: a widget from the store or from someone else isn't yours to submit.
-            onPublish =
-                if (!runtime.widgets.isOwnWidget(spec)) {
-                    null
-                } else {
-                    {
-                        state.sharing = null
-                        // The default agent opens a pull request (or an issue) on the store repo.
-                        state.withAgent(runtime, "Publish ${spec.name}") { publishWidgetCommand(it, spec) }
-                    }
-                },
-            // Closes the screen: what the agent changes would be shared from a fresh one.
-            onCheck = {
-                state.sharing = null
-                state.withAgent(runtime, "Check ${spec.name}") { checkSecretsCommand(it, spec) }
-            },
-            onDismiss = { state.sharing = null },
-        )
     }
 }
 

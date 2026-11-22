@@ -52,8 +52,8 @@ android {
         applicationId = "com.bellatrixos"
         minSdk = 23
         targetSdk = 36
-        versionCode = 66
-        versionName = "2.9.33"
+        versionCode = 67
+        versionName = "2.9.34"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
@@ -173,7 +173,6 @@ dependencies {
     implementation("org.jetbrains.compose.foundation:foundation:1.11.1")
     implementation("org.jetbrains.compose.ui:ui:1.11.1")
     implementation("com.caverock:androidsvg-aar:1.4")
-    implementation("com.google.zxing:core:3.5.4")
     testImplementation("junit:junit:4.13.2")
     // android.jar only has stubs of org.json.
     testImplementation("org.json:json:20260814")

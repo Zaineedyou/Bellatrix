@@ -89,7 +89,7 @@ class Review(
             }
         }
         if (p.size == null && p.kind == OwlKind.Widget) warnings += "no size: set size: 3x2 so it's placed at the size you designed it for"
-        // Shared links warn about these; the store doesn't take them: what they run can change after review.
+        // The store doesn't take these: what they run can change after review.
         val unquoted = p.commands.filter { UNQUOTED.containsMatchIn(it) }
         for (c in unquoted) {
             errors += "${c.removeSuffix(" built from widget values")} is put together from widget values that aren't quoted: " +

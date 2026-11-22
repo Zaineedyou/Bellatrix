@@ -145,8 +145,6 @@ class MarketTest {
         assertTrue(ok.markdown().contains("notify-send ${Compiler.VALUE}"))
         assertTrue(review("${'$'}{sh(v)} --help").warnings.any { it.contains("runs a program a widget value names") })
         assertTrue(review("bash -c ${'$'}{sh(v)}").warnings.any { it.contains("runs a widget value as code") })
-        // A shared link only warns.
-        assertTrue(Shared(good.replace("license: \"MIT\"", "license: \"MIT\"; owl: 6").replace("Text { text: df }", "state v = \"x\"\n onTap: run(\"echo ${'$'}{v}\")\n Text { text: df }")).risks.single().contains("can't be shown here"))
     }
 
     @Test fun catalogRoundTrips() {

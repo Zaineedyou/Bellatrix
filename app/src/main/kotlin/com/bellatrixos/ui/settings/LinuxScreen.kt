@@ -1,7 +1,6 @@
 package com.bellatrixos.ui.settings
 
 import android.Manifest
-import android.net.Uri
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -38,7 +37,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.bellatrixos.BackupState
 import com.bellatrixos.Runtime
 import com.bellatrixos.R
 import com.bellatrixos.linux.AGENTS
@@ -47,9 +45,6 @@ import com.bellatrixos.linux.JobState
 import com.bellatrixos.linux.LinuxState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.io.File
 import java.io.IOException
 import java.nio.file.FileVisitResult
@@ -89,78 +84,7 @@ fun LinuxScreen(
                 LinuxState.Installed -> Installed(runtime)
                 LinuxState.Removing -> BasicText(stringResource(R.string.linux_removing), style = Mono.copy(color = Palette.accent))
             }
-            if (state == LinuxState.NotInstalled || state == LinuxState.Installed || state is LinuxState.Failed) BackupCard(runtime)
             LegacyArchCard(runtime)
-        }
-    }
-}
-
-
-/**
- * Backup and restore. The files go through the system's file picker, so the place is the user's to choose (a folder on
- * the phone, an SD card, a cloud drive) and the launcher needs no storage permission for it. A restore asks first: it
- * replaces what is on the phone now.
- */
-@Composable
-private fun BackupCard(runtime: Runtime) {
-    val backup = runtime.backup
-    var restoreFrom by remember { mutableStateOf<Uri?>(null) }
-    val create =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            result.data?.data?.let(runtime::backupTo)
-        }
-    val pick =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            restoreFrom = result.data?.data
-        }
-    Spacer(Modifier.height(24.dp))
-    Column(Modifier.card(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        BasicText("backup and restore", style = Mono.copy(fontSize = TextSize.Item))
-        BasicText(
-            "Saves the Linux system and the launcher's settings (themes, widgets, home layout, style) to one file in a place you " +
-                "choose, and brings them back from it. Linux apps close while it runs; keep the launcher open until it's done.",
-            style = Mono.copy(color = Palette.muted, fontSize = TextSize.Small),
-        )
-        when (val s = backup.state) {
-            BackupState.Idle ->
-                if (restoreFrom == null) {
-                    Row {
-                        BracketAction("back up", Palette.accent) {
-                            val name = "bellatrix-backup-" + SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()) + ".tar.gz"
-                            create.launch(
-                                Intent(Intent.ACTION_CREATE_DOCUMENT)
-                                    .addCategory(Intent.CATEGORY_OPENABLE)
-                                    .setType("application/gzip")
-                                    .putExtra(Intent.EXTRA_TITLE, name),
-                            )
-                        }
-                        BracketAction("restore", Palette.accent) {
-                            pick.launch(Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"))
-                        }
-                    }
-                } else {
-                    BasicText(
-                        "Restore from this file? It replaces the Linux system and the launcher's settings that are on this phone now, " +
-                            "and restarts the launcher.",
-                        style = Mono.copy(color = Palette.red, fontSize = TextSize.Small),
-                    )
-                    Row {
-                        BracketAction("restore", Palette.red) {
-                            restoreFrom?.let(runtime::restoreFrom)
-                            restoreFrom = null
-                        }
-                        BracketAction("cancel", Palette.muted) { restoreFrom = null }
-                    }
-                }
-            is BackupState.Running ->
-                BasicText(
-                    s.label + (s.progress?.let { " · ${(it * 100).toInt()}%" } ?: "…"),
-                    style = Mono.copy(color = Palette.accent, fontSize = TextSize.Small),
-                )
-            is BackupState.Finished -> {
-                BasicText(s.message, style = Mono.copy(color = if (s.ok) Palette.muted else Palette.red, fontSize = TextSize.Small))
-                BracketAction("ok", Palette.muted, onClick = backup::dismiss)
-            }
         }
     }
 }

@@ -11,9 +11,12 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.bellatrixos.App
 import com.bellatrixos.R
 import com.bellatrixos.app_settings.UISettings
 import com.bellatrixos.database.SharedPrefs
+import com.bellatrixos.ui.settings.SettingsPage
+import com.bellatrixos.widgets.cards.UISettingsCard
 import com.bellatrixos.widgets.cards.UISettingsCardSpinnerText
 import com.bellatrixos.windows.drivers.Display
 import java.text.SimpleDateFormat
@@ -32,14 +35,19 @@ class UIAbout : Fragment() {
     @JvmField var x0: TextView? = null
     @JvmField var y0: TextView? = null
     @JvmField var z0: TextView? = null
+    @JvmField var licenses: UISettingsCard? = null
 
     override fun onDestroyView() {
         super.onDestroyView()
         u0 = null
         v0?.setOnCardClickListener(null)
+        licenses?.setOnCardClickListener(null)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        licenses?.setOnCardClickListener {
+            (t0?.applicationContext as? App)?.runtime?.openSettings(SettingsPage.Licenses)
+        }
         s0?.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 val root = s0 ?: return
@@ -88,6 +96,7 @@ class UIAbout : Fragment() {
         y0 = view.findViewById(R.id.about_id)
         z0 = view.findViewById(R.id.about_installed_date)
         B0 = view.findViewById(R.id.about_installed_title)
+        licenses = view.findViewById(R.id.about_licenses)
         return view
     }
 }

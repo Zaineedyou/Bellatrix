@@ -969,7 +969,7 @@ internal fun NeedsLinuxNote(app: Boolean) =
 
 /**
  * What a widget or app installs and runs, shown before it's added: the store's
- * entries and shared links say it the same way. [notice] goes between the two.
+ * entries say it. [notice] goes between the two.
  */
 @Composable
 internal fun InstallDisclosure(

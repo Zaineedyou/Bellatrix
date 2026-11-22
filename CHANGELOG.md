@@ -9,6 +9,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.34] - 2026-11-22
+
+### Added
+
+- The launcher's own Settings window now exposes **system updates**, **fast system calls**, **stay alive in the background**, **packages**, **permissions** and **licenses**. The Linux, PC Update, Privacy and About pages carry cards that open the existing screens, which were implemented but had no entry point from the running launcher.
+
+### Fixed
+
+- Home widgets tick while home is visible: the native activity now calls `homeStarted()` / `homeStopped()`.
+- Widget permission prompts follow the native activities through `WidgetAsks` on resume and pause.
+- Browser WebView timers follow home visibility through `BrowserPages.started(...)`.
+
+### Removed
+
+- Launcher backup/restore logic and its Settings card. Platform backup rules are unchanged.
+- Widget sharing: QR/link export and import, store publish, shared-widget agent commands, share strings, docs and the ZXing dependency. File sharing and the normal widget store remain.
+
 ## [2.9.33] - 2026-11-22
 
 ### Added

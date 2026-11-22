@@ -121,7 +121,7 @@ declarations.md, nodes.md, expressions.md and handlers.md; a face, an app, a pan
 | docs/panels.md | panels a swipe opens, the app drawer among them |
 | docs/keybar.md | the terminal key bar over the keyboard |
 | docs/home.md | home's layout.toml, creating widgets on Bellatrix home, and reaching a running widget from scripts with `owl-send` |
-| docs/sharing.md | the widget store, and sharing a file as a link or QR code |
+| docs/store.md | the widget store and what a widget needs to be in it |
 | docs/versions.md | what each owl version added |
 
 ## Mistakes to avoid

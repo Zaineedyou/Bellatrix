@@ -37,7 +37,6 @@ import com.bellatrixos.widgets.lang.OwlKind
 import com.bellatrixos.widgets.lang.Program
 import com.bellatrixos.widgets.lang.Source
 import com.bellatrixos.widgets.lang.phoneLanguage
-import com.bellatrixos.widgets.market.Shared
 import com.bellatrixos.widgets.runtime.WidgetInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -445,18 +444,6 @@ class WidgetEngine(
     /** An agent's terminal tile, which [addAgentWidget] made. */
     fun isAgentWidget(spec: WidgetSpec) = spec.file.name.startsWith(AGENT_PREFIX)
 
-    /** File names of the widgets this app ships, defaults and examples alike. */
-    private val bundledFiles by lazy {
-        listOf("widgets", "widgets/examples").flatMap { context.assets.list(it).orEmpty().filter { n -> n.endsWith(".owl") } }.toSet()
-    }
-
-    /** The user (or their agent) wrote it: not shipped with the app, installed from the store, shared with them, or an agent's tile. */
-    fun isOwnWidget(spec: WidgetSpec): Boolean {
-        val name = spec.file.name
-        return name !in bundledFiles && !isAgentWidget(spec) && !name.startsWith(TERMINAL_PREFIX) && !name.startsWith(Shared.FILE_PREFIX) &&
-            markets.none { m -> m.installed.values.any { i -> i.files.any { it.file == name } } }
-    }
-
     /** [agent]'s terminal tile is on the home screen. */
     fun hasAgentWidget(agent: Agent) = specs.any { it.file.name == agentWidgetFile(agent) }
 
@@ -482,32 +469,6 @@ class WidgetEngine(
             val name = TERMINAL_PREFIX + System.currentTimeMillis().toString(36) + ".owl"
             setPage(name, 1)
             File(dir, name).writeBytes(context.assets.open("widgets/$TERMINAL_ASSET").use { it.readBytes() })
-        }
-
-    /** What a widget from a share link is saved as is there already, with the same text (null when it isn't there). */
-    fun sharedWidgetIsSame(shared: Shared): Boolean? = File(dir, shared.fileName).takeIf { it.exists() }?.let { it.readText() == shared.text }
-
-    /**
-     * Adds a widget from a share link, once the user has read what it runs: on Bellatrix's one home page, its packages
-     * installed right after, as a store install. One shared before under the same name is replaced and keeps its place.
-     * [page] is kept for old callers and ignored; faces are ordinary tiles too.
-     */
-    @Suppress("UNUSED_PARAMETER")
-    suspend fun addSharedWidget(
-        shared: Shared,
-        page: Int,
-    ) = withContext(Dispatchers.IO) {
-        val name = shared.fileName
-        if (!File(dir, name).exists()) setPage(name, 1)
-        installDependenciesWhenLoaded(name)
-        File(dir, name).writeText(shared.text)
-    }
-
-    /** A copy of a shared widget for an agent to review ([Shared.forReview]), where nothing loads it; its path from ~/[GUEST_DIR]. */
-    suspend fun saveForReview(shared: Shared): String =
-        withContext(Dispatchers.IO) {
-            File(dir, ".review").apply { mkdirs() }.resolve(shared.fileName).writeText(shared.forReview)
-            ".review/${shared.fileName}"
         }
 
     fun installDependenciesWhenLoaded(fileName: String) {

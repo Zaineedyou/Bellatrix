@@ -484,13 +484,6 @@ fun HomeScreen(
                         val spec = if (item is WidgetItem) item.spec else (item as? Shortcut)?.owl?.let(engine.specs::app)
                         if (spec != null) EditAction(stringResource(R.string.home_edit)) { edit(spec) }
                         if (spec != null) EditAction(stringResource(R.string.home_edit_file)) { editFile(spec) }
-                        // As a QR code or link, or (your own) to the store. An agent's tile is a terminal, not a widget to pass on.
-                        if (spec != null && !engine.isAgentWidget(spec)) {
-                            EditAction(stringResource(R.string.home_share)) {
-                                state.editing = null
-                                state.sharing = spec
-                            }
-                        }
                         EditAction(stringResource(R.string.home_remove), Palette.red) { remove(item) }
                     }
                 }

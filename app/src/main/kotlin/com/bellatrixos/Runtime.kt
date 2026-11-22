@@ -122,18 +122,6 @@ class Runtime(
     val agents = AgentStore(proot, text = { id, arg -> context.getString(id, arg) }, onChanged = ::syncGuest)
     val packages = Packages(proot)
 
-    /** The Linux system and the launcher's data to and from one file; see [Backup]. */
-    val backup = Backup(context, proot, packages)
-
-    fun backupTo(uri: Uri) {
-        scope.launch { backup.createTo(uri) }
-    }
-
-    /** Restores from [uri]; the launcher restarts when it worked, to load what came back. */
-    fun restoreFrom(uri: Uri) {
-        scope.launch { if (backup.restoreFrom(uri)) restartLauncher(context, proot) }
-    }
-
     /** Arch Linux's old files, if any are still in storage; see [LegacyArch]. */
     private val legacyArch = LegacyArch(context, proot.filesDir)
     var hasLegacyArch by mutableStateOf(legacyArch.present)
