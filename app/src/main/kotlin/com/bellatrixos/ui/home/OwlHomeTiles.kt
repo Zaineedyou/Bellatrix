@@ -9,11 +9,13 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +36,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.bellatrixos.MainActivity
@@ -113,7 +117,7 @@ private fun bottomRightGrabbed(
 ): Boolean {
     val gx = grip.coerceAtMost(maxOf(1, rect.w / 2))
     val gy = grip.coerceAtMost(maxOf(1, rect.h / 2))
-    return p.x >= rect.w - gx && p.y >= rect.h - gy
+    return p.x >= rect.w - gx && p.x <= rect.w && p.y >= rect.h - gy && p.y <= rect.h
 }
 
 private fun resizedFromBottomRight(
@@ -272,9 +276,17 @@ internal fun OwlHomeTiles(
             val at = contained(raw, grid, minW, minH)
             key(item.key) {
                 val current = rememberUpdatedState(at)
-                // Live drag geometry: read once in the layout modifier, so a move doesn't
-                // recompose every tile (or the OWL scene) on every pointer event.
+                // Live drag geometry. Position is read only in the offset (placement) phase, and
+                // size through a derived state that only changes on resize. A pure move therefore
+                // invalidates placement alone instead of remeasuring the whole OWL tile each frame.
                 val live = remember { mutableStateOf<PixelRect?>(null) }
+                val liveSize =
+                    remember {
+                        derivedStateOf {
+                            live.value?.let { IntSize(it.w, it.h) }
+                                ?: IntSize(current.value.w, current.value.h)
+                        }
+                    }
                 val isSelected = selected == item.key
 
                 LaunchedEffect(saved) {
@@ -283,12 +295,14 @@ internal fun OwlHomeTiles(
 
                 Box(
                     Modifier
-                        // Size and position are applied in the same layout pass. Two separate state
-                        // reads (offset + size) could land on different frames and look like a jerk.
                         .layout { measurable, _ ->
+                            val size = liveSize.value
+                            val placeable = measurable.measure(Constraints.fixed(size.width, size.height))
+                            layout(size.width, size.height) { placeable.place(0, 0) }
+                        }
+                        .offset {
                             val r = live.value ?: current.value
-                            val placeable = measurable.measure(Constraints.fixed(r.w, r.h))
-                            layout(r.w, r.h) { placeable.place(r.x, r.y) }
+                            IntOffset(r.x, r.y)
                         }
                         .zIndex(if (isSelected) 2f else 0f)
                         .systemGestureExclusion()
@@ -305,27 +319,36 @@ internal fun OwlHomeTiles(
                                 val start = down.position
                                 var last = start
                                 var cancelled = false
+                                val origin = live.value ?: current.value
+                                // down.position is already tile-local; subtracting the screen origin made
+                                // the grip miss unless the tile sat at 0,0. The dedicated grip resizes
+                                // right away; only dragging the body needs the deliberate hold.
+                                val resizing = !locked && bottomRightGrabbed(origin, start, grip)
 
-                                // A quick tap opens the widget. Moving before the hold finishes only cancels;
-                                // dragging never starts from a swipe, so taps can't turn into moves.
+                                // A quick tap on the body opens the widget. Moving before the hold
+                                // finishes only cancels; a swipe can never turn into a move.
                                 val longPressed =
-                                    withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
-                                        while (true) {
-                                            val change =
-                                                awaitPointerEvent(PointerEventPass.Initial)
-                                                    .changes
-                                                    .firstOrNull { it.id == id }
-                                                    ?: return@withTimeoutOrNull false
-                                            if (!change.pressed) return@withTimeoutOrNull false
-                                            last = change.position
-                                            if ((last - start).getDistance() > holdSlop) {
-                                                cancelled = true
-                                                change.consume()
-                                                return@withTimeoutOrNull false
+                                    if (resizing) {
+                                        true
+                                    } else {
+                                        withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+                                            while (true) {
+                                                val change =
+                                                    awaitPointerEvent(PointerEventPass.Initial)
+                                                        .changes
+                                                        .firstOrNull { it.id == id }
+                                                        ?: return@withTimeoutOrNull false
+                                                if (!change.pressed) return@withTimeoutOrNull false
+                                                last = change.position
+                                                if ((last - start).getDistance() > holdSlop) {
+                                                    cancelled = true
+                                                    change.consume()
+                                                    return@withTimeoutOrNull false
+                                                }
                                             }
-                                        }
-                                        false
-                                    } == null
+                                            false
+                                        } == null
+                                    }
 
                                 if (cancelled) return@awaitEachGesture
 
@@ -337,12 +360,6 @@ internal fun OwlHomeTiles(
                                 selected = item.key
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                val origin = live.value ?: current.value
-                                val dragStart = last
-                                // down.position is already tile-local; subtracting the screen origin made
-                                // the grip miss unless the tile sat at 0,0.
-                                val resizing = !locked && bottomRightGrabbed(origin, start, grip)
-                                var previous = dragStart
                                 var total = Offset.Zero
                                 var didDrag = false
 
@@ -367,18 +384,16 @@ internal fun OwlHomeTiles(
                                         change.consume()
                                         continue
                                     }
-                                    if (!didDrag && (change.position - dragStart).getDistance() <= viewConfiguration.touchSlop) {
-                                        previous = change.position
+                                    // Read Compose's own per-event delta before consuming. Unlike a
+                                    // manually stored position it stays correct while the tile itself
+                                    // is being moved by this same gesture, so the tile follows the finger.
+                                    val step = change.positionChange()
+                                    if (!didDrag && (total + step).getDistance() <= viewConfiguration.touchSlop) {
                                         continue
                                     }
                                     change.consume()
-                                    if (didDrag) {
-                                        total += change.position - previous
-                                    } else {
-                                        didDrag = true
-                                        total = change.position - dragStart
-                                    }
-                                    previous = change.position
+                                    didDrag = true
+                                    total += step
                                     apply(total.x, total.y)
                                 }
 
@@ -433,7 +448,7 @@ internal fun OwlHomeTiles(
                         Box(
                             Modifier
                                 .align(Alignment.BottomEnd)
-                                .size(16.dp)
+                                .size(20.dp)
                                 .background(Palette.accent.copy(alpha = if (isSelected) 1f else 0.55f))
                                 .border(1.dp, Palette.popup),
                         )

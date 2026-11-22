@@ -13,6 +13,6 @@
             <androidx.recyclerview.widget.RecyclerView android:id="@id/widgetPickerRecyclerView" android:visibility="gone" android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="match_parent" />
             <com.bellatrixos.taskbar.center_widgets.utils.WidgetsRecyclerView android:scrollbarStyle="outsideInset" android:id="@id/widgetsRecyclerView" android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="match_parent" />
         </LinearLayout>
-        <TextView android:textSize="15.0sp" android:textColor="@color/text_muted" android:layout_gravity="center" android:id="@id/empty_view" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/dialog_widget_placeholder" android:textAlignment="center" android:elevation="5.0dp" app:drawableTopCompat="@drawable/ui_widgets_placeholder_124" />
+        <TextView android:textSize="15.0sp" android:textColor="@color/text_muted" android:layout_gravity="center" android:id="@id/empty_view" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/dialog_widget_placeholder" android:textAlignment="center" android:elevation="5.0dp" app:drawableTopCompat="@drawable/img_widget_zone_coding_agents_48" />
     </FrameLayout>
 </FrameLayout>

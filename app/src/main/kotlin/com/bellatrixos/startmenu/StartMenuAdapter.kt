@@ -171,10 +171,11 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
         }
         // Mode 2 hid every APK; mode 3 shows ONLY work-profile apps and hides all
         // built-ins when there is no second profile. Collapse both to "all apps".
-        val validViews = setOf(MODE_ALL, MODE_FREEFORM, MODE_WORK, FILTER_BELLATRIX, FILTER_ANDROID, FILTER_CODING_AGENTS, FILTER_LINUX)
+        val validViews = setOf(MODE_ALL, MODE_FREEFORM, MODE_WORK, FILTER_BELLATRIX, FILTER_ANDROID, FILTER_LINUX)
         val effectiveView = when {
             savedView == MODE_FREEFORM -> MODE_ALL
             savedView == MODE_WORK && !H -> MODE_ALL
+            savedView == FILTER_CODING_AGENTS -> MODE_ALL
             savedView !in validViews -> MODE_ALL
             else -> savedView
         }
@@ -238,11 +239,14 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
             for (installed in InstalledAppsDB.b()) A(1, installed.c(), installed.b().orEmpty())
         } catch (_: RuntimeException) {
         }
-        // Guest apps keep their desktop id. Agents are agent-*.desktop so the drop-down
-        // can show them as Coding Agents; every other guest app as Linux apps.
+        // Guest apps keep their desktop id. Coding agents are picked in the taskbar's
+        // Widget Zone now, so agent-*.desktop entries stay out of the app drawer.
         try {
             val runtime = (B.applicationContext as? App)?.runtime ?: return
-            for (app in runtime.linuxApps.apps) A(1, LINUX_APP_PREFIX + app.id, app.name)
+            for (app in runtime.linuxApps.apps) {
+                if (app.id.startsWith("agent-")) continue
+                A(1, LINUX_APP_PREFIX + app.id, app.name)
+            }
         } catch (_: RuntimeException) {
         }
     }

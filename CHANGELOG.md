@@ -9,6 +9,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.31] - 2026-11-22
+
+### Added
+
+- The taskbar's **Widget Zone** is now the **Coding Agents** picker. It lists installed agents with their logos, marks the current default, and choosing one makes it the default and opens it. Its taskbar icon is now a dedicated coding-agents icon.
+
+### Changed
+
+- Coding Agents no longer appear in the app drawer or the app-drawer filter. Install and remove them from the standalone Coding Agents settings page or from the picker's **Manage agents** button.
+
+### Fixed
+
+- Widget drag no longer blinks, trails, or feels heavy. Position is applied in Compose's placement phase without remeasuring the OWL tile, and movement uses Compose's own per-event delta so the tile follows the finger instead of lagging a frame behind.
+- The bottom-right resize grip is now decisive: pressing it starts resizing immediately, its touch band matches the visible grip, and it is no longer mistaken for a body drag.
+- The app drawer's old Recommended reservation is gone; the app grid now fills the available space between the title and footer instead of leaving 318 dp of dead space.
+- Floating terminal pixels now render through a `TextureView`, so raising a terminal puts its content above ordinary Views. Coding Agents can no longer cover the terminal's text.
+
 ## [2.9.30] - 2026-11-22
 
 ### Added

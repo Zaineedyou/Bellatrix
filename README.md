@@ -49,6 +49,7 @@ using Bellatrix UI — there is no second home screen or parallel desktop to swi
 
 - Native Bellatrix Settings with System, Linux, Coding Agents, and PC Update pages
 - Coding Agents as a standalone top-level page with one card per agent and per-agent dropdowns
+- Coding Agents picker in the taskbar's Widget Zone; agents are not duplicated in the app drawer
 - Themes, wallpapers, colors, icon packs, fonts, taskbar, and home gestures
 - OWL widget engine with native schemas and live-data previews
 - PC Update with GitHub Release changelog, a **Download From Github** button, and Chrome fallback

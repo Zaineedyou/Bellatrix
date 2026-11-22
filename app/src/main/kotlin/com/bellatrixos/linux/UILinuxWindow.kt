@@ -25,7 +25,7 @@ import com.bellatrixos.wayland.KeyBarView
 import com.bellatrixos.wayland.KeyboardSink
 import com.bellatrixos.wayland.LinuxViewBackend
 import com.bellatrixos.wayland.LinuxWindowInputView
-import com.bellatrixos.wayland.WindowSurfaceView
+import com.bellatrixos.wayland.WindowTextureView
 import com.bellatrixos.wayland.XdgToplevel
 
 /**
@@ -34,8 +34,10 @@ import com.bellatrixos.wayland.XdgToplevel
  * [LinuxWindowActivity] remains the host for ordinary guest apps, but the
  * terminal is launched as this fragment so it behaves like every other
  * launcher window: draggable, resizable, minimisable and listed in the taskbar.
- * Pixels still come straight from the Wayland compositor into [WindowSurfaceView];
- * Android only supplies the frame, input, keybar and soft keyboard.
+ * Pixels still come straight from the Wayland compositor into [WindowTextureView],
+ * so a raised terminal covers ordinary Views like the Coding Agents page instead
+ * of staying behind them on SurfaceView's separate layer. Android only supplies
+ * the frame, input, keybar and soft keyboard.
  */
 class UILinuxWindow : UIFragment() {
     companion object {
@@ -56,7 +58,7 @@ class UILinuxWindow : UIFragment() {
     private var closing = false
 
     private lateinit var content: FrameLayout
-    private lateinit var surface: WindowSurfaceView
+    private lateinit var surface: WindowTextureView
     private lateinit var input: LinuxWindowInputView
     private lateinit var sink: KeyboardSink
     private lateinit var keyBar: KeyBarView
@@ -193,7 +195,7 @@ class UILinuxWindow : UIFragment() {
     }
 
     private fun installLinuxViews(w: XdgToplevel) {
-        surface = WindowSurfaceView(requireContext(), backend.server, backend.wm, w)
+        surface = WindowTextureView(requireContext(), backend.server, backend.wm, w)
         content.addView(surface, 0, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
 
         input = LinuxWindowInputView(requireContext(), backend.wm, w)

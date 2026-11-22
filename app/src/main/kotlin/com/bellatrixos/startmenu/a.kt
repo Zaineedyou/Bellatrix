@@ -20,7 +20,6 @@ class a(mainActivityIn: MainActivityIn, i2: Int) : UIContextMenu.OnMenuItemClick
                     R.id.action_list_work -> StartMenuAdapter.MODE_WORK
                     StartMenuAdapter.FILTER_BELLATRIX,
                     StartMenuAdapter.FILTER_ANDROID,
-                    StartMenuAdapter.FILTER_CODING_AGENTS,
                     StartMenuAdapter.FILTER_LINUX -> i2
                     else -> StartMenuAdapter.MODE_ALL
                 }

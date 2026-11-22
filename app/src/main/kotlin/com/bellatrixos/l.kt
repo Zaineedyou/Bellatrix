@@ -96,14 +96,8 @@ class l(@JvmField val v: Any, @JvmField val u: Int) : Runnable {
                         mainActivity2.resources.getDimensionPixelSize(R.dimen.start_menu_max_height)
                     coordinatorLayout.layoutParams = layoutParams
                 } else {
-                    val resources = mainActivity2.resources
-                    val itemWidth = resources.getDimensionPixelSize(R.dimen.start_menu_app_layout_width)
-                    val rowWidth =
-                        ((WindowSize.b - resources.getDimensionPixelSize(R.dimen.start_menu_recommended_padding)) /
-                            itemWidth) * itemWidth
-                    val layoutParams2 = recyclerView.layoutParams
-                    layoutParams2.height = rowWidth
-                    recyclerView.layoutParams = layoutParams2
+                    // The app grid fills the space between the title and the footer in XML. The old
+                    // Recommended reservation is gone, so no dead height is subtracted here anymore.
                 }
                 recyclerView.layoutManager = GridLayoutManager(mainActivity2, iMax)
                 bottomSheetBehavior.peekHeight = coordinatorLayout.height
@@ -261,7 +255,7 @@ class l(@JvmField val v: Any, @JvmField val u: Int) : Runnable {
                         }
                     } else if (i11 == 1 && z) {
                         val taskbarBtn3 = TaskbarBtn(mainActivity10)
-                        taskbarBtn3.setIcon(R.drawable.img_app_widget)
+                        taskbarBtn3.setIcon(R.drawable.img_widget_zone_coding_agents_48)
                         mainActivity7.p0(taskbarBtn3)
                         linearLayout4?.addView(taskbarBtn3, 0)
                     }

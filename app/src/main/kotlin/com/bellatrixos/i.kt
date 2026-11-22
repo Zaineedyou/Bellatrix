@@ -143,7 +143,6 @@ class i(@JvmField val u: Int, @JvmField val v: Any?) : View.OnClickListener {
                     listOf(
                         StartMenuAdapter.FILTER_BELLATRIX to R.string.start_filter_bellatrix,
                         StartMenuAdapter.FILTER_ANDROID to R.string.start_filter_android,
-                        StartMenuAdapter.FILTER_CODING_AGENTS to R.string.start_filter_coding_agents,
                         StartMenuAdapter.FILTER_LINUX to R.string.start_filter_linux,
                     )
                 for ((mode, label) in kindFilters) {

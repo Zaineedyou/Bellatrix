@@ -45,7 +45,7 @@ object TaskBar {
         taskbarBtn.setOnBtnClickListener(null)
         if (Global.o) {
             val button = TaskbarBtn(context)
-            button.setIcon(R.drawable.img_app_widget)
+            button.setIcon(R.drawable.img_widget_zone_coding_agents_48)
             mainActivityIn.p0(button)
             linearLayout.addView(button, 0)
         }

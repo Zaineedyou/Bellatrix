@@ -579,7 +579,7 @@ class WidgetServices(
     private fun drawer(): Value {
         val apps = runtime.androidApps
         val hits =
-            runtime.widgets.apps().map { AppHit.Owl(it) } + runtime.linuxApps.apps.map { AppHit.Linux(it) } +
+            runtime.widgets.apps().map { AppHit.Owl(it) } + runtime.linuxApps.apps.filter { !it.id.startsWith("agent-") }.map { AppHit.Linux(it) } +
                 apps.shortcuts.filter { !it.work }.map { AppHit.Shortcut(it) } + apps.apps.filter { !it.work }.map { AppHit.Android(it) } +
                 apps.shortcuts.filter { it.work }.map { AppHit.Shortcut(it) } + apps.apps.filter { it.work }.map { AppHit.Android(it) }
         val list =

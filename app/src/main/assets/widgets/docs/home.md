@@ -55,8 +55,8 @@ session for that file (or opens the standalone Coding Agents page when no agent 
 **lock widget** pins its pixel rectangle so it cannot be moved or resized — the same item becomes
 **unlock widget** when locked. A locked tile still opens on tap. There is no always-visible dropdown
 button and no ring of handles. A quick swipe never moves a tile: hold it first, then drag the body to
-move it, or hold and drag only the single bottom-right grip left/right/up/down to resize it in pixels.
-A locked tile has no grip. Tiles may overlap, and the home area is clipped without a visible border.
+move it. The single bottom-right grip starts resizing as soon as you press it and follows left/right/up/down
+in pixels; it does not need the hold. A locked tile has no grip. Tiles may overlap, and the home area is clipped without a visible border.
 The empty home invite creates a widget or face tile directly when Linux isn't installed. There is no
 second launcher screen — the files below are the ones Bellatrix home reads.
 
