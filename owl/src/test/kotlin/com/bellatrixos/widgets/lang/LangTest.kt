@@ -866,7 +866,8 @@ class LangTest {
         }
         // A text long enough that one match takes a while, on this machine, but gives up on its own.
         while (timed() < 60) host.slots[0] = Num((host.slots[0] as Num).v + 4)
-        host.slots[1] = Num(40.0)
+        // Well over the one-second shared allowance even if every later match is faster than the first.
+        host.slots[1] = Num(120.0)
         val started = System.nanoTime()
         try {
             host.budget.eval(ev, Env.root(host))
@@ -874,7 +875,7 @@ class LangTest {
         } catch (e: WidgetError) {
             assertTrue(e.message, e.message!!.contains("in all in one update"))
         }
-        // Over 40 times 60 ms before.
+        // Over 120 times 60 ms before, cut short by the shared allowance.
         assertTrue((System.nanoTime() - started) / 1_000_000 < 1800)
         // The pattern isn't refused, and the next update has its own allowance.
         host.slots[1] = Num(1.0)
