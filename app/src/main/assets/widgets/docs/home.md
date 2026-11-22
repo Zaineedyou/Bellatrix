@@ -53,10 +53,11 @@ Hold a widget tile and release without dragging to open Bellatrix's own native p
 moves the `.owl` file to `.removed/` and takes the tile off home, **edit** starts a Coding Agent
 session for that file (or opens the standalone Coding Agents page when no agent is installed), and
 **lock widget** pins its pixel rectangle so it cannot be moved or resized — the same item becomes
-**unlock widget** when locked. A locked tile still opens on tap. There is no always-visible dropdown
-button and no ring of handles. A quick swipe never moves a tile: hold it first, then drag the body to
-move it. The single bottom-right grip starts resizing as soon as you press it and follows left/right/up/down
-in pixels; it does not need the hold. A locked tile has no grip. Tiles may overlap, and the home area is clipped without a visible border.
+**unlock widget** immediately, while the menu is still open, and tapping it again switches straight back.
+A locked tile still opens on tap. There is no always-visible dropdown button and no ring of handles.
+A quick swipe never moves a tile: hold it first, then drag the body to move it. The bottom-right resize
+area is invisible: pressing that corner starts resizing immediately and follows left/right/up/down in pixels,
+with no hold and no drawn box. A locked tile has no such area. Tiles may overlap, and the home area is clipped without a visible border.
 The empty home invite creates a widget or face tile directly when Linux isn't installed. There is no
 second launcher screen — the files below are the ones Bellatrix home reads.
 

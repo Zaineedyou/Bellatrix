@@ -3,14 +3,12 @@ package com.bellatrixos.ui.home
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -22,7 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
@@ -174,7 +171,7 @@ private fun showNativeWidgetMenu(
     unlockLabel: String,
     removeLabel: String,
     onEdit: () -> Unit,
-    onLock: () -> Unit,
+    onLock: (Boolean) -> Unit,
     onRemove: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -182,6 +179,9 @@ private fun showNativeWidgetMenu(
     UIContextMenu.f4743f?.dismiss()
     val menu = UIContextMenu(activity)
     menu.f4745d.clear()
+    // The menu stays open while the user toggles it, so this local value follows each tap instead
+    // of the stale composition value captured when the popup was first created.
+    var currentLocked = locked
 
     val edit = UIMenuItem(0, 1, R.drawable.menu_ic_edit_20_regular, editLabel)
     edit.f4750f = true
@@ -192,7 +192,7 @@ private fun showNativeWidgetMenu(
             0,
             3,
             R.drawable.ic_lock_closed_24_regular,
-            if (locked) unlockLabel else lockLabel,
+            if (currentLocked) unlockLabel else lockLabel,
         ),
     )
     menu.f4745d.add(UIMenuItem(1, 0, 0, ""))
@@ -201,11 +201,30 @@ private fun showNativeWidgetMenu(
     menu.c =
         UIContextMenu.OnMenuItemClickListener { _, id ->
             when (id) {
-                1 -> onEdit()
-                2 -> onRemove()
-                3 -> onLock()
+                1 -> {
+                    onEdit()
+                    menu.dismiss()
+                }
+                2 -> {
+                    onRemove()
+                    menu.dismiss()
+                }
+                3 -> {
+                    // Keep the native menu open and swap its item in place, so Lock becomes Unlock
+                    // and back again immediately instead of looking stale until the launcher restarts.
+                    currentLocked = !currentLocked
+                    onLock(currentLocked)
+                    menu.f4745d[2] =
+                        UIMenuItem(
+                            0,
+                            3,
+                            R.drawable.ic_lock_closed_24_regular,
+                            if (currentLocked) unlockLabel else lockLabel,
+                        )
+                    menu.a(0)
+                    menu.c()
+                }
             }
-            menu.dismiss()
         }
     menu.setOnDismissListener { onDismiss() }
     menu.a(0)
@@ -226,10 +245,11 @@ private fun showNativeWidgetMenu(
  * Declarative OWL tiles on Bellatrix's native home.
  *
  * A tile's starting rectangle comes from its root `Box`/`Flex`/`Anchor` props (`width`, `height`,
- * `size`, `fill`, `offset`, `anchor`), not from a grid. Hold a tile, then drag its body to move; hold
- * and drag the one bottom-right grip in any direction to resize freely. A quick swipe never moves a
- * tile, so taps keep working. Holding and releasing opens Bellatrix's own native popup window with
- * Edit, Lock/Unlock and Remove. A locked tile still opens on tap but cannot move or resize. Tiles may
+ * `size`, `fill`, `offset`, `anchor`), not from a grid. Hold a tile, then drag its body to move. The
+ * bottom-right resize area is invisible: pressing it resizes immediately in any direction, with no
+ * visible box or handle. A quick swipe never moves a tile, so taps keep working. Holding and releasing
+ * opens Bellatrix's own native popup window with Edit, Lock/Unlock and Remove; the lock item swaps in
+ * place while the menu is open. A locked tile still opens on tap but cannot move or resize. Tiles may
  * overlap. Geometry is clipped to the native home view, with no visible boundary line.
  */
 @Composable
@@ -307,7 +327,7 @@ internal fun OwlHomeTiles(
                         }
                         .zIndex(if (isSelected) 2f else 0f)
                         .systemGestureExclusion()
-                        .pointerInput("owl-tile-${item.key}") {
+                        .pointerInput("owl-tile-${item.key}-locked-$locked") {
                             // A finger can wander a little while waiting for the hold without cancelling it.
                             val holdSlop = viewConfiguration.touchSlop * 2
                             awaitEachGesture {
@@ -424,7 +444,7 @@ internal fun OwlHomeTiles(
                                                 )
                                             }
                                         },
-                                        onLock = { layout.setLocked(item.key, !locked) },
+                                        onLock = { value -> layout.setLocked(item.key, value) },
                                         onRemove = { engine.removeWidget(spec) },
                                         onDismiss = { selected = null },
                                     )
@@ -442,18 +462,6 @@ internal fun OwlHomeTiles(
                     }
 
                     if (isSelected) Box(Modifier.fillMaxSize().border(1.dp, Palette.accent))
-
-                    // The only grip: bottom-right. Drag it any direction to resize. No grip on a
-                    // locked tile, so there is nothing there to drag by accident.
-                    if (!locked) {
-                        Box(
-                            Modifier
-                                .align(Alignment.BottomEnd)
-                                .size(20.dp)
-                                .background(Palette.accent.copy(alpha = if (isSelected) 1f else 0.55f))
-                                .border(1.dp, Palette.popup),
-                        )
-                    }
                 }
             }
         }

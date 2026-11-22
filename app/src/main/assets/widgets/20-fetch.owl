@@ -191,10 +191,8 @@ widget "fetch" {
   """) every 5m json optional
 
   let lx = sys.linux ?? lxCmd
-  // Android labels miss MODEL on some phones; label falls back to product, device, board or brand.
-  let devName = dev.label ?? dev.model ?? dev.product ?? dev.device ?? dev.board ?? dev.brand ?? "phone"
   // A desktop host knows who and where you are; the phone's guest is root.
-  let host = lx.host ?? lower(replace(devName, " ", "-"))
+  let host = lx.host ?? lower(replace(dev.model ?? "phone", " ", "-"))
   let user = lx.user ?? (linux ? "root" : "user")
   // Android's apps are only counted where there is Android; elsewhere the
   // app menu's apps aren't packages.
@@ -318,7 +316,7 @@ widget "fetch" {
         Line { key: "os"; value: linux ? lx.os : dev == null ? null : "Android ${dev.android}" }
       }
       if !low {
-        Line { key: "host"; value: dev == null ? null : devName }
+        Line { key: "host"; value: dev == null ? null : "${dev.maker} ${dev.model}" }
         Line { key: "kernel"; value: kernel }
       }
       if !tiny {

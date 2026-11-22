@@ -9,6 +9,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.32] - 2026-11-22
+
+### Fixed
+
+- **Lock/Unlock** in the native widget menu now toggles in place immediately, both ways, without reopening the launcher. The tile's grip also disappears or returns on the same tap.
+- The resize corner has no visible box or handle any more. Its bottom-right hit area is still there, but nothing is drawn on top of the widget.
+- The Coding Agents panel header now shows only **Coding Agents**. The overlapping **Choose an agent** subtitle and settings gear are gone.
+- `android.device` and the fetch widget are back to Omalauncher's exact behavior: `{model, maker, android, sdk, soc}` from `Build.*`, with no synthesized labels or extra fields.
+- The launcher icon is generated from `/sdcard/Bellatrix.png`.
+
 ## [2.9.31] - 2026-11-22
 
 ### Added

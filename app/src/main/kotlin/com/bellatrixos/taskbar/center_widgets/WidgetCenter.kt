@@ -128,6 +128,10 @@ class WidgetCenter(
         TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip.toFloat(), b.resources.displayMetrics).roundToInt()
 
     private fun installAgentPicker() {
+        // Keep only the native header title. The old "Choose an agent" subtitle and the settings
+        // gear overlapped it, so neither is part of this panel any more.
+        f4819a.findViewById<View>(R.id.dialog_subheading).visibility = View.GONE
+        j.visibility = View.GONE
         f4824i.visibility = View.GONE
         f4825k.visibility = View.GONE
         f4823h.visibility = View.VISIBLE
@@ -136,9 +140,6 @@ class WidgetCenter(
         agentAdapter = adapter
         f4823h.adapter = adapter
 
-        j.setImageResource(R.drawable.ic_settings_20_regular)
-        j.contentDescription = b.getString(R.string.dialog_widget_add)
-        j.setOnClickListener { manageAgents() }
         f4822f.text = b.getString(R.string.dialog_widget_placeholder)
         f4822f.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.img_widget_zone_coding_agents_48, 0, 0)
         f4822f.isClickable = true
