@@ -356,9 +356,12 @@ class StartMenuAdapter(@JvmField val B: Context, @JvmField val x: MutableList<St
             val icon = (B.applicationContext as? App)?.runtime?.linuxApps?.icons?.get(id)?.asAndroidBitmap()
             holder.u?.setImageBitmap(icon)
         } else {
-            IconEngine.b(B).c(key, IconEngine.Callback { bitmap ->
+            val callback = IconEngine.Callback { bitmap ->
                 if (holder.bindingAdapterPosition != -1) holder.u?.setImageBitmap(bitmap)
-            })
+            }
+            // Work/profile rows carry their launcher activity; let the pack pick that icon first.
+            val component = item.f4786a
+            if (component != null) IconEngine.b(B).c(component, callback) else IconEngine.b(B).c(key, callback)
         }
         // Nama asli APK sudah ada di item.b(); AppsDatabase.a() hanya untuk tag window internal (UI...).
         val packageName = item.c().orEmpty()

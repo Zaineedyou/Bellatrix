@@ -656,4 +656,17 @@
     <string name="home_new_widget_file">novo arquivo de widget</string>
     <string name="home_edit_home">editar superfície inicial</string>
     <string name="home_edit_taskbar">editar superfície da barra de tarefas</string>
+    <string name="guest_editor_title">Editor</string>
+    <string name="guest_files_title">Arquivos</string>
+    <string name="home_edit_file">editar arquivo</string>
+    <string name="home_lock">bloquear widget</string>
+    <string name="home_unlock">desbloquear widget</string>
+    <string name="start_filter_android">apps Android</string>
+    <string name="start_filter_bellatrix">Bellatrix</string>
+    <string name="start_filter_coding_agents">Coding Agents</string>
+    <string name="start_filter_linux">apps Linux</string>
+    <string name="start_section_android">apps Android</string>
+    <string name="start_section_bellatrix">Bellatrix</string>
+    <string name="start_section_linux">apps Linux</string>
+    <string name="voice_title">voz</string>
 </resources>

@@ -37,6 +37,7 @@ import com.bellatrixos.linux.SystemUpdates
 import com.bellatrixos.linux.LauncherFont
 import com.bellatrixos.linux.LINUX_AGENT_TAG_PREFIX
 import com.bellatrixos.linux.TerminalFont
+import com.bellatrixos.linux.TerminalText
 import com.bellatrixos.linux.bundledIcons
 import com.bellatrixos.linux.defaultApps
 import com.bellatrixos.linux.matches
@@ -293,6 +294,8 @@ class Runtime(
         // Saved, so removing Linux later doesn't bring the first-run screen back.
         if (launcherReady) prefs.edit().putBoolean(SETUP_DONE, true).apply()
         themes.loadPalette()
+        // style.toml is authoritative for foot too, including on first start before any edit event.
+        syncTerminalFontFromStyle()
         // An agent or the user edited style.toml; the rest of the style is read where it's drawn.
         style.onExternalChange = { old, new ->
             val changed = new.changed(old)
@@ -300,7 +303,9 @@ class Runtime(
         }
         // foot.ini follows the terminal settings, from the Style menu or the file alike.
         scope.launch {
-            snapshotFlow { style.style[Style.TERMINAL_FONT] to style.style[Style.TERMINAL_TEXT] }.drop(1).collect { terminalFont.write() }
+            snapshotFlow { style.style[Style.TERMINAL_FONT] to style.style[Style.TERMINAL_TEXT] }
+                .drop(1)
+                .collect { syncTerminalFontFromStyle() }
         }
         scope.launch {
             snapshotFlow { style.style[Style.FONT] }.drop(1).collect { launcherFont.apply() }
@@ -360,6 +365,14 @@ class Runtime(
                 )
             }
         }
+    }
+
+    /** style.toml's terminal values are the source of truth; foot.ini must follow both edits and first start. */
+    private fun syncTerminalFontFromStyle() {
+        val family = style.style[Style.TERMINAL_FONT]?.toString()?.takeIf { it.isNotBlank() } ?: "JetBrains Mono"
+        val em = (style.style[Style.TERMINAL_TEXT] as? Number)?.toFloat() ?: TerminalText.Default.em
+        val text = TerminalText.entries.minByOrNull { kotlin.math.abs(it.em - em) } ?: TerminalText.Default
+        terminalFont.sync(family, text)
     }
 
     /** The launcher first (it never waits for Linux), then Linux if it's installed or an install was started. */

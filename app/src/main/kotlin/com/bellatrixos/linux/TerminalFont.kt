@@ -63,6 +63,27 @@ class TerminalFont(
         write()
     }
 
+    /** Applies both style.toml values in one write, avoiding two foot.ini rewrites per style change. */
+    fun sync(
+        family: String,
+        text: TerminalText,
+    ) {
+        val familyChanged = this.family != family
+        if (familyChanged) {
+            this.family = family
+            families = (families + family).distinct().sorted()
+        }
+        val textChanged = prefs.getString(TEXT, null) != text.id
+        if (familyChanged || textChanged) {
+            prefs
+                .edit()
+                .putString(FAMILY, family)
+                .putString(TEXT, text.id)
+                .apply()
+        }
+        write()
+    }
+
     fun update(
         density: Float,
         fontScale: Float,

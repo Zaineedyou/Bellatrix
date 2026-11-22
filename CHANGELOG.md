@@ -9,6 +9,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.33] - 2026-11-22
+
+### Added
+
+- The guest-side `bellatrix` command is installed again. Agents and scripts in Void Linux can query phone location, calendar, AirPods, battery, notifications, folders, and share/copy files through the launcher bridge.
+- Full license texts ship with the app, so Settings → Licenses opens the real notices.
+- The guest gets a phone-sized `fastfetch` config, themed fallbacks for foot, btop, Pi and Claude Code, and a small Bellatrix wordmark for the fastfetch logo.
+- Tests cover the `bellatrix` command contract and the fastfetch config adaptation.
+
+### Fixed
+
+- Without **All files access**, the guest still sees the launcher-owned shared storage at `/sdcard`, so `bellatrix ls/get/put/pick` and `/sdcard` paths keep working under scoped storage.
+- Terminal font family and size in `style.toml` now actually reach `foot`, including on first start.
+- Icon packs use the shared appfilter parser: activity-specific icons win, activity aliases fall back to the app icon, and density-specific drawables are used. Work/profile rows pass their launcher activity to the pack.
+- The eight translated locales have the missing widget/drawer/lock/voice strings again.
+
 ## [2.9.32] - 2026-11-22
 
 ### Fixed

@@ -656,4 +656,17 @@
     <string name="home_new_widget_file">новый файл виджета</string>
     <string name="home_edit_home">изменить поверхность главного экрана</string>
     <string name="home_edit_taskbar">изменить поверхность панели задач</string>
+    <string name="guest_editor_title">Редактор</string>
+    <string name="guest_files_title">Файлы</string>
+    <string name="home_edit_file">изменить файл</string>
+    <string name="home_lock">заблокировать виджет</string>
+    <string name="home_unlock">разблокировать виджет</string>
+    <string name="start_filter_android">приложения Android</string>
+    <string name="start_filter_bellatrix">Bellatrix</string>
+    <string name="start_filter_coding_agents">Coding Agents</string>
+    <string name="start_filter_linux">приложения Linux</string>
+    <string name="start_section_android">приложения Android</string>
+    <string name="start_section_bellatrix">Bellatrix</string>
+    <string name="start_section_linux">приложения Linux</string>
+    <string name="voice_title">голос</string>
 </resources>

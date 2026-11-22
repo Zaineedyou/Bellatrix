@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Environment
 import android.util.Log
+import com.bellatrixos.storage.PhoneStorage
 import com.bellatrixos.upgrade.Managed
 import com.bellatrixos.upgrade.Policy
 import java.io.File
@@ -99,13 +100,17 @@ class Proot(
         }
     }
 
-    /** The phone's shared storage in the guest, when access was granted. */
+    /**
+     * With "All files access": the phone's own storage as /sdcard, and all of Android's /storage.
+     * Without it: what PhoneStorage shows, the files Linux made there itself, so `bellatrix
+     * ls/get/put/pick` and /sdcard paths keep working under scoped storage.
+     */
     private val storageBinds: List<Pair<String, File>>
         get() =
-            if (storageAccess()) {
-                listOf(GUEST_SDCARD to File(PRIMARY_STORAGE), GUEST_STORAGE to File(STORAGE_ROOT))
-            } else {
-                emptyList()
+            when {
+                storageAccess() -> listOf(GUEST_SDCARD to File(PRIMARY_STORAGE), GUEST_STORAGE to File(STORAGE_ROOT))
+                PhoneStorage.supported() -> listOf(PhoneStorage.GUEST to PhoneStorage.root)
+                else -> emptyList()
             }
 
     /** Host directories bound over guest paths by [command]. */
@@ -130,7 +135,7 @@ class Proot(
     val guestFs by lazy { GuestFs(::hostFile, ::guestVisible) }
 
     /** The empty directory in the rootfs that the phone's storage is bound over. */
-    private val storageMount get() = File(rootfs, GUEST_SDCARD.removePrefix("/"))
+    private val storageMount get() = File(rootfs, PhoneStorage.GUEST.removePrefix("/"))
 
     /** The guest path of a host file, the reverse of [hostFile]. */
     fun guestPath(host: File): String? {
@@ -154,6 +159,8 @@ class Proot(
             host.mkdirs()
             if (rootfs.isDirectory) File(rootfs, guest.removePrefix("/")).mkdirs()
         }
+        // /sdcard must exist in / even without full storage access; Android 10 has no scoped path at all.
+        if (rootfs.isDirectory) storageMount.let { if (PhoneStorage.supported()) it.mkdirs() else it.delete() }
         if (rootfs.isDirectory && storageAccess()) {
             for (guest in listOf(GUEST_SDCARD, GUEST_STORAGE)) File(rootfs, guest.removePrefix("/")).mkdirs()
         }

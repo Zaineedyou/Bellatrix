@@ -30,15 +30,21 @@ class GuestThemeConfig(
         themeDir.mkdirs()
         theme.guestFiles().forEach { (name, file) -> file.copyTo(File(themeDir, name)) }
         File(currentDir, "theme.name").writeText(theme.name + "\n")
-        // A theme may provide its own terminal colors; otherwise generate them from its palette.
-        if (!File(themeDir, "foot.ini").isFile) File(themeDir, "foot.ini").writeText(footTheme(theme.colors, footColorSection()))
-        if (!File(themeDir, "btop.theme").isFile) File(themeDir, "btop.theme").writeText(btopTheme(theme.colors))
-        symlink("${Proot.GUEST_HOME}/.local/state/bellatrix/current/theme/btop.theme", File(home, ".config/btop/themes/current.theme"))
-        val agentTheme = File(themeDir, if (File(home, ".claude").isDirectory) "claude.json" else "pi.json")
-        if (agentTheme.isFile) {
-            copyTheme(agentTheme, ".claude/themes/bellatrix.json")
-            copyTheme(agentTheme, ".pi/agent/themes/bellatrix-system.json")
+        // A theme may provide its own fragments; otherwise generate them from its palette.
+        // The theme's files win, but every guest app still gets a matching theme.
+        fun fallback(name: String, content: () -> String) {
+            val out = File(themeDir, name)
+            if (!out.isFile) out.writeText(content())
         }
+        fallback("foot.ini") { footTheme(theme.colors, footColorSection()) }
+        fallback("btop.theme") { btopTheme(theme.colors) }
+        fallback("pi.json") { Templates.render(PI_JSON, theme.colors) }
+        fallback("claude.json") { Templates.render(CLAUDE_JSON, theme.colors) }
+        symlink("${Proot.GUEST_HOME}/.local/state/bellatrix/current/theme/btop.theme", File(home, ".config/btop/themes/current.theme"))
+        // Install both even when only one agent is present today: an agent added later picks its
+        // theme up on the next start, and both reload the file when it changes.
+        copyTheme(File(themeDir, "claude.json"), ".claude/themes/bellatrix.json")
+        copyTheme(File(themeDir, "pi.json"), ".pi/agent/themes/bellatrix-system.json")
     }
 
     private fun copyTheme(src: File, to: String) {
@@ -61,6 +67,8 @@ class GuestThemeConfig(
         fun seed(path: String, content: () -> String) = files.add(Managed.text(File(home, path), Policy.Seeded, content = content))
 
         seed(".config/foot/foot.ini") { FOOT_INI }
+        seed(".config/fastfetch/config.jsonc") { guestFastfetch(FASTFETCH_CONFIG) }
+        seed(".config/bellatrix/branding/about.txt") { ABOUT }
         seed(".bashrc") { BASHRC }
         seed(".pi/agent/settings.json") { "{\n  \"theme\": \"bellatrix-system\"\n}\n" }
         seed(".config/opencode/opencode.json") { OPENCODE_JSON }
@@ -121,7 +129,7 @@ class GuestThemeConfig(
         runCatching { proot.run(script) }
     }
 
-    private companion object {
+    internal companion object {
         fun footColors(c: Map<String, String>): Map<String, String> {
             val accent = c["accent"] ?: c["blue"] ?: return c
             val background = c["background"] ?: return c
@@ -208,10 +216,99 @@ class GuestThemeConfig(
             }
             """.trimIndent() + "\n"
 
+        /** A theme for Pi when the picked theme doesn't ship its own. */
+        val PI_JSON =
+            """
+            {
+              "name": "bellatrix-system",
+              "colors": {
+                "background": "{{background}}",
+                "foreground": "{{foreground}}",
+                "accent": "{{accent}}",
+                "muted": "{{muted}}",
+                "success": "{{green}}",
+                "error": "{{red}}"
+              }
+            }
+            """.trimIndent() + "\n"
+
+        /** Claude Code picks this from /theme once it has been run. */
+        val CLAUDE_JSON =
+            """
+            {
+              "name": "Bellatrix System",
+              "colors": {
+                "primary_background": "{{background}}",
+                "primary_foreground": "{{foreground}}",
+                "accent": "{{accent}}",
+                "secondary_background": "{{lighter_background}}",
+                "secondary_foreground": "{{muted}}",
+                "success": "{{green}}",
+                "error": "{{red}}"
+              }
+            }
+            """.trimIndent() + "\n"
+
+        /**
+         * Bellatrix's own fastfetch config, sized for a portrait terminal. It uses only
+         * commands the guest has: no omarchy-i18n and no reading /proc/uptime directly.
+         * [guestFastfetch] still normalizes it so an upstream config an agent drops in
+         * gets the same treatment.
+         */
+        val FASTFETCH_CONFIG =
+            """
+            {
+              "logo": {
+                "type": "file",
+                "source": "~/.config/bellatrix/branding/about.txt"
+              },
+              "modules": [
+                "os",
+                "host",
+                "kernel",
+                "uptime",
+                "shell",
+                "cpu",
+                "memory",
+                "disk",
+                {
+                  "type": "command",
+                  "key": "OS Age",
+                  "keyColor": "magenta",
+                  "text": "days=${'$'}(( (${'$'}(date +%s) - ${'$'}(stat -c %W /var/log)) / 86400 )); echo \"${'$'}days days\""
+                }
+              ]
+            }
+            """.trimIndent() + "\n"
+
+        /** Small enough to sit above the info in a narrow terminal. */
+        const val ABOUT = "Bellatrix\n"
+
         val BASHRC =
             """
             export BELLATRIX_PATH=${Proot.GUEST_HOME}/.local/share/bellatrix
             export EDITOR=bellatrix-edit VISUAL=bellatrix-edit
             """.trimIndent() + "\n"
     }
+}
+
+/** Upstream's OS Age line words its count with a helper that doesn't exist in the guest. */
+private const val OS_AGE_I18N = "omarchy-i18n --count \\\"\$days\\\" about.days \\\"\$days\\\""
+
+/** Upstream's Uptime line reads /proc/uptime, which Android denies apps, and uses the same helper. */
+private val UPTIME_COMMAND = Regex(""""type": "command",(\s*"key": "[^"]*Uptime",\s*"keyColor": "[^"]*"),\s*"text": "[^\n]*omarchy-i18n[^\n]*""")
+
+/**
+ * Makes an upstream fastfetch config fit the guest. In portrait a side-by-side logo
+ * leaves ~20 columns for the info, so it goes on top; OS Age says its days in plain
+ * English and Uptime goes back to fastfetch's own module. Bellatrix's bundled config
+ * is already in this shape, but an agent may drop the upstream one in.
+ */
+internal fun guestFastfetch(config: String): String {
+    val withLogo =
+        if ("\"position\"" in config) config
+        else config.replaceFirst("\"type\": \"file\",", "\"type\": \"file\",\n    \"position\": \"top\",")
+    return withLogo
+        .replace(OS_AGE_I18N, "echo \\\"\$days days\\\"")
+        .replace(UPTIME_COMMAND, "\"type\": \"uptime\",$1")
 }

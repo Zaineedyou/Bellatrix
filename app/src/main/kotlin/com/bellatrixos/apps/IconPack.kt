@@ -32,6 +32,31 @@ class IconPack private constructor(
         return runCatching { res.getDrawableForDensity(id, densityDpi, null) }.getOrNull()
     }
 
+    /**
+     * Same lookup for callers that only have a string: a package, `pkg/class`, or a
+     * `ComponentInfo{pkg/class}` as written in appfilter.xml. An activity-specific
+     * mapping wins; the app-wide one is the fallback for aliases and other activities.
+     */
+    fun drawable(
+        key: String,
+        densityDpi: Int,
+    ): Drawable? {
+        val component = appfilterComponent(key)
+        val pkg: String
+        val name: String?
+        if (component != null) {
+            pkg = component.first
+            name = names["${component.first}/${component.second}"] ?: names[pkg]
+        } else {
+            pkg = key.trim().substringBefore('/').trim()
+            name = names[pkg]
+        }
+        if (pkg.isEmpty() || name == null) return null
+        @Suppress("DiscouragedApi")
+        val id = res.getIdentifier(name, "drawable", packageName).takeIf { it != 0 } ?: return null
+        return runCatching { res.getDrawableForDensity(id, densityDpi, null) }.getOrNull()
+    }
+
     companion object {
         private const val TAG = "iconpack"
 
