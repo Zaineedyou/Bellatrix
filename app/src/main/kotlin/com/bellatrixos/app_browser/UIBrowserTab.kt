@@ -201,7 +201,7 @@ class UIBrowserTab : Fragment() {
             (web.parent as? ViewGroup)?.removeView(web)
             web.stopLoading()
             web.webChromeClient = null
-            web.webViewClient = null
+            web.webViewClient = object : WebViewClient() {}
             web.destroy()
         }
     }
@@ -282,14 +282,15 @@ class UIBrowserTab : Fragment() {
             val popup = WebView(ctx)
             UIWebMount.b(popup, true, w0?.b0())
             // No nesting: another window.open() in the popup would have no dialog of its own.
-            popup.webViewClient = object : WebViewClient() {
-                override fun onCreateWindow(
-                    view: WebView?,
-                    isDialog: Boolean,
-                    isUserGesture: Boolean,
-                    resultMsg: Message?
-                ): Boolean = false
-            }
+            popup.webChromeClient =
+                object : WebChromeClient() {
+                    override fun onCreateWindow(
+                        view: WebView,
+                        isDialog: Boolean,
+                        isUserGesture: Boolean,
+                        resultMsg: Message,
+                    ): Boolean = false
+                }
             val dialog = AlertDialog.Builder(ctx).setView(popup).setOnDismissListener { closePopup() }.create()
             popupWebView = popup
             popupDialog = dialog
