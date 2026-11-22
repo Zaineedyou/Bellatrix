@@ -2,6 +2,7 @@ package com.bellatrixos.context_menu
 
 import android.content.Context
 import android.graphics.Typeface
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -141,5 +142,12 @@ class UIContextMenu(context: Context) : PopupWindow(context) {
         c()
         val x = if (Display.f4898a) width / 2 - view.width / 2 else view.width / 2 - width / 2
         showAsDropDown(view, x, -height - view.height)
+    }
+
+    /** Shows this native menu at pixel coordinates inside [view], for anchors that aren't a single View. */
+    fun showAt(view: View, x: Int, y: Int) {
+        if (b(view)) return
+        c()
+        showAtLocation(view, Gravity.TOP or Gravity.START, x, y)
     }
 }

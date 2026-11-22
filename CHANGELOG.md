@@ -9,11 +9,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.28] - 2026-11-22
+
+### Added
+
+- Holding a widget or face tile opens Bellatrix's own native context-menu `PopupWindow` with **Edit** and **Remove**. There is no always-visible dropdown button and no Compose imitation menu.
+
+### Changed
+
+- Drag moves a tile immediately; a hold-and-drag resizes from the edge or corner under the finger. Resize now uses tile-local coordinates, so every edge and corner works instead of only tiles near the screen origin. Tiles still move and resize freely by pixel, may overlap, and are clipped without a home border.
+- Edit still routes to the default Coding Agent, or the standalone Coding Agents page when no agent is installed.
+
+### Fixed
+
+- Coding Agent startup flags are inserted after the agent binary instead of the first shell token. Opening Edit with OpenCode or Kilo no longer runs `cd --standalone ...` and drops into a bare shell.
+
 ## [2.9.27] - 2026-11-22
 
 ### Added
 
-- Widget and face tiles now have a window-style `▾` menu with **remove** and **edit**. Remove moves the `.owl` file to `.removed/`; edit starts a Coding Agent session for that file, or opens the standalone Coding Agents page if no agent is installed.
+- Widget and face tiles now have a tile menu with **remove** and **edit**. Remove moves the `.owl` file to `.removed/`; edit starts a Coding Agent session for that file, or opens the standalone Coding Agents page if no agent is installed.
 - A tile's starting rectangle is declared on its root `Box`/`Flex`/`Anchor` with `width`, `height`, `size`, `fill`, `offset` and `anchor`. Tiles can overlap, and drag/resize geometry is saved as free pixels rather than grid cells.
 
 ### Changed

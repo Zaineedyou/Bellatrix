@@ -43,16 +43,15 @@ data class Agent(
     /** Its activity alias in the manifest (cursor-agent -> CursorAgentWindow), so Recents names its window after it. */
     val windowAlias get() = bin.split('-').joinToString("") { it.replaceFirstChar(Char::uppercase) } + "Window"
 
-    /** Adds this agent's flags after its binary, even when the caller supplied its own arguments. */
+    /** Adds this agent's flags after its binary, even when a shell prefix such as `cd ... &&` comes first. */
     fun flags(command: String): String {
         if (startupFlags.isBlank()) return command
-        val trimmed = command.trimStart()
-        val space = trimmed.indexOfFirst { it.isWhitespace() }
-        return if (space < 0) {
-            "$trimmed $startupFlags"
-        } else {
-            "${trimmed.substring(0, space)} $startupFlags${trimmed.substring(space)}"
-        }
+        // The first token isn't necessarily the agent: widget/theme edits start with `cd ~/.config/... &&`.
+        // Match the binary as a standalone word so `--standalone` never lands on `cd` (busybox ash: `cd --`).
+        val token = Regex("""(^|\s)${Regex.escape(bin)}(?=\s|$)""")
+        val match = token.find(command) ?: return command
+        val end = match.range.last + 1
+        return command.substring(0, end) + " $startupFlags" + command.substring(end)
     }
 
     /** Every launch path (terminal, drawer, prompt, voice) gets the same proot-safe preparation. */

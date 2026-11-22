@@ -49,13 +49,13 @@ text editor, with no Linux or coding agent needed. Save, and the file appears on
 home within a second. Coding agents work too (the prompts point them at these same files), as does
 any other writer of files.
 
-Every widget tile has a small **▾** menu at its top-right: **remove** moves the `.owl` file to
-`.removed/` and takes the tile off home, while **edit** starts a Coding Agent session for that file
-(or opens the standalone Coding Agents page when no agent is installed). Long-press a tile to select
-it; with it selected, drag anywhere on it to move it freely, or drag any edge/corner to resize it in
-pixels. Tiles may overlap, and the home area is clipped without a visible border. The empty home
-invite creates a widget or face tile directly when Linux isn't installed. There is no second launcher
-screen — the files below are the ones Bellatrix home reads.
+Hold a widget tile and release without dragging to open Bellatrix's own native popup window: **remove**
+moves the `.owl` file to `.removed/` and takes the tile off home, while **edit** starts a Coding Agent
+session for that file (or opens the standalone Coding Agents page when no agent is installed). There is
+no always-visible dropdown button. Drag a tile to move it freely, or start the drag on an edge or corner
+to resize it in pixels. Tiles may overlap, and the home area is clipped without a visible border. The
+empty home invite creates a widget or face tile directly when Linux isn't installed. There is no second
+launcher screen — the files below are the ones Bellatrix home reads.
 
 `home.owl` is an ordinary OWL `panel` drawn **over the Bellatrix desktop view you already see**, above
 the taskbar and below app windows. Its tiles are clipped to that area, so they never escape the home
