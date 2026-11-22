@@ -17,7 +17,7 @@ class c(
             0 -> {
                 val video = v
                 AppExecutors.c().removeCallbacks(video.E0)
-                TrackSelections.b(video.u0, video.L0, video.D0, video.H0, d(video, 0))
+                video.trackSelections.b(video.u0, video.L0, video.D0, video.H0, d(video, 0))
             }
             1 -> WindowSize.c(v.T0)
             2 -> {

@@ -27,8 +27,20 @@ class Packages(
     /** The package manager holds a lock on its database; everything that runs it takes this first. */
     val lock = Mutex()
 
-    /** Per-package install/remove progress. */
+    /** Per-package install/remove progress. Writes come from IO, so the map itself stays concurrent. */
     val states = ConcurrentHashMap<String, JobState>()
+
+    /** Bumped on every publish so the Compose screen recomposes as a job's log grows. */
+    val progress = mutableIntStateOf(0)
+
+    /** One run per package: a second tap must not queue another xbps job behind the first. */
+    private val running = ConcurrentHashMap.newKeySet<String>()
+
+    /** Reads [progress] first, so a row observes both the value and every publish from the IO worker. */
+    fun stateOf(name: String): JobState {
+        val tick = progress.intValue
+        return if (tick >= 0) states[name] ?: JobState.Idle else JobState.Idle
+    }
 
     /** Bumped after installs and removals so lists reload. */
     val revision = mutableIntStateOf(0)
@@ -72,14 +84,20 @@ class Packages(
         verb: String,
         script: String,
     ): Boolean {
-        val (ok, _) = proot.trackedJob(action, script, lock) {
-            if (it == JobState.Idle) states.remove(name) else states[name] = it
+        if (!running.add(name)) return false
+        try {
+            val (ok, _) = proot.trackedJob(action, script, lock) {
+                if (it == JobState.Idle) states.remove(name) else states[name] = it
+                progress.intValue++
+                onChange?.invoke()
+            }
+            Log.i(TAG, "$verb $name: ${if (ok) "ok" else "failed"}")
+            revision.intValue++
             onChange?.invoke()
+            return ok
+        } finally {
+            running.remove(name)
         }
-        Log.i(TAG, "$verb $name: ${if (ok) "ok" else "failed"}")
-        revision.intValue++
-        onChange?.invoke()
-        return ok
     }
 
     companion object {

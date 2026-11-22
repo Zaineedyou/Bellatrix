@@ -151,10 +151,13 @@ internal class FolderGeometry(
     private val margin = with(density) { 16.dp.roundToPx() }
     private val head = with(density) { 40.dp.roundToPx() }
     private val scale =
-        minOf(
-            1f,
-            (width - 2 * margin - 2 * pad) / (cols * cellW),
-            (height - 2 * margin - 2 * pad - head) / (rows * cellH),
+        maxOf(
+            0.01f,
+            minOf(
+                1f,
+                (width - 2 * margin - 2 * pad).coerceAtLeast(1).toFloat() / (cols * cellW).coerceAtLeast(1f),
+                (height - 2 * margin - 2 * pad - head).coerceAtLeast(1).toFloat() / (rows * cellH).coerceAtLeast(1f),
+            ),
         )
     private val w = cellW * scale
     private val h = cellH * scale
@@ -164,9 +167,9 @@ internal class FolderGeometry(
         run {
             val pw = (cols * w).roundToInt() + 2 * pad
             val ph = (rows * h).roundToInt() + 2 * pad + head
-            val left = (width - pw) / 2
-            val top = (height - ph) / 2
-            IntRect(left, top, left + pw, top + ph)
+            val left = ((width - pw) / 2).coerceAtLeast(0)
+            val top = ((height - ph) / 2).coerceAtLeast(0)
+            IntRect(left, top, (left + pw).coerceAtMost(width), (top + ph).coerceAtMost(height))
         }
 
     /** The folder's name, across the panel's top; a tap there renames it. */

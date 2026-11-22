@@ -261,6 +261,9 @@ class WidgetInstance(
 
     /** Bumped whenever a source updates; album art follows it. */
     val updates = mutableIntStateOf(0)
+
+    /** Bumped on every global write, so a native surface can restyle itself from state and sources that changed. */
+    val revision = mutableIntStateOf(0)
     private val jobs = ArrayList<Job>()
     private val reported = HashSet<String>()
 
@@ -363,6 +366,7 @@ class WidgetInstance(
     ) {
         @Suppress("UNCHECKED_CAST")
         (cells[slot] as MutableState<Value>).value = value
+        revision.intValue++
     }
 
     override fun theme(name: String): Int? =
@@ -837,13 +841,16 @@ class WidgetInstance(
                                 else -> null
                             }
                         if (pushed != null) {
-                            // Listens while on screen, like a stream, instead of polling.
-                            untilPaused(active, g) {
-                                pushed.collect { v ->
-                                    write(slot, v)
-                                    sample(g)
+                            // Listens while on screen, like a stream, instead of polling. A source that
+                            // fails or closes on its own waits before subscribing again, not in a tight loop.
+                            val ended =
+                                untilPaused(active, g) {
+                                    pushed.collect { v ->
+                                        write(slot, v)
+                                        sample(g)
+                                    }
                                 }
-                            }
+                            if (ended) delay(PUSHED_RETRY_MS)
                             continue
                         }
                         when (g.kind) {
@@ -1462,6 +1469,9 @@ class WidgetInstance(
 
         /** How soon a failed http fetch is tried again, if its interval is longer. */
         private const val RETRY_MS = 30_000L
+
+        /** How soon a pushed Android source is subscribed to again after it failed or closed. */
+        private const val PUSHED_RETRY_MS = 1_000L
 
         /** How long a post(...) may take: a sign-in or a change, sent once and never retried. */
         private const val POST_TIMEOUT_S = 30

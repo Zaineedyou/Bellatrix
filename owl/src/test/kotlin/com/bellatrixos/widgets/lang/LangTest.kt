@@ -150,9 +150,12 @@ class LangTest {
         assertEquals("a6", text("\"a\" + x * 2", "state x = 3"))
         assertEquals("41", text("x + 1", "state x = \"4\""))
         assertEquals("41", text("x + y * 1", "state x = \"4\"\nstate y = 1"))
-        // min and max skip null arguments.
+        // min and max skip non-numbers, and give null rather than a sentinel when there are none.
         assertEquals("3", text("min(x, 3) * 1", "state x = null"))
         assertEquals("2", text("max(x * 2, 1, -5)", "state x = 1"))
+        assertEquals("null", text("min(x, y) * 1", "state x = null\nstate y = null"))
+        assertEquals("null", text("max(x, y) * 1", "state x = null\nstate y = null"))
+        assertEquals("null", text("min(x, y) * 1", "state x = \"a\"\nstate y = null"))
         assertEquals("0", text("10 / (x - 3)", "state x = 3"))
         assertEquals("2", text("(x - 10) % 3", "state x = 3"))
         assertEquals("16", text("(x < 3 ? 2 : 1) * 8", "state x = 1"))
@@ -251,6 +254,13 @@ class LangTest {
         assertEquals("[a, b]", text("split(\"a,b\", \",\")"))
         assertEquals("  7", text("pad(7, 3)"))
         assertEquals("[10, 20]", text("match(\"x=10 y=20\", \"x=(\\\\d+) y=(\\\\d+)\")"))
+        // An empty from inserts at both ends too; check that expansion before it allocates the text.
+        try {
+            Builtins.all.getValue("replace").impl(Args(listOf(Str("ab"), Str(""), Str("x".repeat(MAX_TEXT))), null))
+            fail("replace(s, \"\", to) must check its projected length")
+        } catch (e: WidgetError) {
+            assertTrue(e.message!!.contains("text over"))
+        }
     }
 
     @Test fun plusKeepsSpacesInStrings() {
@@ -579,6 +589,13 @@ class LangTest {
         assertTrue(shader("half4 main(float2 p) { return half4(sin(time), 0, 0, 1); }"))
         assertFalse(shader("half4 main(float2 p) { return half4(p.x / size.x, 0, 0, 1); }"))
         assertFalse(shader("half4 main(float2 p) { float times = 2.0; return half4(times, 0, 0, 1); }"))
+        // A mention in a comment, string or local named time isn't the uniform the launcher declares.
+        assertFalse(shader("// time = 1.0\nhalf4 main(float2 p) { return half4(p.x); }"))
+        assertFalse(shader("/* time */ half4 main(float2 p) { return half4(p.x); }"))
+        assertFalse(shader("half4 main(float2 p) { float time = 1.0; return half4(time); }"))
+        assertFalse(Compiler.shaderReadsTime("\"time\""))
+        assertFalse(Compiler.shaderReadsTime("return p.time;"))
+        assertTrue(Compiler.shaderReadsTime("return time;"))
     }
 
     @Test fun spritesAreRunsOfLetters() {
@@ -1114,7 +1131,10 @@ class LangTest {
             )
         assertEquals(listOf("android.drawer"), p.globals.filterIsInstance<Global.Source>().map { it.kind })
         assertEquals(listOf("read the launcher's apps (names and icons)", "act on an app from the drawer's menu: any of its entries", "act on an app from the drawer's menu: uninstall"), p.commands)
-        assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: appAction(\"delete\", \"a:x\") } }").contains("appAction takes pin, info"))
+        assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: appAction(\"delete\", \"a:x\") } }").contains("appAction takes pin, info, uninstall, remove, edit and an app's key"))
+        // Sharing was removed from the drawer's menu: reject it here without touching share(...).
+        assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: appAction(\"share\", \"a:x\") } }").contains("appAction takes pin, info"))
+        Compiler.compile("widget {\n Text { text: 1; onTap: share(\"hi\") } }")
         assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: workApps(\"off\") } }").contains("workApps takes pause, resume, toggle"))
         for (old in listOf("source d = android.drawer\n Text { text: 1 }", "Text { text: 1; onTap: appAction(\"pin\", \"l:foot\") }", "Text { text: 1; onTap: workApps(\"pause\") }")) {
             assertTrue(compileError("widget {\n meta { owl: 10 }\n $old }").contains("needs owl 11"))

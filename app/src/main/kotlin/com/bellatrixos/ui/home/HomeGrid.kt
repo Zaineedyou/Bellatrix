@@ -701,7 +701,7 @@ internal fun HomeGrid(
                                         val others = placed.filter { it.first.key != item.key }.map { it.second }
                                         trackUntilUp(down.id) { position ->
                                             val minW = item.minSize.first.coerceAtMost(g.cols)
-                                            val minH = item.minSize.second
+                                            val minH = item.minSize.second.coerceAtMost(g.rows)
                                             val p = g.local(position, selSide)
                                             val x0 = if (edges.left) g.colLine(p).coerceAtMost(cell.right - minW) else cell.x
                                             val x1 = if (edges.right) g.colLine(p).coerceAtLeast(cell.x + minW) else cell.right

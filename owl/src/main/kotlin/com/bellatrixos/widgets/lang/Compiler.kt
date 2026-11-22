@@ -67,10 +67,23 @@ class Compiler private constructor(
         /** Texts [shaderTexts] gives at most for one Shader: a few picked between, not every combination of many. */
         private const val MAX_SHADER_TEXTS = 64
 
-        private val TIME_WORD = Regex("""\btime\b""")
+        /** `time` as a free name; a field like `p.time` isn't the uniform the launcher declares. */
+        private val TIME_WORD = Regex("""(?<!\.)\btime\b""")
+
+        /** SkSL strings and comments may spell `time` without reading the uniform. */
+        private val SHADER_STRINGS = Regex("""("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')""")
+        private val SHADER_COMMENTS = Regex("""//[^\n]*|/\*[\s\S]*?\*/""")
+
+        /** A local variable or parameter named `time` (after a SkSL type) hides the injected uniform. */
+        private val SHADER_TIME_DECL = Regex("""\b(?:(?:uniform|const|in|out|inout)\s+)*(?:float|half|int|uint|bool)[234]?\s+time\b""")
 
         /** Whether a Shader's code reads its `time` uniform: only then does it need a frame clock. */
-        fun shaderReadsTime(code: String) = TIME_WORD.containsMatchIn(code)
+        fun shaderReadsTime(code: String): Boolean {
+            val bare = SHADER_COMMENTS.replace(SHADER_STRINGS.replace(code, ""), "")
+            // A declared `time` is a local, not the uniform the launcher injects; don't tick a clock for it.
+            if (SHADER_TIME_DECL.containsMatchIn(bare)) return false
+            return TIME_WORD.containsMatchIn(bare)
+        }
 
         /** The names of a Shader's `uniform shader name;` lines, the images it samples (owl 22). */
         fun shaderImages(code: String): Set<String> = SHADER_IMAGE_RE.findAll(code).map { it.groupValues[1] }.toSet()

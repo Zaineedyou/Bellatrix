@@ -156,8 +156,8 @@ face "poster" {
   way: `font GET https://…`. Google Fonts' own files are in https://github.com/google/fonts, under
   `ofl/<name>/`; take the link of the `.ttf` from `raw.githubusercontent.com`. WOFF and WOFF2 web fonts
   don't load: Android reads TTF and OTF only.
-- **Embedded.** An asset font makes the file big (a whole font is 30 KB to 1 MB), too big for a QR code to
-  share. Embed a small one, or link one.
+- **Embedded.** An asset font makes the file big (a whole font is 30 KB to 1 MB), and the store takes the
+  whole file. Embed a small one, or link one.
 - Up to 8 fonts per file, and 8 MB each. Mind the license: Google Fonts' are OFL, free to use and share.
 
 ## Gradient backgrounds

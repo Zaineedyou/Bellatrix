@@ -9,6 +9,9 @@ import android.util.Log
 import com.bellatrixos.storage.PhoneStorage
 import com.bellatrixos.upgrade.Managed
 import com.bellatrixos.upgrade.Policy
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
 import kotlin.concurrent.thread
 
@@ -58,13 +61,19 @@ class Proot(
 
     private val prefs = context.getSharedPreferences("bellatrix_linux", Context.MODE_PRIVATE)
 
+    private val _cpuPinningState = MutableStateFlow(prefs.getBoolean(CPU_PINNING, true))
+
+    /** Observable CPU pinning for the Compose settings row; the plain field below stays for existing callers. */
+    val cpuPinningState: StateFlow<Boolean> = _cpuPinningState.asStateFlow()
+
     /** proot keeps programs making many syscalls on one fast CPU (built into the pinned proot). */
     @Volatile
-    var cpuPinning: Boolean = prefs.getBoolean(CPU_PINNING, true)
+    var cpuPinning: Boolean = _cpuPinningState.value
         private set
 
     fun changeCpuPinning(on: Boolean) {
         cpuPinning = on
+        _cpuPinningState.value = on
         prefs.edit().putBoolean(CPU_PINNING, on).apply()
     }
 

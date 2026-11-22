@@ -60,6 +60,12 @@ class UIVideo : UIFragment(), BackPressHandler {
     @JvmField var y0: Boolean = false
     @JvmField val T0: Window = Window(0)
 
+    /** Track list belongs to this player instance, not to the class, and is dropped on every media change. */
+    @JvmField val trackSelections = TrackSelections()
+
+    /** Whether this player was playing when the fragment was paused, so resume doesn't start a stopped video. */
+    private var resumeAfterPause = false
+
     // Fragment state used by the window helpers (obfuscated names in the original).
     @JvmField var a0: Boolean = false
     @JvmField var T: String = "UIVideo"
@@ -98,6 +104,9 @@ class UIVideo : UIFragment(), BackPressHandler {
     }
 
     override fun onPause() {
+        val player = D0
+        resumeAfterPause = player?.playWhenReady == true
+        if (resumeAfterPause) player?.pause()
         super.onPause()
         G()
     }
@@ -112,6 +121,12 @@ class UIVideo : UIFragment(), BackPressHandler {
     override fun onResume() {
         super.onResume()
         H()
+        if (resumeAfterPause) {
+            resumeAfterPause = false
+            val player = D0 ?: return
+            player.playWhenReady = true
+            N0?.let { AppExecutors.c().post(it) }
+        }
     }
 
     /** Fragment resume hook; restarts progress updates while playing. */
@@ -235,6 +250,8 @@ class UIVideo : UIFragment(), BackPressHandler {
     fun q0(str: String?) {
         if (str == null) return
         Q0 = str
+        // A new media has new tracks: the old menu's group indices would point at the wrong stream.
+        trackSelections.reset()
         val uri = Uri.fromFile(File(str))
         val mediaItem = MediaItem.Builder().setUri(uri).build()
         D0?.setMediaItem(mediaItem)
@@ -249,11 +266,8 @@ class UIVideo : UIFragment(), BackPressHandler {
             exoPlayer.release()
         }
         D0 = null
-        if (TrackSelections.c.isNotEmpty()) {
-            TrackSelections.f4725a = -1
-            TrackSelections.b?.clear()
-            TrackSelections.c.clear()
-        }
+        resumeAfterPause = false
+        trackSelections.reset()
         N0?.let { AppExecutors.c().removeCallbacks(it) }
     }
 

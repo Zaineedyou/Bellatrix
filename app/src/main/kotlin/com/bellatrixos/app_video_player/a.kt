@@ -15,12 +15,7 @@ class a(
 
     override fun onDismiss() {
         when (u) {
-            0 -> {
-                val selected = TrackSelections.f4725a
-                @Suppress("UNUSED_VARIABLE")
-                val unused = selected
-                (v as? Runnable)?.run()
-            }
+            0 -> (v as? Runnable)?.run()
             1 -> {
                 @Suppress("UNUSED_VARIABLE")
                 val unused = WidgetCenter.u

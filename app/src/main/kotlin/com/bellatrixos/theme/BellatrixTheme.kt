@@ -66,7 +66,7 @@ class BellatrixTheme(
         val files = LinkedHashMap<String, File>()
         for (dir in dirs) {
             for (f in dir.listFiles().orEmpty().sortedBy { it.name }) {
-                if (!f.isFile || f.isLink() || f.extension == "png" || f.name.startsWith('.')) continue
+                if (!f.isFile || f.isLink() || f.extension.lowercase() in IMAGE_EXTENSIONS || f.name.startsWith('.')) continue
                 files[f.name] = f
             }
         }

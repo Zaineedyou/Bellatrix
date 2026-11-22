@@ -70,6 +70,10 @@ class UIMusic : UIFragment(), BackPressHandler {
     @JvmField var b1: Boolean = false
     @JvmField var c1: Boolean = false
 
+    /** Playback state across a fragment pause: only a player that was playing resumes. */
+    private var resumeAfterPause = false
+    private var fragmentPaused = false
+
     /** Fragment arguments; named A in the original obfuscated build. */
     val A: Bundle?
         get() = arguments
@@ -145,10 +149,12 @@ class UIMusic : UIFragment(), BackPressHandler {
         }
         z0.setOnPreparedListener { mp ->
             if (W0 > 0) mp.seekTo(W0)
-            if (Y0) {
+            if (Y0 && !fragmentPaused) {
                 mp.start()
                 L0.setImageResource(R.drawable.img_app_music_pause)
             } else {
+                // A track that finished preparing behind a paused window waits for onResume.
+                if (fragmentPaused && Y0) resumeAfterPause = true
                 L0.setImageResource(R.drawable.img_app_music_play)
             }
             J0 = AudioManager.a(mp.duration)
@@ -235,10 +241,33 @@ class UIMusic : UIFragment(), BackPressHandler {
         N0.setOnClickListener(b(this, 5))
     }
 
+    override fun onPause() {
+        val player = if (::z0.isInitialized) z0 else null
+        resumeAfterPause = player?.isPlaying == true
+        if (resumeAfterPause) player?.pause()
+        fragmentPaused = true
+        I0?.let { AppExecutors.c().removeCallbacks(it) }
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fragmentPaused = false
+        if (::z0.isInitialized) {
+            I0?.let { AppExecutors.c().post(it) }
+            if (resumeAfterPause) {
+                resumeAfterPause = false
+                z0.start()
+                L0.setImageResource(R.drawable.img_app_music_pause)
+            }
+        }
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         if (::z0.isInitialized) {
             outState.putInt("playback_position", z0.currentPosition)
-            outState.putBoolean("was_playing", z0.isPlaying)
+            // onPause() stops the player, so keep the pre-pause playback intent for process recreation.
+            outState.putBoolean("was_playing", Y0 || z0.isPlaying)
         }
         outState.putBoolean("looping", T0)
         super.onSaveInstanceState(outState)

@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -127,7 +128,10 @@ fun StoreScreen(
     val scope = rememberCoroutineScope()
     // The kind and id of the entry whose page shows.
     var open by remember { mutableStateOf<Pair<OwlKind, String>?>(null) }
-    var message by remember { mutableStateOf<StoreMessage?>(null) }
+    // A result belongs to the entry it was started for, not to whichever page happens to be open when it lands.
+    val messages = remember { mutableStateMapOf<Pair<OwlKind, String>, StoreMessage?>() }
+    // Bumped when the selection leaves an entry, so a late result can't appear on a later selection.
+    var selectionEpoch by remember { mutableStateOf(0) }
     var viewing by remember { mutableStateOf<ImageBitmap?>(null) }
     // Each kind keeps its search, tab and scroll while the other shows.
     val filters =
@@ -139,7 +143,8 @@ fun StoreScreen(
     val detail = open?.let { (k, id) -> shelves.firstOrNull { it.kind == k }?.let { m -> m.entries.firstOrNull { it.id == id }?.let { Listed(m, it) } } }
     val back = {
         open = null
-        message = null
+        selectionEpoch++
+        messages.clear()
     }
     BoxWithConstraints {
         // What the panel's content gets: the screen less the gap and padding on both sides.
@@ -155,7 +160,8 @@ fun StoreScreen(
                     KindToggle(kind, engine.markets.map { it.kind }.filter { it != OwlKind.Face }) {
                         kind = it
                         open = null
-                        message = null
+                        selectionEpoch++
+                        messages.clear()
                     }
                     RefreshButton(shelves.any { it.loading }) { for (m in shelves) scope.launch { m.refresh() } }
                 }
@@ -166,38 +172,53 @@ fun StoreScreen(
                 // Side by side, the pane is never empty: until one is tapped, the grid's first entry shows in it.
                 val picked = if (wide) detail ?: shownEntries(market, faces, filter).firstOrNull() else detail
                 val select = { l: Listed ->
-                    open = l.market.kind to l.e.id
-                    message = null
+                    val key = l.market.kind to l.e.id
+                    if (open != key) selectionEpoch++
+                    open = key
                 }
                 val showDetail = @Composable { l: Listed, modifier: Modifier ->
                     val (market, e) = l
-                    // Acting on the preselected entry picks it, so its message stays with it when the grid's first entry changes.
-                    val pick = { open = market.kind to e.id }
+                    val key = market.kind to e.id
+                    // Acting on the preselected entry picks it; the keyed message then follows the entry, not the grid.
+                    val pick = {
+                        if (open != key) selectionEpoch++
+                        open = key
+                    }
                     Detail(
                         market = market,
                         e = e,
                         theme = theme,
                         linux = engine.linux,
                         page = page,
-                        message = message,
+                        message = messages[key],
                         modifier = modifier,
                         onView = { viewing = it },
                         onOpen = { market.installedVersion(e)?.let { onOpenApp(it.file) } },
                         onInstall = {
                             pick()
+                            messages[key] = null
+                            val epoch = selectionEpoch
                             scope.launch {
-                                message = market.install(e, page)
-                                // A widget closes the store to show it on its page; an app or a face stays, its page saying where it went.
-                                if (message == null && market.kind == OwlKind.Widget) onDismiss()
+                                val result = market.install(e, page)
+                                if (epoch == selectionEpoch && open == key) {
+                                    messages[key] = result
+                                    // A widget closes the store to show it on its page; an app or a face stays, its page saying where it went.
+                                    if (result == null && market.kind == OwlKind.Widget) onDismiss()
+                                }
                             }
                         },
                         onAddPages = {
                             pick()
-                            scope.launch { message = market.addPages(e) }
+                            messages[key] = null
+                            val epoch = selectionEpoch
+                            scope.launch {
+                                val result = market.addPages(e)
+                                if (epoch == selectionEpoch && open == key) messages[key] = result
+                            }
                         },
                         onRemove = {
                             pick()
-                            message = null
+                            messages[key] = null
                             market.remove(e)
                         },
                     )

@@ -200,7 +200,6 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
                 )
             }
             tx.replace(R.id.content_frame, fragment, null)
-            tx.addToBackStack(null)
             Windows.i(manager, tx)
             manager.executePendingTransactions()
             val listener = onFragmentDisplayedListener
@@ -230,7 +229,6 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
             val tx = manager.beginTransaction()
             tx.setCustomAnimations(R.anim.settings_page_change, 0, R.anim.settings_page_change, 0)
             tx.replace(R.id.content_frame, fragment, null)
-            tx.addToBackStack(null)
             Windows.i(manager, tx)
         }
         I0?.text = UINavigator.b(i2)

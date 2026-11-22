@@ -72,6 +72,9 @@ class UIDialogProperties(context: Context, @JvmField val x: File) :
         val decor = window.decorView
         decor.post { decor.setFitsSystemWindows(true) }
         val params = window.attributes
+        val metrics = context.resources.displayMetrics
+        v = -metrics.heightPixels / 2
+        w = metrics.heightPixels / 2
         var startX = 0.0f
         var startY = 0.0f
         var touchX = 0.0f

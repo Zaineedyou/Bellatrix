@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.media.MediaMetadataRetriever
 import android.media.MediaScannerConnection
 import android.net.Uri
-import android.os.Environment
 import android.util.TypedValue
 import android.view.View
 import com.bellatrixos.app_browser.widgets.dialogs.UIDownloads
@@ -55,13 +54,10 @@ class b : Runnable {
             try {
                 val payload = data.substring(data.indexOf(',') + 1)
                 val name = FileManager.a(context, data, suggested)
-                val target = File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                    name
-                )
+                val target = FileManager.downloadsTarget(name) ?: return
                 FileManager.b(target, payload)
                 MediaScannerConnection.scanFile(context, arrayOf(target.absolutePath), null, null)
-                if (view != null) downloads?.b(view, name, 2)
+                if (view != null) downloads?.b(view, target.name, 2)
             } catch (_: Exception) {
                 return
             }

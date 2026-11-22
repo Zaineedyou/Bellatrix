@@ -90,6 +90,8 @@ class UIWebApp : UIFragment(), BackPressHandler {
 
     override fun onDestroy() {
         super.onDestroy()
+        S0?.dismiss()
+        S0 = null
         // Java juga menulis F0 = null di sini; helper memakai F0 sebagai lateinit non-null.
         if (::w0.isInitialized) {
             w0.stopLoading()
@@ -105,6 +107,9 @@ class UIWebApp : UIFragment(), BackPressHandler {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // The settings popup is anchored to the fragment's view; don't leave it over a destroyed window.
+        S0?.dismiss()
+        S0 = null
         if (::F0.isInitialized) {
             val str = K0
             val bitmap = M0
@@ -242,7 +247,7 @@ class UIWebApp : UIFragment(), BackPressHandler {
                 u0?.let { url ->
                     R0 = UIDownloads(x0)
                     w0.loadUrl(url)
-                    Downloader.a(x0, w0, R0, C0.getBtnMore())
+                    Downloader.a(x0, w0, R0, C0.getBtnMore(), viewLifecycleOwner)
                 }
                 Q0 = UIFinder(Supplier<WebView?> { w0 })
                 Q0.f4670d = v0.findViewById<FrameLayout>(R.id.overlay_container)

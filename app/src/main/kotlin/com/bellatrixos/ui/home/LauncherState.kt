@@ -32,9 +32,9 @@ class LauncherState {
     /** The menu from long-pressing empty home space. */
     var homeMenuOpen by mutableStateOf(false)
 
-    /** The open drawer hides the home screen; animated widgets stop ticking under it. */
+    /** The open drawer or pulled panel hides the home screen; animated widgets stop ticking under it. */
     val homeCovered: Boolean
-        get() = drawer.value > 0.99f
+        get() = drawer.value > 0.99f || pull.value > 0.99f
 
     /** Closes every overlay screen (the home menu). */
     fun closeScreens() {
@@ -123,6 +123,7 @@ class LauncherState {
      */
     fun closeNow() =
         scope.launch {
+            pullGeneration++
             drawer.snapTo(0f)
             // The swipe-down panel stays where it was going, so coming back from an app opened from it finds it open;
             // one on its way up, or only part way down, goes.
@@ -146,8 +147,17 @@ class LauncherState {
     /** The swipe-down panel: 0 = up out of sight, 1 = down. Follows the finger while dragging, like [drawer]. */
     val pull = Animatable(0f)
 
+    /** Changes whenever a pull starts or is closed, so a late close can't forget a newer pull. */
+    private var pullGeneration = 0
+
     /** File name of the panel [pull] shows, fixed when a swipe down starts it; null while none is pulled. */
     var pulled by mutableStateOf<String?>(null)
+
+    /** Starts a new pull from a gesture; invalidates any close still animating out. */
+    fun beginPull(name: String) {
+        pullGeneration++
+        pulled = name
+    }
 
     /**
      * Whether the drag under way started with the panel open. A slow drag settles by how far it went from there, not
@@ -171,24 +181,30 @@ class LauncherState {
                 pullFromOpen -> pull.value > 0.8f
                 else -> pull.value > 0.2f
             }
-        if (open) composeScope?.launch { pull.animateTo(1f, spring(stiffness = Spring.StiffnessMediumLow)) } else closePull()
+        if (open) {
+            pullGeneration++
+            composeScope?.launch { pull.animateTo(1f, spring(stiffness = Spring.StiffnessMediumLow)) }
+        } else {
+            closePull()
+        }
     }
 
     /** Brings [name] down as the swipe-down panel, as a key asks for it rather than a drag; the drawer goes. */
     fun openPull(name: String) {
         val compose = composeScope ?: return
         close()
-        pulled = name
+        beginPull(name)
         compose.launch { pull.animateTo(1f, spring(stiffness = Spring.StiffnessMediumLow)) }
     }
 
     /** Slides the panel away and lets it go; a drag that catches it on the way keeps it. */
     fun closePull() {
+        val generation = ++pullGeneration
         // Read once: composition can start between launching and running, and animating outside it has no frame clock.
         val compose = composeScope
         (compose ?: CoroutineScope(Dispatchers.Main)).launch {
             if (compose != null) pull.animateTo(0f, spring(stiffness = Spring.StiffnessMedium)) else pull.snapTo(0f)
-            pulled = null
+            if (generation == pullGeneration) pulled = null
         }
     }
 

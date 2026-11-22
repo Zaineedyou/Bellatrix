@@ -59,7 +59,9 @@ fun PackagesScreen(
     }
     val searching = loaded?.first != query.trim()
 
-    fun act(block: suspend () -> Boolean) {
+    fun act(name: String, block: suspend () -> Boolean) {
+        // The row's button is gone while its state is Working; keep a second tap from starting another job.
+        if (pacman.states[name] is JobState.Working) return
         // New or removed .desktop files should show up in the drawer right away.
         scope.launch { if (block()) runtime.refreshApps() }
     }
@@ -86,9 +88,10 @@ fun PackagesScreen(
                 PackageRow(
                     pkg = pkg,
                     core = pkg.name in pacman.core,
-                    state = pacman.states[pkg.name] ?: JobState.Idle,
-                    onInstall = { act { pacman.install(pkg) } },
-                    onRemove = { act { pacman.remove(pkg.name) } },
+                    // stateOf reads the publish tick, so the row recomposes as the IO worker appends log lines.
+                    state = pacman.stateOf(pkg.name),
+                    onInstall = { act(pkg.name) { pacman.install(pkg) } },
+                    onRemove = { act(pkg.name) { pacman.remove(pkg.name) } },
                 )
             }
         }

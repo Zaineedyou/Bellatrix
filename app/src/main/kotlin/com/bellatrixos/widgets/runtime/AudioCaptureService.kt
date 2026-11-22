@@ -20,6 +20,7 @@ import android.util.Log
 import com.bellatrixos.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -33,6 +34,8 @@ class AudioCaptureService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var projection: MediaProjection? = null
     private var callback: MediaProjection.Callback? = null
+    /** The capture loop of the current run; a restart must stop the old one before it releases its projection. */
+    private var runJob: Job? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -42,6 +45,12 @@ class AudioCaptureService : Service() {
         startId: Int,
     ): Int {
         if (intent?.action == ACTION_STOP) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        // AudioPlaybackCapture (and the typed foreground service) starts at API 29; don't open a
+        // projection on older phones that can't read what it plays.
+        if (Build.VERSION.SDK_INT < 29) {
             stopSelf()
             return START_NOT_STICKY
         }
@@ -59,6 +68,9 @@ class AudioCaptureService : Service() {
         }
         // The type goes first: getMediaProjection throws on Android 14+ unless the service already runs with it.
         startForeground(NOTIFICATION_ID, notification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)
+        // A restart can arrive while the old capture is still reading; stop its loop first.
+        runJob?.cancel()
+        runJob = null
         release()
         val p =
             try {
@@ -79,7 +91,7 @@ class AudioCaptureService : Service() {
                     stopSelf()
                 }
             }.also { p.registerCallback(it, Handler(Looper.getMainLooper())) }
-        scope.launch { AudioCapture.run(p) }
+        runJob = scope.launch { AudioCapture.run(p) }
         return START_NOT_STICKY
     }
 

@@ -492,26 +492,28 @@ class e(@JvmField val u: MainActivity) :
             )
             if (!zContainsKey) {
                 arrayList.add(UIMenuItem(1, 0, 0, ""))
-                if (!InstalledAppsDB.b.containsKey(strC)) {
-                    UIMenuItem(
-                        0, 15, R.drawable.menu_ic_settings_20_regular,
-                        mainActivity2.getString(R.string.context_menu_app_settings)
-                    )
-                } else {
-                    UIMenuItem(
-                        0, 24, R.drawable.menu_ic_delete_20_regular,
-                        mainActivity2.getString(R.string.context_menu_uninstall)
-                    )
-                }
+                arrayList.add(
+                    if (!InstalledAppsDB.b.containsKey(strC)) {
+                        UIMenuItem(
+                            0, 15, R.drawable.menu_ic_settings_20_regular,
+                            mainActivity2.getString(R.string.context_menu_app_settings)
+                        )
+                    } else {
+                        UIMenuItem(
+                            0, 24, R.drawable.menu_ic_delete_20_regular,
+                            mainActivity2.getString(R.string.context_menu_uninstall)
+                        )
+                    }
+                )
             }
-            showMenu()
-        }
-        arrayList.add(
-            UIMenuItem(
-                0, 15, R.drawable.menu_ic_settings_20_regular,
-                mainActivity2.getString(R.string.context_menu_app_settings)
+        } else {
+            arrayList.add(
+                UIMenuItem(
+                    0, 15, R.drawable.menu_ic_settings_20_regular,
+                    mainActivity2.getString(R.string.context_menu_app_settings)
+                )
             )
-        )
+        }
         showMenu()
     }
 
@@ -653,7 +655,6 @@ class e(@JvmField val u: MainActivity) :
     ): UIContextMenu.OnMenuItemClickListener = UIContextMenu.OnMenuItemClickListener { _, i4 ->
         val desktopItem2 = desktopItem
         val strA2 = desktopItem2.a()
-        val iIntValue = if (strA2 == null) -1 else (desktopAdapter.F[strA2] as? Int) ?: -1
         var zA = false
         val z = strA2 != null && strA2.contains("Bellatrix/Desktop")
         if (i4 == 0) {
@@ -692,6 +693,13 @@ class e(@JvmField val u: MainActivity) :
                     return@OnMenuItemClickListener
                 }
                 26 -> {
+                    // Rebuild the map: the cached one may be stale, and -1 must never be indexed or saved.
+                    desktopAdapter.B()
+                    val index =
+                        desktopAdapter.E.indexOfFirst { it === desktopItem2 }
+                            .takeIf { it >= 0 }
+                            ?: (if (strA2 == null) -1 else desktopAdapter.F[strA2] ?: -1)
+                    if (index !in desktopAdapter.E.indices) return@OnMenuItemClickListener
                     if (z) {
                         val file = File(strA2)
                         val uIDialog = UIDialog(mainActivity2, mainActivity2.getString(R.string.context_menu_rename), null)
@@ -700,7 +708,7 @@ class e(@JvmField val u: MainActivity) :
                         uIDialog.x = mainActivity2.getString(R.string.files_file_name)
                         uIDialog.G = false
                         uIDialog.C = com.bellatrixos.windows.files.operations.a(
-                            mainActivity2, file, uIDialog, desktopAdapter, iIntValue
+                            mainActivity2, file, uIDialog, desktopAdapter, index
                         )
                         uIDialog.setCanceledOnTouchOutside(true)
                         uIDialog.show()
@@ -715,12 +723,10 @@ class e(@JvmField val u: MainActivity) :
                     uIDialog2.G = false
                     uIDialog2.C = DialogInterface.OnClickListener { _, _ ->
                         val string2 = uIDialog2.w?.text?.toString().orEmpty()
-                        val desktopItem3 = desktopAdapter.E[iIntValue]
+                        val desktopItem3 = desktopAdapter.E[index]
                         desktopItem3.e(string2)
-                        if (iIntValue >= 0) {
-                            desktopAdapter.notifyItemChanged(iIntValue)
-                        }
-                        DesktopDB.b(iIntValue, desktopItem3)
+                        desktopAdapter.notifyItemChanged(index)
+                        DesktopDB.b(index, desktopItem3)
                         uIDialog2.dismiss()
                     }
                     uIDialog2.setCanceledOnTouchOutside(true)

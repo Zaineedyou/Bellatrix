@@ -486,6 +486,8 @@ class CodexLink(
 
     private var thread: String? = null
     private var turn: String? = null
+    /** Stop pressed before the `turn/start` reply gave us the id: interrupt as soon as it arrives. */
+    private var cancelRequested = false
     private val asked = HashMap<String, Any>()
 
     /** What each tool call in this turn does, by item, for a file change's approval, which only names the item. */
@@ -529,21 +531,34 @@ class CodexLink(
     override fun startTurn(text: String) {
         message = null
         acts.clear()
+        cancelRequested = false
         call("turn/start", json("threadId" to thread, "input" to JSONArray().put(json("type" to "text", "text" to text)))) { result, error ->
             if (error != null) return@call ended(LinkEvent.Done(error = error.optString("message")))
-            turn = result?.optJSONObject("turn")?.optString("id")
+            val id = result?.optJSONObject("turn")?.optString("id")?.takeIf { it.isNotEmpty() }
+            turn = id
+            if (cancelRequested && id != null) {
+                cancelRequested = false
+                call("turn/interrupt", json("threadId" to thread, "turnId" to id)) { _, _ -> emptyList() }
+            }
             emptyList()
         }
     }
 
     private fun ended(done: LinkEvent.Done): List<LinkEvent> {
         turn = null
+        cancelRequested = false
         return finished(done)
     }
 
     override fun cancel() {
         dropQueued()
-        val t = turn ?: return
+        val t = turn
+        if (t == null) {
+            // The id is still on its way; the reply above will send the interrupt.
+            cancelRequested = true
+            return
+        }
+        cancelRequested = false
         call("turn/interrupt", json("threadId" to thread, "turnId" to t)) { _, _ -> emptyList() }
     }
 
@@ -764,7 +779,11 @@ class PiLink(
             }
             "message_end" -> {
                 val m = ev.optJSONObject("message")
-                if (m?.optString("role") == "assistant" && m.optString("stopReason") == "error") error = m.optString("errorMessage")
+                if (m?.optString("role") == "assistant") {
+                    val reason = m.optString("stopReason")
+                    // A later successful message supersedes an earlier failure in the same turn.
+                    error = if (reason == "error") m.optString("errorMessage") else if (reason.isEmpty()) error else null
+                }
                 emptyList()
             }
             "tool_execution_start" -> {
@@ -775,7 +794,7 @@ class PiLink(
             }
             "auto_retry_start" -> listOf(LinkEvent.Retrying(ev.optString("errorMessage").ifEmpty { "network" }))
             "auto_retry_end" -> {
-                if (!ev.optBoolean("success")) error = ev.optString("finalError")
+                error = if (ev.optBoolean("success")) null else ev.optString("finalError")
                 emptyList()
             }
             "agent_settled" ->

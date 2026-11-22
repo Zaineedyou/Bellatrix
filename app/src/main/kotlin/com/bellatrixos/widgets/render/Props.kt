@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import com.bellatrixos.widgets.lang.Builtins
 import com.bellatrixos.widgets.lang.Env
 import com.bellatrixos.widgets.lang.Lst
+import com.bellatrixos.widgets.lang.Null
 import com.bellatrixos.widgets.lang.Obj
 import com.bellatrixos.widgets.lang.Value
 import com.bellatrixos.widgets.lang.WNode
@@ -87,9 +88,15 @@ internal class Props(
                 read
             }
         val spec = el.animations[name] ?: return read
+        // The spec is an expression: keying on it alone kept the first evaluated animation spec forever.
+        val specState =
+            remember(spec, env) {
+                derivedStateOf(structuralEqualityPolicy()) { inst.eval(spec, env, "animate $name") ?: Null }
+            }
+        val specValue = specState.value
+        val animSpec = remember(specValue) { floatSpec(specValue) }
         val anim = remember(ev, env) { androidx.compose.animation.core.Animatable(Snapshot.withoutReadObservation { read() }) }
-        val animSpec = remember(spec) { floatSpec(inst.eval(spec, env, "animate $name")) }
-        LaunchedEffect(anim) { snapshotFlow(read).collectLatest { anim.animateTo(it, animSpec) } }
+        LaunchedEffect(anim, animSpec) { snapshotFlow(read).collectLatest { anim.animateTo(it, animSpec) } }
         // The same reader each time, so the modifiers that capture it stay equal.
         return remember(anim) { { anim.value } }
     }
@@ -112,9 +119,14 @@ internal class Props(
                 read
             }
         val spec = el.animations["offset"] ?: return read
+        val specState =
+            remember(spec, env) {
+                derivedStateOf(structuralEqualityPolicy()) { inst.eval(spec, env, "animate offset") ?: Null }
+            }
+        val specValue = specState.value
+        val animSpec = remember(specValue) { offsetSpec(specValue) }
         val anim = remember(ev, env) { androidx.compose.animation.core.Animatable(Snapshot.withoutReadObservation { read() }, Offset.VectorConverter) }
-        val animSpec = remember(spec) { offsetSpec(inst.eval(spec, env, "animate offset")) }
-        LaunchedEffect(anim) {
+        LaunchedEffect(anim, animSpec) {
             snapshotFlow { read() to held.value }.collectLatest { (to, dragging) -> if (dragging) anim.snapTo(to) else anim.animateTo(to, animSpec) }
         }
         return remember(anim) { { anim.value } }
@@ -133,9 +145,14 @@ internal class Props(
                 read
             }
         val spec = el.animations[name] ?: return read
+        val specState =
+            remember(spec, env) {
+                derivedStateOf(structuralEqualityPolicy()) { inst.eval(spec, env, "animate $name") ?: Null }
+            }
+        val specValue = specState.value
+        val animSpec = remember(specValue) { colorSpec(specValue) }
         val anim = remember(ev, env) { Animatable(Snapshot.withoutReadObservation { read() }) }
-        val animSpec = remember(spec) { colorSpec(inst.eval(spec, env, "animate $name")) }
-        LaunchedEffect(anim) { snapshotFlow(read).collectLatest { anim.animateTo(it, animSpec) } }
+        LaunchedEffect(anim, animSpec) { snapshotFlow(read).collectLatest { anim.animateTo(it, animSpec) } }
         return remember(anim) { { anim.value } }
     }
 

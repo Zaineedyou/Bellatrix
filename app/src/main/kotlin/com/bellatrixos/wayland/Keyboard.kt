@@ -311,7 +311,8 @@ class KeyboardSink(
                 beforeLength: Int,
                 afterLength: Int,
             ): Boolean {
-                repeat(beforeLength.coerceAtLeast(1)) { bridge.tap(Keys.KEY_BACKSPACE) }
+                repeat(beforeLength.coerceAtLeast(0)) { bridge.tap(Keys.KEY_BACKSPACE) }
+                repeat(afterLength.coerceAtLeast(0)) { bridge.tap(Keys.KEY_DELETE) }
                 return true
             }
 

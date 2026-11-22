@@ -103,7 +103,15 @@ class GuestShell(
     }
 
     private fun stop() {
-        process?.let(::killTree)
+        val p = process
+        p?.let(::killTree)
+        // Closing the pipes matters as much as killing the tree: a restart otherwise
+        // keeps the old shell's file descriptors alive until GC.
+        runCatching { stdin?.close() }
+        runCatching { stdout?.close() }
+        runCatching { p?.errorStream?.close() }
+        stdin = null
+        stdout = null
         process = null
     }
 }

@@ -39,6 +39,7 @@ class UIDialogProgress @JvmOverloads constructor(
         A?.visibility = android.view.View.GONE
         B?.visibility = android.view.View.VISIBLE
         F?.isChecked = false
+        setCancelable(true)
     }
 
     fun b(i2: Int) {
@@ -48,6 +49,7 @@ class UIDialogProgress @JvmOverloads constructor(
 
     fun c(str: String?, conflictListener: ConflictListener) {
         G = conflictListener
+        setCancelable(false)
         if (!isShowing) show()
         A?.visibility = android.view.View.VISIBLE
         B?.visibility = android.view.View.GONE

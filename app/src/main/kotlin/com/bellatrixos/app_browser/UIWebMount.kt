@@ -41,8 +41,10 @@ class UIWebMount {
             settings.allowContentAccess = true
             settings.mediaPlaybackRequiresUserGesture = false
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            settings.setAllowUniversalAccessFromFileURLs(true)
-            settings.setAllowFileAccessFromFileURLs(true)
+            // File origins must not reach other origins (or the app's own files): a page's script may read any file
+            // it can name once either of these is on, including content the WebView shares with the app.
+            settings.setAllowUniversalAccessFromFileURLs(false)
+            settings.setAllowFileAccessFromFileURLs(false)
             if (Build.VERSION.SDK_INT >= 29) {
                 settings.setForceDark(WebSettings.FORCE_DARK_AUTO)
             }

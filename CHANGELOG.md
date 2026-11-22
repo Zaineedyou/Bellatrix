@@ -9,6 +9,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.36] - 2026-11-22
+
+### Fixed
+
+- File manager: initialized the copy/move worker executor, corrected inverted delete logic for multi-item copy, propagated folder-copy failures, and made the conflict dialog cancel path release the worker.
+- Browser and apps: sanitized JS-download filenames, disabled file-origin cross-origin access, stopped clearing the shared main-handler callbacks, and fixed zoom, popup, clipboard, permission, download-receiver, playback and track-state handling.
+- Native launcher: corrected taskbar context-menu targeting, Linux key-bar bridge ownership, editor shim recreation, leave animations, start-menu items, desktop rename indexing, keyboard delete handling, folder geometry and pulled-panel state.
+- Settings and Linux: guarded the home-role check on Android 6–9, made package/GPU/CPU state observable while work runs, and keyed store result messages to the selected entry.
+- Widgets and OWL: fixed native taskbar skin leaks/state/dp/padding, icon caching, animation specs and preview cleanup; added telephony permission and backoff, audio-capture restart cleanup, AirPods fallback and image retry; corrected `min`/`max`, empty-string `replace`, shader animation detection and the removed `appAction("share")` word.
+- Theme, voice and wallpaper: guarded API 28 image decoding, validated theme colors, filtered guest images, made wallpaper teardown asynchronous, fixed Codex stop and Pi retry reporting, released Media3 transformers and corrected the mini wallpaper format.
+- Browser widget timers now use a counted lifecycle so an old activity's stop callback cannot pause timers while a new home activity is visible.
+- CI and manifest: fork pull requests no longer require signing secrets, pin shortcuts are exported to the system, the proot source hash is verified, stale share-only paths were removed, and the widget signal source has the phone-state permission it needs.
+
 ## [2.9.35] - 2026-11-22
 
 ### Fixed

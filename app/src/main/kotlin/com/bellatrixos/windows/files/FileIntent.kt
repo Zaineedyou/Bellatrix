@@ -43,7 +43,10 @@ object FileIntent {
 
     @JvmStatic
     fun b(context: Context, file: File, launcher: AppLauncher) {
-        if (!file.exists()) notifyUnavailable(context)
+        if (!file.exists()) {
+            notifyUnavailable(context)
+            return
+        }
         val ext = FileExtensions.c(file.name)
         val tag = when (ext) {
             "3gp", "mkv", "mp4", "mov", "mpg", "mpeg", "webm" -> "UIVideo"

@@ -324,16 +324,17 @@ private fun KeepAliveRow(runtime: Runtime) {
 @Composable
 private fun GpuRow(runtime: Runtime) {
     val gpu = runtime.gpu
-    val state = gpu.state
+    val snapshot by gpu.uiState.collectAsState()
+    val state = snapshot.state
     val status =
         when {
             state is JobState.Working -> stringResource(R.string.linux_job_working, stringResource(state.action))
-            gpu.active && gpu.openGlOnCpu -> stringResource(R.string.linux_gpu_on_vulkan_only, gpu.device ?: "GPU")
-            gpu.active -> stringResource(R.string.linux_gpu_on, gpu.device ?: "GPU")
-            gpu.wanted && state is JobState.Failed -> stringResource(R.string.linux_gpu_off_failed)
-            gpu.wanted -> stringResource(R.string.linux_gpu_waiting)
+            snapshot.active && snapshot.openGlOnCpu -> stringResource(R.string.linux_gpu_on_vulkan_only, snapshot.device ?: "GPU")
+            snapshot.active -> stringResource(R.string.linux_gpu_on, snapshot.device ?: "GPU")
+            snapshot.wanted && state is JobState.Failed -> stringResource(R.string.linux_gpu_off_failed)
+            snapshot.wanted -> stringResource(R.string.linux_gpu_waiting)
             state is JobState.Failed -> stringResource(R.string.linux_gpu_failed)
-            else -> stringResource(R.string.linux_gpu_offer, gpu.driverLabel)
+            else -> stringResource(R.string.linux_gpu_offer, snapshot.driverLabel)
         }
     Column(Modifier.card()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -341,14 +342,14 @@ private fun GpuRow(runtime: Runtime) {
                 BasicText(stringResource(R.string.linux_gpu_title), style = Mono.copy(fontSize = TextSize.Item))
                 BasicText(
                     status,
-                    style = Mono.copy(color = if (gpu.active) Palette.green else Palette.muted, fontSize = TextSize.Small),
+                    style = Mono.copy(color = if (snapshot.active) Palette.green else Palette.muted, fontSize = TextSize.Small),
                 )
             }
             // Keys on one wait out its job, for the one it ends with.
             val passed = Modifier.takesPassedKeys().passesKeys()
             when {
                 state is JobState.Working -> {}
-                gpu.wanted -> {
+                snapshot.wanted -> {
                     if (state is JobState.Failed) BracketAction(stringResource(R.string.linux_retry), Palette.accent, passed) { runtime.setGpu(true) }
                     BracketAction(stringResource(R.string.linux_gpu_turn_off), Palette.red, passed) { runtime.setGpu(false) }
                 }
@@ -363,7 +364,7 @@ private fun GpuRow(runtime: Runtime) {
 @Composable
 private fun CpuPinningRow(runtime: Runtime) {
     val proot = runtime.proot
-    val on = proot.cpuPinning
+    val on by proot.cpuPinningState.collectAsState()
     Row(Modifier.card(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             BasicText(stringResource(R.string.linux_cpu_pinning_title), style = Mono.copy(fontSize = TextSize.Item))

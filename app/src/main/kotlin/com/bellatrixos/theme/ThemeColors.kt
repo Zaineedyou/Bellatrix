@@ -3,16 +3,38 @@ package com.bellatrixos.theme
 import java.io.File
 
 /**
+ * Compiles a color to `#rrggbb`, so one hand-edited bad value can't make a derivation throw.
+ * Accepts `#rrggbb`, `0xrrggbb` and bare `rrggbb`.
+ */
+private val HEX_COLOR = Regex("""^(?:#|0[xX])?([0-9a-fA-F]{6})$""")
+
+/** Values that are names, not colors: they must survive [ThemeColors.parse] unchanged. */
+private val NON_COLOR_KEYS = setOf("mode", "theme_type")
+
+/** Keeps the old `rgb(...).joinToString(",")` template call compiling with a nullable [ThemeColors.rgb]. */
+fun IntArray?.joinToString(separator: String): String = this?.joinToString(separator) ?: ""
+
+/**
  * Parses an Bellatrix `colors.toml` and resolves the derived names that
  * templates use, mirroring the cascade in bellatrix-theme-color.
  */
 object ThemeColors {
     private val LINE = Regex("""^\s*([A-Za-z0-9_]+)\s*=\s*"([^"]*)"""")
 
+    /** Normalized color, or null for anything that isn't a six-digit hex color. */
+    fun color(value: String?): String? {
+        val match = HEX_COLOR.matchEntire(value?.trim().orEmpty()) ?: return null
+        return "#" + match.groupValues[1].lowercase()
+    }
+
     fun load(file: File): Map<String, String> = resolve(parse(file.readText()))
 
     fun parse(text: String): Map<String, String> =
-        text.lineSequence().mapNotNull { LINE.find(it)?.destructured?.let { (k, v) -> k to v } }.toMap()
+        text.lineSequence().mapNotNull { line ->
+            LINE.find(line)?.destructured?.let { (key, value) ->
+                if (key in NON_COLOR_KEYS) key to value else color(value)?.let { key to it }
+            }
+        }.toMap()
 
     fun resolve(raw: Map<String, String>): Map<String, String> {
         val c = raw.toMutableMap()
@@ -42,7 +64,7 @@ object ThemeColors {
 
         default("light_foreground") { c["color7"] ?: c["foreground"] }
         default("bright_foreground") { c["color15"] ?: c["foreground"] }
-        c["cursor"] = c["bright_foreground"] ?: c["foreground"] ?: "#ffffff"
+        c["cursor"] = color(c["bright_foreground"] ?: c["foreground"] ?: "#ffffff") ?: "#ffffff"
         default("lighter_background") { c["color0"] ?: c["background"] }
         default("dark_foreground") { c["color8"] ?: c["foreground"] }
         default("muted") { c["color8"] ?: c["dark_foreground"] }
@@ -64,7 +86,8 @@ object ThemeColors {
         ).forEachIndexed { n, key -> alias("color$n", key) }
         // theme_type is mode's older name: a theme may set either, and templates read both (Claude Code's base).
         alias("mode", "theme_type")
-        default("mode") { if (luminance(c["background"] ?: "#000000") > 0.5) "light" else "dark" }
+        // An unparseable background can no longer take the theme down; it just isn't a light theme.
+        default("mode") { c["background"]?.let { if (luminance(it) > 0.5) "light" else "dark" } ?: "dark" }
         c["theme_type"] = c.getValue("mode")
         return c
     }
@@ -107,21 +130,25 @@ object ThemeColors {
         return out
     }
 
+    /** Null when either side isn't a color: the derivation simply skips that key. */
     fun mix(
         a: String,
         b: String,
         amount: Double,
-    ): String {
-        val x = rgb(a)
-        val y = rgb(b)
-        val out = IntArray(3) { i -> (x[i] * (1 - amount) + y[i] * amount + 0.5).toInt() }
+    ): String? {
+        val x = rgb(a) ?: return null
+        val y = rgb(b) ?: return null
+        val out = IntArray(3) { i -> (x[i] * (1 - amount) + y[i] * amount + 0.5).toInt().coerceIn(0, 255) }
         return "#%02x%02x%02x".format(out[0], out[1], out[2])
     }
 
-    fun rgb(hex: String): IntArray {
-        val h = hex.removePrefix("#")
-        return IntArray(3) { i -> h.substring(i * 2, i * 2 + 2).toInt(16) }
+    /** Null on malformed input instead of throwing; callers pick their own fallback. */
+    fun rgb(hex: String): IntArray? {
+        val h = color(hex) ?: return null
+        return IntArray(3) { i -> h.substring(i * 2 + 1, i * 2 + 3).toInt(16) }
     }
 
-    fun luminance(hex: String): Double = rgb(hex).let { (0.2126 * it[0] + 0.7152 * it[1] + 0.0722 * it[2]) / 255 }
+    /** Zero for a malformed color: [resolve] turns that into the dark mode fallback. */
+    fun luminance(hex: String): Double =
+        rgb(hex)?.let { (0.2126 * it[0] + 0.7152 * it[1] + 0.0722 * it[2]) / 255 } ?: 0.0
 }

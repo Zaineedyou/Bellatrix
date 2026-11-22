@@ -47,55 +47,9 @@ class m(@JvmField val f4767a: Any) :
         val act: MainActivity = mainActivity.W ?: mainActivity
         val taskBarAdapter: TaskBarAdapter = mainActivity.t0 ?: return
 
-        if (i2 >= 0) {
-            val list2 = taskBarAdapter.D
-            val strA = if (i2 < list2.size) (list2[i2] as TaskBarItem).a() else ""
-            val uIContextMenu = mainActivity.i0 ?: return
-            val arrayList = uIContextMenu.f4745d
-            arrayList.clear()
-            var strA2 = AppsDatabase.a(strA)
-            if (strA2 == act.getString(R.string.app_default_title)) {
-                strA2 = act.getString(R.string.context_menu_open)
-            }
-            arrayList.add(UIMenuItem(0, 0, R.drawable.menu_ic_blank_20_regular, strA2))
-            arrayList.add(UIMenuItem(1, 0, 0, ""))
-            arrayList.add(
-                UIMenuItem(
-                    0, 18, R.drawable.menu_ic_rearrange_20_regular,
-                    act.getString(R.string.context_menu_rearrange)
-                )
-            )
-            if (!b.containsKey(strA)) {
-                arrayList.add(
-                    UIMenuItem(
-                        0, 15, R.drawable.menu_ic_settings_20_regular,
-                        act.getString(R.string.context_menu_app_settings)
-                    )
-                )
-            }
-            val zH = i2 >= 0 && i2 < taskBarAdapter.D.size && (taskBarAdapter.D[i2] as TaskBarItem).h()
-            arrayList.add(
-                if (zH) {
-                    UIMenuItem(
-                        0, 17, R.drawable.menu_ic_pin_off_20_regular,
-                        act.getString(R.string.context_menu_unpin_from_taskbar)
-                    )
-                } else {
-                    UIMenuItem(
-                        0, 16, R.drawable.menu_ic_pin_20_regular,
-                        act.getString(R.string.context_menu_pin_to_taskbar)
-                    )
-                }
-            )
-            uIContextMenu.c = menuListener(mainActivityIn, act, taskBarAdapter, view, strA, i2)
-            uIContextMenu.a(R.style.AnimationDialogFadeUp)
-            uIContextMenu.g(view, -act.resources.getDimensionPixelSize(R.dimen.ui_12dp))
-            view.isActivated = true
-            uIContextMenu.setOnDismissListener(com.bellatrixos.desktop.b(view, 1))
-        }
-
-        // Cabang jatuh-an: memakai nama aplikasi bawaan (FLAVOR).
-        val strA = ""
+        // One menu path: the real package when the index names a task, the fallback name otherwise.
+        val list2 = taskBarAdapter.D
+        val strA = if (i2 in list2.indices) (list2[i2] as TaskBarItem).a() else ""
         val uIContextMenu = mainActivity.i0 ?: return
         val arrayList = uIContextMenu.f4745d
         arrayList.clear()
@@ -119,7 +73,7 @@ class m(@JvmField val f4767a: Any) :
                 )
             )
         }
-        val zH = i2 >= 0 && i2 < taskBarAdapter.D.size && (taskBarAdapter.D[i2] as TaskBarItem).h()
+        val zH = i2 in list2.indices && (list2[i2] as TaskBarItem).h()
         arrayList.add(
             if (zH) {
                 UIMenuItem(
@@ -136,10 +90,8 @@ class m(@JvmField val f4767a: Any) :
         uIContextMenu.c = menuListener(mainActivityIn, act, taskBarAdapter, view, strA, i2)
         uIContextMenu.a(R.style.AnimationDialogFadeUp)
         uIContextMenu.g(view, -act.resources.getDimensionPixelSize(R.dimen.ui_12dp))
-        if (view.isActivated) {
-            view.isActivated = true
-            uIContextMenu.setOnDismissListener(com.bellatrixos.desktop.b(view, 1))
-        }
+        view.isActivated = true
+        uIContextMenu.setOnDismissListener(com.bellatrixos.desktop.b(view, 1))
     }
 
     override fun b() {

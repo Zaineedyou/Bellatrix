@@ -234,7 +234,11 @@ class KeyboardBridge(
     private fun liftImplied() = implied.toList().forEach { key(it, false) }
 
     /** Lifts every key the window was told is down, as it loses the keys with some still held. */
-    fun releaseHeld() = down.toList().forEach { key(it, false) }
+    fun releaseHeld() {
+        // A key sent whole under a latch is already up; its release must not swallow the next key-up.
+        swallowUp = null
+        down.toList().forEach { key(it, false) }
+    }
 
     /** The keys pressed and not released yet, as the window was told. */
     private val down = mutableSetOf<Int>()
@@ -356,7 +360,8 @@ class KeyboardSink(
                 beforeLength: Int,
                 afterLength: Int,
             ): Boolean {
-                repeat(beforeLength.coerceAtLeast(1)) { bridge.tap(Keys.KEY_BACKSPACE) }
+                repeat(beforeLength.coerceAtLeast(0)) { bridge.tap(Keys.KEY_BACKSPACE) }
+                repeat(afterLength.coerceAtLeast(0)) { bridge.tap(Keys.KEY_DELETE) }
                 return true
             }
 

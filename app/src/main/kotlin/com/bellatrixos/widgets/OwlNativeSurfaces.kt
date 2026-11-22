@@ -17,6 +17,7 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.bellatrixos.App
 import com.bellatrixos.R
 import com.bellatrixos.Runtime
+import com.bellatrixos.ui.Palette
 import com.bellatrixos.ui.home.NativeGrid
 import com.bellatrixos.ui.home.OwlHomeTiles
 import com.bellatrixos.ui.home.OwlSurface
@@ -122,8 +123,15 @@ object OwlNativeSurfaces {
             // Frosted OWL nodes blur the same wallpaper the Compose launcher would blur.
             val backdrop = remember(runtime) { Backdrop({ runtime.themes.background }, { 0f }) }
             if (name == WidgetEngine.HOME_BAR) {
-                // The one home surface also watches the taskbar file; a save restyles the real native bar.
-                LaunchedEffect(runtime.widgets.specs.map { "${it.file.name}:${it.stamp}" }.joinToString("|")) {
+                // The one home surface also watches the taskbar file; a save, a source or state change,
+                // or a new theme restyles the real native bar.
+                val files = runtime.widgets.specs.map { "${it.file.name}:${it.stamp}" }.joinToString("|")
+                val bar = runtime.widgets.barInstance(WidgetEngine.TASKBAR_BAR)
+                // -1 before the instance exists, then its revision: first appearance is a change too.
+                val revision = bar?.revision?.intValue ?: -1
+                val palette = Palette.current
+                val theme = runtime.themes.current
+                LaunchedEffect(files, revision, palette, theme) {
                     NativeTaskbarSkin.apply(activity, runtime)
                 }
             }

@@ -183,9 +183,10 @@ class C0054c(@JvmField val u: Int, @JvmField val v: Fragment) :
                 val uri = result as? Uri ?: return
                 val context = accounts.s0 ?: return
                 try {
-                    val stream = context.contentResolver.openInputStream(uri)
+                    val stream = context.contentResolver.openInputStream(uri) ?: return
                     var bitmap = BitmapFactory.decodeStream(stream)
-                    stream?.close()
+                    stream.close()
+                    bitmap ?: return
                     val width = bitmap.width
                     val height = bitmap.height
                     if (width > 512) {

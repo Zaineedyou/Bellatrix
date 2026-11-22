@@ -60,7 +60,8 @@ object Wallpapers {
                 256,
                 true
             )
-            b(context, mini, "wallpaper_mini.webp")
+            // The bytes are PNG (see b()), so the name and the stored path must say so too.
+            b(context, mini, "wallpaper_mini.png")
             (context as? MainActivityIn)?.v(mini)
         } catch (ignored: Exception) {
         }

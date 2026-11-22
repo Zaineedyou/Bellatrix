@@ -16,6 +16,15 @@ class Scaling {
     }
 
     companion object {
+        /** Only the pending zoom save, never the shared main Handler's other callbacks. Main thread only. */
+        private var saveZoomRunnable: Runnable? = null
+
+        /** A page's text zoom in percent; bad persisted or typed values must not reach CSS. */
+        private fun percent(zoom: Int): Int = zoom.coerceIn(MIN_ZOOM, MAX_ZOOM)
+
+        private const val MIN_ZOOM = 50
+        private const val MAX_ZOOM = 300
+
         @JvmStatic
         fun a(textView: TextView, str: String) {
             val color = textView.currentTextColor
@@ -39,20 +48,28 @@ class Scaling {
 
         @JvmStatic
         fun b(webView: WebView, app: InstalledApp?) {
-            val zoom = app?.g() ?: 100
-            if (zoom != 100) webView.evaluateJavascript("document.body.style.zoom = '$zoom%;", null)
+            val zoom = percent(app?.g() ?: 100)
+            if (zoom != 100) webView.evaluateJavascript("document.body.style.zoom = '$zoom%';", null)
         }
 
         @JvmStatic
         fun c(webView: WebView, app: InstalledApp?, zoom: Int) {
-            webView.evaluateJavascript("document.body.style.zoom = '$zoom%;", null)
-            AppExecutors.c().removeCallbacksAndMessages(null)
-            AppExecutors.c().postDelayed({
-                if (app != null) {
-                    app.n(zoom)
-                    InstalledAppsDB.e(app.c(), app)
+            val value = percent(zoom)
+            webView.evaluateJavascript("document.body.style.zoom = '$value%';", null)
+            val handler = AppExecutors.c()
+            // Supersede only the previous save: clearing the whole main Handler drops unrelated app callbacks.
+            saveZoomRunnable?.let { handler.removeCallbacks(it) }
+            val pending = object : Runnable {
+                override fun run() {
+                    if (saveZoomRunnable === this) saveZoomRunnable = null
+                    if (app != null) {
+                        app.n(value)
+                        InstalledAppsDB.e(app.c(), app)
+                    }
                 }
-            }, 1500L)
+            }
+            saveZoomRunnable = pending
+            handler.postDelayed(pending, 1500L)
         }
     }
 }

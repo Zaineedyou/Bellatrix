@@ -94,15 +94,14 @@ class UIInstaller : UIFragment(), BackPressHandler {
         installButton.setOnClickListener {
             val name = nameInput.text.toString().trim()
             val url = urlInput.text.toString().trim()
-            var nameOk = true
             if (name.isEmpty()) {
                 nameInput.setError(getString(R.string.app_installer_error_app_name_required))
                 nameInput.requestFocus()
-                nameOk = false
+                return@setOnClickListener
             }
             if (url.isEmpty()) {
                 urlInput.setError(getString(R.string.app_installer_error_url_required))
-                if (nameOk) urlInput.requestFocus()
+                urlInput.requestFocus()
                 return@setOnClickListener
             }
             if (InstalledAppsDB.b.containsKey(url)) {

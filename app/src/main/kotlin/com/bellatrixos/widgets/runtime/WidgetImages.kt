@@ -181,8 +181,11 @@ internal class WidgetImages(
                 val file = if (src.startsWith("asset:") || remote) null else services.guestFile(src)
                 val stamp = file?.lastModified() ?: 0L
                 if (!remote && stamps[src] == stamp) return@withContext null
-                stamps[src] = stamp
-                Result.success(runCatching { decode(src, file) }.getOrNull())
+                // Only a successful decode is stamped: a file that was being written, or a failed
+                // download, is asked for again on the next recheck.
+                val image = runCatching { decode(src, file) }.getOrNull()
+                if (image != null && !remote) stamps[src] = stamp
+                Result.success(image)
             } ?: return
         val image = decoded.getOrNull()
         if (image == null) report(if (remote) "image '$src' couldn't be downloaded, or isn't an image" else "image '$src' couldn't be loaded")

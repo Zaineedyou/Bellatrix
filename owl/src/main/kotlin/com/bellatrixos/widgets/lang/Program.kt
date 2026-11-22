@@ -412,7 +412,7 @@ class Program(
     val keyboard: Boolean = true,
     val onTap: Action? = null,
     val triggers: List<Trigger>,
-    /** Shell commands this widget can run, known without running it; for reviewing shared widgets. */
+    /** Shell commands this widget can run, known without running it; for reviewing widgets submitted to the store. */
     val commands: List<String>,
     /** Each `secret` state's servers, sorted: its sealed value is kept only while these stay the same. */
     val secretHosts: Map<String, List<String>> = emptyMap(),

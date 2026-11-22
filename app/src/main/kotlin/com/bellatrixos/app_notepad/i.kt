@@ -120,10 +120,12 @@ class i(
                 writer.flush()
             }
         } catch (_: Exception) {
-            Toast.makeText(context, R.string.toast_file_failed_save, Toast.LENGTH_SHORT).show()
             ok = false
+            AppExecutors.c().post {
+                Toast.makeText(context, R.string.toast_file_failed_save, Toast.LENGTH_SHORT).show()
+            }
         }
-        AppExecutors.c().post { (w as? Runnable)?.run() }
-        if (!ok) return
+        // The callback clears the unsaved marker in the title; on failure the edit is still unsaved.
+        if (ok) AppExecutors.c().post { (w as? Runnable)?.run() }
     }
 }

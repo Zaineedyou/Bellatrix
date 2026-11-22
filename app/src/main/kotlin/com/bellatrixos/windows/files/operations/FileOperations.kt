@@ -48,7 +48,7 @@ class FileOperations(context: Context) {
     @JvmField val b: Handler = Handler(Looper.getMainLooper())
 
     companion object {
-        @JvmField var f4923i: ExecutorService? = null
+        @JvmField var f4923i: ExecutorService? = Executors.newFixedThreadPool(2)
         @JvmField @Volatile var j: FileOperations? = null
 
         @JvmStatic
@@ -129,12 +129,9 @@ class FileOperations(context: Context) {
     }
 
     fun e(file: File, file2: File, iArr: IntArray, i2: Int, iArr2: IntArray): Boolean {
-        if (!file.isDirectory) {
-            d(file, file2, iArr, i2, iArr2)
-            return true
-        }
+        if (!file.isDirectory) return d(file, file2, iArr, i2, iArr2)
         if (!file2.exists() && !file2.mkdirs()) return false
-        val names = file.list() ?: return true
+        val names = file.list() ?: return false
         for (name in names) {
             if (!e(File(file, name), File(file2, name), iArr, i2, iArr2)) return false
         }

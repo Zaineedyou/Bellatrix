@@ -1,6 +1,7 @@
 package com.bellatrixos.app_browser.files
 
 import android.content.Context
+import android.os.Environment
 import android.util.Base64InputStream
 import android.webkit.MimeTypeMap
 import com.bellatrixos.R
@@ -12,6 +13,32 @@ import java.util.UUID
 
 /** Penentuan nama berkas hasil unduhan dan penulisan data Base64. */
 object FileManager {
+    /**
+     * A file name coming from page script is untrusted: keep only a bare basename, and reject paths, traversal,
+     * absolute/drive-qualified names and control characters instead of letting them reach the filesystem.
+     */
+    @JvmStatic
+    fun safeName(raw: String?): String? {
+        val name = raw?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        val base = name.substringAfterLast('/').substringAfterLast('\\')
+        if (base != name) return null
+        if (base == "." || base == ".." || base.contains("..") ||
+            base.any { it.isISOControl() || it == '/' || it == '\\' } ||
+            (base.length > 1 && base[1] == ':') || base.length > 200
+        ) return null
+        return base
+    }
+
+    /** Resolves [name] under Downloads, checking the canonical path so a symlink can't lead elsewhere. */
+    @JvmStatic
+    fun downloadsTarget(name: String): File? = try {
+        val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).canonicalFile
+        val target = File(downloads, safeName(name) ?: return null).canonicalFile
+        if (target.parentFile == downloads) target else null
+    } catch (_: Exception) {
+        null
+    }
+
     @JvmStatic
     fun a(context: Context, str: String, str2: String?): String {
         var extension = "bin"
@@ -38,12 +65,15 @@ object FileManager {
         }
 
         if (str2 != null && str2.trim().isNotEmpty()) {
-            val name = str2.trim()
+            val name = safeName(str2) ?: return generated(context, extension)
             return if (!name.contains(".")) "$name.$extension" else name
         }
-        return context.getString(R.string.downloader_file_downloaded) +
-            UUID.randomUUID().toString().substring(0, 8) + "." + extension
+        return generated(context, extension)
     }
+
+    private fun generated(context: Context, extension: String): String =
+        context.getString(R.string.downloader_file_downloaded) +
+            UUID.randomUUID().toString().substring(0, 8) + "." + extension
 
     @JvmStatic
     @Throws(java.io.IOException::class)

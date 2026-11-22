@@ -568,8 +568,8 @@ object Builtins {
     val all: Map<String, Builtin> =
         mapOf(
             // numbers
-            "min" to Builtin(1, 16) { a -> if (a.size == 1) a.list(0).mapNotNull { it.num() }.minOrNull()?.let(::n) ?: Null else n(a.args.minOf { it.num() ?: Double.MAX_VALUE }) },
-            "max" to Builtin(1, 16) { a -> if (a.size == 1) a.list(0).mapNotNull { it.num() }.maxOrNull()?.let(::n) ?: Null else n(a.args.maxOf { it.num() ?: -Double.MAX_VALUE }) },
+            "min" to Builtin(1, 16) { a -> (if (a.size == 1) a.list(0) else a.args).mapNotNull { it.num() }.minOrNull()?.let(::n) ?: Null },
+            "max" to Builtin(1, 16) { a -> (if (a.size == 1) a.list(0) else a.args).mapNotNull { it.num() }.maxOrNull()?.let(::n) ?: Null },
             "clamp" to Builtin(3, 3) { a -> n(a.num(0).coerceIn(a.num(1), a.num(2).coerceAtLeast(a.num(1)))) },
             "lerp" to Builtin(3, 3) { a -> n(a.num(0) + (a.num(1) - a.num(0)) * a.num(2)) },
             "round" to
@@ -628,8 +628,14 @@ object Builtins {
                     val s = a.str(0)
                     val from = a.str(1)
                     val to = a.str(2)
-                    // "a" for every character of a long text multiplies it.
-                    if (to.length > from.length && from.isNotEmpty()) checkText(s.length / from.length * to.length + s.length)
+                    // "a" for every character of a long text multiplies it; an empty from
+                    // matches at every position, including both ends, which expands the most.
+                    if (from.isEmpty()) {
+                        val projected = s.length.toLong() + (s.length.toLong() + 1) * to.length
+                        checkText(projected.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
+                    } else if (to.length > from.length) {
+                        checkText(s.length / from.length * to.length + s.length)
+                    }
                     Str(s.replace(from, to))
                 },
             // owl 6: a value as one shell word, for commands put together while the widget runs.

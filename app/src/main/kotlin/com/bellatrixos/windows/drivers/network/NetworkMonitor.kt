@@ -68,7 +68,7 @@ class NetworkMonitor(context: Context, private val imageView: ImageView?) {
         const val TYPE_CELLULAR = 1
         const val TYPE_WIFI = 2
         const val TYPE_ETHERNET = 3
-        const val TYPE_OTHER = 2
+        const val TYPE_OTHER = 4
 
         @JvmField var f4907d: Boolean = false
         @JvmField var f4908e: Boolean = false
@@ -80,7 +80,8 @@ class NetworkMonitor(context: Context, private val imageView: ImageView?) {
             val res = when (type) {
                 TYPE_CELLULAR -> R.drawable.ic_cellular_data_1_24_filled
                 TYPE_ETHERNET -> R.drawable.ui_tb_ethernet_24_regular
-                else -> R.drawable.ui_tb_wifi_4_24_regular
+                TYPE_WIFI -> R.drawable.ui_tb_wifi_4_24_regular
+                else -> R.drawable.ic_globe_24_regular
             }
             view.setImageResource(res)
         }

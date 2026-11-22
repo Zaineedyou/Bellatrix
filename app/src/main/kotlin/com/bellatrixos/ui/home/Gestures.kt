@@ -172,7 +172,7 @@ internal fun Modifier.homeSwipe(
                             state.drawer.value > 0f -> HomeDrag.Drawer
                             dy < 0f && gestures.swipeUp != Gestures.NONE -> HomeDrag.Drawer
                             // Picked as the drag starts: it comes down from out of sight above with the finger.
-                            dy > 0f -> runtime.panelOf(gestures.swipeDown)?.let { name -> state.pulled = name; HomeDrag.Pull } ?: HomeDrag.Ignored
+                            dy > 0f -> runtime.panelOf(gestures.swipeDown)?.let { name -> state.beginPull(name); HomeDrag.Pull } ?: HomeDrag.Ignored
                             else -> HomeDrag.Ignored
                         }
                 }

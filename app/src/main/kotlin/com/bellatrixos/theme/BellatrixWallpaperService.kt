@@ -2,11 +2,13 @@ package com.bellatrixos.theme
 
 import android.app.WallpaperColors
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.graphics.SurfaceTexture
 import android.graphics.drawable.AnimatedImageDrawable
+import android.graphics.drawable.Animatable
 import android.graphics.drawable.Drawable
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
@@ -27,15 +29,14 @@ import android.service.wallpaper.WallpaperService
 import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
+import androidx.annotation.RequiresApi
 import com.bellatrixos.ui.decodeAnimated
 import com.bellatrixos.ui.wallpaperCrop
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -90,7 +91,7 @@ class BellatrixWallpaperService : WallpaperService() {
         private var stillTex = 0
 
         /** The GIF showing: each frame is drawn into [gifBitmap], which is uploaded as a texture. */
-        private var animated: AnimatedImageDrawable? = null
+        private var animated: Drawable? = null
         private var gifBitmap: Bitmap? = null
         private var gifCanvas: Canvas? = null
         private var gifTex = 0
@@ -152,14 +153,18 @@ class BellatrixWallpaperService : WallpaperService() {
         override fun onDestroy() {
             ThemeStore.changeListeners.remove(onThemeChanged)
             decoder.shutdownNow()
-            val done = CountDownLatch(1)
+            visible = false
+            // The main thread never waits for the render thread: cleanup reports back here instead.
             val posted =
                 gl.post {
                     releaseContent()
                     releaseGl()
-                    done.countDown()
+                    main.post { finishDestroy() }
                 }
-            if (posted) done.await(2, TimeUnit.SECONDS)
+            if (!posted) finishDestroy()
+        }
+
+        private fun finishDestroy() {
             thread.quitSafely()
             super.onDestroy()
         }
@@ -176,16 +181,17 @@ class BellatrixWallpaperService : WallpaperService() {
         }
 
         override fun onSurfaceDestroyed(holder: SurfaceHolder) {
-            // Everything that draws into this surface has to be gone before it is: wait for the render thread.
-            val done = CountDownLatch(1)
+            // Everything that draws into this surface has to be gone before it is, but not by blocking main.
+            visible = false
             val posted =
                 gl.post {
                     releaseGl()
-                    done.countDown()
+                    main.post { finishSurfaceDestroyed(holder) }
                 }
-            if (posted) done.await(2, TimeUnit.SECONDS)
-            super.onSurfaceDestroyed(holder)
+            if (!posted) finishSurfaceDestroyed(holder)
         }
+
+        private fun finishSurfaceDestroyed(holder: SurfaceHolder) = super.onSurfaceDestroyed(holder)
 
         override fun onOffsetsChanged(
             xOffset: Float,
@@ -207,7 +213,7 @@ class BellatrixWallpaperService : WallpaperService() {
             // Nothing moves while the wallpaper is covered: no battery goes on frames nobody sees.
             gl.post {
                 player?.let { p -> runCatching { if (visible) p.start() else p.pause() } }
-                animated?.let { if (visible) it.start() else it.stop() }
+                animated?.let { if (it is Animatable) { if (visible) it.start() else it.stop() } }
                 if (visible) render()
             }
         }
@@ -230,8 +236,11 @@ class BellatrixWallpaperService : WallpaperService() {
                     loadedPath = file?.path
                     loadedStamp = stamp
                     val image = file?.takeIf { changed && !it.isVideoBackground() }
+                    // ImageDecoder and AnimatedImageDrawable are API 28; older phones show the first frame as a still.
                     val gif =
-                        image?.takeIf { it.extension.lowercase() in ANIMATED_TYPES }?.let { decodeAnimated(it, this@BellatrixWallpaperService) } as? AnimatedImageDrawable
+                        image
+                            ?.takeIf { it.extension.lowercase() in ANIMATED_TYPES && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P }
+                            ?.let(::decodeAnimatedDrawable)
                     val movie = file?.takeIf { changed && it.isVideoBackground() }
                     // A video shows its first frame at once, as a picture, and moves when the player has frames: the
                     // screen is never left on the plain color while the player starts, or if it can't play this file.
@@ -265,11 +274,56 @@ class BellatrixWallpaperService : WallpaperService() {
             }
         }
 
+        /** Animated decode stays behind the version guard, so the engine never carries an API-28 field type. */
+        @RequiresApi(Build.VERSION_CODES.P)
+        private fun decodeAnimatedDrawable(file: File): Drawable? =
+            decodeAnimated(file, this@BellatrixWallpaperService)
+
+        /** Only called with the same API-28 guard as [decodeAnimatedDrawable]. */
+        @RequiresApi(Build.VERSION_CODES.P)
+        private fun setAnimatedRepeat(drawable: Drawable) {
+            if (drawable is AnimatedImageDrawable) drawable.repeatCount = AnimatedImageDrawable.REPEAT_INFINITE
+        }
+
         /** A still image as a software bitmap (GL can't read a hardware one), covering the screen with room to slide. */
         private fun decodeStill(file: File): Bitmap? {
             val screen = resources.displayMetrics
             val side = max(screen.widthPixels, screen.heightPixels) * 3 / 4
-            return runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val decoded = decodeStillApi28(file, side)
+                if (decoded != null) return decoded
+            }
+            // API 23-27, or a format ImageDecoder couldn't read: BitmapFactory with the same target size.
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(file.path, bounds)
+            val w = bounds.outWidth
+            val h = bounds.outHeight
+            if (w <= 0 || h <= 0) return null
+            val scale = min(min(1f, side.toFloat() / min(w, h)), MAX_TEXTURE.toFloat() / max(w, h))
+            val options =
+                BitmapFactory.Options().apply {
+                    inSampleSize = max(1, (1f / scale).toInt())
+                    inPreferredConfig = Bitmap.Config.ARGB_8888
+                }
+            val decoded = BitmapFactory.decodeFile(file.path, options) ?: return null
+            val targetW = (w * scale).roundToInt().coerceAtLeast(1)
+            val targetH = (h * scale).roundToInt().coerceAtLeast(1)
+            return if (decoded.width > targetW || decoded.height > targetH) {
+                val sized = Bitmap.createScaledBitmap(decoded, targetW, targetH, true)
+                if (sized !== decoded) decoded.recycle()
+                sized
+            } else {
+                decoded
+            }
+        }
+
+        /** API-28-only still decoder, called only with a version guard. */
+        @RequiresApi(Build.VERSION_CODES.P)
+        private fun decodeStillApi28(
+            file: File,
+            side: Int,
+        ): Bitmap? =
+            runCatching {
                 ImageDecoder.decodeBitmap(ImageDecoder.createSource(file)) { decoder, info, _ ->
                     val (w, h) = info.size.width to info.size.height
                     val scale = min(min(1f, side.toFloat() / min(w, h)), MAX_TEXTURE.toFloat() / max(w, h))
@@ -277,14 +331,13 @@ class BellatrixWallpaperService : WallpaperService() {
                     decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
                 }
             }.getOrNull()
-        }
 
         /** On the render thread: takes what [reload] decoded and shows it. */
         private fun show(
             themeColors: Map<String, String>,
             changed: Boolean,
             picture: Bitmap?,
-            gif: AnimatedImageDrawable?,
+            gif: Drawable?,
             movie: File?,
         ) {
             val colorsChanged = themeColors != colors
@@ -295,7 +348,7 @@ class BellatrixWallpaperService : WallpaperService() {
                 video = movie
                 if (gif != null) {
                     gif.callback = frames
-                    gif.repeatCount = AnimatedImageDrawable.REPEAT_INFINITE
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) setAnimatedRepeat(gif)
                     animated = gif
                 }
                 if (ready) applyContent()
@@ -370,7 +423,7 @@ class BellatrixWallpaperService : WallpaperService() {
         /** Lets go of the player, the textures and EGL, so the surface is free; the background itself is kept to start again. */
         private fun releaseGl() {
             releasePlayer()
-            animated?.stop()
+            animated?.let { if (it is Animatable) it.stop() }
             if (ready && display != EGL14.EGL_NO_DISPLAY) {
                 deleteTexture(stillTex)
                 deleteTexture(gifTex)
@@ -412,7 +465,7 @@ class BellatrixWallpaperService : WallpaperService() {
                 file != null -> startVideo(file)
                 gif != null -> {
                     drawGifFrame()
-                    if (visible) gif.start()
+                    if (visible && gif is Animatable) gif.start()
                 }
             }
         }
@@ -422,7 +475,7 @@ class BellatrixWallpaperService : WallpaperService() {
             releasePlayer()
             video = null
             animated?.let {
-                it.stop()
+                if (it is Animatable) it.stop()
                 it.callback = null
             }
             animated = null

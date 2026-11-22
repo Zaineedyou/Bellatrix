@@ -99,7 +99,8 @@ class Market(
     val busy = mutableStateMapOf<String, Int>()
     val installed = mutableStateMapOf<String, Installed>()
     private val previews = StoreImages(PREVIEW_BYTES)
-    private val icons = HashMap<Pair<String, Int>, ImageBitmap?>()
+    /** By icon, tint and requested size: the same icon drawn at 32 and at 48 px needs two decodes. */
+    private val icons = HashMap<Triple<String, Int, Int>, ImageBitmap?>()
     private val catalog = if (kind == OwlKind.Widget) "index.json" else "${kind.word}s.json"
 
     /** Each kind keeps its own records: an app and a widget may share an id. */
@@ -335,7 +336,7 @@ class Market(
         size: Int,
         accent: Int,
     ): ImageBitmap? {
-        val key = (e.icon ?: e.iconFile ?: return null) to (if (e.icon != null) accent else 0)
+        val key = Triple(e.icon ?: e.iconFile ?: return null, if (e.icon != null) accent else 0, size)
         synchronized(icons) { if (key in icons) return icons[key] }
         val img =
             withContext(Dispatchers.IO) {

@@ -67,6 +67,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Prepare signing
+        # Fork PRs cannot read repository secrets; Gradle falls back to the debug keystore.
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}

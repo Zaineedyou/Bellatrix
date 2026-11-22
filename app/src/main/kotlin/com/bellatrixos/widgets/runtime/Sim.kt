@@ -40,13 +40,16 @@ class Sim(
     /** The last signal Android reported, 0 to 4; read directly until a callback says. */
     @Volatile private var signal: Int? = null
 
+    /** Some phones throw from telephony getters when there's no SIM, no service or no permission; a read is still a value. */
+    private fun <T> TelephonyManager?.safe(f: (TelephonyManager) -> T): T? = this?.let { t -> runCatching { f(t) }.getOrNull() }
+
     fun value(): Value {
         val t = telephony
         // Every field on every phone, null where there's nothing to say, so a widget reads one shape.
-        val present = t != null && t.simState == TelephonyManager.SIM_STATE_READY
+        val present = t.safe { it.simState } == TelephonyManager.SIM_STATE_READY
         // Without a SIM there's no network of its own, signal or data to speak of.
-        val carrier = if (t != null && present) t.networkOperatorName.ifBlank { t.simOperatorName }.takeIf { it.isNotBlank() } else null
-        val level = if (t != null && present) signal ?: runCatching { t.signalStrength?.level }.getOrNull() else null
+        val carrier = if (present) t.safe { tm -> tm.networkOperatorName.ifBlank { tm.simOperatorName } }?.takeIf { it.isNotBlank() } else null
+        val level = if (present) signal ?: t.safe { it.signalStrength?.level } else null
         val data = if (present) mobileData() else null
         return Obj(
             mapOf(
@@ -56,7 +59,7 @@ class Sim(
                 "carrier" to (carrier?.let(::Str) ?: Null),
                 "signal" to (level?.let { Num(it.toDouble()) } ?: Null),
                 "data" to (data?.let(::bool) ?: Null),
-                "roaming" to bool(t != null && present && runCatching { t.isNetworkRoaming }.getOrDefault(false)),
+                "roaming" to bool(present && t.safe { it.isNetworkRoaming } == true),
             ),
         )
     }
@@ -68,8 +71,8 @@ class Sim(
     fun updates(): Flow<Value> {
         val t = telephony ?: return callbackFlow<Unit> { trySend(Unit); awaitClose() }.map { value() }
         return callbackFlow {
-            val onSignal: (SignalStrength) -> Unit = {
-                signal = it.level
+            val onSignal: (SignalStrength) -> Unit = { s ->
+                signal = runCatching { s.level }.getOrNull()
                 trySend(Unit)
             }
             val unregister: () -> Unit =
@@ -82,8 +85,8 @@ class Sim(
                                 trySend(Unit)
                             }
                         }
-                    t.registerTelephonyCallback(context.mainExecutor, callback)
-                    ({ t.unregisterTelephonyCallback(callback) })
+                    val registered = runCatching { t.registerTelephonyCallback(context.mainExecutor, callback) }.isSuccess
+                    ({ if (registered) runCatching { t.unregisterTelephonyCallback(callback) } })
                 } else {
                     @Suppress("DEPRECATION")
                     val listener =
@@ -96,17 +99,19 @@ class Sim(
                                 trySend(Unit)
                             }
                         }
-                    @Suppress("DEPRECATION")
-                    t.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or PhoneStateListener.LISTEN_SERVICE_STATE)
-                    @Suppress("DEPRECATION")
-                    ({ t.listen(listener, PhoneStateListener.LISTEN_NONE) })
+                    val registered =
+                        runCatching {
+                            @Suppress("DEPRECATION")
+                            t.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or PhoneStateListener.LISTEN_SERVICE_STATE)
+                        }.isSuccess
+                    ({ if (registered) runCatching { @Suppress("DEPRECATION") t.listen(listener, PhoneStateListener.LISTEN_NONE) } })
                 }
             val observer = changeObserver(main) { trySend(Unit) }
-            context.contentResolver.registerContentObserver(Settings.Global.getUriFor(MOBILE_DATA), true, observer)
+            val observed = runCatching { context.contentResolver.registerContentObserver(Settings.Global.getUriFor(MOBILE_DATA), true, observer) }.isSuccess
             trySend(Unit)
             awaitClose {
                 unregister()
-                context.contentResolver.unregisterContentObserver(observer)
+                if (observed) runCatching { context.contentResolver.unregisterContentObserver(observer) }
             }
         }.conflate().map { value() }.distinctUntilChanged()
     }

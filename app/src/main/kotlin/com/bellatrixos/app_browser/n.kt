@@ -29,21 +29,23 @@ class n(@JvmField val v: Any?, @JvmField val u: Int, @JvmField val w: Any?) : Ru
                 Manifest.permission.CAMERA
             ) == 0
 
-            val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
-            if (hasCamera && hasMicrophone) {
-                request.grant(request.resources)
+            val resources = request.resources
+            val wantsCamera = PermissionRequest.RESOURCE_VIDEO_CAPTURE in resources
+            val wantsMicrophone = PermissionRequest.RESOURCE_AUDIO_CAPTURE in resources
+            val missing = ArrayList<String>()
+            if (wantsCamera && !hasCamera) missing.add(Manifest.permission.CAMERA)
+            if (wantsMicrophone && !hasMicrophone) missing.add(Manifest.permission.RECORD_AUDIO)
+            if (missing.isEmpty()) {
+                request.grant(resources)
                 return
             }
 
+            // Ask only for what the page actually wants: a camera page must not be blocked by a denied microphone.
+            val permissions = missing.toTypedArray()
             val activity = tab.activity ?: (context as? Activity)
-            val shouldExplain = activity != null &&
-                (ActivityCompat.shouldShowRequestPermissionRationale(
-                    activity,
-                    Manifest.permission.CAMERA
-                ) || ActivityCompat.shouldShowRequestPermissionRationale(
-                    activity,
-                    Manifest.permission.RECORD_AUDIO
-                ))
+            val shouldExplain = activity != null && missing.any {
+                ActivityCompat.shouldShowRequestPermissionRationale(activity, it)
+            }
 
             if (shouldExplain) {
                 AlertDialog.Builder(context)
@@ -51,6 +53,7 @@ class n(@JvmField val v: Any?, @JvmField val u: Int, @JvmField val w: Any?) : Ru
                     .setMessage(context.getString(R.string.browser_dialog_permission_info))
                     .setPositiveButton(context.getString(R.string.dialog_actions_ok)) { _: DialogInterface, _: Int ->
                         tab.E0 = request
+                        tab.permissionResources = resources.toList()
                         tab.F0?.launch(permissions)
                     }
                     .setNegativeButton(context.getString(R.string.dialog_actions_cancel)) { _: DialogInterface, _: Int ->
@@ -60,6 +63,7 @@ class n(@JvmField val v: Any?, @JvmField val u: Int, @JvmField val w: Any?) : Ru
                     .show()
             } else {
                 tab.E0 = request
+                tab.permissionResources = resources.toList()
                 tab.F0?.launch(permissions)
             }
             return

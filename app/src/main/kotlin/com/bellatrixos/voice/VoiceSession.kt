@@ -340,13 +340,28 @@ class VoiceSession(
         val fresh = turns == 0
         // A turn that ended without its answer (stopped, the agent gone) leaves nothing for the next one.
         keptEarly = !fresh && (keptEarly || kept)
+        sendPrompt(said, fresh)
+    }
+
+    /**
+     * The one path that sends a prompt. Everything that adds a turn goes through here, including a spoken
+     * alternative to a refused approval, so busy/watchdog/idle accounting can't be skipped.
+     */
+    private fun sendPrompt(
+        said: String,
+        fresh: Boolean,
+        record: Boolean = true,
+    ) {
+        if (said.isEmpty() || agent == null) return
         if (fresh) {
             steps.clear()
             since = System.currentTimeMillis()
         }
         turns++
-        transcript += Entry("you", said)
-        saveTranscript()
+        if (record) {
+            transcript += Entry("you", said)
+            saveTranscript()
+        }
         saveSession()
         phase = Phase.Thinking
         lastEvent = System.currentTimeMillis()
@@ -405,7 +420,11 @@ class VoiceSession(
         transcript += Entry("note", (if (allow) "✓ " else "✗ ") + what + if (always) " · " + str(R.string.voice_always) else "")
         saveTranscript()
         val took = link?.answer(id, allow, always, instead) ?: true
-        if (!took && instead != null) link?.prompt(instead)
+        if (!took && instead != null) {
+            // The words were already added to the transcript by ask(); only the turn was never counted.
+            keptEarly = true
+            sendPrompt(instead, fresh = turns == 0, record = false)
+        }
         // Questions that came while this one was up and that "always" now covers.
         for (other in approvals.toList()) if (approveAll || Steps.covered(other.key, this.always)) answer(other.id, true)
         settle()

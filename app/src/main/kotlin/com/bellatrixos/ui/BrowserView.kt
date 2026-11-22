@@ -391,13 +391,22 @@ class EmbeddedBrowser internal constructor(
 internal object BrowserPages {
     val live = HashSet<EmbeddedBrowser>()
 
+    /**
+     * Started lifecycles we've been told about. During an activity replacement both activities can start before the
+     * old one stops: a boolean would let that stale onStop pause the new activity's pages. Counting keeps the pages
+     * running until the last lifecycle stops, and only the 0↔1 crossings touch the process-wide WebView timers.
+     */
+    private var starts = 0
+
     /** Whether the launcher is started; while it's stopped every page's script waits. */
     var started = true
         private set
 
     fun started(on: Boolean) {
-        if (on == started) return
-        started = on
+        starts = if (on) starts + 1 else (starts - 1).coerceAtLeast(0)
+        val now = starts > 0
+        if (now == started) return
+        started = now
         live.forEach { it.refresh() }
     }
 }

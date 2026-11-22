@@ -10,6 +10,7 @@ import android.media.AudioFormat
 import android.media.AudioPlaybackCaptureConfiguration
 import android.media.AudioRecord
 import android.media.projection.MediaProjection
+import android.os.Build
 import com.bellatrixos.widgets.lang.Lst
 import com.bellatrixos.widgets.lang.Num
 import com.bellatrixos.widgets.lang.Obj
@@ -165,6 +166,8 @@ class AudioLevels(
     }
 
     private fun start() {
+        // Playback capture is API 29+: older phones have no way to read what other apps play.
+        if (Build.VERSION.SDK_INT < 29) return
         context.startActivity(Intent(context, AudioPermissionActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 

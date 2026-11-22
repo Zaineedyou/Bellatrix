@@ -46,6 +46,7 @@ abstract class InstantActivity : ComponentActivity() {
     /** True while the window is see-through and empty, on its way out. */
     private var hidden by mutableStateOf(false)
     private var leaving = false
+    private var leavePending: Runnable? = null
     private var background: Drawable? = null
 
     protected val runtime get() = (application as App).runtime
@@ -101,12 +102,21 @@ abstract class InstantActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT < 30) return then()
         setTranslucent(true)
         // Until the system has made it see-through, an empty window shows black.
-        window.decorView.postDelayed({
-            hidden = true
-            background = window.decorView.background
-            window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            window.decorView.postOnAnimation(then)
-        }, SEE_THROUGH_MS)
+        val pending =
+            Runnable {
+                // A restart may have cancelled the leave before this ran.
+                if (!leaving) return@Runnable
+                leavePending = null
+                hidden = true
+                background = window.decorView.background
+                window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                window.decorView.postOnAnimation {
+                    // Keep the guard through the animation turn too: nothing closes a revived activity.
+                    if (leaving) then()
+                }
+            }
+        leavePending = pending
+        window.decorView.postDelayed(pending, SEE_THROUGH_MS)
     }
 
     /** Names the Recents card [label], with [appIcon], else its initials in the theme colors. */
@@ -124,6 +134,8 @@ abstract class InstantActivity : ComponentActivity() {
     /** Back from Recents after [backInstantly]: solid again, so what's behind it can stop drawing. */
     override fun onRestart() {
         super.onRestart()
+        leavePending?.let { window.decorView.removeCallbacks(it) }
+        leavePending = null
         if (!leaving || isFinishing) return
         leaving = false
         background?.let(window::setBackgroundDrawable)

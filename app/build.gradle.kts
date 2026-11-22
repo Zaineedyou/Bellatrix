@@ -1,3 +1,5 @@
+import org.gradle.api.GradleException
+import java.security.MessageDigest
 import java.util.Properties
 
 plugins {
@@ -52,8 +54,8 @@ android {
         applicationId = "com.bellatrixos"
         minSdk = 23
         targetSdk = 36
-        versionCode = 68
-        versionName = "2.9.35"
+        versionCode = 69
+        versionName = "2.9.36"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
@@ -159,6 +161,53 @@ android {
         buildConfig = true
         viewBinding = false
     }
+}
+
+// scripts/fetch-proot.sh writes .source when it builds jniLibs. Verify it here so a stale or
+// hand-edited native directory cannot silently ship. CI builds libfastpath.so directly and has no
+// .source stamp, so this check is skipped there.
+val verifyProotSourceHash = tasks.register("verifyProotSourceHash") {
+    group = "verification"
+    description = "Checks app/src/main/jniLibs/arm64-v8a/.source against the current proot sources."
+
+    val repoRoot = rootProject.rootDir
+    val sourceStamp = rootProject.file("app/src/main/jniLibs/arm64-v8a/.source")
+    val sourceScript = rootProject.file("scripts/fetch-proot.sh")
+    val patchFiles = rootProject.fileTree("patches/proot").files
+        .filter { it.isFile && !it.name.startsWith(".") }
+        .map { it.relativeTo(repoRoot).invariantSeparatorsPath }
+        .sorted()
+
+    inputs.file(sourceStamp).optional()
+    inputs.file(sourceScript)
+    inputs.files(patchFiles.map { repoRoot.resolve(it) })
+
+    doLast {
+        if (!sourceStamp.isFile) {
+            logger.info("Proot .source stamp is absent; skipping source hash verification.")
+            return@doLast
+        }
+
+        val digest = MessageDigest.getInstance("SHA-256")
+        // fetch-proot.sh pipes the sorted file list through xargs cat, so only file bytes are hashed.
+        digest.update(sourceScript.readBytes())
+        for (relativePath in patchFiles) {
+            digest.update(repoRoot.resolve(relativePath).readBytes())
+        }
+
+        val expected = sourceStamp.readText(Charsets.UTF_8).trim()
+        val actual = digest.digest().joinToString("") { "%02x".format(it) }
+        if (!expected.equals(actual, ignoreCase = true)) {
+            throw GradleException(
+                "Proot .source hash mismatch: expected $expected, computed $actual. " +
+                    "Rebuild app/src/main/jniLibs/arm64-v8a with scripts/fetch-proot.sh."
+            )
+        }
+    }
+}
+
+tasks.matching { it.name == "preBuild" }.configureEach {
+    dependsOn(verifyProotSourceHash)
 }
 
 dependencies {

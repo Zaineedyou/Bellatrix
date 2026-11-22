@@ -67,7 +67,7 @@ class Review(
                 errors += "doesn't compile: " + Source(text).format(e)
                 return
             } catch (e: RuntimeException) {
-                // A compiler bug, not the file's: turned down all the same rather than taking the share screen or CI with it.
+                // A compiler bug, not the file's: turned down all the same rather than taking the store review or CI with it.
                 errors += "doesn't compile: $e"
                 return
             }

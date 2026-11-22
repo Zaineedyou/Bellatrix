@@ -44,6 +44,11 @@ class LinuxWindowActivity : AppCompatActivity() {
     private var window: XdgToplevel? = null
     private var keyboardHeight = 0
 
+    /** Whether this activity put the shared keybar bridge in place, so only it takes it back. */
+    private var bridgeSetByMe = false
+    /** The bridge that was installed before this activity took over, restored when it leaves. */
+    private var priorKeyBarBridge: com.bellatrixos.wayland.KeyboardViewBridge? = null
+
     private lateinit var root: FrameLayout
     private lateinit var surface: WindowSurfaceView
     private lateinit var input: LinuxWindowInputView
@@ -87,7 +92,6 @@ class LinuxWindowActivity : AppCompatActivity() {
         root.addView(sink, FrameLayout.LayoutParams(1, 1, Gravity.TOP or Gravity.START))
 
         keyBar = KeyBarView(this)
-        KeyBarView.KeyboardBridgeHolder.bridge = backend.keyboard
         keyBarContainer.addView(keyBar, FrameLayout.LayoutParams(MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
@@ -123,6 +127,15 @@ class LinuxWindowActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         window?.let(backend.wm::focus)
+        // The keybar reads this global holder; whichever window is in front must put its bridge back.
+        val holder = KeyBarView.KeyboardBridgeHolder
+        if (holder.bridge !== backend.keyboard) {
+            priorKeyBarBridge = holder.bridge
+            holder.bridge = backend.keyboard
+            bridgeSetByMe = true
+        } else {
+            bridgeSetByMe = false
+        }
         backend.keyboard.picker = imagePicker
         asks.resumed((application as App).runtime)
         relayout()
@@ -132,6 +145,7 @@ class LinuxWindowActivity : AppCompatActivity() {
         super.onPause()
         backend.keyboard.releaseHeld()
         if (backend.keyboard.picker === imagePicker) backend.keyboard.picker = null
+        clearKeyBarBridge()
         asks.paused((application as App).runtime)
     }
 
@@ -142,9 +156,18 @@ class LinuxWindowActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        KeyBarView.KeyboardBridgeHolder.bridge = null
+        clearKeyBarBridge()
         val w = window ?: return
         if (isFinishing && backend.wm.appWindows.contains(w)) backend.wm.close(w)
+    }
+
+    /** Takes the keybar bridge back only if this activity set it and nobody has replaced it since. */
+    private fun clearKeyBarBridge() {
+        if (bridgeSetByMe && KeyBarView.KeyboardBridgeHolder.bridge === backend.keyboard) {
+            KeyBarView.KeyboardBridgeHolder.bridge = priorKeyBarBridge
+            priorKeyBarBridge = null
+            bridgeSetByMe = false
+        }
     }
 
     @SuppressLint("RestrictedApi")

@@ -27,8 +27,9 @@ class EditorActivity : InstantActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        savedInstanceState?.getStringArrayList(STATE_WAITING)?.let(waiting::addAll)
         val path = intent.data?.path?.takeIf { it.startsWith('/') }
-        intent.getStringExtra(EXTRA_DONE)?.let(waiting::add)
+        intent.getStringExtra(EXTRA_DONE)?.let { if (it !in waiting) waiting.add(it) }
         if (!runtime.bootstrap.wanted) return close()
         val name = path?.substringAfterLast('/') ?: getString(R.string.editor_title)
         setTaskDescription(ActivityManager.TaskDescription(name, null, Palette.background.toArgb()))
@@ -44,7 +45,12 @@ class EditorActivity : InstantActivity() {
     /** The same file again, from another `bellatrix-edit`: it waits for this one to close too. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent.getStringExtra(EXTRA_DONE)?.let(waiting::add)
+        intent.getStringExtra(EXTRA_DONE)?.let { if (it !in waiting) waiting.add(it) }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putStringArrayList(STATE_WAITING, ArrayList(waiting))
+        super.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
@@ -90,6 +96,7 @@ class EditorActivity : InstantActivity() {
 
     companion object {
         private const val EXTRA_DONE = "done"
+        private const val STATE_WAITING = "waiting"
 
         /** Editing [path] (a guest path), or the editor's start page without one; [done] is a reply FIFO on the host. */
         fun intent(

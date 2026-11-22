@@ -100,9 +100,7 @@ class h(
                         }
                         z3 = if (ok) z3 else false
                         arrayList2.add(file2)
-                        if (Files.g || !ok) {
-                            // keep counts as-is for move or failed copy
-                        } else {
+                        if (Files.g && ok) {
                             fileOperations.a(file, iArr5, 1, iArr6)
                         }
                     }

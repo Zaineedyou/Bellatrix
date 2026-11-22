@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
 import android.hardware.display.DisplayManager
+import android.hardware.display.VirtualDisplay
 import android.media.Image
 import android.media.ImageReader
 import android.os.Handler
@@ -106,24 +107,26 @@ internal class Previews(
         // A widget can declare a size of thousands of rows; that's no tile to draw, and its bitmap would run out of memory.
         if (widthPx !in 1..MAX_SIDE || heightPx !in 1..MAX_SIDE) return false
         val reader = ImageReader.newInstance(widthPx, heightPx, PixelFormat.RGBA_8888, 3)
-        val handler = Handler(Looper.getMainLooper())
         var latest: Image? = null
-        reader.setOnImageAvailableListener({ r ->
-            // Keep only the newest frame, so the display never runs out of buffers.
-            r.acquireLatestImage()?.let { image ->
-                latest?.close()
-                latest = image
-            }
-        }, handler)
-        val dm = context.getSystemService(DisplayManager::class.java)
-        val dpi = context.resources.displayMetrics.densityDpi
-        // Private (no flags): only this app draws on it, and it needs no permission.
-        val display = dm.createVirtualDisplay("bellatrix-preview", widthPx, heightPx, dpi, reader.surface, 0)
-        val owner = Owner()
+        var display: VirtualDisplay? = null
         var presentation: Presentation? = null
+        val owner = Owner()
         try {
+            val handler = Handler(Looper.getMainLooper())
+            reader.setOnImageAvailableListener({ r ->
+                // Keep only the newest frame, so the display never runs out of buffers.
+                r.acquireLatestImage()?.let { image ->
+                    latest?.close()
+                    latest = image
+                }
+            }, handler)
+            val dm = context.getSystemService(DisplayManager::class.java)
+            val dpi = context.resources.displayMetrics.densityDpi
+            // Private (no flags): only this app draws on it, and it needs no permission.
+            val created = dm.createVirtualDisplay("bellatrix-preview", widthPx, heightPx, dpi, reader.surface, 0) ?: return false
+            display = created
             presentation =
-                Presentation(context, display.display).apply {
+                Presentation(context, created.display).apply {
                     window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
                     val view =
                         ComposeView(this.context).apply {
@@ -145,9 +148,17 @@ internal class Previews(
             return withContext(Dispatchers.IO) {
                 out.parentFile?.mkdirs()
                 val tmp = File(out.path + ".tmp")
-                tmp.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-                bitmap.recycle()
-                tmp.renameTo(out)
+                val committed =
+                    try {
+                        tmp.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                        tmp.renameTo(out)
+                    } catch (e: Exception) {
+                        bitmap.recycle()
+                        throw e
+                    }
+                // A failed rename isn't a preview; don't report success with a stale or absent file.
+                if (committed) bitmap.recycle() else Log.w("widgets", "couldn't write preview ${out.name}")
+                committed
             }
         } catch (e: Exception) {
             Log.w("widgets", "preview of ${spec.file.name} failed", e)
@@ -157,7 +168,7 @@ internal class Previews(
             // Android 17); thrown from here it crashed the launcher and skipped releasing the display.
             runCatching { presentation?.dismiss() }.onFailure { Log.w("widgets", "cannot dismiss the preview", it) }
             owner.destroy()
-            display.release()
+            display?.release()
             latest?.close()
             reader.close()
         }

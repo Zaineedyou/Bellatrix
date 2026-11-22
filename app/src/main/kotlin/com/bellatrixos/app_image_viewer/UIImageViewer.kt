@@ -129,7 +129,7 @@ class UIImageViewer : UIFragment(), BackPressHandler {
         } else if (i2 == KeyEvent.KEYCODE_DPAD_RIGHT) {
             u0()
         }
-        if (keyEvent.isCtrlPressed && i2 == KeyEvent.KEYCODE_O && u0File.exists()) {
+        if (keyEvent.isCtrlPressed && i2 == KeyEvent.KEYCODE_O && ::u0File.isInitialized && u0File.exists()) {
             Clipboards.f4922a.add(ClipboardItem(2, u0File.parent ?: "", u0File.name))
         }
     }
@@ -142,6 +142,15 @@ class UIImageViewer : UIFragment(), BackPressHandler {
     }
 
     override fun k0(str: String?) {
+        // Opened without a path (the placeholder view): there is no current file to compare against yet.
+        if (!::u0File.isInitialized) {
+            if (str != null) {
+                contentView?.bringToFront()
+                s0(str)
+                R0 = true
+            }
+            return
+        }
         if (!u0File.exists() || u0File.absolutePath == str) {
             if (u0File.absolutePath != str || contentView == null) return
             contentView?.bringToFront()

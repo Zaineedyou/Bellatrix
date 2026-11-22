@@ -244,7 +244,10 @@ class AirPods(
         if (adapter?.isEnabled != true) return null
         val connected = synchronized(profiles) { profiles.values.flatMap { runCatching { it.connectedDevices }.getOrDefault(emptyList()) } }
         // A device Android never looked up the services of has none listed: by its name, then.
-        return connected.firstOrNull { d -> d.uuids?.any { it == AAP_UUID } ?: (d.name?.contains("AirPods") == true) }
+        return connected.firstOrNull { d ->
+            val uuids = d.uuids
+            if (uuids.isNullOrEmpty()) d.name?.contains("AirPods", true) == true else uuids.any { it == AAP_UUID }
+        }
     }
 
     /**

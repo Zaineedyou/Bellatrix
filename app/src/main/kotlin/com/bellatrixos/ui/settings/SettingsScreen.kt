@@ -1,8 +1,11 @@
 package com.bellatrixos.ui.settings
 
 import android.app.role.RoleManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,6 +64,25 @@ import com.bellatrixos.ui.home.gestureLabel
 import com.bellatrixos.ui.passesKeys
 import com.bellatrixos.ui.rememberAskPermission
 
+/**
+ * The home-role APIs are API 29+. Kept in their own class so composing settings on Android 6–9 never touches
+ * [RoleManager]; the service is held as [Any] and only cast behind the version check.
+ */
+@RequiresApi(Build.VERSION_CODES.Q)
+private object HomeRole {
+    fun service(context: Context): Any? = context.getSystemService(RoleManager::class.java)
+
+    fun missing(service: Any): Boolean {
+        val manager = service as RoleManager
+        return manager.isRoleAvailable(RoleManager.ROLE_HOME) && !manager.isRoleHeld(RoleManager.ROLE_HOME)
+    }
+
+    fun request(service: Any): Intent {
+        val manager = service as RoleManager
+        return manager.createRequestRoleIntent(RoleManager.ROLE_HOME)
+    }
+}
+
 /** The launcher's settings hub, opened from the gear next to the drawer's search. */
 @Composable
 fun SettingsScreen(
@@ -80,8 +102,10 @@ fun SettingsScreen(
     var localNetworkMissing by remember { mutableStateOf(LocalNetwork.missing(context)) }
     // Once Android won't show its dialog any more, a tap opens the app's own settings, where the switch then is.
     val askLocalNetwork = rememberAskPermission(LocalNetwork.PERMISSION) { localNetworkMissing = !it }
-    val roles = remember { context.getSystemService(RoleManager::class.java) }
-    val homeRoleMissing = { roles.isRoleAvailable(RoleManager.ROLE_HOME) && !roles.isRoleHeld(RoleManager.ROLE_HOME) }
+    // RoleManager is API 29+; on Android 6–9 there is no home-role row to ask about.
+    val canAskHomeRole = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+    val roles = remember { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) HomeRole.service(context) else null }
+    val homeRoleMissing = { roles?.let { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) HomeRole.missing(it) else false } ?: false }
     var notHome by remember { mutableStateOf(homeRoleMissing()) }
     // Made the default (or not), or the local network allowed, in Android's settings or the permissions screen while away.
     LifecycleResumeEffect(Unit) {
@@ -132,9 +156,11 @@ fun SettingsScreen(
                     SettingsRow(R.string.start_filter_coding_agents, needsLinux, onLinux)
                 },
                 SettingsRow(R.string.settings_packages, if (installed) stringResource(R.string.settings_packages_subtitle) else needsLinux, if (installed) onPackages else onLinux),
-                if (notHome) {
+                if (notHome && canAskHomeRole) {
                     SettingsRow(R.string.settings_home_app, stringResource(R.string.settings_home_app_subtitle)) {
-                        askHome.launch(roles.createRequestRoleIntent(RoleManager.ROLE_HOME))
+                        roles?.let { manager ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) askHome.launch(HomeRole.request(manager))
+                        }
                     }
                 } else {
                     null
