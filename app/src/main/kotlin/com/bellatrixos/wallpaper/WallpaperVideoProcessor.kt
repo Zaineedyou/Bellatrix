@@ -23,7 +23,7 @@ object WallpaperVideoProcessor {
         fun b(file: File, file2: File)
     }
 
-    /** Exports still running, so a destroyed picker can release their codecs. */
+    /** Exports still running, so a destroyed picker can cancel them and detach its callbacks. */
     private val active = Collections.newSetFromMap(IdentityHashMap<Transformer, Boolean>())
 
     @Synchronized
@@ -36,11 +36,14 @@ object WallpaperVideoProcessor {
         active.remove(transformer)
     }
 
-    /** Releases any export that hasn't reached its terminal callback yet. */
+    /** Cancels any export that hasn't reached its terminal callback yet. */
     @JvmStatic
     @Synchronized
     fun cancelActive() {
-        for (transformer in active) runCatching { transformer.release() }
+        for (transformer in active) {
+            runCatching { transformer.removeAllListeners() }
+            runCatching { transformer.cancel() }
+        }
         active.clear()
     }
 
@@ -64,7 +67,7 @@ object WallpaperVideoProcessor {
                             try {
                                 runnable2.run()
                             } finally {
-                                release(holder[0])
+                                finish(holder[0])
                                 holder[0] = null
                             }
                         }
@@ -77,7 +80,7 @@ object WallpaperVideoProcessor {
                             try {
                                 runnable.run()
                             } finally {
-                                release(holder[0])
+                                finish(holder[0])
                                 holder[0] = null
                             }
                         }
@@ -98,15 +101,18 @@ object WallpaperVideoProcessor {
         try {
             transformer.start(edited, file.absolutePath)
         } catch (t: Throwable) {
-            release(transformer)
+            finish(transformer)
             throw t
         }
     }
 
-    /** Releases and forgets one export; safe from either terminal callback. */
-    private fun release(transformer: Transformer?) {
+    /**
+     * Media3 1.5.1 has no Transformer.release(): each export frees its own codecs at its
+     * terminal callback. What we must do is detach the caller's callbacks and stop tracking it.
+     */
+    private fun finish(transformer: Transformer?) {
         if (transformer == null) return
-        runCatching { transformer.release() }
+        runCatching { transformer.removeAllListeners() }
         untrack(transformer)
     }
 }
