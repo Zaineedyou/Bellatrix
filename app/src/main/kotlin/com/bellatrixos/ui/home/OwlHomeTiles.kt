@@ -257,6 +257,9 @@ internal fun OwlHomeTiles(
     runtime: Runtime,
     grid: NativeGrid,
 ) {
+    // The desktop is measured after the first layout pass. During an early composition (notably a
+    // relaunch on Android 13) it can still be empty; tile geometry needs a positive area.
+    if (grid.width <= 0 || grid.height <= 0) return
     val engine = runtime.widgets
     val layout = engine.layout
     val context = LocalContext.current

@@ -18,6 +18,12 @@ import kotlin.math.roundToInt
 internal object OwlTileGeometry {
     private val containers = setOf("Box", "Anchor", "Flex", "Row", "Column", "Flow")
 
+    /** A grid measured before the first layout pass can be empty; coerceIn(1, 0) throws. */
+    private fun fit(
+        value: Int,
+        limit: Int,
+    ): Int = if (limit > 0) value.coerceIn(1, limit) else 1
+
     fun initialRect(
         spec: WidgetSpec,
         instance: WidgetInstance?,
@@ -48,18 +54,20 @@ internal object OwlTileGeometry {
                 h = grid.height
             }
         }
-        w = w.coerceIn(1, grid.width)
-        h = h.coerceIn(1, grid.height)
+        w = fit(w, grid.width)
+        h = fit(h, grid.height)
 
+        val gridW = grid.width.coerceAtLeast(1)
+        val gridH = grid.height.coerceAtLeast(1)
         val anchor = (value("anchor") ?: value("align"))?.toString().orEmpty()
         var x = when (anchor) {
-            "end", "topEnd", "bottomEnd" -> grid.width - w
-            "center", "top", "bottom" -> (grid.width - w) / 2
+            "end", "topEnd", "bottomEnd" -> gridW - w
+            "center", "top", "bottom" -> (gridW - w) / 2
             else -> 0
         }
         var y = when (anchor) {
-            "bottom", "bottomStart", "bottomEnd" -> grid.height - h
-            "center", "start", "end" -> (grid.height - h) / 2
+            "bottom", "bottomStart", "bottomEnd" -> gridH - h
+            "center", "start", "end" -> (gridH - h) / 2
             else -> 0
         }
         val offset = value("offset") as? Lst
@@ -75,8 +83,8 @@ internal object OwlTileGeometry {
         density: Float,
     ): PixelRect {
         val (cellsW, cellsH) = spec.size ?: spec.minSize
-        val w = (cellsW * grid.cellW - grid.gapX).roundToInt().coerceIn(1, grid.width)
-        val h = (cellsH * grid.cellH - grid.gapY).roundToInt().coerceIn(1, grid.height)
+        val w = fit((cellsW * grid.cellW - grid.gapX).roundToInt(), grid.width)
+        val h = fit((cellsH * grid.cellH - grid.gapY).roundToInt(), grid.height)
         val step = ((spec.order % 8).coerceAtLeast(0) * 16 * density).roundToInt()
         return PixelRect(step, step, w, h)
     }

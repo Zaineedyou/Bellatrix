@@ -91,6 +91,8 @@ object OwlNativeSurfaces {
         val rows = max(1, floor(down / rowHeight).toInt())
         val cellH = down / rows.toFloat()
         return NativeGrid(
+            // attach() runs before the first layout pass on some devices (and on every relaunch),
+            // so these can still be 0. setOwlContent() waits for a measured grid before composing tiles.
             width = desktop.width,
             height = desktop.height,
             cols = cols,
@@ -127,7 +129,12 @@ object OwlNativeSurfaces {
             }
             CompositionLocalProvider(LocalBackdrop provides backdrop) {
                 OwlSurface(runtime, name, Modifier.fillMaxSize())
-                if (name == WidgetEngine.HOME_BAR && grid != null) OwlHomeTiles(runtime, grid())
+                if (name == WidgetEngine.HOME_BAR && grid != null) {
+                    // The first composition can precede the desktop's first layout pass. Wait for a
+                    // real size; grid() reads the state the layout listener updates, so it recomposes.
+                    val measured = grid()
+                    if (measured.width > 0 && measured.height > 0) OwlHomeTiles(runtime, measured)
+                }
             }
         }
     }

@@ -9,6 +9,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.35] - 2026-11-22
+
+### Fixed
+
+- Launcher crash on Android 13 relaunch (e.g. RMX3491): home OWL tiles are now composed only after the native desktop has been measured. Tile geometry also treats an empty grid as 1 pixel instead of calling `coerceIn(1, 0)`.
+- Added a JVM regression test for tile geometry with an unmeasured grid.
+
 ## [2.9.34] - 2026-11-22
 
 ### Added
