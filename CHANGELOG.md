@@ -9,6 +9,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.38] - 2026-11-23
+
+### Fixed
+
+- Restored the phone-folder picker helper used by the file manager and fixed the native Permissions fragment's saved-state imports; the Settings port compiles again.
+
 ## [2.9.37] - 2026-11-23
 
 ### Fixed
