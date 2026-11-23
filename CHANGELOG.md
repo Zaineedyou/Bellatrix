@@ -9,6 +9,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.39] - 2026-11-23
+
+### Fixed
+
+- Permissions on Android 13 (SDK 33): the native Settings page now registers permission dialogs with the fragment that owns them, so reopening the page no longer crashes with "Can not register for activity result after the activity has been resumed".
+- Settings text now starts each sentence with a capital letter and stays in English in every translation. Licenses now uses the exact label "Open Source Software In Bellatrix".
+
+### Removed
+
+- The built-in Compose Settings port and its separate style, Linux, store and gesture screens. Existing shortcuts and widget links now open the matching Bellatrix-native Settings pages, with one runtime, one home and one settings window.
+
 ## [2.9.38] - 2026-11-23
 
 ### Fixed

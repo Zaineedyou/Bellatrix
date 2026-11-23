@@ -1504,6 +1504,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         runtime.openLicenses = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "17") } }
         runtime.openPackages = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "91") } }
         runtime.openPermissions = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "71") } }
+        runtime.openNativeSettings = { page -> if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", page) } }
         runtime.onLinuxUnavailable = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "9") } }
     }
 

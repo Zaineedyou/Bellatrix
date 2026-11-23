@@ -48,7 +48,6 @@ import com.bellatrixos.theme.StyleStore
 import com.bellatrixos.theme.ThemeStore
 import com.bellatrixos.ui.home.Gestures
 import com.bellatrixos.ui.KeyboardBridge
-import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.ui.voice.Speaker
 import com.bellatrixos.voice.VoiceSession
 import com.bellatrixos.ui.home.TerminalTiles
@@ -245,6 +244,10 @@ class Runtime(
     @Volatile
     var openPermissions: (() -> Unit)? = null
 
+    /** One hook for every native Settings page; the string is the nav id, or null for Settings itself. */
+    @Volatile
+    var openNativeSettings: ((String?) -> Unit)? = null
+
     /** The classic drawer re-reads the guest catalog when an agent or app is installed or removed. */
     @Volatile
     var onAppsChanged: (() -> Unit)? = null
@@ -409,6 +412,7 @@ class Runtime(
         openLicenses = null
         openPackages = null
         openPermissions = null
+        openNativeSettings = null
         onAppsChanged = null
         onLinuxUnavailable = { showLinuxSettings() }
     }
@@ -881,56 +885,53 @@ class Runtime(
     fun iconNamed(name: String): ImageBitmap? = linuxApps.apps.firstOrNull { it.name == name }?.let { linuxApps.icons[it.id] }
 
     /**
-     * Opens the settings activity at [page]: settings itself comes back to where it was left, another screen
-     * shows on its own (see [SettingsActivity]). [homePage] is where the store puts widgets.
+     * Opens Bellatrix's one Settings window. [page] is a native nav id (3 personalize, 4 apps,
+     * 14 home, 17 licenses, 71 permissions, 91 packages, …); null opens Settings itself.
      */
-    fun openSettings(
-        page: SettingsPage = SettingsPage.Settings,
-        homePage: Int? = null,
-    ) {
-        InstantActivity.startInstantly(context, SettingsActivity.intent(context, page, homePage))
+    fun showNativeSettings(page: String? = null) {
+        val hook = openNativeSettings
+        if (hook != null) {
+            hook(page)
+            return
+        }
+        val intent =
+            Intent(context, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        if (page != null) intent.putExtra(MainActivity.EXTRA_SETTINGS_PAGE, page)
+        context.startActivity(intent)
     }
 
     /**
-     * Coding Agents is a standalone page of Bellatrix's classic Settings window (nav id 10). A widget or
-     * voice screen asks for it through here instead of opening the ported Compose screen.
+     * Coding Agents is a standalone page of Bellatrix's Settings (nav id 10). A widget or
+     * voice screen asks for it through here instead of opening a ported Compose screen.
      */
     fun showCodingAgents() {
         val hook = openCodingAgents
-        if (hook != null) hook() else showClassicSettings("10")
+        if (hook != null) hook() else showNativeSettings("10")
     }
 
     /** Same for the Linux page (nav id 9), used when a guest command is attempted before install. */
     fun showLinuxSettings() {
         val hook = openLinuxSettings
-        if (hook != null) hook() else showClassicSettings("9")
+        if (hook != null) hook() else showNativeSettings("9")
     }
 
     /** Licenses is a native page of Bellatrix's Settings (nav id 17), never an Omalauncher screen. */
     fun showLicenses() {
         val hook = openLicenses
-        if (hook != null) hook() else showClassicSettings("17")
+        if (hook != null) hook() else showNativeSettings("17")
     }
 
     /** Packages is a native page of Bellatrix's Settings (nav id 91). */
     fun showPackages() {
         val hook = openPackages
-        if (hook != null) hook() else showClassicSettings("91")
+        if (hook != null) hook() else showNativeSettings("91")
     }
 
     /** Permissions is a native page of Bellatrix's Settings (nav id 71). */
     fun showPermissions() {
         val hook = openPermissions
-        if (hook != null) hook() else showClassicSettings("71")
-    }
-
-    /** Away from home, bring the classic window up with the requested page instead of a new settings task. */
-    private fun showClassicSettings(page: String) {
-        val intent =
-            Intent(context, MainActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                .putExtra(MainActivity.EXTRA_SETTINGS_PAGE, page)
-        context.startActivity(intent)
+        if (hook != null) hook() else showNativeSettings("71")
     }
 
     /** Opens the owl app in file [name] in its own task; nothing if it isn't running (removed, or broken). */

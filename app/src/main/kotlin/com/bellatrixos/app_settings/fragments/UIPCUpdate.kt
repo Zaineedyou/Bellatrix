@@ -17,7 +17,6 @@ import com.bellatrixos.BuildConfig
 import com.bellatrixos.LauncherUpdates
 import com.bellatrixos.R
 import com.bellatrixos.database.SharedPrefs
-import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.variables.Global
 import com.bellatrixos.widgets.UIProgressBarLinear
 import com.bellatrixos.widgets.cards.UISettingsCard
@@ -75,7 +74,7 @@ class UIPCUpdate : Fragment() {
         B0?.setOnCardClickListener(w(this, 2))
         systemUpdates = view.findViewById(R.id.update_system)
         systemUpdates?.setOnCardClickListener {
-            (s0?.applicationContext as? App)?.runtime?.openSettings(SettingsPage.Settings)
+            (s0?.applicationContext as? App)?.runtime?.showNativeSettings()
         }
         if (Global.B == 1) c0()
         C0?.setOnSwitchCheckedChangeListener(com.bellatrixos.app_settings.fragments.u(2))

@@ -17,17 +17,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.Dispatchers
 import com.bellatrixos.Runtime
-import com.bellatrixos.ui.settings.SettingsPage
 
 /** App panel position (above the bar): 0 = closed, 1 = open. Follows the finger while dragging. */
 class LauncherState {
     val drawer = Animatable(0f)
-
-    /** Opens a screen of the settings activity, set by the launcher activity; see [show]. */
-    var onSettings: (SettingsPage, Int) -> Unit = { _, _ -> }
-
-    /** Opens settings, or one of its screens on its own; the store puts widgets on the page showing now. */
-    fun show(page: SettingsPage = SettingsPage.Settings) = onSettings(page, currentPage)
 
     /** The menu from long-pressing empty home space. */
     var homeMenuOpen by mutableStateOf(false)

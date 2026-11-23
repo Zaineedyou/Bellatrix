@@ -1,75 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="files_delete_items">
-        <item quantity="one">видалити %1$d елемент?</item>
-        <item quantity="few">видалити %1$d елементи?</item>
-        <item quantity="many">видалити %1$d елементів?</item>
-        <item quantity="other">видалити %1$d елемента?</item>
+        <item quantity="one">Delete %1$d item?</item>
+        <item quantity="other">Delete %1$d items?</item>
     </plurals>
     <plurals name="files_items">
-        <item quantity="one">%1$d елемент</item>
-        <item quantity="few">%1$d елементи</item>
-        <item quantity="many">%1$d елементів</item>
-        <item quantity="other">%1$d елемента</item>
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
     </plurals>
     <plurals name="home_file_problems">
-        <item quantity="one">%1$s: %2$d помилка</item>
-        <item quantity="few">%1$s: %2$d помилки</item>
-        <item quantity="many">%1$s: %2$d помилок</item>
-        <item quantity="other">%1$s: %2$d помилки</item>
+        <item quantity="one">%1$s: %2$d problem</item>
+        <item quantity="other">%1$s: %2$d problems</item>
     </plurals>
     <plurals name="home_file_problems_more">
-        <item quantity="one">ще %1$d в errors.txt · торкніться, щоб сховати</item>
-        <item quantity="few">ще %1$d в errors.txt · торкніться, щоб сховати</item>
-        <item quantity="many">ще %1$d в errors.txt · торкніться, щоб сховати</item>
-        <item quantity="other">ще %1$d в errors.txt · торкніться, щоб сховати</item>
+        <item quantity="one">%1$d more in errors.txt · Tap to hide</item>
+        <item quantity="other">%1$d more in errors.txt · Tap to hide</item>
     </plurals>
     <plurals name="linux_install_with_agents">
-        <item quantity="one">встановити linux і агентів: %d</item>
-        <item quantity="few">встановити linux і агентів: %d</item>
-        <item quantity="many">встановити linux і агентів: %d</item>
-        <item quantity="other">встановити linux і агентів: %d</item>
+        <item quantity="one">Install Linux and %d agent</item>
+        <item quantity="other">Install Linux and %d agents</item>
     </plurals>
     <plurals name="packages_results">
-        <item quantity="one">%d результат</item>
-        <item quantity="few">%d результати</item>
-        <item quantity="many">%d результатів</item>
-        <item quantity="other">%d результату</item>
+        <item quantity="one">%d results</item>
+        <item quantity="other">%d results</item>
     </plurals>
     <plurals name="settings_pages_subtitle">
-        <item quantity="one">%1$d сторінка · порядок, зміна, видалення</item>
-        <item quantity="few">%1$d сторінки · порядок, зміна, видалення</item>
-        <item quantity="many">%1$d сторінок · порядок, зміна, видалення</item>
-        <item quantity="other">%1$d сторінки · порядок, зміна, видалення</item>
+        <item quantity="one">%1$d page · Arrange, edit, remove</item>
+        <item quantity="other">%1$d pages · Arrange, edit, remove</item>
     </plurals>
     <plurals name="store_pages">
-        <item quantity="one">%1$d сторінка</item>
-        <item quantity="few">%1$d сторінки</item>
-        <item quantity="many">%1$d сторінок</item>
-        <item quantity="other">%1$d сторінки</item>
+        <item quantity="one">%1$d page</item>
+        <item quantity="other">%1$d pages</item>
     </plurals>
     <plurals name="store_add_missing_pages">
-        <item quantity="one">додати %1$d відсутню сторінку</item>
-        <item quantity="few">додати %1$d відсутні сторінки</item>
-        <item quantity="many">додати %1$d відсутніх сторінок</item>
-        <item quantity="other">додати %1$d відсутньої сторінки</item>
+        <item quantity="one">Add its missing page</item>
+        <item quantity="other">Add its %1$d missing pages</item>
     </plurals>
     <plurals name="style_terminal_size">
-        <item quantity="one">%1$s пт · %2$d стовпець у книжковій орієнтації</item>
-        <item quantity="few">%1$s пт · %2$d стовпці у книжковій орієнтації</item>
-        <item quantity="many">%1$s пт · %2$d стовпців у книжковій орієнтації</item>
-        <item quantity="other">%1$s пт · %2$d стовпця у книжковій орієнтації</item>
+        <item quantity="one">%1$s pt · %2$d column in portrait</item>
+        <item quantity="other">%1$s pt · %2$d columns in portrait</item>
     </plurals>
     <plurals name="pages_apps">
-        <item quantity="one">%1$d додаток</item>
-        <item quantity="few">%1$d додатки</item>
-        <item quantity="many">%1$d додатків</item>
-        <item quantity="other">%1$d додатка</item>
+        <item quantity="one">%1$d app</item>
+        <item quantity="other">%1$d apps</item>
     </plurals>
     <plurals name="voice_steps">
-        <item quantity="one">%1$d крок</item>
-        <item quantity="few">%1$d кроки</item>
-        <item quantity="many">%1$d кроків</item>
-        <item quantity="other">%1$d кроку</item>
+        <item quantity="one">%1$d step</item>
+        <item quantity="other">%1$d steps</item>
     </plurals>
 </resources>

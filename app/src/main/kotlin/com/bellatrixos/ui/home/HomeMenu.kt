@@ -35,7 +35,6 @@ import com.bellatrixos.ui.Palette
 import com.bellatrixos.ui.TextSize
 import com.bellatrixos.ui.frame
 import com.bellatrixos.ui.holdsKeys
-import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.ui.settings.ThemeStrip
 
 @Composable
@@ -104,19 +103,19 @@ fun HomeMenu(
                     for ((title, label, command) in kinds) {
                         BracketAction(stringResource(title), Palette.accent) {
                             state.homeMenuOpen = false
-                            if (linux) state.withAgent(runtime, "New $label", command) else state.show(SettingsPage.Linux)
+                            if (linux) state.withAgent(runtime, "New $label", command) else runtime.showLinuxSettings()
                         }
                     }
                 }
             }
             SettingsButton(runtime) {
                 state.homeMenuOpen = false
-                state.show()
+                runtime.showNativeSettings()
             }
         }
         MenuItem(stringResource(R.string.home_browse_store)) {
             state.homeMenuOpen = false
-            state.show(SettingsPage.Store)
+            runtime.showNativeSettings("4")
         }
         // The direct, on-device way to rice home: no Linux and no agent needed. These open Bellatrix's own
         // editor on the .owl files, so the home and taskbar are editable right here, Waybar-style.
@@ -139,7 +138,7 @@ fun HomeMenu(
                 onPick = ::pickTheme,
                 onBrowse = {
                     state.homeMenuOpen = false
-                    state.show(SettingsPage.Style)
+                    runtime.showNativeSettings("3")
                 },
             )
         }

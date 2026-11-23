@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="files_delete_items">
-        <item quantity="one">%1$d element löschen?</item>
-        <item quantity="other">%1$d elemente löschen?</item>
+        <item quantity="one">Delete %1$d item?</item>
+        <item quantity="other">Delete %1$d items?</item>
     </plurals>
     <plurals name="files_items">
-        <item quantity="one">%1$d element</item>
-        <item quantity="other">%1$d elemente</item>
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
     </plurals>
     <plurals name="home_file_problems">
-        <item quantity="one">%1$s: %2$d fehler</item>
-        <item quantity="other">%1$s: %2$d fehler</item>
+        <item quantity="one">%1$s: %2$d problem</item>
+        <item quantity="other">%1$s: %2$d problems</item>
     </plurals>
     <plurals name="home_file_problems_more">
-        <item quantity="one">%1$d weiterer in errors.txt · zum ausblenden tippen</item>
-        <item quantity="other">%1$d weitere in errors.txt · zum ausblenden tippen</item>
+        <item quantity="one">%1$d more in errors.txt · Tap to hide</item>
+        <item quantity="other">%1$d more in errors.txt · Tap to hide</item>
     </plurals>
     <plurals name="linux_install_with_agents">
-        <item quantity="one">linux und %d agent installieren</item>
-        <item quantity="other">linux und %d agenten installieren</item>
+        <item quantity="one">Install Linux and %d agent</item>
+        <item quantity="other">Install Linux and %d agents</item>
     </plurals>
     <plurals name="packages_results">
-        <item quantity="one">%d ergebnis</item>
-        <item quantity="other">%d ergebnisse</item>
+        <item quantity="one">%d results</item>
+        <item quantity="other">%d results</item>
     </plurals>
     <plurals name="settings_pages_subtitle">
-        <item quantity="one">%1$d seite · anordnen, bearbeiten, entfernen</item>
-        <item quantity="other">%1$d seiten · anordnen, bearbeiten, entfernen</item>
+        <item quantity="one">%1$d page · Arrange, edit, remove</item>
+        <item quantity="other">%1$d pages · Arrange, edit, remove</item>
     </plurals>
     <plurals name="store_pages">
-        <item quantity="one">%1$d seite</item>
-        <item quantity="other">%1$d seiten</item>
+        <item quantity="one">%1$d page</item>
+        <item quantity="other">%1$d pages</item>
     </plurals>
     <plurals name="store_add_missing_pages">
-        <item quantity="one">fehlende seite hinzufügen</item>
-        <item quantity="other">%1$d fehlende seiten hinzufügen</item>
+        <item quantity="one">Add its missing page</item>
+        <item quantity="other">Add its %1$d missing pages</item>
     </plurals>
     <plurals name="style_terminal_size">
-        <item quantity="one">%1$s pt · %2$d spalte im hochformat</item>
-        <item quantity="other">%1$s pt · %2$d spalten im hochformat</item>
+        <item quantity="one">%1$s pt · %2$d column in portrait</item>
+        <item quantity="other">%1$s pt · %2$d columns in portrait</item>
     </plurals>
     <plurals name="pages_apps">
         <item quantity="one">%1$d app</item>
         <item quantity="other">%1$d apps</item>
     </plurals>
     <plurals name="voice_steps">
-        <item quantity="one">%1$d schritt</item>
-        <item quantity="other">%1$d schritte</item>
+        <item quantity="one">%1$d step</item>
+        <item quantity="other">%1$d steps</item>
     </plurals>
 </resources>

@@ -108,7 +108,6 @@ import com.bellatrixos.ui.TextSize
 import com.bellatrixos.ui.extraKeysWanted
 import com.bellatrixos.ui.frame
 import com.bellatrixos.ui.passesKeys
-import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.ui.keyActivated
 
 /** Home pages of JSON widgets on a snap grid, bordered and gapped like Bellatrix windows. */
@@ -185,12 +184,12 @@ fun HomeScreen(
         engine.launcherAction = { action ->
             when (action) {
                 // "themes" from before the screen was style; widgets still send it.
-                "style", "themes" -> state.show(SettingsPage.Style)
+                "style", "themes" -> runtime.showNativeSettings("3")
                 "agents" -> runtime.showCodingAgents()
-                "store" -> state.show(SettingsPage.Store)
-                "linux" -> state.show(SettingsPage.Linux)
+                "store" -> runtime.showNativeSettings("4")
+                "linux" -> runtime.showLinuxSettings()
                 "drawer" -> state.open()
-                "settings" -> state.show()
+                "settings" -> runtime.showNativeSettings()
                 // "page:N" is kept for old widgets: the launcher closes what covers home and returns to its one page.
                 // A face left of page 1 no longer exists, so every page number means the same Bellatrix home.
                 else ->
@@ -504,7 +503,7 @@ fun HomeScreen(
                     stringResource(R.string.home_widget_invite_title),
                     agent?.let { stringResource(R.string.home_widget_invite_text, it) } ?: stringResource(R.string.home_widget_invite_text_no_agent),
                     agent,
-                    onBrowse = { state.show(SettingsPage.Store) },
+                    onBrowse = { runtime.showNativeSettings("4") },
                 ) {
                     if (linuxState == LinuxPhase.Installed) {
                         state.withAgent(runtime, "New widget") { newOwlCommand(it, OwlKind.Widget) }
@@ -720,7 +719,7 @@ private fun HomeTile(
                 install = engine.installs[item.spec.file.name],
                 onInstall = { engine.installDependencies(item.spec) },
                 waitsForLinux = if (engine.waitsForLinux(item.spec)) linuxState else null,
-                onInstallLinux = { state.show(SettingsPage.Linux) },
+                onInstallLinux = { runtime.showLinuxSettings() },
                 onFix = { log -> state.withAgent(runtime, "Fix ${item.spec.name}") { fixDependenciesCommand(it, item.spec, log) } },
             )
         }

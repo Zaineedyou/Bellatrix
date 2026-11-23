@@ -1,54 +1,29 @@
 package com.bellatrixos.ui.home
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import android.content.Context
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
-import com.bellatrixos.storage.LauncherData
-import com.bellatrixos.R
-import com.bellatrixos.Runtime
-import com.bellatrixos.theme.Style
-import com.bellatrixos.theme.StyleStore
-import com.bellatrixos.widgets.WidgetEngine
-import com.bellatrixos.widgets.WidgetSpec
-import com.bellatrixos.widgets.editWidgetCommand
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
-import com.bellatrixos.ui.BelowAnchorEnd
-import com.bellatrixos.ui.ChoicePopup
-import com.bellatrixos.ui.Glyph
+import androidx.compose.ui.unit.dp
+import com.bellatrixos.R
+import com.bellatrixos.Runtime
+import com.bellatrixos.storage.LauncherData
+import com.bellatrixos.theme.Style
+import com.bellatrixos.theme.StyleStore
 import com.bellatrixos.ui.LauncherStyle
-import com.bellatrixos.ui.Mono
-import com.bellatrixos.ui.OverlayPanel
-import com.bellatrixos.ui.Palette
-import com.bellatrixos.ui.ReadingWidth
-import com.bellatrixos.ui.Symbol
-import com.bellatrixos.ui.TextSize
-import com.bellatrixos.ui.card
+import com.bellatrixos.widgets.WidgetEngine
 
 /**
  * What swiping up and swiping down on home open, kept in style.toml so agents can set them too: the file name of a
@@ -241,94 +216,5 @@ internal fun Modifier.pullSwipe(state: LauncherState): Modifier {
         onDragStarted = { state.startPull() },
         onDragStopped = { velocity -> state.settlePull(velocity) },
     )
-}
-
-/**
- * Gesture settings: what swiping up and swiping down on home open, each picked from a dropdown of choices and panels,
- * owl files to edit with the agent.
- */
-@Composable
-fun GesturesScreen(
-    runtime: Runtime,
-    onDismiss: () -> Unit,
-    /** Opens the agent on a panel, as settings › pages does on a face. */
-    onAgent: (title: String, command: (bin: String) -> String) -> Unit,
-) {
-    val gestures = runtime.gestures
-    // A panel that doesn't compile is still listed, marked, so a pick that stopped working shows why.
-    val panels = runtime.widgets.panels().map { it.file.name to if (it.program == null) stringResource(R.string.gestures_has_errors, it.name) else it.name }
-    val nothing = Gestures.NONE to stringResource(R.string.gestures_nothing)
-    OverlayPanel(stringResource(R.string.gestures_title), onDismiss, contentWidth = ReadingWidth) {
-        GestureRow(stringResource(R.string.gestures_swipe_up), panels + listOf(nothing), gestures.swipeUp) { gestures.swipeUp = it }
-        EditPanel(runtime, gestures.swipeUp, onAgent)
-        Spacer(Modifier.height(8.dp))
-        GestureRow(stringResource(R.string.gestures_swipe_down), listOf(nothing) + panels, gestures.swipeDown) { gestures.swipeDown = it }
-        EditPanel(runtime, gestures.swipeDown, onAgent)
-        BasicText(
-            stringResource(R.string.gestures_hint),
-            Modifier.padding(top = 12.dp, start = 14.dp, end = 14.dp),
-            style = Mono.copy(color = Palette.muted, fontSize = TextSize.Small),
-        )
-    }
-}
-
-/** Under a gesture opening a panel: [edit] starts the agent on its file, as one edits a face or a widget. */
-@Composable
-private fun EditPanel(
-    runtime: Runtime,
-    choice: String,
-    onAgent: (title: String, command: (bin: String) -> String) -> Unit,
-) {
-    EditFile(runtime.widgets.panels().firstOrNull { it.file.name == choice } ?: return, onAgent)
-}
-
-/**
- * [edit] starts the agent on [spec]'s file, as one edits a face or a widget. The whole line takes it, file name too: the
- * keys' arrows then stop on it between the gestures, where a short [ edit ] at its start lost to the full row past it.
- */
-@Composable
-private fun EditFile(
-    spec: WidgetSpec,
-    onAgent: (title: String, command: (bin: String) -> String) -> Unit,
-) {
-    Row(
-        Modifier
-            .padding(start = 6.dp, top = 2.dp)
-            .fillMaxWidth()
-            .clickable { onAgent("Edit ${spec.name}") { editWidgetCommand(it, spec) } }
-            .padding(horizontal = 8.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        BasicText("[ ${stringResource(R.string.gestures_edit)} ]", Modifier.padding(end = 8.dp), style = Mono.copy(color = Palette.accent))
-        BasicText(spec.file.name, style = Mono.copy(color = Palette.muted, fontSize = TextSize.Small))
-    }
-}
-
-/** A gesture and what it opens; tapping that lists the others under it. [choices] are (saved value, label). */
-@Composable
-private fun GestureRow(
-    label: String,
-    choices: List<Pair<String, String>>,
-    current: String,
-    onPick: (String) -> Unit,
-) {
-    var open by remember { mutableStateOf(false) }
-    // A file name not among the panels (removed since): shown as it's saved, so the user sees it and picks another.
-    val picked = choices.firstOrNull { it.first == current } ?: (current to stringResource(R.string.gestures_missing, current))
-    Row(
-        Modifier.card(onClick = { open = !open }),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        BasicText(label, Modifier.weight(1f), style = Mono.copy(fontSize = TextSize.Item))
-        Box {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                BasicText(picked.second, style = Mono.copy(color = Palette.accent, fontSize = TextSize.Item))
-                Symbol(if (open) Glyph.ChevronUp else Glyph.ChevronDown, Palette.muted, Modifier.padding(start = 4.dp))
-            }
-            if (open) {
-                ChoicePopup(choices, picked, BelowAnchorEnd, onDismiss = { open = false }, onPick = { onPick(it.first) }, label = { it.second })
-            }
-        }
-    }
 }
 

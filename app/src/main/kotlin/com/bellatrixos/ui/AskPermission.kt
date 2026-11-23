@@ -10,7 +10,9 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -19,24 +21,33 @@ import androidx.core.content.edit
 import com.bellatrixos.Runtime
 
 /**
- * Asks for one runtime permission for a widget: the microphone for speech("start") (see
+ * Asks for one runtime permission: the microphone for speech("start") (see
  * [com.bellatrixos.widgets.runtime.Dictation]), the location for location("request") (see
  * [com.bellatrixos.widgets.runtime.PhoneLocation]), calendar for calendar("request") (see
  * [com.bellatrixos.widgets.runtime.PhoneCalendar]), Bluetooth for airpods(...) (see
- * [com.bellatrixos.widgets.runtime.AirPods]). Each activity that shows widgets has one of each, in its [WidgetAsks], made
- * with it, as a launcher must be registered before the activity starts. With [orSettings], a tap once Android won't show its dialog
+ * [com.bellatrixos.widgets.runtime.AirPods]). Register with the [ActivityResultCaller] that owns the
+ * dialog: an activity's own caller for [WidgetAsks], or a fragment's caller from that fragment's
+ * `onCreate` for a settings page. Registering with a resumed activity throws, so a late-created
+ * fragment must use its own registry. With [orSettings], a tap once Android won't show its dialog
  * any more opens the app's own settings, where the switch then is, so the tap still does something.
  */
-class AskPermission(
-    activity: ComponentActivity,
+class AskPermission private constructor(
+    caller: ActivityResultCaller,
     private val permission: String,
-    orSettings: Boolean = false,
+    activity: Activity,
+    orSettings: Boolean,
 ) {
+    constructor(activity: ComponentActivity, permission: String, orSettings: Boolean = false) :
+        this(activity, permission, activity, orSettings)
+
+    constructor(fragment: Fragment, permission: String, orSettings: Boolean = false) :
+        this(fragment, permission, fragment.requireActivity(), orSettings)
+
     private var then: ((Boolean) -> Unit)? = null
     private val refusals = Refusals(activity, permission) { if (orSettings) appDetails(activity) else null }
 
     private val launcher =
-        activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        caller.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             val then = then
             this.then = null
             then?.invoke(granted)

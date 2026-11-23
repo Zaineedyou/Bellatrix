@@ -479,16 +479,12 @@
             android:resizeableActivity="true"
             android:taskAffinity="${applicationId}.voice"
             android:theme="@style/Theme.Bellatrix" />
+        <!-- No settings screen here: this only forwards old `page` intents to Bellatrix Settings. -->
         <activity
             android:name=".SettingsActivity"
-            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
             android:exported="false"
-            android:label="@string/activity_settings"
-            android:launchMode="singleTask"
-            android:resizeableActivity="true"
-            android:taskAffinity="${applicationId}.settings"
-            android:theme="@style/Theme.Bellatrix"
-            android:windowSoftInputMode="adjustResize" />
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity
             android:name=".EditorActivity"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"

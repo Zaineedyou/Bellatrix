@@ -93,7 +93,6 @@ import com.bellatrixos.ui.glassBackground
 import com.bellatrixos.ui.Symbol
 import com.bellatrixos.ui.TextSize
 import com.bellatrixos.ui.keyActivated
-import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.ui.tile
 import com.bellatrixos.ui.voice.Speech
 import com.bellatrixos.widgets.WidgetEngine
@@ -139,7 +138,7 @@ internal fun PromptBar(
         focusManager.clearFocus()
         keyboard?.hide()
         state.closeNow()
-        state.show(SettingsPage.Linux)
+        runtime.showLinuxSettings()
     }
 
     fun send(prompt: String) {

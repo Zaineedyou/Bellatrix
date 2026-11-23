@@ -15,7 +15,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.runtime.snapshotFlow
@@ -66,15 +65,14 @@ class UIPermissions : Fragment() {
     @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val activity = requireActivity() as ComponentActivity
         asks =
             mapOf(
-                MIC to AskPermission(activity, Manifest.permission.RECORD_AUDIO, orSettings = true),
-                LOCATION to AskPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION, orSettings = true),
-                CALENDAR to AskPermission(activity, Manifest.permission.READ_CALENDAR, orSettings = true),
-                BLUETOOTH to AskPermission(activity, Manifest.permission.BLUETOOTH_CONNECT, orSettings = true),
-                NOTIFICATIONS to AskPermission(activity, Manifest.permission.POST_NOTIFICATIONS, orSettings = true),
-                LOCAL_NETWORK to AskPermission(activity, LocalNetwork.PERMISSION, orSettings = true),
+                MIC to AskPermission(this, Manifest.permission.RECORD_AUDIO, orSettings = true),
+                LOCATION to AskPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, orSettings = true),
+                CALENDAR to AskPermission(this, Manifest.permission.READ_CALENDAR, orSettings = true),
+                BLUETOOTH to AskPermission(this, Manifest.permission.BLUETOOTH_CONNECT, orSettings = true),
+                NOTIFICATIONS to AskPermission(this, Manifest.permission.POST_NOTIFICATIONS, orSettings = true),
+                LOCAL_NETWORK to AskPermission(this, LocalNetwork.PERMISSION, orSettings = true),
             )
     }
 

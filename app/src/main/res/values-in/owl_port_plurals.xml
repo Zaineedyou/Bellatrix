@@ -1,39 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="files_delete_items">
-        <item quantity="other">hapus %1$d item?</item>
+        <item quantity="one">Delete %1$d item?</item>
+        <item quantity="other">Delete %1$d items?</item>
     </plurals>
     <plurals name="files_items">
-        <item quantity="other">%1$d item</item>
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
     </plurals>
     <plurals name="home_file_problems">
-        <item quantity="other">%1$s: %2$d masalah</item>
+        <item quantity="one">%1$s: %2$d problem</item>
+        <item quantity="other">%1$s: %2$d problems</item>
     </plurals>
     <plurals name="home_file_problems_more">
-        <item quantity="other">%1$d lagi di errors.txt · ketuk untuk menyembunyikan</item>
+        <item quantity="one">%1$d more in errors.txt · Tap to hide</item>
+        <item quantity="other">%1$d more in errors.txt · Tap to hide</item>
     </plurals>
     <plurals name="linux_install_with_agents">
-        <item quantity="other">instal linux dan %d agen</item>
+        <item quantity="one">Install Linux and %d agent</item>
+        <item quantity="other">Install Linux and %d agents</item>
     </plurals>
     <plurals name="packages_results">
-        <item quantity="other">%d hasil</item>
+        <item quantity="one">%d results</item>
+        <item quantity="other">%d results</item>
     </plurals>
     <plurals name="settings_pages_subtitle">
-        <item quantity="other">%1$d halaman · susun, edit, hapus</item>
+        <item quantity="one">%1$d page · Arrange, edit, remove</item>
+        <item quantity="other">%1$d pages · Arrange, edit, remove</item>
     </plurals>
     <plurals name="store_pages">
-        <item quantity="other">%1$d halaman</item>
+        <item quantity="one">%1$d page</item>
+        <item quantity="other">%1$d pages</item>
     </plurals>
     <plurals name="store_add_missing_pages">
-        <item quantity="other">tambahkan %1$d halaman yang belum ada</item>
+        <item quantity="one">Add its missing page</item>
+        <item quantity="other">Add its %1$d missing pages</item>
     </plurals>
     <plurals name="style_terminal_size">
-        <item quantity="other">%1$s pt · %2$d kolom saat potret</item>
+        <item quantity="one">%1$s pt · %2$d column in portrait</item>
+        <item quantity="other">%1$s pt · %2$d columns in portrait</item>
     </plurals>
     <plurals name="pages_apps">
-        <item quantity="other">%1$d aplikasi</item>
+        <item quantity="one">%1$d app</item>
+        <item quantity="other">%1$d apps</item>
     </plurals>
     <plurals name="voice_steps">
-        <item quantity="other">%1$d langkah</item>
+        <item quantity="one">%1$d step</item>
+        <item quantity="other">%1$d steps</item>
     </plurals>
 </resources>
