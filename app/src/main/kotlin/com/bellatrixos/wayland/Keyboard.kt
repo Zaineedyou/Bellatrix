@@ -18,6 +18,8 @@ import android.view.inputmethod.InputMethodManager
 import android.view.inputmethod.TextAttribute
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bellatrixos.theme.Style
+import com.bellatrixos.ui.LauncherStyle
 import kotlin.concurrent.thread
 
 /** How a modifier on the keybar is held: for the next key, or until tapped again. */
@@ -279,8 +281,7 @@ class KeyboardSink(
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection {
         cjk = cjkKeyboard()
-        val suggestions = context.getSharedPreferences("bellatrix_linux", Context.MODE_PRIVATE).getBoolean("terminal_suggestions", false)
-        outAttrs.inputType = terminalInputType(cjk || suggestions)
+        outAttrs.inputType = terminalInputType(cjk || LauncherStyle.style[Style.TERMINAL_SUGGESTIONS])
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN or EditorInfo.IME_FLAG_NO_EXTRACT_UI
         outAttrs.contentMimeTypes = arrayOf("image/*")
         return object : BaseInputConnection(this, false) {

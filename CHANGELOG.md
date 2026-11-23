@@ -9,6 +9,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.40] - 2026-11-23
+
+### Fixed
+
+- Linux terminal windows now use the same Keyboard suggestions setting as home terminals, so word and clipboard suggestions from the phone keyboard work there too.
+- Restored the Keyboard suggestions switch in native Settings → Time & Language → Typing after the Compose Settings screens were removed.
+
 ## [2.9.39] - 2026-11-23
 
 ### Fixed

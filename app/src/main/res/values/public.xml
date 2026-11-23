@@ -3750,6 +3750,7 @@
     <public type="id" name="surface_view" id="0x7f0a0373" />
     <public type="id" name="switchAutoCorrect" id="0x7f0a0374" />
     <public type="id" name="switchHighlightMisspelled" id="0x7f0a0375" />
+    <public type="id" name="switch_keyboard_suggestions" id="0x7f0a0420" />
     <public type="id" name="switch_autofocus_input" id="0x7f0a0376" />
     <public type="id" name="switch_bluetooth_enabled" id="0x7f0a0377" />
     <public type="id" name="switch_freeform" id="0x7f0a0378" />

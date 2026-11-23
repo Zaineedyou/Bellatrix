@@ -885,6 +885,7 @@
     <id name="surface_view" />
     <id name="switchAutoCorrect" />
     <id name="switchHighlightMisspelled" />
+    <id name="switch_keyboard_suggestions" />
     <id name="switch_autofocus_input" />
     <id name="switch_bluetooth_enabled" />
     <id name="switch_freeform" />
