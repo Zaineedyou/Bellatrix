@@ -13,9 +13,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ### Added
 
-- Coding agents in Linux can now modify Bellatrix's native views directly through `~/.config/bellatrix/native-ui/look.toml`. Rules match real taskbar, start menu, action center, Settings, window and home views by resource id or class and change their size, padding, background, border, text and icons in place.
-- The native UI file is watched while the launcher runs: saving it restyles the views already on screen, and `errors.txt` next to it names anything ignored.
-- `README.md` beside `look.toml` documents every surface, selector and property, and the guest `AGENTS.md` points agents to it. No theme picker, second home or replacement screen was added.
+- Coding agents in Linux can now modify Bellatrix's native views and UI logic from `~/.config/bellatrix/native-ui/`. `look.toml` matches real taskbar, start menu, action center, Settings, window and home views by resource id or class and changes their size, padding, background, border, text and icons in place.
+- An embedded Lua runtime inside the existing `App.runtime` runs `ui.lua` from the same directory. Scripts can hook clicks, long-presses and gestures, edit native adapter data, pin taskbar apps, open the existing Bellatrix Settings page and change window decorations. No second Activity, launcher runtime, home, drawer, Settings window or replacement renderer was added.
+- Both files are watched while the launcher runs: a save reaches the views already on screen within a second, and the shared `errors.txt` names anything ignored. The shipped files are neutral templates, with active taskbar and Settings examples in `examples/`.
+- `README.md` beside those files documents every surface, selector, property and `nativeui` API call, and the guest `AGENTS.md` points agents to it.
 
 ## [2.9.41] - 2026-11-23
 

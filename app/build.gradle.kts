@@ -215,6 +215,9 @@ tasks.matching { it.name == "preBuild" }.configureEach {
 dependencies {
     implementation(project(":owl"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    // Embedded Lua for ~/.config/bellatrix/native-ui/ui.lua. It runs inside App.runtime;
+    // it is not a second launcher runtime and needs no native library or rebuild by guests.
+    implementation("org.luaj:luaj-jse:3.0.1")
 
     // OWL's Compose renderer and the UI composables it shares with the launcher.
     // Compose 1.12.x pulls androidx.compose 1.12.1, which needs AGP 9.1 and

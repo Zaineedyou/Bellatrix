@@ -89,6 +89,7 @@ class Proot(
         listOf(
             GUEST_HOME + "/.config/bellatrix/widgets" to File(filesDir, "widgets"),
             GUEST_HOME + "/.config/bellatrix/style" to File(filesDir, "style"),
+            GUEST_HOME + "/.config/bellatrix/native-ui" to File(filesDir, "native-ui"),
             GUEST_HOME + "/.config/bellatrix/home" to File(filesDir, "home"),
             GUEST_HOME + "/.config/bellatrix/taskbar" to File(filesDir, "taskbar"),
             GUEST_HOME + "/.config/bellatrix/themes" to File(filesDir, "themes"),

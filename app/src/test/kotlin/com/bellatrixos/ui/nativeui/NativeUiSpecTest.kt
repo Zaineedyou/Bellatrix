@@ -9,8 +9,8 @@ class NativeUiSpecTest {
     @Test fun shippedDefaultsParseWithoutProblems() {
         val parsed = NativeUiSpec.parse(NativeUiSpec.defaults())
         assertEquals(emptyList<String>(), parsed.problems)
-        assertEquals(4, parsed.spec.rules.size)
-        assertEquals("#CC001811", parsed.spec.palette["surface"])
+        assertTrue(parsed.spec.rules.isEmpty())
+        assertTrue(parsed.spec.palette.isEmpty())
     }
 
     @Test fun readsRulesAsNativeViewSelectors() {
@@ -38,6 +38,8 @@ class NativeUiSpecTest {
         assertEquals(setOf("taskbar", "settings"), spec.rules[0].surfaces)
         assertTrue(spec.rules[0].matches("taskbar", "taskBarList", "LinearLayout", null))
         assertTrue(spec.rules[0].matches("settings", null, "UISettingsCardSwitch", null))
+        assertTrue(spec.rules[0].matches("settings", null, "com.bellatrixos.app_settings.UISettingsCardSwitch", null))
+        assertTrue(NativeUiSpec.selector("class:UISettingsCard")!!.matches("settings", null, "com.bellatrixos.app_settings.UISettingsCardSwitch", null))
         assertFalse(spec.rules[0].matches("home", "taskBarList", "LinearLayout", null))
         assertTrue(spec.rules[1].matches("window", null, "TextView", "Wi-Fi"))
         assertEquals(0x101418ccL, NativeUiSpec.color("panel", spec.palette))
@@ -73,6 +75,10 @@ class NativeUiSpecTest {
         assertEquals(
             listOf(NativeUiSpec.Dim(4f), NativeUiSpec.Dim(8f)),
             NativeUiSpec.dims("4 8"),
+        )
+        assertEquals(
+            listOf(NativeUiSpec.Dim(4f), NativeUiSpec.Dim(8f)),
+            NativeUiSpec.dims(listOf(4, 8)),
         )
         assertEquals(
             listOf(NativeUiSpec.Dim(1f), NativeUiSpec.Dim(2f), NativeUiSpec.Dim(3f), NativeUiSpec.Dim(4f)),

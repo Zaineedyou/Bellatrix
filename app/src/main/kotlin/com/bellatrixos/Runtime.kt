@@ -301,7 +301,7 @@ class Runtime(
         if (launcherReady) prefs.edit().putBoolean(SETUP_DONE, true).apply()
         themes.loadPalette()
         // look.toml edits reach the native views already on screen, not just the next launch.
-        NativeUiLook.install(context.applicationContext as Application, nativeUi)
+        NativeUiLook.install(context.applicationContext as Application, nativeUi, taskbar)
         // style.toml is authoritative for foot too, including on first start before any edit event.
         syncTerminalFontFromStyle()
         // An agent or the user edited style.toml; the rest of the style is read where it's drawn.

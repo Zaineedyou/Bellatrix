@@ -28,9 +28,10 @@ class TaskBarStore(
 
     private val dir = LauncherData.taskbarDir(context)
     private val prefs = LauncherData.prefs(context)
-    private var pins: List<TaskBarItemPins> = emptyList()
+    private var storedPins: List<TaskBarItemPins> = emptyList()
     private var ready = false
     private var applying = false
+    private var pendingPins: List<TaskBarItemPins>? = null
     private var onApply: ((List<TaskBarItemPins>) -> Unit)? = null
 
     /** What errors.txt says, so a terminal or coding agent can read it. */
@@ -39,13 +40,17 @@ class TaskBarStore(
     private val synced =
         SyncedFile(File(dir, FILE), File(dir, ERRORS), "the taskbar layout") {
             Toml.write(
-                mapOf("version" to 1, "pins" to pins.map { it.a() }),
+                mapOf("version" to 1, "pins" to storedPins.map { it.a() }),
                 HEADER,
             )
         }
 
     init {
         synced.onWritten = { text -> prefs.edit().putString(WRITTEN, hash(text)).apply() }
+        // Scripts can pin taskbar apps before MainActivity has set this up.
+        if (TaskBarDB.f4804a == null) {
+            TaskBarDB.f4804a = context.getSharedPreferences("TaskbarPrefs", 0)
+        }
         TaskBarDB.onPinsChanged = { changed(it) }
     }
 
@@ -59,9 +64,14 @@ class TaskBarStore(
             return
         }
         onApply = apply
-        pins = current
+        storedPins = current
         val text = synced.open()
         ready = true
+        pendingPins?.let { pins ->
+            pendingPins = null
+            adopt(pins, apply)
+            return
+        }
         when {
             text == null -> {
                 synced.create()
@@ -69,7 +79,7 @@ class TaskBarStore(
             }
             hash(text) == prefs.getString(WRITTEN, null) -> {
                 synced.setProblems(emptyList())
-                pins = current
+                storedPins = current
                 synced.save()
                 apply(current)
             }
@@ -96,7 +106,7 @@ class TaskBarStore(
     /** A pin was added, removed or reordered from the launcher's own UI. */
     fun changed(list: List<TaskBarItemPins>) {
         if (!ready || applying) return
-        pins = list
+        storedPins = list
         synced.save()
     }
 
@@ -104,12 +114,32 @@ class TaskBarStore(
         list: List<TaskBarItemPins>,
         apply: (List<TaskBarItemPins>) -> Unit,
     ) {
-        pins = list
+        storedPins = list
         applying = true
         TaskBarDB.e(list)
         applying = false
         synced.setProblems(emptyList())
         apply(list)
+    }
+
+    /** Script-visible pins; writing them goes through layout.toml like a pin made in the launcher. */
+    fun pins(): List<String> = TaskBarDB.b().map { it.data }
+
+    fun addPin(name: String) {
+        val name = name.trim()
+        if (name.isEmpty()) return
+        val current = pins()
+        if (name !in current) writePins(current + name)
+    }
+
+    fun removePin(name: String) = writePins(pins() - name.trim())
+
+    fun refresh() = changed(TaskBarDB.b())
+
+    private fun writePins(names: List<String>) {
+        val list = names.distinct().mapIndexed { index, name -> TaskBarItemPins(name, index) }
+        if (!ready) pendingPins = list
+        TaskBarDB.e(list)
     }
 
     /** Blank means no pins; a file that doesn't parse returns null and changes nothing. */

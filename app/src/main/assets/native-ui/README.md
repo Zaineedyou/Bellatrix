@@ -1,26 +1,29 @@
-# Bellatrix native UI overrides
+# Bellatrix native UI scripting
 
-`look.toml` in this directory changes Bellatrix's **own** views: the taskbar,
-start menu, action center, Settings cards, app windows and home tiles. A rule
-finds a real `View` in those existing screens and changes its size, padding,
-background, border, text, icon or visibility in place. There is no second
-launcher, no replacement screen and no theme picker.
+Two files in this directory let a coding agent change Bellatrix's **own** UI from Linux:
 
-Guest path: `~/.config/bellatrix/native-ui/look.toml`.
-Errors go to `~/.config/bellatrix/native-ui/errors.txt`.
+| File | What it owns |
+| --- | --- |
+| `look.toml` | Declarative style for existing native `View`s: size, padding, background, border, text, icon, visibility |
+| `ui.lua` | Behaviour: click/long-click/gesture hooks, adapter data, taskbar actions, Settings navigation, window decorations |
 
-Save the file and the next layout pass restyles the views already on screen;
-opening a panel or dialog also picks the change up. A file that does not parse
-is ignored and reported, never overwritten. Deleting the file brings back the
-version shipped with this launcher.
+Guest path: `~/.config/bellatrix/native-ui/`. Errors from both files go to `errors.txt` beside them.
 
-## Format
+Both shipped files are neutral templates: a fresh install keeps the stock Bellatrix look and behavior.
+Save either file and the change reaches the views already on screen within a second. A file that does not
+parse is ignored and reported, never overwritten. Deleting `look.toml` restores the stock look; deleting
+`ui.lua` restores directly edited views and adapter data and removes every Lua rule and hook. There is no second launcher, Activity, home, drawer, Settings
+window, renderer or mode toggle. Every change lands on a Bellatrix `View` that is already on screen.
+
+`examples/taskbar.lua` and `examples/settings.lua` are active examples you can copy into `ui.lua`.
+
+## `look.toml`
 
 ```toml
 version = 1
 
 [palette]
-surface = "#CC001811"
+surface = "#CC101418"
 border = "#AA00AAA4"
 text = "#BDF5EF"
 
@@ -36,20 +39,18 @@ padding = [8, 6]
 height = 56
 ```
 
-`palette` holds reusable colors: `#rgb`, `#rrggbb` or `#aarrggbb`. A rule may
-use a palette name in any color property. `none` or `transparent` clears a
-color.
+`palette` holds reusable colors: `#rgb`, `#rrggbb` or `#aarrggbb`. A rule may use a palette name in any
+color property. `none` or `transparent` clears a color.
 
 `[[rule]]` blocks are applied in file order; later rules win. Every rule has:
 
 - `surface`: one surface name or an array. `all` means every native surface.
-- `match`: one selector or an array. A view matches when any selector matches.
-  Omitting it means `all`.
+- `match`: one selector or an array. A view matches when any selector matches. Omitting it means `all`.
 - `description`: ignored by the launcher; a note for the next editor.
 
 Unknown keys are reported in `errors.txt` and skipped.
 
-## Surfaces
+### Surfaces
 
 | Name | Native views it covers |
 | --- | --- |
@@ -62,22 +63,22 @@ Unknown keys are reported in `errors.txt` and skipped.
 | `drawer` | Native app-drawer views inside the start menu |
 | `dialog` | Other native dialogs and popups |
 
-A view inside a nested surface uses that surface: text in the taskbar is
-`taskbar`, even though the activity is `home`.
+A view inside a nested surface uses that surface: text in the taskbar is `taskbar`, even though the
+activity is `home`.
 
-## Selectors
+### Selectors
 
 | Selector | Matches |
 | --- | --- |
-| `id:taskBar` | A view's resource id, e.g. `taskBar`, `startMenuBg`, `mainView` |
-| `class:UISettingsCard` | A view class name or its suffix; `*` is a wildcard |
+| `id:taskBar` | A view's resource id, e.g. `taskBar`, `startMenuBg`, `settings_content`, `title_bar` |
+| `class:UISettingsCard` | A view class name, or a prefix/suffix of its simple name; `*` is a wildcard |
 | `text:Wi-Fi` | The exact text of a `TextView`; `*` is a wildcard |
 | `all` | Every view in the surface |
 
-To discover ids, read the layouts in this launcher's source at
-`app/src/main/res/layout/`. The same names are accepted here.
+To discover ids, read the layouts in this launcher's source at `app/src/main/res/layout/`. The same names
+are accepted here; only views in the existing Bellatrix view tree are addressable.
 
-## Properties
+### Properties
 
 Colors accept a palette name, `#rgb`, `#rrggbb` or `#aarrggbb`.
 
@@ -96,47 +97,82 @@ Colors accept a palette name, `#rgb`, `#rrggbb` or `#aarrggbb`.
 | `clip`, `clickable`, `focusable` | Boolean view flags |
 | `layout-gravity`, `weight` | Linear/frame layout gravity and linear weight |
 
-A bare number is dp, except `text-size`, where it is sp. Sizes may also be
-strings: `8dp`, `12sp`, `3px`, `50%`, `match`, `wrap`.
+A bare number is dp, except `text-size`, where it is sp. Sizes may also be strings: `8dp`, `12sp`, `3px`,
+`50%`, `match`, `wrap`.
 
-## Examples
+## `ui.lua`
 
-Move the taskbar's native app cluster and restyle it:
+Lua runs inside Bellatrix's one `App.runtime`. It is the same launcher process and the same view tree.
+The global object is `nativeui`; every call takes a selector string and a surface name from the tables
+above. Call its methods with `:` (`nativeui:style(...)`), and do the same for view and adapter handles.
+Halting the script or deleting it removes its rules and hooks, not the launcher.
 
-```toml
-[[rule]]
-surface = "taskbar"
-match = "id:taskBarList"
-background = "#CC101418"
-radius = 18
-padding = [6, 10]
+### Selector and view helpers
+
+| Call | Effect |
+| --- | --- |
+| `nativeui:views(match, surface)` | Lua list of handles for every matching native view |
+| `nativeui:view(match, surface)` | First matching handle, or `nil` |
+| `nativeui:style(match, surface, props)` | Adds a rule whose keys are `look.toml` properties; Lua lists work for `padding`, `margin` and `border` |
+| `nativeui:setText(match, surface, text)` | Sets text on matching `TextView`s |
+| `nativeui:setHint(match, surface, hint)` | Sets hint on matching `TextView`s |
+| `nativeui:setBackground(match, surface, color, radius)` | Sets a solid or rounded drawable |
+| `nativeui:setPadding(match, surface, left, top, right, bottom)` | Sets padding in pixels |
+| `nativeui:setVisibility(match, surface, value)` | `visible`, `invisible` or `gone` |
+| `nativeui:adapter(match, surface)` | Handle for an existing native `AdapterView`/`RecyclerView` |
+
+A view handle has `id()`, `surface()`, `className()`, `text()`, `setText()`, `setHint()`, `background(color, radius)`,
+`border(color, width)`, `padding(l, t, r, b)`, `width(px)`, `height(px)`, `visibility(value)`, `alpha(value)`,
+`iconSize(px)`, `tint(color)` and `raw()` (the underlying native `View`). Example:
+
+```lua
+local bar = nativeui:view("id:taskBar", "taskbar")
+if bar then bar:background("#CC101418", 14) end
 ```
 
-Give native Settings cards a denser look:
+### Hooks
 
-```toml
-[[rule]]
-surface = "settings"
-match = "class:UISettingsCard"
-background = "#20FFFFFF"
-border = "#40FFFFFF"
-border-width = 1
-radius = 8
-margin = [2, 0]
-padding = [10, 12]
+`onClick`, `onLongClick` and `onGesture` take `(match, surface, callback)`. The callback receives
+`(view, action, x, y)`. `action` is `click`, `long-click`, or a gesture phase: `down`, `move`, `up`,
+`cancel`. Hooks observe the native touch; they do not consume it or replace Bellatrix's own click and
+long-click actions.
+
+```lua
+nativeui:onGesture("id:taskBar", "taskbar", function(view, action, x, y)
+    if action == "down" then view:alpha(0.85)
+    elseif action == "up" or action == "cancel" then view:alpha(1.0) end
+end)
+
+nativeui:onLongClick("class:UISettingsCard", "settings", function(view, action, x, y)
+    nativeui:log("held " .. view:id())
+end)
 ```
 
-Hide one native tray icon without hiding the taskbar:
+### Adapter data
 
-```toml
-[[rule]]
-surface = "taskbar"
-match = "id:tray_battery"
-visibility = "gone"
-```
+`nativeui:adapter(match, surface)` returns a handle for the adapter already installed on that native
+list. `count()`, `data()`, `textAt(i)` and `viewAt(i)` read it. `setData({"one", "two"})` replaces the data
+only when the native adapter is a string `ArrayAdapter`; other adapters stay owned by Bellatrix and their
+rows can be restyled through `viewAt(i)`. `notifyChanged()` redraws it.
+
+### Native actions
+
+| Call | Effect |
+| --- | --- |
+| `nativeui:taskbar("pin", "UISettings")` | Adds a pin through the real taskbar `layout.toml` |
+| `nativeui:taskbar("unpin", "UISettings")` | Removes that pin |
+| `nativeui:taskbar("refresh")` | Re-applies the current pins |
+| `nativeui:taskbar("launch", "UISettings")` | Opens a native Bellatrix window |
+| `nativeui:launch("UIExplorer", "path")` | Opens any native window key; data is optional |
+| `nativeui:pins()` | Current taskbar pin keys |
+| `nativeui:settings("1")` | Opens the existing Bellatrix Settings page; `""` opens its root and `"1"` is System |
+| `nativeui:window("title", "Title")` | Sets the current native window decoration's title |
+| `nativeui:window("background", "#CC101418")` | Recolors the native `title_bar` |
+| `nativeui:window("height", "56")` | Sets the native title bar height in pixels |
+| `nativeui:log(text)`, `nativeui:toast(text)` | Log to logcat, or show a short native toast |
 
 ## Limits
 
-Only properties the launcher understands can change. This file cannot install
-a different theme engine, add a second home, replace Android's system bars or
-change Linux/Wayland services. It applies to Bellatrix's native views only.
+This system edits Bellatrix's existing native views. It cannot install a different theme engine, add a
+second home or replacement renderer, change Android's system bars, or alter Linux/Wayland services. Calling
+the API from a file in this directory never needs a source edit or an APK rebuild.

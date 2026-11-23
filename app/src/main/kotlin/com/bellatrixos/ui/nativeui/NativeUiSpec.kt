@@ -31,7 +31,14 @@ object NativeUiSpec {
             when (kind) {
                 Kind.ALL -> true
                 Kind.ID -> idName?.let { wildcard(value, it) } == true
-                Kind.CLASS -> wildcard(value, className) || className.endsWith(value, ignoreCase = true)
+                Kind.CLASS -> {
+                    val simple = className.substringAfterLast('.')
+                    wildcard(value, className) ||
+                        wildcard(value, simple) ||
+                        simple.startsWith(value, ignoreCase = true) ||
+                        simple.endsWith(value, ignoreCase = true) ||
+                        className.endsWith(value, ignoreCase = true)
+                }
                 Kind.TEXT -> text?.let { wildcard(value, it) } == true
             }
 
@@ -118,7 +125,6 @@ object NativeUiSpec {
             "hint-color",
             "icon-color",
             "icon-tint",
-            "divider-color",
         )
 
     private val DIM_KEYS =
@@ -133,7 +139,6 @@ object NativeUiSpec {
             "border-width",
             "text-size",
             "icon-size",
-            "divider-height",
             "elevation",
             "translation-x",
             "translation-y",
@@ -161,51 +166,33 @@ object NativeUiSpec {
         """
         # Bellatrix native UI overrides.
         #
-        # Every [[rule]] below is applied to a real Bellatrix View, not to a
-        # replacement screen or a theme. Edit this file from Linux and the
-        # change reaches the next layout pass. README.md next to it lists the
-        # selectors and properties this launcher understands.
-        #
+        # This shipped file is neutral: Bellatrix keeps its stock look until an
+        # agent edits it. Every [[rule]] changes a real View already on screen,
+        # not a replacement screen. README.md lists every surface, selector and
+        # property; examples/ has rules for the taskbar and native Settings.
         # Guest path: ~/.config/bellatrix/native-ui/look.toml
         version = 1
 
-        [palette]
-        surface = "#CC001811"
-        border = "#AA00AAA4"
-        text = "#BDF5EF"
-        accent = "#00AAA4"
-        fill = "#2E00AAA4"
+        # [palette]
+        # surface = "#CC101418"
+        # border = "#AA00AAA4"
+        # text = "#BDF5EF"
 
-        [[rule]]
-        surface = ["taskbar", "start-menu", "action-center"]
-        match = ["id:taskBar", "id:startMenuBg", "id:mainView"]
-        description = "The shell's three native panels."
-        background = "surface"
-        border = "border"
-        border-width = 2
-        radius = 15
+        # [[rule]]
+        # surface = ["taskbar"]
+        # match = ["id:taskBar"]
+        # background = "surface"
+        # border = "border"
+        # border-width = 1
+        # radius = 14
+        # padding = [4, 6]
 
-        [[rule]]
-        surface = ["taskbar", "start-menu", "action-center", "settings"]
-        match = ["class:TextView"]
-        description = "Text on the shell panels and in native Settings cards."
-        text-color = "text"
-
-        [[rule]]
-        surface = ["start-menu", "action-center", "settings"]
-        match = ["class:UISettingsCard", "id:appIconImageView"]
-        description = "List tiles and Settings cards."
-        background = "fill"
-        border = "border"
-        border-width = 1
-        radius = 8
-
-        [[rule]]
-        surface = ["taskbar"]
-        match = ["class:ImageView", "class:AppCompatImageView"]
-        description = "Taskbar icons."
-        icon-size = 26
-        icon-color = "accent"
+        # [[rule]]
+        # surface = ["settings"]
+        # match = ["class:UISettingsCard"]
+        # background = "#202233"
+        # radius = 8
+        # padding = [6, 8]
         """.trimIndent() + "\n"
 
     fun parse(text: String): Parsed {
@@ -240,13 +227,13 @@ object NativeUiSpec {
             problems += "palette must be a table"
         }
 
-        val rawRules =
+        val rawRules: List<*> =
             when (val value = table["rule"]) {
-                null -> emptyList()
+                null -> emptyList<Any?>()
                 is List<*> -> value
                 else -> {
                     problems += "rule must be a list of [[rule]] tables"
-                    emptyList()
+                    emptyList<Any?>()
                 }
             }
 
@@ -281,12 +268,15 @@ object NativeUiSpec {
                     problems += "rule $index: $name takes one, two or four sizes"
                     continue
                 }
-                properties[name] = value
+                properties[name] = value ?: continue
             }
             rules += Rule(surfaces, selectors, properties)
         }
         return Parsed(Spec(palette, rules), problems)
     }
+
+    /** Parses one selector token from a script or a file; bad tokens are reported by [parse]. */
+    fun selector(token: String): Selector? = selector(token, -1, mutableListOf())
 
     private fun selector(
         token: String,
@@ -325,6 +315,8 @@ object NativeUiSpec {
     fun dims(value: Any?): List<Dim?> =
         when (value) {
             is String -> value.trim().split(Regex("\\s+")).map { Dim.of(it) }
+            is Iterable<*> -> value.map { Dim.of(it) }
+            is Array<*> -> value.map { Dim.of(it) }
             else -> listOf(Dim.of(value))
         }
 
