@@ -6,5 +6,5 @@ interface IAdbShellService {
     void destroy() = 16777114;
 
     /** Installs the APK Bellatrix downloaded. Returns 0 on success. */
-    int installApk(String apkPath);
+    int installApk(String apkPath) = 1;
 }
