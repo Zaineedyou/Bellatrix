@@ -158,6 +158,7 @@ android {
     }
 
     buildFeatures {
+        aidl = true
         buildConfig = true
         viewBinding = false
     }

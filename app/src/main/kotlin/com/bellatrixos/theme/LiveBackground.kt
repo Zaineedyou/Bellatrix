@@ -10,7 +10,7 @@ val VIDEO_EXTENSIONS =
     )
 
 /** Image extensions Bellatrix can decode; animated ones are shown by the live wallpaper. */
-val IMAGE_EXTENSIONS =
+val WALLPAPER_IMAGE_EXTENSIONS =
     setOf(
         "png", "jpg", "jpeg", "jpe", "webp", "gif", "apng", "avif", "heic", "heif", "bmp", "tiff",
         "tif", "ico", "dng", "psd",
@@ -29,4 +29,4 @@ fun File.isAnimatedImageBackground() = extension.lowercase() in ANIMATED_IMAGE_E
 fun File.isLiveBackground() = isVideoBackground() || isAnimatedImageBackground()
 
 /** What the user's own backgrounds may be, besides the images Linux reads too. */
-val BACKGROUND_EXTENSIONS = IMAGE_EXTENSIONS + VIDEO_EXTENSIONS
+val BACKGROUND_EXTENSIONS = WALLPAPER_IMAGE_EXTENSIONS + VIDEO_EXTENSIONS

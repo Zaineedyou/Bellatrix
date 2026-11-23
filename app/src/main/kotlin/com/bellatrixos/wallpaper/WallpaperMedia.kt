@@ -3,10 +3,9 @@ package com.bellatrixos.wallpaper
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import com.bellatrixos.theme.BACKGROUND_EXTENSIONS
-import com.bellatrixos.theme.IMAGE_EXTENSIONS
+import com.bellatrixos.theme.WALLPAPER_IMAGE_EXTENSIONS
 import com.bellatrixos.theme.VIDEO_EXTENSIONS
 import java.io.File
 import java.util.Locale
@@ -40,9 +39,12 @@ fun Uri.displayName(context: Context): String? {
                 if (index >= 0) cursor.getString(index)?.takeIf { it.isNotBlank() }?.let { return it }
             }
         }
-        runCatching { DocumentsContract.getDocumentName(this) }.getOrNull()?.takeIf { it.isNotBlank() }?.let { return it }
     }
-    return lastPathSegment?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
+    // Content providers often use "raw:/storage/.../clip.mkv" or "msf:123" as the last segment.
+    return lastPathSegment
+        ?.substringAfterLast('/')
+        ?.substringAfterLast(':')
+        ?.takeIf { it.isNotBlank() }
 }
 
 /** Extension from the file name, or from its MIME type, restricted to formats this launcher lists as backgrounds. */
@@ -66,7 +68,7 @@ fun Uri.wallpaperKind(context: Context): WallpaperKind {
     }
     val extension = backgroundExtension(context)
     if (extension != null) {
-        if (extension in IMAGE_EXTENSIONS) return WallpaperKind.IMAGE
+        if (extension in WALLPAPER_IMAGE_EXTENSIONS) return WallpaperKind.IMAGE
         if (extension in VIDEO_EXTENSIONS) return WallpaperKind.VIDEO
     }
     // A file manager may report application/octet-stream for a perfectly good clip.

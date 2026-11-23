@@ -101,7 +101,7 @@ class UIPCUpdate : Fragment() {
         val notes =
             release?.changelog?.takeIf { it.isNotBlank() }
                 ?: getString(R.string.settings_update_dialog_no_notes)
-        val adb = (context.applicationContext as? App)?.adb
+        val adb = (context.applicationContext as? App)?.runtime?.adb
         val message =
             buildString {
                 append(getString(R.string.settings_update_dialog_current, current)).append('\n')

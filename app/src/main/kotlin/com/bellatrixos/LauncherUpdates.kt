@@ -184,7 +184,7 @@ class LauncherUpdates(
             return
         }
         if (installing) return
-        val adb = (targetContext.applicationContext as? App)?.adb
+        val adb = (targetContext.applicationContext as? App)?.runtime?.adb
         if (adb == null || !adb.ready) {
             lastError = targetContext.getString(R.string.adb_shell_status_unavailable)
             onFinished?.invoke(false)

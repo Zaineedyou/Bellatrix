@@ -106,7 +106,6 @@ class AdbBridge {
                 .daemon(false)
                 .processNameSuffix("adb")
                 .version(1)
-                .build()
         val done = AtomicBoolean(false)
         val main = Handler(Looper.getMainLooper())
         lateinit var connection: ServiceConnection
