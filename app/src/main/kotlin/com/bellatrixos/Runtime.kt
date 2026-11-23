@@ -237,6 +237,14 @@ class Runtime(
     @Volatile
     var openLinuxSettings: (() -> Unit)? = null
 
+    /** Licenses, packages and permissions are native pages of that same Settings window. */
+    @Volatile
+    var openLicenses: (() -> Unit)? = null
+    @Volatile
+    var openPackages: (() -> Unit)? = null
+    @Volatile
+    var openPermissions: (() -> Unit)? = null
+
     /** The classic drawer re-reads the guest catalog when an agent or app is installed or removed. */
     @Volatile
     var onAppsChanged: (() -> Unit)? = null
@@ -398,6 +406,9 @@ class Runtime(
         openVoiceWindow = null
         openCodingAgents = null
         openLinuxSettings = null
+        openLicenses = null
+        openPackages = null
+        openPermissions = null
         onAppsChanged = null
         onLinuxUnavailable = { showLinuxSettings() }
     }
@@ -893,6 +904,24 @@ class Runtime(
     fun showLinuxSettings() {
         val hook = openLinuxSettings
         if (hook != null) hook() else showClassicSettings("9")
+    }
+
+    /** Licenses is a native page of Bellatrix's Settings (nav id 17), never an Omalauncher screen. */
+    fun showLicenses() {
+        val hook = openLicenses
+        if (hook != null) hook() else showClassicSettings("17")
+    }
+
+    /** Packages is a native page of Bellatrix's Settings (nav id 91). */
+    fun showPackages() {
+        val hook = openPackages
+        if (hook != null) hook() else showClassicSettings("91")
+    }
+
+    /** Permissions is a native page of Bellatrix's Settings (nav id 71). */
+    fun showPermissions() {
+        val hook = openPermissions
+        if (hook != null) hook() else showClassicSettings("71")
     }
 
     /** Away from home, bring the classic window up with the requested page instead of a new settings task. */

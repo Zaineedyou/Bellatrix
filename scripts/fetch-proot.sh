@@ -14,10 +14,10 @@ OUT="${OUT:-$ROOT/app/src/main/jniLibs/arm64-v8a}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
-# Pinned, so a build ships exactly the versions whose source the licenses screen links to
-# (ui/LicensesScreen.kt). Termux's pool only keeps current versions: when a download 404s, update
+# Pinned, so a build ships exactly the versions whose source the licenses page links to
+# (app_settings/fragments/UILicenses.kt). Termux's pool only keeps current versions: when a download 404s, update
 # the version and SHA256 here (from $REPO/dists/stable/main/binary-aarch64/Packages) and the source
-# links in LicensesScreen.kt together. PROOT's SHA256 is the one termux-packages pins in
+# links in UILicenses.kt together. PROOT's SHA256 is the one termux-packages pins in
 # packages/proot/build.sh.
 PROOT=5.1.107.96
 TALLOC=2.5.0

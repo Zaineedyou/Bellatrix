@@ -202,7 +202,7 @@
     <string name="packages_remove">移除</string>
     <string name="packages_install">安装</string>
     <string name="licenses_title">开源许可</string>
-    <string name="licenses_header">Omalauncher %1$s · © 2026 Simon Schubert\n\n它包含以下开源软件。</string>
+    <string name="licenses_header">Bellatrix %1$s · © 2026 Simon Schubert\n\n它包含以下开源软件。</string>
     <string name="licenses_website">网站</string>
     <string name="licenses_source">源代码</string>
     <string name="licenses_use_proot">运行可选的 Linux 系统</string>
@@ -250,7 +250,7 @@
     <string name="settings_permissions_subtitle">麦克风、位置、文件…</string>
     <string name="permissions_title">权限</string>
     <string name="permissions_folders_title">手机文件夹</string>
-    <string name="permissions_folders_about">存放你的照片、下载和文档、供 linux 使用的文件夹：在“文件”中，以及供智能体和脚本通过 omalauncher 使用</string>
+    <string name="permissions_folders_about">存放你的照片、下载和文档、供 linux 使用的文件夹：在“文件”中，以及供智能体和脚本通过 Bellatrix 使用</string>
     <string name="permissions_folders_sdcard">linux 保存在 %1$s/Download 或 %1$s/Documents 中的文件，其他应用也能看到</string>
     <string name="permissions_folders_add">添加文件夹</string>
     <string name="permissions_folders_remove">移除</string>
@@ -262,11 +262,11 @@
     <string name="permissions_mic">麦克风</string>
     <string name="permissions_mic_uses">输入栏的麦克风、Voice、会聆听的小组件</string>
     <string name="permissions_location">位置</string>
-    <string name="permissions_location_uses">大致位置 · 天气等小组件，仅在显示时 · 智能体用 omalauncher location</string>
+    <string name="permissions_location_uses">大致位置 · 天气等小组件，仅在显示时 · 智能体用 Bellatrix location</string>
     <string name="permissions_calendar">日历</string>
-    <string name="permissions_calendar_uses">你的日程，只读 · 日历小组件 · 智能体用 omalauncher calendar</string>
+    <string name="permissions_calendar_uses">你的日程，只读 · 日历小组件 · 智能体用 Bellatrix calendar</string>
     <string name="permissions_bluetooth">蓝牙</string>
-    <string name="permissions_bluetooth_uses">AirPods 的电量和设置 · AirPods 小组件 · 智能体用 omalauncher airpods</string>
+    <string name="permissions_bluetooth_uses">AirPods 的电量和设置 · AirPods 小组件 · 智能体用 Bellatrix airpods</string>
     <string name="permissions_notifications">通知</string>
     <string name="permissions_notifications_uses">linux 运行时的状态、发送通知的小组件</string>
     <string name="permissions_notification_access">通知使用权</string>
@@ -274,7 +274,7 @@
     <string name="settings_android">android 设置</string>
     <string name="settings_android_subtitle">手机的系统设置</string>
     <string name="settings_licenses">开源许可</string>
-    <string name="settings_licenses_subtitle">Omalauncher 中的开源软件</string>
+    <string name="settings_licenses_subtitle">Bellatrix 中的开源软件</string>
     <string name="settings_system_updating">正在更新系统：%1$s…</string>
     <string name="settings_system_update_failed">系统更新没有完成</string>
     <string name="settings_retry">重试</string>

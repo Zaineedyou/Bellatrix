@@ -209,7 +209,7 @@
     <string name="packages_remove">remove</string>
     <string name="packages_install">install</string>
     <string name="licenses_title">licenses</string>
-    <string name="licenses_header">Omalauncher %1$s · © 2026 Simon Schubert\n\nIt includes the open source software below.</string>
+    <string name="licenses_header">Bellatrix %1$s · © 2026 Simon Schubert\n\nIt includes the open source software below.</string>
     <string name="licenses_website">website</string>
     <string name="licenses_source">source code</string>
     <string name="licenses_use_proot">runs the optional Linux system</string>
@@ -264,7 +264,7 @@
     <string name="settings_permissions_subtitle">microphone, location, files, …</string>
     <string name="permissions_title">permissions</string>
     <string name="permissions_folders_title">phone folders</string>
-    <string name="permissions_folders_about">folders of your photos, downloads and documents for linux: in Files, and for agents and scripts through omalauncher</string>
+    <string name="permissions_folders_about">folders of your photos, downloads and documents for linux: in Files, and for agents and scripts through Bellatrix</string>
     <string name="permissions_folders_sdcard">what linux saves in %1$s/Download or %1$s/Documents, other apps see too</string>
     <string name="permissions_folders_add">add folder</string>
     <string name="permissions_folders_remove">remove</string>
@@ -276,11 +276,11 @@
     <string name="permissions_mic">microphone</string>
     <string name="permissions_mic_uses">the prompt bar\'s mic, Voice, widgets that listen</string>
     <string name="permissions_location">location</string>
-    <string name="permissions_location_uses">approximate · widgets like the weather, while on screen · agents with omalauncher location</string>
+    <string name="permissions_location_uses">approximate · widgets like the weather, while on screen · agents with Bellatrix location</string>
     <string name="permissions_calendar">calendar</string>
-    <string name="permissions_calendar_uses">your events, read only · calendar widgets · agents with omalauncher calendar</string>
+    <string name="permissions_calendar_uses">your events, read only · calendar widgets · agents with Bellatrix calendar</string>
     <string name="permissions_bluetooth">bluetooth</string>
-    <string name="permissions_bluetooth_uses">your AirPods\' batteries and settings · AirPods widgets · agents with omalauncher airpods</string>
+    <string name="permissions_bluetooth_uses">your AirPods\' batteries and settings · AirPods widgets · agents with Bellatrix airpods</string>
     <string name="permissions_notifications">notifications</string>
     <string name="permissions_notifications_uses">linux while it runs, widgets that notify you</string>
     <string name="permissions_notification_access">notification access</string>
@@ -288,7 +288,7 @@
     <string name="settings_android">android settings</string>
     <string name="settings_android_subtitle">the phone\'s system settings</string>
     <string name="settings_licenses">licenses</string>
-    <string name="settings_licenses_subtitle">open source software in Omalauncher</string>
+    <string name="settings_licenses_subtitle">open source software in Bellatrix</string>
     <string name="settings_system_updating">updating the system: %1$s…</string>
     <string name="settings_system_update_failed">a system update didn\'t finish</string>
     <string name="settings_retry">retry</string>

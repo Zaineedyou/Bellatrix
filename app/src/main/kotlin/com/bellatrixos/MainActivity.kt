@@ -1501,6 +1501,9 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         // Coding Agents and Linux are pages of this one Bellatrix Settings window, never OWL screens.
         runtime.openCodingAgents = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "10") } }
         runtime.openLinuxSettings = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "9") } }
+        runtime.openLicenses = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "17") } }
+        runtime.openPackages = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "91") } }
+        runtime.openPermissions = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "71") } }
         runtime.onLinuxUnavailable = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "9") } }
     }
 

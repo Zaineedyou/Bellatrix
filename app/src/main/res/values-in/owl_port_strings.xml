@@ -204,7 +204,7 @@
     <string name="packages_remove">hapus</string>
     <string name="packages_install">instal</string>
     <string name="licenses_title">lisensi</string>
-    <string name="licenses_header">Omalauncher %1$s · © 2026 Simon Schubert\n\nAplikasi ini menyertakan perangkat lunak open source di bawah ini.</string>
+    <string name="licenses_header">Bellatrix %1$s · © 2026 Simon Schubert\n\nAplikasi ini menyertakan perangkat lunak open source di bawah ini.</string>
     <string name="licenses_website">situs web</string>
     <string name="licenses_source">kode sumber</string>
     <string name="licenses_use_proot">menjalankan sistem Linux opsional</string>
@@ -252,7 +252,7 @@
     <string name="settings_permissions_subtitle">mikrofon, lokasi, file, …</string>
     <string name="permissions_title">izin</string>
     <string name="permissions_folders_title">folder ponsel</string>
-    <string name="permissions_folders_about">folder berisi foto, unduhan, dan dokumenmu untuk linux: di File, dan untuk agen dan skrip lewat omalauncher</string>
+    <string name="permissions_folders_about">folder berisi foto, unduhan, dan dokumenmu untuk linux: di File, dan untuk agen dan skrip lewat Bellatrix</string>
     <string name="permissions_folders_sdcard">yang disimpan linux di %1$s/Download atau %1$s/Documents juga terlihat oleh aplikasi lain</string>
     <string name="permissions_folders_add">tambah folder</string>
     <string name="permissions_folders_remove">hapus</string>
@@ -264,11 +264,11 @@
     <string name="permissions_mic">mikrofon</string>
     <string name="permissions_mic_uses">mikrofon di bilah prompt, Voice, widget yang mendengarkan</string>
     <string name="permissions_location">lokasi</string>
-    <string name="permissions_location_uses">perkiraan · widget seperti cuaca, saat tampil di layar · agen dengan omalauncher location</string>
+    <string name="permissions_location_uses">perkiraan · widget seperti cuaca, saat tampil di layar · agen dengan Bellatrix location</string>
     <string name="permissions_calendar">kalender</string>
-    <string name="permissions_calendar_uses">acaramu, hanya dibaca · widget kalender · agen dengan omalauncher calendar</string>
+    <string name="permissions_calendar_uses">acaramu, hanya dibaca · widget kalender · agen dengan Bellatrix calendar</string>
     <string name="permissions_bluetooth">bluetooth</string>
-    <string name="permissions_bluetooth_uses">baterai dan setelan AirPods-mu · widget AirPods · agen dengan omalauncher airpods</string>
+    <string name="permissions_bluetooth_uses">baterai dan setelan AirPods-mu · widget AirPods · agen dengan Bellatrix airpods</string>
     <string name="permissions_notifications">notifikasi</string>
     <string name="permissions_notifications_uses">linux selama berjalan, widget yang memberi notifikasi</string>
     <string name="permissions_notification_access">akses notifikasi</string>
@@ -276,7 +276,7 @@
     <string name="settings_android">setelan android</string>
     <string name="settings_android_subtitle">setelan sistem ponsel</string>
     <string name="settings_licenses">lisensi</string>
-    <string name="settings_licenses_subtitle">perangkat lunak open source di Omalauncher</string>
+    <string name="settings_licenses_subtitle">perangkat lunak open source di Bellatrix</string>
     <string name="settings_system_updating">memperbarui sistem: %1$s…</string>
     <string name="settings_system_update_failed">pembaruan sistem tidak selesai</string>
     <string name="settings_retry">coba lagi</string>

@@ -17,6 +17,9 @@ import com.bellatrixos.app_settings.fragments.UIDisplayScale
 import com.bellatrixos.app_settings.fragments.UIFManager
 import com.bellatrixos.app_settings.fragments.UIHome
 import com.bellatrixos.app_settings.fragments.UILangRegion
+import com.bellatrixos.app_settings.fragments.UILicenses
+import com.bellatrixos.app_settings.fragments.UIPackages
+import com.bellatrixos.app_settings.fragments.UIPermissions
 import com.bellatrixos.app_settings.fragments.UILinux
 import com.bellatrixos.app_settings.fragments.UIMouse
 import com.bellatrixos.app_settings.fragments.UIMultitasking
@@ -56,6 +59,9 @@ class UINavigator {
         @JvmField var f4711i: String? = null
         @JvmField var linuxTitle: String? = null
         @JvmField var codingAgentsTitle: String? = null
+        @JvmField var licensesTitle: String? = null
+        @JvmField var packagesTitle: String? = null
+        @JvmField var permissionsTitle: String? = null
         @JvmField var j: String? = null
         @JvmField var f4712k: String? = null
         @JvmField var l: String? = null
@@ -75,6 +81,10 @@ class UINavigator {
 
         @JvmStatic
         fun a(i2: Int, relativeLayout: RelativeLayout?): Fragment? {
+            // Bellatrix-native pages for the ported features: never the old Compose/Material screens.
+            if (i2 == 17) return UILicenses()
+            if (i2 == 71) return UIPermissions()
+            if (i2 == 91) return UIPackages()
             if (i2 == 21) return UIMouse()
             if (i2 == 111) return UIDisplayScale()
             if (i2 == 41) return UIAppsInstalled()
@@ -190,6 +200,24 @@ class UINavigator {
                         sb.append(b)
                         sb.append("  ›  ")
                         str = l
+                    }
+                    17 -> {
+                        sb = StringBuilder()
+                        sb.append(b)
+                        sb.append("  ›  ")
+                        str = licensesTitle
+                    }
+                    71 -> {
+                        sb = StringBuilder()
+                        sb.append(f4710h)
+                        sb.append("  ›  ")
+                        str = permissionsTitle
+                    }
+                    91 -> {
+                        sb = StringBuilder()
+                        sb.append(linuxTitle)
+                        sb.append("  ›  ")
+                        str = packagesTitle
                     }
                     31 -> {
                         sb = StringBuilder()

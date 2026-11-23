@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.bellatrixos.App
 import com.bellatrixos.R
-import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.widgets.cards.UISettingsCard
 import com.bellatrixos.windows.config.UIPermissions
 import com.bellatrixos.windows.installed_apps.IntentSites
@@ -31,7 +30,7 @@ class UIPrivacy : Fragment() {
         u0?.setOnCardClickListener(permissionClick(1))
         v0?.setOnCardClickListener(permissionClick(2))
         permissions?.setOnCardClickListener {
-            (s0?.applicationContext as? App)?.runtime?.openSettings(SettingsPage.Permissions)
+            (s0?.applicationContext as? App)?.runtime?.showPermissions()
         }
     }
 

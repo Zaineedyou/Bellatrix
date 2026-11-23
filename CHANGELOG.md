@@ -9,6 +9,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.37] - 2026-11-23
+
+### Fixed
+
+- Licenses, Packages and Permissions now open as Bellatrix-native Settings pages built from the launcher's own cards, instead of the ported Compose screens. Existing links to those pages land on the native ones.
+- Licenses, package and permission strings name Bellatrix instead of Omalauncher in every translation.
+
 ## [2.9.36] - 2026-11-22
 
 ### Fixed

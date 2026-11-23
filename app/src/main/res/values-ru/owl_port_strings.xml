@@ -202,7 +202,7 @@
     <string name="packages_remove">удалить</string>
     <string name="packages_install">установить</string>
     <string name="licenses_title">лицензии</string>
-    <string name="licenses_header">Omalauncher %1$s · © 2026 Simon Schubert\n\nВ него входит открытое ПО, перечисленное ниже.</string>
+    <string name="licenses_header">Bellatrix %1$s · © 2026 Simon Schubert\n\nВ него входит открытое ПО, перечисленное ниже.</string>
     <string name="licenses_website">сайт</string>
     <string name="licenses_source">исходный код</string>
     <string name="licenses_use_proot">запускает необязательную систему Linux</string>
@@ -250,7 +250,7 @@
     <string name="settings_permissions_subtitle">микрофон, местоположение, файлы, …</string>
     <string name="permissions_title">разрешения</string>
     <string name="permissions_folders_title">папки телефона</string>
-    <string name="permissions_folders_about">папки с фото, загрузками и документами для linux: в Файлах, а для агентов и скриптов — через omalauncher</string>
+    <string name="permissions_folders_about">папки с фото, загрузками и документами для linux: в Файлах, а для агентов и скриптов — через Bellatrix</string>
     <string name="permissions_folders_sdcard">то, что linux сохраняет в %1$s/Download или %1$s/Documents, видят и другие приложения</string>
     <string name="permissions_folders_add">добавить папку</string>
     <string name="permissions_folders_remove">убрать</string>
@@ -262,11 +262,11 @@
     <string name="permissions_mic">микрофон</string>
     <string name="permissions_mic_uses">микрофон в строке ввода, Голос, виджеты, которые слушают</string>
     <string name="permissions_location">местоположение</string>
-    <string name="permissions_location_uses">приблизительное · виджеты вроде погоды, пока они на экране · агенты через omalauncher location</string>
+    <string name="permissions_location_uses">приблизительное · виджеты вроде погоды, пока они на экране · агенты через Bellatrix location</string>
     <string name="permissions_calendar">календарь</string>
-    <string name="permissions_calendar_uses">ваши события, только чтение · виджеты календаря · агенты через omalauncher calendar</string>
+    <string name="permissions_calendar_uses">ваши события, только чтение · виджеты календаря · агенты через Bellatrix calendar</string>
     <string name="permissions_bluetooth">bluetooth</string>
-    <string name="permissions_bluetooth_uses">заряд и настройки ваших AirPods · виджеты AirPods · агенты через omalauncher airpods</string>
+    <string name="permissions_bluetooth_uses">заряд и настройки ваших AirPods · виджеты AirPods · агенты через Bellatrix airpods</string>
     <string name="permissions_notifications">уведомления</string>
     <string name="permissions_notifications_uses">linux, пока он работает, и виджеты, которые присылают уведомления</string>
     <string name="permissions_notification_access">доступ к уведомлениям</string>
@@ -274,7 +274,7 @@
     <string name="settings_android">настройки android</string>
     <string name="settings_android_subtitle">системные настройки телефона</string>
     <string name="settings_licenses">лицензии</string>
-    <string name="settings_licenses_subtitle">открытое ПО в Omalauncher</string>
+    <string name="settings_licenses_subtitle">открытое ПО в Bellatrix</string>
     <string name="settings_system_updating">обновление системы: %1$s…</string>
     <string name="settings_system_update_failed">обновление системы не завершилось</string>
     <string name="settings_retry">повторить</string>

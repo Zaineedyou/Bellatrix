@@ -22,7 +22,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Omalauncher's permission set, merged here: widgets and Linux reach these through the
-         same Bellatrix permission screen (ui/settings/PermissionsScreen.kt). -->
+         same Bellatrix permission page (app_settings/fragments/UIPermissions.kt). -->
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />

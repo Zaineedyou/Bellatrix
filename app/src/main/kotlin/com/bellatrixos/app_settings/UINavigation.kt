@@ -32,6 +32,11 @@ class UINavigation {
             // Radio buttons follow the visible order: System, Linux, Coding Agents, ...
             // Page ids are unchanged, so map the two merged pages explicitly.
             val abs = kotlin.math.abs(i2)
+            // These pages have ids with a leading digit that isn't their radio section.
+            if (abs == 91) {
+                f4705a?.getOrNull(1)?.isChecked = true // Linux
+                return
+            }
             val page =
                 if (abs.toString().startsWith("10")) {
                     10

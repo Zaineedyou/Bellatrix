@@ -15,7 +15,6 @@ import com.bellatrixos.App
 import com.bellatrixos.R
 import com.bellatrixos.app_settings.UISettings
 import com.bellatrixos.database.SharedPrefs
-import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.widgets.cards.UISettingsCard
 import com.bellatrixos.widgets.cards.UISettingsCardSpinnerText
 import com.bellatrixos.windows.drivers.Display
@@ -46,7 +45,7 @@ class UIAbout : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         licenses?.setOnCardClickListener {
-            (t0?.applicationContext as? App)?.runtime?.openSettings(SettingsPage.Licenses)
+            (t0?.applicationContext as? App)?.runtime?.showLicenses()
         }
         s0?.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16.0dp"
+        android:paddingBottom="26.0dp">
+
+        <EditText
+            android:id="@+id/packages_query"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6.0dp"
+            android:autofillHints="@null"
+            android:background="@drawable/widget_edittext"
+            android:drawableEnd="@drawable/ic_search_14_regular"
+            android:hint="@string/packages_search"
+            android:imeOptions="flagNoFullscreen|flagNoExtractUi"
+            android:inputType="text"
+            android:maxLines="1"
+            android:paddingStart="12.0dp"
+            android:paddingTop="8.0dp"
+            android:paddingEnd="12.0dp"
+            android:paddingBottom="8.0dp"
+            android:textColor="@color/text_default"
+            android:textColorHint="@color/text_muted"
+            android:textSize="14.0sp" />
+
+        <TextView
+            android:id="@+id/packages_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10.0dp"
+            android:text="@string/packages_intro"
+            android:textColor="@color/text_muted"
+            android:textSize="12.0sp" />
+
+        <TextView
+            android:id="@+id/packages_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10.0dp"
+            android:layout_marginBottom="6.0dp"
+            android:textColor="@color/text_muted"
+            android:textSize="12.0sp" />
+
+        <LinearLayout
+            android:id="@+id/packages_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
+</ScrollView>

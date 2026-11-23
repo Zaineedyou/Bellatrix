@@ -17,7 +17,6 @@ import com.bellatrixos.Runtime
 import com.bellatrixos.linux.JobState
 import com.bellatrixos.linux.LinuxState
 import com.bellatrixos.linux.Stage
-import com.bellatrixos.ui.settings.SettingsPage
 import com.bellatrixos.widgets.cards.UISettingsCard
 import com.bellatrixos.widgets.cards.UISettingsCardCollapse
 import com.bellatrixos.widgets.cards.UISettingsCardProgressBar
@@ -96,7 +95,7 @@ class UILinux : Fragment() {
                 startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }
         }
-        packages.setOnCardClickListener { runtime.openSettings(SettingsPage.Packages) }
+        packages.setOnCardClickListener { runtime.showPackages() }
         terminal.setOnCardClickListener { runtime.terminal(null, "Terminal") }
         remove.setOnCardClickListener { runtime.remove() }
         installLog.setOnCardClickListener { updateLogs() }

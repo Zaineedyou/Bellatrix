@@ -128,6 +128,9 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
         UINavigator.w = navSub[11]
         UINavigator.x = navSub[12]
         UINavigator.y = context.getString(R.string.settings_nav_sub_item_typing)
+        UINavigator.licensesTitle = context.getString(R.string.settings_licenses)
+        UINavigator.packagesTitle = context.getString(R.string.settings_packages)
+        UINavigator.permissionsTitle = context.getString(R.string.settings_permissions)
 
         AppExecutors.c().postDelayed({ delayedSetup(view, savedInstanceState) }, 500L)
         if (K0.c != 0) {
@@ -216,6 +219,7 @@ class UISettings : UIFragment(), UINavigator.BreadcrumbCallback, BackPressHandle
             x0?.scrollTo(0, saved)
         }, delay)
         UINavigation.b(i2)
+        I0?.text = UINavigator.b(i2)
     }
 
     /** Navigasi "cepat" tanpa animasi geser (dipakai nav radio). */

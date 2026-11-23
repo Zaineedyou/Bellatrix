@@ -59,6 +59,24 @@ class SettingsActivity : InstantActivity() {
      */
     private fun open(intent: Intent) {
         homePage = intent.getIntExtra(EXTRA_HOME_PAGE, homePage)
+        // Old intents naming the ported screens now land on their native Bellatrix pages.
+        when (intent.getStringExtra(EXTRA_PAGE)) {
+            "Licenses" -> {
+                runtime.showLicenses()
+                closeInstantly()
+                return
+            }
+            "Packages" -> {
+                runtime.showPackages()
+                closeInstantly()
+                return
+            }
+            "Permissions" -> {
+                runtime.showPermissions()
+                closeInstantly()
+                return
+            }
+        }
         val page = intent.getStringExtra(EXTRA_PAGE)?.let { name -> SettingsPage.entries.firstOrNull { it.name == name } } ?: SettingsPage.Settings
         if (page == SettingsPage.Settings && stack.firstOrNull() == SettingsPage.Settings) return
         stack.clear()

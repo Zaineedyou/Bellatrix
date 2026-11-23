@@ -202,7 +202,7 @@
     <string name="packages_remove">削除</string>
     <string name="packages_install">インストール</string>
     <string name="licenses_title">ライセンス</string>
-    <string name="licenses_header">Omalauncher %1$s · © 2026 Simon Schubert\n\n以下のオープンソースソフトウェアが含まれています。</string>
+    <string name="licenses_header">Bellatrix %1$s · © 2026 Simon Schubert\n\n以下のオープンソースソフトウェアが含まれています。</string>
     <string name="licenses_website">ウェブサイト</string>
     <string name="licenses_source">ソースコード</string>
     <string name="licenses_use_proot">追加でインストールできる Linux システムを実行</string>
@@ -250,7 +250,7 @@
     <string name="settings_permissions_subtitle">マイク、位置情報、ファイルなど</string>
     <string name="permissions_title">権限</string>
     <string name="permissions_folders_title">スマートフォンのフォルダ</string>
-    <string name="permissions_folders_about">写真、ダウンロード、ドキュメントなどのフォルダを linux で使えるようにします。「ファイル」に表示され、エージェントやスクリプトからは omalauncher コマンドで使えます</string>
+    <string name="permissions_folders_about">写真、ダウンロード、ドキュメントなどのフォルダを linux で使えるようにします。「ファイル」に表示され、エージェントやスクリプトからは Bellatrix コマンドで使えます</string>
     <string name="permissions_folders_sdcard">linux が %1$s/Download や %1$s/Documents に保存したものは、ほかのアプリからも見えます</string>
     <string name="permissions_folders_add">フォルダを追加</string>
     <string name="permissions_folders_remove">削除</string>
@@ -262,11 +262,11 @@
     <string name="permissions_mic">マイク</string>
     <string name="permissions_mic_uses">プロンプトバーのマイク、Voice、音声を聞き取るウィジェット</string>
     <string name="permissions_location">位置情報</string>
-    <string name="permissions_location_uses">おおよその位置情報 · 天気などのウィジェット（表示中のみ） · omalauncher location を使うエージェント</string>
+    <string name="permissions_location_uses">おおよその位置情報 · 天気などのウィジェット（表示中のみ） · Bellatrix location を使うエージェント</string>
     <string name="permissions_calendar">カレンダー</string>
-    <string name="permissions_calendar_uses">予定（読み取りのみ） · カレンダーウィジェット · omalauncher calendar を使うエージェント</string>
+    <string name="permissions_calendar_uses">予定（読み取りのみ） · カレンダーウィジェット · Bellatrix calendar を使うエージェント</string>
     <string name="permissions_bluetooth">bluetooth</string>
-    <string name="permissions_bluetooth_uses">AirPods のバッテリー残量と設定 · AirPods ウィジェット · omalauncher airpods を使うエージェント</string>
+    <string name="permissions_bluetooth_uses">AirPods のバッテリー残量と設定 · AirPods ウィジェット · Bellatrix airpods を使うエージェント</string>
     <string name="permissions_notifications">通知</string>
     <string name="permissions_notifications_uses">実行中の linux、通知を送るウィジェット</string>
     <string name="permissions_notification_access">通知へのアクセス</string>
@@ -274,7 +274,7 @@
     <string name="settings_android">android の設定</string>
     <string name="settings_android_subtitle">スマートフォンのシステム設定</string>
     <string name="settings_licenses">ライセンス</string>
-    <string name="settings_licenses_subtitle">Omalauncher に含まれるオープンソースソフトウェア</string>
+    <string name="settings_licenses_subtitle">Bellatrix に含まれるオープンソースソフトウェア</string>
     <string name="settings_system_updating">システムを更新中：%1$s…</string>
     <string name="settings_system_update_failed">システムアップデートが完了しませんでした</string>
     <string name="settings_retry">再試行</string>

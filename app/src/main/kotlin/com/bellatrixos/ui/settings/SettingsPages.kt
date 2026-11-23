@@ -25,15 +25,10 @@ enum class SettingsPage {
 
     /** The store filtered to faces, kept for old intents; faces are tiles on the one home page. */
     FaceStore,
-    Packages,
 
     /** Install, progress, remove; opened by anything that needs Linux. */
     Linux,
-    Licenses,
     Gestures,
-
-    /** Every permission, to turn on or off. */
-    Permissions,
 }
 
 /** Opens [page] over the ones in [stack]; one that's already open comes back to the top, closing what's over it. */
@@ -116,11 +111,12 @@ private fun SettingsPage(
                     close()
                     runtime.showCodingAgents()
                 },
-                onPackages = { stack.push(SettingsPage.Packages) },
+                // These three are native pages of Bellatrix's Settings window, never Compose screens.
+                onPackages = { runtime.showPackages(); close() },
                 onLinux = { stack.push(SettingsPage.Linux) },
-                onLicenses = { stack.push(SettingsPage.Licenses) },
+                onLicenses = { runtime.showLicenses(); close() },
                 onGestures = { stack.push(SettingsPage.Gestures) },
-                onPermissions = { stack.push(SettingsPage.Permissions) },
+                onPermissions = { runtime.showPermissions(); close() },
             )
         SettingsPage.Style -> StyleScreen(runtime, onDismiss = close, onAgent = ::agent)
         // Kept only for old intents: hand off to the Bellatrix Settings page instead of showing a ported screen.
@@ -130,10 +126,7 @@ private fun SettingsPage(
         }
         SettingsPage.Store -> StoreScreen(runtime.widgets, runtime.agents.installed, homePage, runtime.themes.picked, onDismiss = close, onOpenApp = runtime::openOwlApp)
         SettingsPage.FaceStore -> StoreScreen(runtime.widgets, runtime.agents.installed, homePage, runtime.themes.picked, onDismiss = close, initialKind = OwlKind.Face, onOpenApp = runtime::openOwlApp)
-        SettingsPage.Packages -> PackagesScreen(runtime, onDismiss = close)
         SettingsPage.Linux -> LinuxScreen(runtime, onDismiss = close)
-        SettingsPage.Licenses -> LicensesScreen(onDismiss = close)
         SettingsPage.Gestures -> GesturesScreen(runtime, onDismiss = close, onAgent = ::agent)
-        SettingsPage.Permissions -> PermissionsScreen(runtime, onDismiss = close)
     }
 }
