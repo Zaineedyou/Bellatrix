@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.bellatrixos.App
 import com.bellatrixos.R
 import com.bellatrixos.Runtime
@@ -21,8 +22,11 @@ import com.bellatrixos.ui.Palette
 import com.bellatrixos.ui.home.NativeGrid
 import com.bellatrixos.ui.home.OwlHomeTiles
 import com.bellatrixos.ui.home.OwlSurface
+import com.bellatrixos.ui.home.WidgetScreenPanel
 import com.bellatrixos.widgets.render.Backdrop
 import com.bellatrixos.widgets.render.LocalBackdrop
+import com.bellatrixos.widgets.render.LocalHomeCovered
+import com.bellatrixos.widgets.render.LocalInputFocus
 import kotlin.math.floor
 import kotlin.math.max
 
@@ -42,6 +46,29 @@ object OwlNativeSurfaces {
         val taskBar = activity.findViewById<ViewGroup>(R.id.taskBar)
         if (parent !is ConstraintLayout || desktop == null || taskBar == null) return
         val runtime = (activity.application as? App)?.runtime ?: return
+
+        // Animated tiles stop ticking while a native window, the start menu, the scrim or an owl
+        // screen covers home. The sliding sheet moves by translation, which isn't a layout pass,
+        // so this is sampled before each draw instead of in onGlobalLayout.
+        val nativeCovered = mutableStateOf(false)
+        fun refreshNativeCovered() {
+            val scrim = parent.findViewById<View>(R.id.overlay)
+            val windows = parent.findViewById<ViewGroup>(R.id.apps_window)
+            val sheet = parent.findViewById<View>(R.id.startMenuBehavior)
+            val sheetShown =
+                sheet != null &&
+                    runCatching { BottomSheetBehavior.from(sheet).state != BottomSheetBehavior.STATE_HIDDEN }.getOrDefault(false)
+            val now =
+                scrim?.visibility == View.VISIBLE || (windows?.childCount ?: 0) > 0 || sheetShown
+            if (nativeCovered.value != now) nativeCovered.value = now
+        }
+        val coverListener =
+            ViewTreeObserver.OnPreDrawListener {
+                refreshNativeCovered()
+                true
+            }
+        parent.viewTreeObserver.addOnPreDrawListener(coverListener)
+        val covered: () -> Boolean = { runtime.widgets.openScreen != null || nativeCovered.value }
 
         val grid = mutableStateOf(measureGrid(desktop))
         val gridListener =
@@ -64,18 +91,45 @@ object OwlNativeSurfaces {
                         topToTop = ConstraintLayout.LayoutParams.PARENT_ID
                         bottomToTop = R.id.taskBar
                     }
-                setOwlContent(activity, runtime, WidgetEngine.HOME_BAR) { grid.value }
+                setOwlContent(activity, runtime, WidgetEngine.HOME_BAR, grid = { grid.value }, covered = covered)
                 addOnAttachStateChangeListener(
                     object : View.OnAttachStateChangeListener {
                         override fun onViewAttachedToWindow(v: View) = Unit
 
                         override fun onViewDetachedFromWindow(v: View) {
                             desktop.viewTreeObserver.removeOnGlobalLayoutListener(gridListener)
+                            parent.viewTreeObserver.removeOnPreDrawListener(coverListener)
                         }
                     },
                 )
             }
         parent.addView(home, (parent.indexOfChild(desktop) + 1).coerceAtMost(parent.childCount))
+
+        // A widget's screen { } belongs over the real launcher, above its windows, drawer and
+        // taskbar. It is composed only while open; an empty ComposeView takes no taps or keys.
+        ComposeView(activity).apply {
+            id = View.generateViewId()
+            layoutParams =
+                ConstraintLayout.LayoutParams(0, 0).apply {
+                    startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+                    endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+                    topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+                    bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+                }
+            setViewTreeLifecycleOwner(activity)
+            setViewTreeSavedStateRegistryOwner(activity)
+            background = null
+            isFocusable = false
+            isFocusableInTouchMode = false
+            setContent {
+                runtime.widgets.screenInstance()?.let { (spec, instance) ->
+                    CompositionLocalProvider(LocalInputFocus provides true) {
+                        WidgetScreenPanel(spec, instance, onDismiss = { runtime.widgets.openScreen = null })
+                    }
+                }
+            }
+            parent.addView(this)
+        }
     }
 
     /** The columns and rows GridAutofillLayoutManager gives the native desktop, in pixels. */
@@ -112,6 +166,7 @@ object OwlNativeSurfaces {
         runtime: Runtime,
         name: String,
         grid: (() -> NativeGrid)? = null,
+        covered: () -> Boolean = { false },
     ) {
         setViewTreeLifecycleOwner(activity)
         setViewTreeSavedStateRegistryOwner(activity)
@@ -135,7 +190,7 @@ object OwlNativeSurfaces {
                     NativeTaskbarSkin.apply(activity, runtime)
                 }
             }
-            CompositionLocalProvider(LocalBackdrop provides backdrop) {
+            CompositionLocalProvider(LocalBackdrop provides backdrop, LocalHomeCovered provides covered) {
                 OwlSurface(runtime, name, Modifier.fillMaxSize())
                 if (name == WidgetEngine.HOME_BAR && grid != null) {
                     // The first composition can precede the desktop's first layout pass. Wait for a

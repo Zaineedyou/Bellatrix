@@ -9,6 +9,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.41] - 2026-11-23
+
+### Fixed
+
+- A widget's `screen { }` now opens over Bellatrix's native home, above its windows, drawer and taskbar. Back closes that screen instead of leaving the launcher.
+- Animated home widgets pause while the native start menu, an app window, the window scrim or an open widget screen covers home, and resume when home is clear again.
+
 ## [2.9.40] - 2026-11-23
 
 ### Fixed

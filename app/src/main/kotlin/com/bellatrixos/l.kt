@@ -341,6 +341,13 @@ class l(@JvmField val v: Any, @JvmField val u: Int) : Runnable {
                     private var exitArmed = false
                     private val resetExit = Runnable { exitArmed = false }
                     override fun handleOnBackPressed() {
+                        // A widget's screen { } is a native panel over this activity: Back closes it,
+                        // not the launcher, before the start menu and window handlers below.
+                        val widgets = (mainActivity7.application as? App)?.runtime?.widgets
+                        if (widgets?.openScreen != null) {
+                            widgets.openScreen = null
+                            return
+                        }
                         if (mainActivity7.v0?.isActivated == true) {
                             mainActivity7.U0?.let { it.state = BottomSheetBehavior.STATE_HIDDEN }
                             return
