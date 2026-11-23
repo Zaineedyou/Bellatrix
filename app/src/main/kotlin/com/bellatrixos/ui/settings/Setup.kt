@@ -1,5 +1,9 @@
 package com.bellatrixos.ui.settings
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
@@ -37,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +61,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.bellatrixos.Runtime
 import com.bellatrixos.linux.LinuxState
 import com.bellatrixos.linux.Stage
+import com.bellatrixos.system.hasPermission
 import com.bellatrixos.theme.BundledTheme
 import com.bellatrixos.theme.ThemeStore
 import kotlinx.coroutines.delay
@@ -73,6 +79,32 @@ import com.bellatrixos.ui.hexColor
 import com.bellatrixos.ui.holdsKeys
 import com.bellatrixos.ui.passesKeys
 import com.bellatrixos.ui.takesPassedKeys
+
+/**
+ * Starts the Linux install and asks (Android 13+) to post notifications: the foreground
+ * service's notification shows the install's progress and that Linux is running.
+ * The install doesn't wait for the answer, which may never come back: on the welcome
+ * screen, becoming the home app moves home to a new task, away from the dialog.
+ */
+@Composable
+private fun rememberLinuxInstall(runtime: Runtime): (List<String>) -> Unit {
+    val context = LocalContext.current
+    val ask = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    return { bins ->
+        runtime.installLinux(AGENTS.filter { it.bin in bins })
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !context.hasPermission(Manifest.permission.POST_NOTIFICATIONS)
+        ) {
+            ask.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+}
+
+/** Picks up themes an agent added or removed in Linux since the launcher started, when the welcome screen opens. */
+@Composable
+private fun RescanThemes(store: ThemeStore) {
+    LaunchedEffect(store) { if (store.loaded) store.rescan() }
+}
 
 /**
  * The first-run screen: pick a theme and, optionally, set up Linux. Start
