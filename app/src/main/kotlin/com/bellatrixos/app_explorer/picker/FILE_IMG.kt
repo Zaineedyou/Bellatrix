@@ -1,6 +1,8 @@
 package com.bellatrixos.app_explorer.picker
 
-/** Ekstensi gambar yang dikenal picker. */
+import com.bellatrixos.theme.BACKGROUND_EXTENSIONS
+
+/** Extensions the image picker recognizes, shared with the Background page's own format set. */
 object FILE_IMG {
-    @JvmField val f4691a: Set<String> = setOf("jpg", "jpeg", "png", "webp", "gif")
+    @JvmField val f4691a: Set<String> = BACKGROUND_EXTENSIONS
 }

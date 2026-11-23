@@ -626,4 +626,14 @@
     <string name="linux_stay_alive_title">Stay alive in the background</string>
     <string name="linux_stay_alive_subtitle">Battery and child-process settings</string>
     <string name="settings_system_updates_subtitle">Update Linux packages with xbps</string>
+    <string name="adb_shell_title">Shell 访问权限</string>
+    <string name="adb_shell_status_checking">正在检查 Shell 访问权限…</string>
+    <string name="adb_shell_status_unavailable">Shell 访问权限尚不可用。</string>
+    <string name="adb_shell_status_permission">Bellatrix 需要 Shizuku 的 Shell 权限。</string>
+    <string name="adb_shell_status_root">Shell 访问已就绪（Root）。</string>
+    <string name="adb_shell_status_adb">Shell 访问已就绪（ADB Shell）。</string>
+    <string name="adb_shell_setup">请使用 Shizuku 或 Sui。未 root 时，可通过 USB 调试或 Android 11+ 无线调试启动，然后在此处授予 Bellatrix Shell 权限。</string>
+    <string name="adb_shell_grant">授予 Shell 访问权限</string>
+    <string name="adb_shell_install">使用 Shell 安装</string>
+    <string name="adb_shell_install_failed">Shell 安装失败，请改用 GitHub 下载。</string>
 </resources>

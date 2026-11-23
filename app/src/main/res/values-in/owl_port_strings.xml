@@ -633,4 +633,14 @@
     <string name="linux_stay_alive_title">Stay alive in the background</string>
     <string name="linux_stay_alive_subtitle">Battery and child-process settings</string>
     <string name="settings_system_updates_subtitle">Update Linux packages with xbps</string>
+    <string name="adb_shell_title">Akses shell</string>
+    <string name="adb_shell_status_checking">Memeriksa akses shell…</string>
+    <string name="adb_shell_status_unavailable">Akses shell belum tersedia.</string>
+    <string name="adb_shell_status_permission">Bellatrix memerlukan izin shell Shizuku.</string>
+    <string name="adb_shell_status_root">Akses shell siap (root).</string>
+    <string name="adb_shell_status_adb">Akses shell siap (shell ADB).</string>
+    <string name="adb_shell_setup">Gunakan Shizuku atau Sui. Tanpa root, jalankan dari debugging USB atau debugging nirkabel Android 11+, lalu beri Bellatrix izin shell di sini.</string>
+    <string name="adb_shell_grant">Berikan akses shell</string>
+    <string name="adb_shell_install">Pasang dengan shell</string>
+    <string name="adb_shell_install_failed">Pemasangan dengan shell gagal. Gunakan unduhan GitHub saja.</string>
 </resources>

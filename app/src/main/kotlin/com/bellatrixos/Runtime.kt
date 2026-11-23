@@ -17,6 +17,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
+import com.bellatrixos.adb.AdbBridge
 import com.bellatrixos.linux.AGENTS
 import com.bellatrixos.linux.Agent
 import com.bellatrixos.linux.AgentStore
@@ -175,6 +176,9 @@ class Runtime(
 
     /** A newer launcher: on Google Play in the play build, on GitHub releases in the foss build. */
     val launcherUpdates = LauncherUpdates(context)
+
+    /** Shell access for in-place updates, supplied by Shizuku/Sui in this same runtime. */
+    val adb = AdbBridge()
 
     /** Messages from the developer, shown on home. */
     val announcements = com.bellatrixos.net.Announcements(context)

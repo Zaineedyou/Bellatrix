@@ -9,6 +9,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.43] - 2026-11-24
+
+### Added
+
+- The existing Settings → Personalize → Background picker now accepts any file: images, animated images and video formats are detected from the file itself instead of a short MIME allowlist. The picked clip is also saved as a theme background, so Bellatrix's live wallpaper can keep showing it in other formats or when the launcher is not in front. Media3 exports still produce the trimmed video pair when supported; other containers fall back to the original file.
+- Shell-level app install through Shizuku or Sui, exposed from the existing PC Update dialog. Root, ADB shell, USB debugging and Android 11+ wireless debugging all reach the same privileged service; the launcher asks for shell permission in the same Settings surface and shows the current access state there.
+
 ## [2.9.42] - 2026-11-24
 
 ### Added

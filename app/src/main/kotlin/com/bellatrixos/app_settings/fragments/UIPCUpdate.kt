@@ -14,6 +14,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bellatrixos.App
 import com.bellatrixos.BuildConfig
+import com.bellatrixos.adb.AdbBridge
+import com.bellatrixos.adb.ShellStatus
 import com.bellatrixos.LauncherUpdates
 import com.bellatrixos.R
 import com.bellatrixos.database.SharedPrefs
@@ -99,6 +101,7 @@ class UIPCUpdate : Fragment() {
         val notes =
             release?.changelog?.takeIf { it.isNotBlank() }
                 ?: getString(R.string.settings_update_dialog_no_notes)
+        val adb = (context.applicationContext as? App)?.adb
         val message =
             buildString {
                 append(getString(R.string.settings_update_dialog_current, current)).append('\n')
@@ -109,6 +112,10 @@ class UIPCUpdate : Fragment() {
                     append("\n\n").append(launcher.lastError)
                 } else if (release == null) {
                     append("\n\n").append(getString(R.string.settings_update_dialog_latest_note))
+                }
+                if (adb != null) {
+                    append("\n\n").append(getString(R.string.adb_shell_title)).append(": ").append(shellStatus(adb))
+                    if (!adb.ready) append('\n').append(getString(R.string.adb_shell_setup))
                 }
             }
         val builder =
@@ -121,9 +128,21 @@ class UIPCUpdate : Fragment() {
                         getString(R.string.settings_update_dialog_latest)
                     },
                 ).setMessage(message)
-        // The launcher no longer downloads or installs APKs; the button goes straight to the release.
         builder.setPositiveButton(R.string.settings_update_dialog_download_github) { _, _ -> launcher.openRelease(context) }
-        builder.setNegativeButton(android.R.string.cancel, null)
+        if (release != null && adb?.ready == true) {
+            builder.setNegativeButton(R.string.adb_shell_install) { _, _ ->
+                b0(true)
+                launcher.installWithShell(context) { b0(false) }
+            }
+        } else {
+            builder.setNegativeButton(android.R.string.cancel, null)
+        }
+        if (adb != null && !adb.ready) {
+            builder.setNeutralButton(R.string.adb_shell_grant) { _, _ ->
+                if (adb.status == ShellStatus.UNAVAILABLE) adb.openManager(context) else adb.requestPermission()
+                adb.refresh()
+            }
+        }
         val dialog = builder.create()
         dialog.show()
         // Frost the content behind the glass on Android 12+, after the window and its
@@ -136,6 +155,17 @@ class UIPCUpdate : Fragment() {
             }
         }
     }
+
+    private fun shellStatus(adb: AdbBridge): String =
+        getString(
+            when (adb.status) {
+                ShellStatus.CHECKING -> R.string.adb_shell_status_checking
+                ShellStatus.UNAVAILABLE -> R.string.adb_shell_status_unavailable
+                ShellStatus.PERMISSION_REQUIRED -> R.string.adb_shell_status_permission
+                ShellStatus.READY_ROOT -> R.string.adb_shell_status_root
+                ShellStatus.READY_ADB -> R.string.adb_shell_status_adb
+            },
+        )
 
     fun a0(status: STATUS) {
         val context = s0

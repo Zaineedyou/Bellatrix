@@ -54,8 +54,8 @@ android {
         applicationId = "com.bellatrixos"
         minSdk = 23
         targetSdk = 36
-        versionCode = 75
-        versionName = "2.9.42"
+        versionCode = 76
+        versionName = "2.9.43"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
@@ -218,6 +218,11 @@ dependencies {
     // Embedded Lua for ~/.config/bellatrix/native-ui/ui.lua. It runs inside App.runtime;
     // it is not a second launcher runtime and needs no native library or rebuild by guests.
     implementation("org.luaj:luaj-jse:3.0.1")
+    // Optional ADB/root backend for shell-level package operations (self-update installs).
+    // Shizuku is an IPC bridge in the same process/runtime, not a second launcher.
+    // 12.2.0 is the newest line that still supports Bellatrix's minSdk 23.
+    implementation("dev.rikka.shizuku:api:12.2.0")
+    implementation("dev.rikka.shizuku:provider:12.2.0")
 
     // OWL's Compose renderer and the UI composables it shares with the launcher.
     // Compose 1.12.x pulls androidx.compose 1.12.1, which needs AGP 9.1 and

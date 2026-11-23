@@ -239,7 +239,7 @@ class BellatrixWallpaperService : WallpaperService() {
                     // ImageDecoder and AnimatedImageDrawable are API 28; older phones show the first frame as a still.
                     val gif =
                         image
-                            ?.takeIf { it.extension.lowercase() in ANIMATED_TYPES && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P }
+                            ?.takeIf { it.isAnimatedImageBackground() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P }
                             ?.let(::decodeAnimatedDrawable)
                     val movie = file?.takeIf { changed && it.isVideoBackground() }
                     // A video shows its first frame at once, as a picture, and moves when the player has frames: the
@@ -734,9 +734,6 @@ class BellatrixWallpaperService : WallpaperService() {
 
         /** Every GPU can hold a texture this big. */
         const val MAX_TEXTURE = 4096
-
-        /** Files that may hold an animation; a still WebP is told apart when it is decoded. */
-        val ANIMATED_TYPES = setOf("gif", "webp")
 
         /** The whole texture, corners in the order bottom left, bottom right, top left, top right (image top is v = 0). */
         val FULL = floatArrayOf(0f, 1f, 1f, 1f, 0f, 0f, 1f, 0f)

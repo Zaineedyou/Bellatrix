@@ -644,6 +644,16 @@ We will share more once you're back online."</string>
     <string name="settings_update_dialog_current">Versi terpasang: %1$s</string>
     <string name="settings_update_dialog_failed">Gagal mengecek rilis GitHub. Coba lagi nanti.</string>
     <string name="settings_update_dialog_download_github">Download From Github</string>
+    <string name="adb_shell_title">Shell access</string>
+    <string name="adb_shell_status_checking">Checking shell access…</string>
+    <string name="adb_shell_status_unavailable">Shell access is not available yet.</string>
+    <string name="adb_shell_status_permission">Bellatrix needs Shizuku shell permission.</string>
+    <string name="adb_shell_status_root">Shell access is ready (root).</string>
+    <string name="adb_shell_status_adb">Shell access is ready (ADB shell).</string>
+    <string name="adb_shell_setup">Use Shizuku or Sui. On an unrooted phone, start it from USB debugging or Android 11+ wireless debugging, then grant Bellatrix the shell permission here.</string>
+    <string name="adb_shell_grant">Grant shell access</string>
+    <string name="adb_shell_install">Install with shell</string>
+    <string name="adb_shell_install_failed">Shell install failed. Use the GitHub download instead.</string>
     <string name="settings_update_dialog_install_failed">Gagal mengunduh atau memasang APK. Coba lewat Chrome.</string>
     <string name="settings_update_dialog_latest">Sudah versi terbaru</string>
     <string name="settings_update_dialog_latest_note">Tidak ada pembaruan di GitHub Releases.</string>

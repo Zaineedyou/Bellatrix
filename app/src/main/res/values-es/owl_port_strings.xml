@@ -626,4 +626,14 @@
     <string name="linux_stay_alive_title">Stay alive in the background</string>
     <string name="linux_stay_alive_subtitle">Battery and child-process settings</string>
     <string name="settings_system_updates_subtitle">Update Linux packages with xbps</string>
+    <string name="adb_shell_title">Acceso de shell</string>
+    <string name="adb_shell_status_checking">Comprobando acceso de shell…</string>
+    <string name="adb_shell_status_unavailable">El acceso de shell aún no está disponible.</string>
+    <string name="adb_shell_status_permission">Bellatrix necesita el permiso de shell de Shizuku.</string>
+    <string name="adb_shell_status_root">Acceso de shell listo (root).</string>
+    <string name="adb_shell_status_adb">Acceso de shell listo (shell de ADB).</string>
+    <string name="adb_shell_setup">Usa Shizuku o Sui. Sin root, inícialo desde depuración USB o depuración inalámbrica de Android 11+ y concede a Bellatrix el permiso de shell aquí.</string>
+    <string name="adb_shell_grant">Conceder acceso de shell</string>
+    <string name="adb_shell_install">Instalar con shell</string>
+    <string name="adb_shell_install_failed">Falló la instalación con shell. Usa la descarga de GitHub.</string>
 </resources>

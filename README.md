@@ -53,7 +53,7 @@ using Bellatrix UI — there is no second home screen or parallel desktop to swi
 - Themes, wallpapers, colors, icon packs, fonts, taskbar, and home gestures
 - Guest-editable native UI scripting (look.toml + embedded ui.lua) for the taskbar, start menu, action center, Settings cards, windows and home tiles
 - OWL widget engine with native schemas and live-data previews
-- PC Update with GitHub Release changelog, a **Download From Github** button, and Chrome fallback
+- PC Update with GitHub Release changelog, a **Download From Github** button, Chrome fallback, and an optional shell install through Shizuku/Sui
 
 ### Reliability
 
@@ -130,8 +130,17 @@ dependencies. Third-party components keep their own license terms.
 3. Open the APK and accept Android's install prompt. If asked, allow Bellatrix to install unknown apps.
 4. You can also open the release page in Chrome and tap the APK directly.
 
-Inside Bellatrix, use **Settings → PC Update → Check for updates** to see the newest release version,
-its changelog, and buttons for **Install in launcher** or **Buka di Chrome**.
+Inside Bellatrix, use **Settings → PC Update → Check for updates** to see the newest release version
+and its changelog. **Download From Github** opens the release page. When shell access is granted,
+**Install with shell** downloads and installs the APK without leaving the launcher. Shell access
+comes from Shizuku or Sui: root works directly; without root, start Shizuku via USB debugging or
+Android 11+ wireless debugging, then grant Bellatrix the shell permission from the update dialog.
+The same settings page shows the current shell state.
+
+For a still or moving wallpaper, use **Settings → Personalize → Background**. The picker accepts
+any file; Bellatrix detects whether it is an image, an animated image or a video from the file
+itself. On Android 9+ animated images Android can decode animate as the live wallpaper, and video
+formats play through the system media player when the device can decode them.
 
 If replacing a build signed with a different certificate, uninstall the old version first:
 

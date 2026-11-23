@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.FileProvider
+import com.bellatrixos.adb.AdbBridge
 import com.bellatrixos.net.httpGet
 import com.bellatrixos.net.openHttp
 import com.bellatrixos.system.installerOf
@@ -21,6 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import org.json.JSONArray
 import java.io.File
 import java.io.IOException
@@ -160,6 +163,69 @@ class LauncherUpdates(
             }
         }
     }
+
+    /**
+     * Installs the release through the shell privilege already granted to Bellatrix by
+     * Shizuku/Sui. USB debugging, Android 11+ wireless debugging and root are routes to
+     * that same privilege; there is no second launcher or settings surface here.
+     */
+    fun installWithShell(
+        targetContext: Context = context,
+        onFinished: ((Boolean) -> Unit)? = null,
+    ) {
+        val release = info
+        if (release == null) {
+            onFinished?.invoke(false)
+            return
+        }
+        if (release.apk.isBlank()) {
+            openRelease(targetContext)
+            onFinished?.invoke(false)
+            return
+        }
+        if (installing) return
+        val adb = (targetContext.applicationContext as? App)?.adb
+        if (adb == null || !adb.ready) {
+            lastError = targetContext.getString(R.string.adb_shell_status_unavailable)
+            onFinished?.invoke(false)
+            return
+        }
+        installing = true
+        lastError = null
+        scope.launch {
+            try {
+                val apk =
+                    withContext(Dispatchers.IO) {
+                        val bytes = httpGet(release.apk, connectTimeout = 15_000, readTimeout = 60_000)
+                        // External app storage is readable by the shell user service; app cache is not.
+                        val dir =
+                            targetContext.getExternalFilesDir("updates")
+                                ?: File(targetContext.cacheDir, "updates").also { runCatching { it.setReadable(true, false) } }
+                        dir.mkdirs()
+                        File(dir, "Bellatrix-${release.version}.apk").apply {
+                            writeBytes(bytes)
+                            runCatching { setReadable(true, false) }
+                        }
+                    }
+                val code = withContext(Dispatchers.IO) { adb.installAwait(targetContext, apk.absolutePath) }
+                if (code != 0) lastError = targetContext.getString(R.string.adb_shell_install_failed)
+            } catch (e: Exception) {
+                Log.w(TAG, "shell install of the launcher update failed", e)
+                lastError = targetContext.getString(R.string.adb_shell_install_failed)
+            } finally {
+                withContext(Dispatchers.Main) {
+                    installing = false
+                    onFinished?.invoke(lastError == null)
+                }
+            }
+        }
+    }
+
+    private suspend fun AdbBridge.installAwait(
+        context: Context,
+        path: String,
+    ): Int =
+        suspendCoroutine { continuation -> installApk(context, path) { continuation.resume(it) } }
 
     @Suppress("UNUSED_PARAMETER")
     fun start(launcher: ActivityResultLauncher<IntentSenderRequest>) {

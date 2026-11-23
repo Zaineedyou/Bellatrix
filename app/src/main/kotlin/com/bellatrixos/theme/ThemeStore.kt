@@ -13,6 +13,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.bellatrixos.storage.LauncherData
+import com.bellatrixos.wallpaper.WallpaperKind
+import com.bellatrixos.wallpaper.backgroundExtension
+import com.bellatrixos.wallpaper.copyToBackgroundFile
+import com.bellatrixos.wallpaper.wallpaperKind
 import com.bellatrixos.R
 import com.bellatrixos.linux.Proot
 import com.bellatrixos.ui.Palette
@@ -295,34 +299,27 @@ class ThemeStore(
         }
     }
 
-    /** Copies an image into the current theme's extra backgrounds and shows it. */
+    /** Copies a picked image or video into the theme's extra backgrounds, keeping its own format. */
     suspend fun addBackground(uri: Uri) {
         val theme = current ?: return
         val file = withContext(Dispatchers.IO) {
             val dir = File(dirs.backgrounds, theme.name)
-            val type = context.contentResolver.getType(uri).orEmpty()
-            val kept = when {
-                type == "image/gif" -> "gif"
-                type == "video/webm" -> "webm"
-                type == "video/x-matroska" -> "mkv"
-                type == "video/3gpp" -> "3gp"
-                type.startsWith("video/") -> "mp4"
-                else -> null
-            }
-            val ext = kept ?: when (type) {
-                "image/png" -> "png"
-                "image/webp" -> "webp"
-                else -> "jpg"
-            }
-            val out = File(dir, "${if (type.startsWith("video/")) "video" else "image"}-${System.currentTimeMillis()}.$ext")
+            val kind = uri.wallpaperKind(context)
+            val ext = uri.backgroundExtension(context) ?: if (kind == WallpaperKind.VIDEO) "mp4" else "png"
+            val out = File(dir, "${if (kind == WallpaperKind.VIDEO) "video" else "image"}-${System.currentTimeMillis()}.$ext")
             runCatching {
-                dir.mkdirs()
-                val input = context.contentResolver.openInputStream(uri) ?: throw FileNotFoundException(uri.toString())
-                if (kept != null || type in listOf("image/png", "image/webp", "image/jpeg")) {
-                    input.use { i -> out.outputStream().use { i.copyTo(it) } }
-                } else {
-                    val bmp = input.use(BitmapFactory::decodeStream) ?: error("can't decode $type")
-                    out.outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+                if (!uri.copyToBackgroundFile(context, out)) error("can't read $uri")
+                if (!out.isVideoBackground() && !out.isAnimatedImageBackground()) {
+                    val decoded =
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                            decodeForSystemWallpaper(out, context)
+                        } else {
+                            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                            BitmapFactory.decodeFile(out.path, bounds)
+                            if (bounds.outWidth > 0 && bounds.outHeight > 0) Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888) else null
+                        }
+                    if (decoded == null) error("can't decode $ext")
+                    decoded?.recycle()
                 }
                 out
             }.onFailure {

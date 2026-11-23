@@ -1,16 +1,24 @@
 package com.bellatrixos.app_settings.fragments
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResult
+import androidx.lifecycle.lifecycleScope
+import com.bellatrixos.App
 import com.bellatrixos.AppExecutors
-import com.bellatrixos.R
 import com.bellatrixos.app_browser.files.b
+import com.bellatrixos.wallpaper.WallpaperKind
 import com.bellatrixos.wallpaper.WallpaperVideoProcessor
-import com.bellatrixos.widgets.UIToast
+import com.bellatrixos.wallpaper.backgroundExtension
+import com.bellatrixos.wallpaper.copyToBackgroundFile
+import com.bellatrixos.wallpaper.wallpaperKind
 import com.bellatrixos.widgets.cards.UISettingsCardSpinner
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 /** Hasil pemilih wallpaper dan callback spinner jenis gambar. */
@@ -18,36 +26,57 @@ class C0059h(@JvmField val u: UIBackground) :
     ActivityResultCallback<Any?>,
     UISettingsCardSpinner.SpinnerCallback {
 
-    override fun c(i2: Int) {
-        if (i2 != 1) return
-        u.z0?.setSelection(0)
-        val context = u.t0 ?: return
-        UIToast.a(context, context.getString(R.string.toast_device_coming_soon), R.drawable.ic_megaphone_24_regular, 2000)
-    }
+    /** The type row is a hint only; the picked file decides how it is applied. */
+    override fun c(i2: Int) = Unit
 
     override fun onActivityResult(result: Any?) {
-        val activityResult = result as? androidx.activity.result.ActivityResult ?: return
-        if (activityResult.resultCode != -1) return
+        val activityResult = result as? ActivityResult ?: return
+        if (activityResult.resultCode != Activity.RESULT_OK) return
         val intent: Intent = activityResult.data ?: return
         val data: Uri = intent.data ?: return
         val background = u
         val context = background.t0 ?: return
         background.b0(true)
-        if (background.z0?.getSelectedPosition() != 1) {
+
+        // The same picked file also becomes the theme's saved background, so Bellatrix's own
+        // live wallpaper sees it even when the launcher is not in front. The Background page
+        // stays the only place the user has to go to.
+        (context.applicationContext as? App)?.runtime?.let { runtime ->
+            background.viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                runCatching { runtime.themes.addBackground(data) }
+            }
+        }
+
+        val hinted =
+            when (background.z0?.getSelectedPosition()) {
+                0 -> WallpaperKind.IMAGE
+                1 -> WallpaperKind.VIDEO
+                else -> null
+            }
+        val detected = data.wallpaperKind(context)
+        val useVideo = detected == WallpaperKind.VIDEO || (detected == WallpaperKind.UNKNOWN && hinted == WallpaperKind.VIDEO)
+        if (!useVideo) {
             val quality = background.E0?.getSelectedPosition() ?: 0
             AppExecutors.d().execute(
-                com.bellatrixos.wallpaper.a(context, data, quality, background.x0, i(background, 3))
+                com.bellatrixos.wallpaper.a(context, data, quality, background.x0, i(background, 3)),
             )
             return
         }
-        val callback = object : WallpaperVideoProcessor.Callback {
-            override fun a() {
-                AppExecutors.c().post(k(0, background))
+        processVideo(context, data, background)
+    }
+
+    private fun processVideo(
+        context: Context,
+        data: Uri,
+        background: UIBackground,
+    ) {
+        val callback =
+            object : WallpaperVideoProcessor.Callback {
+                override fun a() = fallbackVideo(context, data, background)
+                override fun b(file: File, file2: File) {
+                    AppExecutors.c().post(A(background, file, file2, 2))
+                }
             }
-            override fun b(file: File, file2: File) {
-                AppExecutors.c().post(A(background, file, file2, 2))
-            }
-        }
         // Read the duration only to trim long clips; unknown or odd formats still get a chance.
         var duration: Long? = null
         val retriever = MediaMetadataRetriever()
@@ -59,17 +88,41 @@ class C0059h(@JvmField val u: UIBackground) :
             runCatching { retriever.release() }
         }
         val maxMs = if (duration != null && duration > 30_000L) 30_000L else 0L
-        val dir = File(context.filesDir, "wallpaper_videos")
-        if (!dir.exists()) dir.mkdirs()
+        val dir = File(context.filesDir, "wallpaper_videos").apply { mkdirs() }
         val main = File(dir, "wallpaper_main.mp4")
-        WallpaperVideoProcessor.a(
-            context,
-            data,
-            main,
-            b(context, data, File(dir, "wallpaper_blur.mp4"), callback, main, maxMs),
-            Runnable { callback.a() },
-            maxMs,
-        )
+        val blur = File(dir, "wallpaper_blur.mp4")
+        try {
+            WallpaperVideoProcessor.a(
+                context,
+                data,
+                main,
+                b(context, data, blur, callback, main, maxMs),
+                Runnable { callback.a() },
+                maxMs,
+            )
+        } catch (_: Throwable) {
+            // An unsupported container can fail before Media3 gives us a callback.
+            callback.a()
+        }
+    }
+
+    /** Media3 can't export every container; keep the original clip and let the player decode it directly. */
+    private fun fallbackVideo(
+        context: Context,
+        data: Uri,
+        background: UIBackground,
+    ) {
+        AppExecutors.d().execute {
+            val extension = data.backgroundExtension(context) ?: "mp4"
+            val dir = File(context.filesDir, "wallpaper_videos").apply { mkdirs() }
+            val main = File(dir, "wallpaper_main.$extension")
+            val blur = File(dir, "wallpaper_blur.$extension")
+            val copied = data.copyToBackgroundFile(context, main)
+            if (copied) data.copyToBackgroundFile(context, blur)
+            AppExecutors.c().post(
+                if (copied) A(background, main, blur, 2) else k(0, background),
+            )
+        }
     }
 
     // ActivityResultCallback.e(Object)

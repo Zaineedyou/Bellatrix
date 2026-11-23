@@ -100,6 +100,10 @@
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
+        <!-- Shizuku, Sui and the manager that can start a shell bridge on unrooted phones. -->
+        <package android:name="moe.shizuku.privileged.api" />
+        <package android:name="moe.shizuku.manager" />
+        <package android:name="com.rikka.sui" />
     </queries>
 
     <application
@@ -420,6 +424,16 @@
             android:name=".app_browser.MySuggestionProvider"
             android:authorities="${applicationId}.app_browser.MySuggestionProvider"
             android:exported="false" />
+
+        <!-- Shizuku sends its binder here; Sui uses the same API. The permission keeps
+             ordinary apps out while the shell/root service can hand the binder over. -->
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:enabled="true"
+            android:exported="true"
+            android:multiprocess="false"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
         <!-- OWL widget screens and the guest bridges they open. -->
         <activity
