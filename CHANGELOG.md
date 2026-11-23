@@ -9,6 +9,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.42] - 2026-11-24
+
+### Added
+
+- Coding agents in Linux can now modify Bellatrix's native views directly through `~/.config/bellatrix/native-ui/look.toml`. Rules match real taskbar, start menu, action center, Settings, window and home views by resource id or class and change their size, padding, background, border, text and icons in place.
+- The native UI file is watched while the launcher runs: saving it restyles the views already on screen, and `errors.txt` next to it names anything ignored.
+- `README.md` beside `look.toml` documents every surface, selector and property, and the guest `AGENTS.md` points agents to it. No theme picker, second home or replacement screen was added.
+
 ## [2.9.41] - 2026-11-23
 
 ### Fixed

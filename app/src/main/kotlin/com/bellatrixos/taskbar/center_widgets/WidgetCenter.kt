@@ -38,6 +38,7 @@ import com.bellatrixos.taskbar.center_widgets.picker.widgetPicker
 import com.bellatrixos.taskbar.center_widgets.utils.SavedWidgetItem
 import com.bellatrixos.taskbar.center_widgets.utils.WidgetsAdapter
 import com.bellatrixos.taskbar.center_widgets.utils.WidgetsRecyclerView
+import com.bellatrixos.ui.nativeui.NativeUiLook
 import com.bellatrixos.variables.Global
 import com.bellatrixos.windows.InsetManager
 import com.bellatrixos.windows.Windows
@@ -88,6 +89,7 @@ class WidgetCenter(
         val root = LayoutInflater.from(b).inflate(R.layout.taskbar_dialog_widgets, null as ViewGroup?)
         f4819a = root
         contentView = root
+        NativeUiLook.popup(root, "action-center")
         this.width = width
         height = -1
         isClippingEnabled = false

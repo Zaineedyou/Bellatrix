@@ -1,6 +1,7 @@
 package com.bellatrixos
 
 import android.app.ActivityManager
+import android.app.Application
 import android.content.ComponentCallbacks
 import android.content.Context
 import android.content.res.Configuration
@@ -54,6 +55,8 @@ import com.bellatrixos.ui.home.TerminalTiles
 import com.bellatrixos.ui.WindowManager
 import com.bellatrixos.ui.bitmapMask
 import com.bellatrixos.ui.Palette
+import com.bellatrixos.ui.nativeui.NativeUiLook
+import com.bellatrixos.ui.nativeui.NativeUiStore
 import com.bellatrixos.ui.decodeImageIcon
 import com.bellatrixos.ui.decodeSvgIcon
 import com.bellatrixos.upgrade.Provisioner
@@ -109,6 +112,9 @@ class Runtime(
     val keyboard = KeyboardBridge(wm, guestImages)
     val terminals = TerminalTiles(this)
     val style = StyleStore(context)
+
+    /** Native view overrides from ~/.config/bellatrix/native-ui/look.toml. */
+    val nativeUi = NativeUiStore(context)
     val terminalFont = TerminalFont(context, proot)
     val launcherFont = LauncherFont(proot, style, context.resources).also { it.restore() }
     val gestures = Gestures(context, style)
@@ -178,7 +184,8 @@ class Runtime(
     private val dns = LinuxDns(context, proot.rootfs)
 
     /** The launcher's own provided files (default widgets, their docs); see [Provisioner]. */
-    private val launcherFiles = Provisioner(proot.filesDir, LauncherData.LAUNCHER_MANIFEST, listOf(widgets::managed, style::managed))
+    private val launcherFiles =
+        Provisioner(proot.filesDir, LauncherData.LAUNCHER_MANIFEST, listOf(widgets::managed, style::managed, nativeUi::managed))
 
     /** Every launcher-provided file in the guest; synced only while Linux is installed. */
     private val provisioner: Provisioner =
@@ -293,6 +300,8 @@ class Runtime(
         // Saved, so removing Linux later doesn't bring the first-run screen back.
         if (launcherReady) prefs.edit().putBoolean(SETUP_DONE, true).apply()
         themes.loadPalette()
+        // look.toml edits reach the native views already on screen, not just the next launch.
+        NativeUiLook.install(context.applicationContext as Application, nativeUi)
         // style.toml is authoritative for foot too, including on first start before any edit event.
         syncTerminalFontFromStyle()
         // An agent or the user edited style.toml; the rest of the style is read where it's drawn.
@@ -391,6 +400,7 @@ class Runtime(
             widgets.start()
             themes.load()
             style.start()
+            nativeUi.start()
             if (bootstrap.wanted) runLinux { bootstrap.run() } else bootstrap.run()
         }
     }

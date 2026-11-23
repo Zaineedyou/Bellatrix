@@ -646,6 +646,7 @@
     <id name="music_list" />
     <id name="name" />
     <id name="native_ad_view" />
+    <id name="native_ui_signature" />
     <id name="navBar" />
     <id name="navGrip" />
     <id name="navResizeHandle" />

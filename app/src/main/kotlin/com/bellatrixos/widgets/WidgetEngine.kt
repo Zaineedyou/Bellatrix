@@ -26,6 +26,7 @@ import com.bellatrixos.linux.runJob
 import com.bellatrixos.ui.Palette
 import com.bellatrixos.theme.Style
 import com.bellatrixos.theme.StyleStore
+import com.bellatrixos.ui.nativeui.NativeUiSpec
 import com.bellatrixos.ui.LauncherStyle
 import com.bellatrixos.upgrade.Managed
 import com.bellatrixos.upgrade.Policy
@@ -1217,6 +1218,13 @@ class WidgetEngine(
                 "The launcher's look (theme, background, tile spacing and borders, corners, the system bars' colors, the " +
                 "terminals' font) is ~/${StyleStore.GUEST_DIR}/${StyleStore.FILE}; ${StyleStore.DEFAULTS} next to it lists every " +
                 "setting with its default and range. Changes show within a second; ${StyleStore.ERRORS} there says what was ignored and why.\n\n" +
+                "To change the native Bellatrix views themselves — taskbar, start menu, action center, Settings cards, " +
+                "window toolbars and home tiles — edit ~/${NativeUiSpec.GUEST_DIR}/${NativeUiSpec.FILE}. It contains `[[rule]]` blocks that " +
+                "find real native views by resource id or class and change their size, padding, background, border, text and icons " +
+                "in place. There is no second launcher or replacement screen: the views you change are the ones already on screen. " +
+                "${NativeUiSpec.README} next to it lists every surface, selector and property. Save the file and the next layout " +
+                "pass restyles the open views; errors.txt there names anything ignored. Do not add a theme picker or a parallel UI " +
+                "to do this.\n\n" +
                 "Everything on Bellatrix's one hard-coded home page (faces as tiles, widgets, pinned apps and folders, each tile's cell) is " +
                 "~/${HomeStore.GUEST_DIR}/${HomeStore.FILE}; edit it to move, resize or pin things. There are no extra pages to reorder; " +
                 "a `page:` in an owl file is ignored and the tile lands on that one page. docs/home.md in the widgets folder explains it.\n\n" +

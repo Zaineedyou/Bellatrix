@@ -34,6 +34,9 @@ object LauncherData {
     /** style.toml and its defaults; see [com.bellatrixos.theme.StyleStore]. The guest sees ~/.config/bellatrix/style. */
     fun styleDir(context: Context) = File(context.filesDir, "style")
 
+    /** look.toml, the guest-editable native view overrides. The guest sees ~/.config/bellatrix/native-ui. */
+    fun nativeUiDir(context: Context) = File(context.filesDir, "native-ui")
+
     /** layout.toml, where home's tiles and pages are; see [com.bellatrixos.widgets.HomeStore]. The guest sees ~/.config/bellatrix/home. */
     fun homeDir(context: Context) = File(context.filesDir, "home")
 

@@ -29,6 +29,7 @@ import com.bellatrixos.windows.drivers.network.Network
 import com.bellatrixos.windows.drivers.network.NetworkMonitor
 import com.bellatrixos.windows.drivers.volume.UIVolume
 import com.bellatrixos.interfaces.MainActivityIn
+import com.bellatrixos.ui.nativeui.NativeUiLook
 
 /** Panel cepat akses (wifi, baterai, volume, bluetooth) di atas taskbar. */
 @SuppressLint("InflateParams")
@@ -54,6 +55,7 @@ class ActionCenter(@JvmField val f4808f: Context) : PopupWindow() {
         val root = LayoutInflater.from(f4808f).inflate(R.layout.taskbar_dialog_action_center, null as ViewGroup?)
         f4806d = root
         contentView = root
+        NativeUiLook.popup(root, "action-center")
         width = -2
         height = -1
         isClippingEnabled = false

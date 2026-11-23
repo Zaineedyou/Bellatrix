@@ -51,6 +51,7 @@ using Bellatrix UI — there is no second home screen or parallel desktop to swi
 - Coding Agents as a standalone top-level page with one card per agent and per-agent dropdowns
 - Coding Agents picker in the taskbar's Widget Zone; agents are not duplicated in the app drawer
 - Themes, wallpapers, colors, icon packs, fonts, taskbar, and home gestures
+- Guest-editable native UI overrides for the taskbar, start menu, action center, Settings cards and home tiles
 - OWL widget engine with native schemas and live-data previews
 - PC Update with GitHub Release changelog, a **Download From Github** button, and Chrome fallback
 
@@ -86,6 +87,16 @@ and the native home redraws within a second; run `owl-check <file>` for an error
 preview before saving if you want the same feedback loop as a Linux status bar config. `home.owl` and
 `taskbar.owl` are the two declarative surface files; `taskbar.owl` restyles the real native taskbar
 views, while the rest of Bellatrix — windows, start menu, settings and themes — stays native.
+
+### Native UI overrides
+
+Coding agents can also edit `~/.config/bellatrix/native-ui/look.toml` to change Bellatrix's native
+views themselves. Each `[[rule]]` matches a real view by resource id or class in one of the native
+surfaces — home, taskbar, start menu, action center, settings, window, drawer or dialog — and changes
+its size, padding, background, border, text, icon or visibility in place. The file is watched while
+the launcher runs, so a save restyles the views already on screen; `errors.txt` beside it reports
+anything ignored. `README.md` in that directory is the selector and property reference. This is not
+a theme picker, a second home or a replacement renderer: the views being changed are Bellatrix's own.
 
 ## Requirements
 

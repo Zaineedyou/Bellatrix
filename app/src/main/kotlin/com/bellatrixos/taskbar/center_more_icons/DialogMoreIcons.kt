@@ -12,6 +12,7 @@ import android.widget.PopupWindow
 import com.bellatrixos.R
 import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.interfaces.MainActivityIn
+import com.bellatrixos.ui.nativeui.NativeUiLook
 import com.bellatrixos.variables.Global
 import com.bellatrixos.windows.InsetManager
 import com.bellatrixos.windows.Windows
@@ -30,6 +31,7 @@ class DialogMoreIcons(context: Context, private val mainActivityIn: MainActivity
         val root = LayoutInflater.from(context).inflate(R.layout.taskbar_dialog_more_icons, null as ViewGroup?)
         f4817a = root
         contentView = root
+        NativeUiLook.popup(root, "action-center")
         f4816f = context.resources.getDimensionPixelSize(R.dimen.taskbar_more_icons_width)
         width = f4816f
         height = -2

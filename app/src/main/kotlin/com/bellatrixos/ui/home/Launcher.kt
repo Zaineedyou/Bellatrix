@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import com.bellatrixos.Runtime
 import com.bellatrixos.theme.Style
 import com.bellatrixos.theme.StyleStore
+import com.bellatrixos.ui.nativeui.NativeUiSpec
 import com.bellatrixos.widgets.HomeStore
 import com.bellatrixos.widgets.WidgetEngine
 import com.bellatrixos.widgets.editWidgetCommand
@@ -287,11 +288,17 @@ private fun DesktopScreen(
     PulledPanel(runtime, state)
     // Full-screen panels draw over the bar.
     ThemesOverlay(runtime)
-    FileErrors(listOf(StyleStore.FILE to runtime.style.errors, HomeStore.FILE to runtime.widgets.home.errors) + runtime.gestureProblems())
+    FileErrors(
+        listOf(
+            StyleStore.FILE to runtime.style.errors,
+            NativeUiSpec.FILE to runtime.nativeUi.errors,
+            HomeStore.FILE to runtime.widgets.home.errors,
+        ) + runtime.gestureProblems(),
+    )
 }
 
 /**
- * What style.toml or layout.toml got wrong, at the top over everything, like Hyprland's bar for config errors:
+ * What a launcher config file got wrong, at the top over everything, like Hyprland's bar for config errors:
  * errors.txt is out of sight without a terminal. A tap hides the problems shown; new ones show again.
  */
 @Composable
