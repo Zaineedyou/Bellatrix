@@ -138,6 +138,7 @@
     <string name="home_news_minutes">Min</string>
     <string name="home_news_seconds">Sec</string>
     <string name="drawer_action_pin">Add to home</string>
+    <string name="drawer_action_window">Abrir em janela</string>
     <string name="drawer_action_info">App info</string>
     <string name="drawer_action_uninstall">Uninstall</string>
     <string name="linux_stage_agents_named">Install %1$s</string>
@@ -623,6 +624,7 @@
     <string name="start_section_bellatrix">Bellatrix</string>
     <string name="start_section_linux">Linux apps</string>
     <string name="voice_title">Voice</string>
+    <string name="owl_app_window">Janela do app</string>
     <string name="linux_stay_alive_title">Stay alive in the background</string>
     <string name="linux_stay_alive_subtitle">Battery and child-process settings</string>
     <string name="settings_system_updates_subtitle">Update Linux packages with xbps</string>

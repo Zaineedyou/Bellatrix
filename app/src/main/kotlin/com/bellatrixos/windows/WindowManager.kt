@@ -3,6 +3,7 @@ package com.bellatrixos.windows
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import com.bellatrixos.UIFragment
+import com.bellatrixos.UIOwlAppWindow
 import com.bellatrixos.UIVoice
 import com.bellatrixos.app_browser.UIBrowser
 import com.bellatrixos.app_explorer.UIExplorer
@@ -49,6 +50,7 @@ object WindowManager {
         "UITerminal" -> UITerminal()
         "UILinuxWindow" -> UILinuxWindow()
         "UIVoice" -> UIVoice()
+        "UIOwlAppWindow" -> UIOwlAppWindow()
         else -> when {
             str.startsWith(LINUX_AGENT_TAG_PREFIX) -> UILinuxWindow()
             str2 == null -> null

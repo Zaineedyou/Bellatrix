@@ -1132,9 +1132,11 @@ class LangTest {
             )
         assertEquals(listOf("android.drawer"), p.globals.filterIsInstance<Global.Source>().map { it.kind })
         assertEquals(listOf("read the launcher's apps (names and icons)", "act on an app from the drawer's menu: any of its entries", "act on an app from the drawer's menu: uninstall"), p.commands)
-        assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: appAction(\"delete\", \"a:x\") } }").contains("appAction takes pin, info, uninstall, remove, edit and an app's key"))
+        assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: appAction(\"delete\", \"a:x\") } }").contains("appAction takes pin, window, info, uninstall, remove, edit and an app's key"))
+        Compiler.compile("widget {\n meta { owl: 25 }\n Text { text: 1; onTap: appAction(\"window\", \"l:vesktop\") } }")
+        assertTrue(compileError("widget {\n meta { owl: 24 }\n Text { text: 1; onTap: appAction(\"window\", \"l:vesktop\") } }").contains("needs owl 25"))
         // Sharing was removed from the drawer's menu: reject it here without touching share(...).
-        assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: appAction(\"share\", \"a:x\") } }").contains("appAction takes pin, info"))
+        assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: appAction(\"share\", \"a:x\") } }").contains("appAction takes pin, window, info"))
         Compiler.compile("widget {\n meta { owl: 7 }\n Text { text: 1; onTap: share(\"hi\") } }")
         assertTrue(compileError("widget {\n meta { owl: 11 }\n Text { text: 1; onTap: workApps(\"off\") } }").contains("workApps takes pause, resume, toggle"))
         for (old in listOf("source d = android.drawer\n Text { text: 1 }", "Text { text: 1; onTap: appAction(\"pin\", \"l:foot\") }", "Text { text: 1; onTap: workApps(\"pause\") }")) {

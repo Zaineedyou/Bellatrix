@@ -15,49 +15,141 @@ data class LinuxApp(
     val wmClass: String?,
     /** Icon= value: a theme icon name or an absolute guest path. */
     val icon: String? = null,
-)
+    /** Path= from the desktop entry: the command runs in this guest directory. */
+    val dir: String? = null,
+) {
+    /**
+     * The shell command to run: the entry's working directory, then its Exec. Electron/Chromium apps need to be
+     * told to use this compositor's Wayland socket; without it Vesktop starts an X11 window that has nowhere to go.
+     */
+    val command: String
+        get() {
+            val flags = mutableListOf<String>()
+            if ("--ozone-platform" !in exec) flags += listOf("--ozone-platform=wayland", "--enable-features=UseOzonePlatform")
+            if ("--no-sandbox" !in exec) flags += "--no-sandbox"
+            val run = if (terminal || !electronLike || flags.isEmpty()) exec else "$exec ${flags.joinToString(" ")}"
+            return if (dir.isNullOrBlank()) run else "cd ${guestQuote(dir)} && $run"
+        }
 
-/** Whether a window with Wayland [appId] belongs to this app: by desktop id, StartupWMClass, or reverse-DNS tail. */
+    /** Known Electron shells; based on the desktop id, WM class, label and Exec so a renamed Vesktop still matches. */
+    val electronLike: Boolean
+        get() =
+            sequenceOf(id, wmClass.orEmpty(), name, exec)
+                .map { it.lowercase() }
+                .any { value -> ELECTRON_NAMES.any { it in value } }
+}
+
+private val ELECTRON_NAMES =
+    listOf("vesktop", "vencord", "discord", "webcord", "armcord", "electron", "chromium", "google-chrome", "brave-browser")
+
+/** Quotes a guest path so spaces and quotes in an Exec or Path cannot become shell syntax. */
+fun guestQuote(value: String): String = "'" + value.replace("'", "'\\''") + "'"
+
+/**
+ * Whether a window with Wayland [appId] belongs to this app: by desktop id, StartupWMClass, or a segment of a
+ * reverse-DNS id. Electron apps such as Vesktop use `io.github.Vesktop.Vesktop` for a `vesktop.desktop` entry;
+ * matching only the old "tail after the last dot" missed those windows.
+ */
 fun LinuxApp.matches(appId: String): Boolean {
     val id = appId.lowercase()
-    return this.id.lowercase() == id || wmClass?.lowercase() == id || this.id.substringAfterLast('.').lowercase() == id
+    val own = this.id.lowercase()
+    return own == id ||
+        wmClass?.lowercase() == id ||
+        own.substringAfterLast('.') == id ||
+        id.split('.', '-').any { it == own }
 }
 
 private val FIELD_CODE = Regex("%[fFuUdDnNickvm]")
 
 /**
- * Reads launchable entries from the guest's user and system application dirs.
- * A user entry replaces the system one with the same file name (XDG), so a
- * NoDisplay=true file in ~/.local/share/applications hides a package's entry.
+ * Reads launchable entries from every guest application dir Bellatrix knows. A user entry replaces the system one
+ * with the same file name (XDG), so a NoDisplay=true file in ~/.local/share/applications hides a package's entry.
+ * AppImages in the guest's Applications, Downloads and /opt are offered too: they have no .desktop file until
+ * their own runtime writes one, which is why an app like Vesktop could be installed and still absent from the drawer.
  */
 fun loadLinuxApps(proot: Proot): List<LinuxApp> {
-    val dirs = listOf(proot.applications, File(proot.rootfs, "usr/share/applications"))
-    return dirs
-        .flatMap { it.listFiles { f -> f.extension == "desktop" }.orEmpty().toList() }
-        .distinctBy { it.name }
-        // An entry may be a link to an absolute guest path (AUR packages link from /opt), which the host can't open.
-        .mapNotNull { runCatching { parseDesktopEntry(it) }.getOrNull() }
-        .distinctBy { it.name }
+    val root = proot.rootfs
+    val dirs =
+        listOf(
+            proot.applications,
+            File(root, "usr/local/share/applications"),
+            File(root, "usr/share/applications"),
+            File(root, "var/lib/flatpak/exports/share/applications"),
+            File(proot.home, ".local/share/flatpak/exports/share/applications"),
+            File(proot.home, "Applications"),
+        )
+    val entries =
+        dirs
+            .flatMap { it.listFiles { f -> f.extension.equals("desktop", ignoreCase = true) }.orEmpty().toList() }
+            .distinctBy { it.name }
+            .mapNotNull { runCatching { parseDesktopEntry(it) }.getOrNull() }
+    val appImages =
+        listOf(File(proot.home, "Applications"), File(proot.home, "Downloads"), File(root, "opt"))
+            .flatMap { it.walkTopDown().maxDepth(2).toList() }
+            .filter { it.isFile && it.extension.equals("appimage", ignoreCase = true) }
+            .map { appImageEntry(it, root) }
+    return (entries + appImages)
+        // The same app can ship a .desktop file and an AppImage; show one tile, preferring the desktop entry.
+        .distinctBy { it.family }
         .sortedBy { it.name.lowercase() }
 }
 
-private fun parseDesktopEntry(file: File): LinuxApp? {
+/** Groups a desktop entry and its `Vesktop-x86_64.AppImage` under one drawer tile, ignoring the arch suffix. */
+internal val LinuxApp.family: String
+    get() =
+        name.lowercase()
+            .replace(Regex("[-_ ]?(x86[-_]?64|x64|aarch64|arm64).*"), "")
+            .replace(Regex("[^a-z0-9]+"), "")
+            .ifBlank { id.lowercase().replace(Regex("[^a-z0-9]+"), "") }
+
+/** Parses one guest `.desktop` file. Kept visible to the JVM tests for the entries installers actually write. */
+internal fun parseDesktopEntry(file: File): LinuxApp? {
     var inEntry = false
     val fields = mutableMapOf<String, String>()
     file.forEachLine { raw ->
         val line = raw.trim()
         if (line.startsWith("[")) {
-            inEntry = line == "[Desktop Entry]"
+            inEntry = line.equals("[Desktop Entry]", ignoreCase = true)
         } else if (inEntry && '=' in line) {
-            val key = line.substringBefore('=')
-            fields.putIfAbsent(key, line.substringAfter('='))
+            val key = line.substringBefore('=').trim()
+            fields.putIfAbsent(key, line.substringAfter('=').trim())
         }
     }
     if (fields["Type"] != "Application") return null
     if (fields["NoDisplay"] == "true" || fields["Hidden"] == "true") return null
-    val name = fields["Name"] ?: return null
-    val exec = fields["Exec"]?.replace(FIELD_CODE, "")?.trim() ?: return null
-    return LinuxApp(name, exec, fields["Terminal"] == "true", file.nameWithoutExtension, fields["StartupWMClass"], fields["Icon"])
+    val name = fields["Name"]?.takeIf { it.isNotBlank() } ?: return null
+    val exec = fields["Exec"]?.replace(FIELD_CODE, "")?.trim()?.takeIf { it.isNotBlank() } ?: return null
+    return LinuxApp(
+        name = name,
+        exec = exec,
+        terminal = fields["Terminal"] == "true",
+        id = file.nameWithoutExtension,
+        wmClass = fields["StartupWMClass"]?.ifBlank { null },
+        icon = fields["Icon"]?.ifBlank { null },
+        dir = fields["Path"]?.ifBlank { null },
+    )
+}
+
+/**
+ * An AppImage is a single executable file. In proot there is no FUSE mount, so ask the bundled runtime to extract
+ * and run it; the id is the file name, which is also what most Electron AppImages report as their Wayland app_id.
+ */
+internal fun appImageEntry(
+    file: File,
+    rootfs: File,
+): LinuxApp {
+    val name = file.nameWithoutExtension
+    // The scan sees host paths; proot's shell sees the same files under / inside the guest.
+    val guestPath = "/" + file.relativeTo(rootfs).path.replace(File.separatorChar, '/')
+    return LinuxApp(
+        name = name,
+        exec = "${guestQuote(guestPath)} --appimage-extract-and-run",
+        terminal = false,
+        id = name.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-'),
+        wmClass = null,
+        icon = null,
+        dir = guestPath.substringBeforeLast('/').ifEmpty { "/" },
+    )
 }
 
 private val ICON_SIZES = listOf("256x256", "192x192", "128x128", "96x96", "72x72", "64x64", "48x48")

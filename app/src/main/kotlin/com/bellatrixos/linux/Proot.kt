@@ -260,6 +260,7 @@ class Proot(
                 "QT_QPA_PLATFORM=wayland",
                 "MOZ_ENABLE_WAYLAND=1",
                 "SDL_VIDEODRIVER=wayland",
+                "ELECTRON_OZONE_PLATFORM_HINT=wayland",
             ) + graphicsEnv +
             (if (cpuPinning && fastLane.isFile) listOf("LD_PRELOAD=$FAST_LANE") else emptyList()) +
             listOf("/bin/sh", "-c", script)

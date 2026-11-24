@@ -35,8 +35,10 @@ tiles = [
   declared `size:` as a starting size, near its `order:` position.
 - `app` is an Android package (`"org.mozilla.firefox"`), an activity with its
   profile when there's more than one (`"com.android.chrome/.Main@10"`),
-  `"linux:<desktop id>"`, or `"owl:<file>"` for an owl app. Adding one pins it;
-  removing it takes it off home (it stays installed).
+  `"linux:<desktop id>"`, or `"owl:<file>"` for an owl app. Linux apps are read from the guest's
+  `~/.local/share/applications`, `/usr/share/applications`, `/usr/local/share/applications`, Flatpak exports
+  and AppImages under `~/Applications`, `~/Downloads` or `/opt`, so a Vesktop entry or AppImage can be pinned
+  by its id. Adding a pin puts it on home; removing it takes it off home (it stays installed).
 - A file left out of layout.toml stays where it is. A new `.owl` lands on the page its `page:` names
   (or page 1) by its `order:` and `size:`. To take a widget or face off home, move its file to `.removed/`.
 - What couldn't be read is in `errors.txt` next to it, and on the phone's home.

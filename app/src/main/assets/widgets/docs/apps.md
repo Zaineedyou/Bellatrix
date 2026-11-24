@@ -96,7 +96,11 @@ below it, `padding: [0, screenTop, 0, 0]`, the way `screenInset` keeps buttons c
 An app is listed in the app drawer (under apps, and in search) by its name. Tapping it opens
 it in its own window, with its own card in recent apps and its `title` (or name). Like any Android app,
 Back leaves it and swiping its card away in recent apps closes it; `close()` closes it too.
-Long-press it in the drawer to add it to home, like any app.
+Long-press it in the drawer to add it to home, like any app, or pick **Open in window** to keep it
+in a resizeable Bellatrix window beside the other app windows instead. That uses the same live app
+and its `back` and `close()`; full screen stays the default tap, since apps with `edge`, `screenInset`
+or `statusBar: false` are laid out for it. A widget can offer the same action with
+`appAction("window", key)` on an app from `android.drawer` (owl 25).
 
 **Icon.** `icon` is the app's icon in the drawer, on home and in recent apps. It's fixed in the
 file rather than an expression, since it's drawn before the app runs, and it's one of two things:

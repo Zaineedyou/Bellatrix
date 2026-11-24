@@ -107,6 +107,8 @@ A bare number is dp, except `text-size`, where it is sp. Sizes may also be strin
 
 `[[window-rule]]` blocks in `look.toml` set where Bellatrix's own app windows open. `match` takes one or more
 window class names (`UIMusic`, `UIExplorer`, `UI*`) and `*` is a wildcard. The first matching rule wins.
+Linux toplevels opened from the drawer or home use `UILinuxWindow`, and owl apps opened with
+**Open in window** use `UIOwlAppWindow`, so they take these rules like Bellatrix's built-in apps.
 
 ```toml
 [[window-rule]]

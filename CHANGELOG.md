@@ -9,6 +9,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.48] - 2026-11-24
+
+### Added
+
+- The drawer and home tile menus have **Open in window**. Owl apps and guest Linux apps open in Bellatrix's own resizeable window layer with title bar, taskbar entry and normal lifecycle; Android apps ask the system for a freeform window. Widgets can offer the same action with `appAction("window", key)` (owl 25).
+- Linux app discovery also reads `/usr/local/share/applications`, Flatpak exports, and AppImages in `~/Applications`, `~/Downloads` and `/opt`, so an installed Vesktop appears in the drawer and can be pinned to home. Electron/Chromium guest apps get Wayland flags and a `Path=` working directory when their desktop entry needs one.
+
+### Fixed
+
+- A second tap on an already-open Linux app focuses its in-home window instead of trying to bring forward a task that doesn't exist.
+- Guest windows follow `look.toml` window rules like other app windows, and keep their title, resize and close controls for GUI apps as well as terminals.
+
 ## [2.9.47] - 2026-11-24
 
 ### Added

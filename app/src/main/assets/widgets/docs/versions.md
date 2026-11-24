@@ -2,7 +2,7 @@
 
 Part of the widget docs: README.md, one folder up, comes first, and paths here are from the widgets folder.
 
-`meta { owl: N }` is the language version a file needs; this launcher has 24, and without `meta` it's 1. Declare
+`meta { owl: N }` is the language version a file needs; this launcher has 25, and without `meta` it's 1. Declare
 the highest level of what the file uses: using something from a later level than the file declares is an error,
 and a launcher older than the level says "update the launcher" instead of failing on what it doesn't know. For a
 file only this phone runs, `owl: 12` is fine; for the store, a lower level reaches older launchers too.
@@ -44,3 +44,4 @@ file only this phone runs, `owl: 12` is fine; for the store, a lower level reach
   `project`, `turn`, `dot`, `cross`, `norm` and `dist`; Shader image uniforms (`uniform shader`) and array uniforms
 - **23**: `media("seek", seconds)`, `media("speed", ...)` and `media("action", id)`; `android.media`'s `canSeek`, `speed` and `actions`; `haptic("light")`, `"medium"` and `"strong"`
 - **24**: `Flex` and `Anchor` layout nodes, and the `anchor` property on children of `Box` and `Anchor` (Waybar-style declarative layout on Bellatrix home)
+- **25**: `appAction("window", key)` opens an app from `android.drawer` in a window: a Bellatrix window for owl and Linux apps, a system freeform window for Android apps

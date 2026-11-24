@@ -231,9 +231,13 @@ class Runtime(
         showLinuxSettings()
     }
 
-    /** The home screen's floating-terminal host; set while a home is on screen, cleared as it leaves. */
+    /** The home screen's floating-window host; set while home is on screen, cleared as it leaves. */
     @Volatile
-    var openFloatingTerminal: ((String) -> Unit)? = null
+    var openFloatingWindow: ((String) -> Unit)? = null
+
+    /** An owl app opened as a Bellatrix window instead of its own full-screen task. */
+    @Volatile
+    var openOwlAppWindow: ((String) -> Unit)? = null
 
     /** Files, Editor and Voice from the guest port use Bellatrix's own windows, never their old tasks. */
     @Volatile
@@ -351,12 +355,11 @@ class Runtime(
         wm.openAppWindow = { handle ->
             val window = wm.windowByHandle(handle)
             val name = window?.let { displayName(it.appId, it.title) }
-            // foot windows (the shell and every agent) are terminals: the home hosts them as
-            // floating windows, never as full-screen activities. All other guest apps keep tasks.
-            val terminal =
-                window != null && (window.appId.startsWith("bellatrix.") || name == "Terminal")
-            if (terminal && openFloatingTerminal != null) {
-                openFloatingTerminal?.invoke(handle)
+            // Every guest toplevel is hosted in Bellatrix's own window while home is up: the same
+            // frame, taskbar entry, drag/resize and close as the shell terminals. Away from home,
+            // where that host is gone, an app keeps its own Android task as before.
+            if (openFloatingWindow != null) {
+                openFloatingWindow?.invoke(handle)
             } else {
                 // Recents uses the activity's manifest label, not the task description's; see the aliases.
                 val activity =
@@ -458,9 +461,10 @@ class Runtime(
         launcherReady = true
     }
 
-    /** Called as the home leaves: a terminal opened elsewhere uses the full-window fallback again. */
+    /** Called as the home leaves: an app opened elsewhere uses the full-window fallback again. */
     fun clearHomeHooks() {
-        openFloatingTerminal = null
+        openFloatingWindow = null
+        openOwlAppWindow = null
         openExplorer = null
         openBellatrixEditor = null
         openVoiceWindow = null
@@ -857,6 +861,23 @@ class Runtime(
         shortcut.owl?.let(::openOwlApp)
     }
 
+    /** The home tile's "open in window" action, for the same kinds a drawer long-press offers. */
+    fun openInWindow(shortcut: Shortcut) {
+        shortcut.linux?.let { pinned ->
+            launch(linuxApps.apps.firstOrNull { it.id == pinned.id } ?: pinned)
+            return
+        }
+        shortcut.owl?.let {
+            openOwlAppInWindow(it)
+            return
+        }
+        shortcut.component?.let { c ->
+            androidApps.pinned(c, shortcut.profile)?.let { androidApps.openInWindow(it) } ?: androidApps.openInWindow(c, shortcut.profile)
+            return
+        }
+        shortcut.androidShortcut?.let { androidApps.openInWindow(it, shortcut.profile) }
+    }
+
     fun launch(app: LinuxApp) {
         // Our own Files app: open it directly rather than round-tripping through the guest.
         if (app.exec == FILES_COMMAND) return openFiles()
@@ -876,14 +897,22 @@ class Runtime(
             }
             return
         }
-        if (app.terminal) return terminal(app.exec, app.name)
+        if (app.terminal) return terminal(app.command, app.name)
         // Like an Android icon: an app that already has a window comes back to it. Single-instance
         // apps would otherwise just exit on a second launch, showing nothing. Quickshell apps (App Finder)
         // all share the app_id org.quickshell, so their window title, which is their name, decides.
         wm.appWindows
             .firstOrNull { (it.appId.isNotEmpty() && app.matches(it.appId)) || it.title.equals(app.name, ignoreCase = true) }
-            ?.let { if (bringToFront(it)) return }
-        launch(app.exec)
+            ?.let { existing ->
+                // A window already hosted in home has no Android task to bring forward: ask the host to focus it.
+                val handle = wm.handleOf(existing)
+                if (handle != null && openFloatingWindow != null) {
+                    openFloatingWindow?.invoke(handle)
+                    return
+                }
+                if (bringToFront(existing)) return
+            }
+        launch(app.command)
     }
 
     /** Moves [window]'s Android task to the front; false if it has none (yet). */
@@ -994,6 +1023,13 @@ class Runtime(
     /** Opens the owl app in file [name] in its own task; nothing if it isn't running (removed, or broken). */
     fun openOwlApp(name: String) {
         if (widgets.isApp(name)) InstantActivity.startInstantly(context, OwlAppActivity.intent(context, name))
+    }
+
+    /** Opens an owl app in Bellatrix's own floating window while home is up; full screen stays the default tap. */
+    fun openOwlAppInWindow(name: String) {
+        if (!widgets.isApp(name)) return
+        val inHome = openOwlAppWindow
+        if (inHome != null) inHome(name) else openOwlApp(name)
     }
 
     /** Opens voice in a Bellatrix window while home is up; the old task is only a fallback away from home. */

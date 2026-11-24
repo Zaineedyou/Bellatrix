@@ -149,6 +149,8 @@ internal fun allApps(runtime: Runtime): List<AppHit> =
 internal class AppHandlers(
     val launch: (AppHit) -> Unit,
     val pin: (AppHit) -> Unit,
+    /** Open in a Bellatrix window for owl/Linux apps, or an Android freeform window for Android apps. */
+    val window: (AppHit) -> Unit,
     val info: (AndroidApp) -> Unit,
     val uninstall: (AndroidApp) -> Unit,
     val remove: (AndroidShortcut) -> Unit,
@@ -183,20 +185,21 @@ internal val AppHit.profileKind: String?
         }
 
 /**
- * The long-press menu's entries, as the words `appAction(word, key)` takes: pin to home, for owl apps editing
- * and removing, for Android apps their info and uninstall, and for shortcuts removing them.
+ * The long-press menu's entries, as the words `appAction(word, key)` takes: pin to home, open in a window, for owl
+ * apps editing and removing, for Android apps their info and uninstall, and for shortcuts removing them.
  */
 internal fun AppHit.actionWords(): List<String> =
     when (this) {
-        is AppHit.Linux -> listOf("pin")
-        is AppHit.Owl -> listOf("pin", "edit", "remove")
-        is AppHit.Android -> listOfNotNull("pin", "info", if (app.system) null else "uninstall")
-        is AppHit.Shortcut -> listOf("pin", "remove")
+        is AppHit.Linux -> listOf("pin", "window")
+        is AppHit.Owl -> listOf("pin", "window", "edit", "remove")
+        is AppHit.Android -> listOfNotNull("pin", "window", "info", if (app.system) null else "uninstall")
+        is AppHit.Shortcut -> listOf("pin", "window", "remove")
     }
 
 private val ACTION_LABELS =
     mapOf(
         "pin" to R.string.drawer_action_pin,
+        "window" to R.string.drawer_action_window,
         "info" to R.string.drawer_action_info,
         "uninstall" to R.string.drawer_action_uninstall,
         "edit" to R.string.home_edit,
@@ -211,6 +214,7 @@ internal fun AppHit.act(
     if (word !in actionWords()) return
     when (word) {
         "pin" -> handlers.pin(this)
+        "window" -> handlers.window(this)
         "info" -> (this as? AppHit.Android)?.let { handlers.info(it.app) }
         "uninstall" -> (this as? AppHit.Android)?.let { handlers.uninstall(it.app) }
         "remove" ->
@@ -245,6 +249,17 @@ internal fun AppHit.open(runtime: Runtime) {
         is AppHit.Android -> runtime.androidApps.open(app)
         is AppHit.Shortcut -> runtime.androidApps.open(shortcut)
         is AppHit.Owl -> runtime.openOwlApp(spec.file.name)
+    }
+}
+
+/** The "open in window" action: owl and Linux apps use Bellatrix's window layer; Android apps use system freeform. */
+internal fun AppHit.openWindow(runtime: Runtime) {
+    runtime.usage.record(key)
+    when (this) {
+        is AppHit.Linux -> runtime.launch(app)
+        is AppHit.Owl -> runtime.openOwlAppInWindow(spec.file.name)
+        is AppHit.Android -> runtime.androidApps.openInWindow(app)
+        is AppHit.Shortcut -> runtime.androidApps.openInWindow(shortcut)
     }
 }
 

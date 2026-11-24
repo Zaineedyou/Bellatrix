@@ -31,11 +31,12 @@ import com.bellatrixos.wayland.XdgToplevel
 /**
  * A Linux toplevel drawn inside a normal Bellatrix floating window.
  *
- * [LinuxWindowActivity] remains the host for ordinary guest apps, but the
- * terminal is launched as this fragment so it behaves like every other
+ * While home is up, every guest toplevel — terminal, agent or a GUI app such as
+ * Vesktop — is launched as this fragment, so it behaves like every other
  * launcher window: draggable, resizable, minimisable and listed in the taskbar.
+ * [LinuxWindowActivity] stays the fallback for apps opened away from home.
  * Pixels still come straight from the Wayland compositor into [WindowTextureView],
- * so a raised terminal covers ordinary Views like the Coding Agents page instead
+ * so a raised window covers ordinary Views like the Coding Agents page instead
  * of staying behind them on SurfaceView's separate layer. Android only supplies
  * the frame, input, keybar and soft keyboard.
  */

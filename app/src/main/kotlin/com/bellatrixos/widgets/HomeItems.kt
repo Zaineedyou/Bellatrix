@@ -222,6 +222,7 @@ class Shortcuts(
                     id = it.getString("id"),
                     wmClass = it.optString("wmClass").ifEmpty { null },
                     icon = it.optString("icon").ifEmpty { null },
+                    dir = it.optString("dir").ifEmpty { null },
                 )
             }
         return Shortcut(
@@ -380,7 +381,8 @@ class Shortcuts(
                         .put("terminal", it.terminal)
                         .put("id", it.id)
                         .putOpt("wmClass", it.wmClass)
-                        .putOpt("icon", it.icon),
+                        .putOpt("icon", it.icon)
+                        .putOpt("dir", it.dir),
                 )
             }
             array.put(o)

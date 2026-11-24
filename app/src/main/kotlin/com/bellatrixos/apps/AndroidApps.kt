@@ -1,5 +1,6 @@
 package com.bellatrixos.apps
 
+import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -17,8 +18,10 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.Bundle
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
@@ -339,6 +342,12 @@ class AndroidAppCatalog(
     private fun open(
         component: ComponentName,
         user: UserHandle,
+    ) = open(component, user, null)
+
+    private fun open(
+        component: ComponentName,
+        user: UserHandle,
+        options: Bundle?,
     ) {
         if (resume(user)) return
         // Uninstalled or disabled since the list was loaded.
@@ -350,11 +359,81 @@ class AndroidAppCatalog(
                         .addCategory(Intent.CATEGORY_LAUNCHER)
                         .setComponent(component)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED or Intent.FLAG_ACTIVITY_NO_ANIMATION),
+                    options,
                 )
             } else {
-                launcherApps.startMainActivity(component, user, null, null)
+                launcherApps.startMainActivity(component, user, null, options)
             }
         }.onFailure { Log.w(TAG, "cannot open $component in $user", it) }
+    }
+
+    /**
+     * Opens an Android app in a system freeform window. Unlike owl and guest Linux apps, a third-party APK's
+     * Activity cannot be hosted inside Bellatrix's window layer, so Android draws the frame here; the system can
+     * ignore the request when freeform windows are turned off for this user.
+     */
+    fun openInWindow(app: AndroidApp) = openInWindow(app.component, app.profile)
+
+    /** Opens a pinned Android app in a system freeform window; [profile] as in [AndroidApp.profile]. */
+    fun openInWindow(
+        component: ComponentName,
+        profile: Long?,
+    ) {
+        val user = userOf(profile)
+        if (user == null) {
+            Log.w(TAG, "cannot open $component in window: its profile $profile is gone")
+            return
+        }
+        open(component, user, freeformOptions())
+    }
+
+    /** Opens an Android-made shortcut in a system freeform window. */
+    fun openInWindow(shortcut: AndroidShortcut) = openInWindow(shortcut.ref, shortcut.profile)
+
+    /** Opens a pinned shortcut in a system freeform window; [profile] as in [AndroidShortcut.profile]. */
+    fun openInWindow(
+        ref: ShortcutRef,
+        profile: Long?,
+    ) {
+        val user = userOf(profile)
+        if (user == null) {
+            Log.w(TAG, "cannot open shortcut $ref in window: its profile $profile is gone")
+            return
+        }
+        open(ref, user, freeformOptions())
+    }
+
+    private fun open(
+        ref: ShortcutRef,
+        user: UserHandle,
+    ) = open(ref, user, null)
+
+    private fun open(
+        ref: ShortcutRef,
+        user: UserHandle,
+        options: Bundle?,
+    ) {
+        if (resume(user)) return
+        // Removed or turned off by its app since the list was loaded, or this isn't the default home app anymore.
+        runCatching { launcherApps.startShortcut(ref.packageName, ref.id, null, options, user) }
+            .onFailure { Log.w(TAG, "cannot open shortcut $ref in $user", it) }
+    }
+
+    /** A centred, reusable freeform bounds; `setWindowMode` is @hide, so set it by reflection when it exists. */
+    private fun freeformOptions(): Bundle? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return null
+        val metrics = context.resources.displayMetrics
+        val width = (metrics.widthPixels * 0.82f).toInt().coerceAtLeast(320)
+        val height = (metrics.heightPixels * 0.72f).toInt().coerceAtLeast(320)
+        val left = ((metrics.widthPixels - width) / 2).coerceAtLeast(0)
+        val top = ((metrics.heightPixels - height) / 2).coerceAtLeast(0)
+        val opts = ActivityOptions.makeBasic()
+        opts.setLaunchBounds(Rect(left, top, left + width, top + height))
+        // WindowConfiguration.WINDOWING_MODE_FREEFORM == 5; hidden from the SDK, and some builds ignore it.
+        runCatching {
+            opts.javaClass.getMethod("setWindowMode", Int::class.javaPrimitiveType).invoke(opts, 5)
+        }.onFailure { Log.w(TAG, "freeform window mode unavailable", it) }
+        return opts.toBundle()
     }
 
     /** Opens [shortcut] through the app that made it; in a paused work profile, as [open] does for apps. */
@@ -371,16 +450,6 @@ class AndroidAppCatalog(
             return
         }
         open(ref, user)
-    }
-
-    private fun open(
-        ref: ShortcutRef,
-        user: UserHandle,
-    ) {
-        if (resume(user)) return
-        // Removed or turned off by its app since the list was loaded, or this isn't the default home app anymore.
-        runCatching { launcherApps.startShortcut(ref.packageName, ref.id, null, null, user) }
-            .onFailure { Log.w(TAG, "cannot open shortcut $ref in $user", it) }
     }
 
     /** The profile [profile] is the serial number of, as in [AndroidApp.profile]; null once it's gone. */

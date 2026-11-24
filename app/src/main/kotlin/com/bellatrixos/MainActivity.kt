@@ -1480,12 +1480,15 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     /** Keeps every guest window routed into a Bellatrix window, including taskbar Terminal taps. */
     private fun installRuntimeHooks() {
         val runtime = (application as App).runtime
-        // Every foot window, from any tile, becomes a floating home window. Missing Linux goes
+        // Every guest window, from any tile or the drawer, becomes a floating home window. Missing Linux goes
         // to the one launcher Settings screen, never a separate legacy Linux window.
-        runtime.openFloatingTerminal = { handle ->
+        runtime.openFloatingWindow = { handle ->
             if (!isFinishing && !isDestroyed) {
                 runOnUiThread { this@MainActivity.c0(runtime.floatingWindowTag(handle), handle) }
             }
+        }
+        runtime.openOwlAppWindow = { name ->
+            if (!isFinishing && !isDestroyed) runOnUiThread { c0(UIOwlAppWindow.TAG, name) }
         }
         // Installing or removing an agent rewrites its .desktop entry; the drawer is one
         // list, so just rebuild that list. No agents button, no separate screen.

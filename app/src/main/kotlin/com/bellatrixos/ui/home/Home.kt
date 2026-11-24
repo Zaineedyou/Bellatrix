@@ -481,6 +481,9 @@ fun HomeScreen(
                     EditBar {
                         // A widget's own file, or the owl app a pinned shortcut opens.
                         val spec = if (item is WidgetItem) item.spec else (item as? Shortcut)?.owl?.let(engine.specs::app)
+                        if (item is Shortcut) {
+                            EditAction(stringResource(R.string.drawer_action_window)) { runtime.openInWindow(item) }
+                        }
                         if (spec != null) EditAction(stringResource(R.string.home_edit)) { edit(spec) }
                         if (spec != null) EditAction(stringResource(R.string.home_edit_file)) { editFile(spec) }
                         EditAction(stringResource(R.string.home_remove), Palette.red) { remove(item) }

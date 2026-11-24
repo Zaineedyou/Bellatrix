@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layoutDirection="locale">
+
+    <com.bellatrixos.widgets.FloatingLayout
+        android:id="@+id/owl_app_floating_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/app_dialog_bg_dark"
+        android:backgroundTintMode="src_atop"
+        android:clickable="true"
+        android:elevation="5dp"
+        android:focusable="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <com.bellatrixos.widgets.UITitleBar
+                android:id="@id/titleBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:ui_title="@string/owl_app_window" />
+
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/owl_app_compose_host"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+    </com.bellatrixos.widgets.FloatingLayout>
+</FrameLayout>

@@ -147,10 +147,17 @@ private fun DesktopScreen(
         hit.open(runtime)
     }
 
+    fun openWindow(hit: AppHit) {
+        state.query = ""
+        state.closeNow()
+        hit.openWindow(runtime)
+    }
+
     val handlers =
         remember(runtime, state, context) {
             AppHandlers(
                 launch = ::launch,
+                window = ::openWindow,
                 // Pins to the page that's showing; the panel closes so the new tile is visible.
                 pin = { hit ->
                     when (hit) {

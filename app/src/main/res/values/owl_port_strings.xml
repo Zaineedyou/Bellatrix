@@ -145,6 +145,7 @@
     <string name="home_news_minutes">Min</string>
     <string name="home_news_seconds">Sec</string>
     <string name="drawer_action_pin">Add to home</string>
+    <string name="drawer_action_window">Open in window</string>
     <string name="drawer_action_info">App info</string>
     <string name="drawer_action_uninstall">Uninstall</string>
     <string name="linux_stage_agents_named">Install %1$s</string>
@@ -549,6 +550,7 @@
     <string name="agents_remove">Remove</string>
     <string name="agents_install">Install</string>
     <string name="voice_title">Voice</string>
+    <string name="owl_app_window">App window</string>
     <string name="guest_files_title">Files</string>
     <string name="guest_editor_title">Editor</string>
     <string name="voice_listening">Listening</string>
