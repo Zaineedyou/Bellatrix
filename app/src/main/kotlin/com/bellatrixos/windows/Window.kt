@@ -11,6 +11,9 @@ class Window(@JvmField var c: Int) {
     @JvmField var b: Float = -1.0f
     @JvmField var f4869d: Int = 1
 
+    /** The fragment class this window belongs to, so native-ui window rules can match it. */
+    @JvmField var tag: String? = null
+
     fun a(i2: Int) {
         c = i2
         f4870e?.b(i2)

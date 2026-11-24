@@ -1,13 +1,14 @@
 # Bellatrix native UI scripting
 
-Two files in this directory let a coding agent change Bellatrix's **own** UI from Linux:
+Three files in this directory let a coding agent change Bellatrix's **own** UI from Linux:
 
 | File | What it owns |
 | --- | --- |
-| `look.toml` | Declarative style for existing native `View`s: size, padding, background, border, text, icon, visibility |
+| `look.toml` | Declarative style for existing native `View`s: size, padding, background, border, text, icon, visibility, and window geometry |
 | `ui.lua` | Behaviour: click/long-click/gesture hooks, adapter data, taskbar actions, Settings navigation, window decorations |
+| `keys.toml` | Global key chords on Bellatrix's home screen and windows |
 
-Guest path: `~/.config/bellatrix/native-ui/`. Errors from both files go to `errors.txt` beside them.
+Guest path: `~/.config/bellatrix/native-ui/`. Errors from all three files go to `errors.txt` beside them.
 
 Both shipped files are neutral templates: a fresh install keeps the stock Bellatrix look and behavior.
 Save either file and the change reaches the views already on screen within a second. A file that does not
@@ -16,6 +17,8 @@ parse is ignored and reported, never overwritten. Deleting `look.toml` restores 
 window, renderer or mode toggle. Every change lands on a Bellatrix `View` that is already on screen.
 
 `examples/taskbar.lua` and `examples/settings.lua` are active examples you can copy into `ui.lua`.
+
+Deleting `keys.toml` removes every global binding; no key is bound on a fresh install.
 
 ## `look.toml`
 
@@ -99,6 +102,52 @@ Colors accept a palette name, `#rgb`, `#rrggbb` or `#aarrggbb`.
 
 A bare number is dp, except `text-size`, where it is sp. Sizes may also be strings: `8dp`, `12sp`, `3px`,
 `50%`, `match`, `wrap`.
+
+### Window geometry
+
+`[[window-rule]]` blocks in `look.toml` set where Bellatrix's own app windows open. `match` takes one or more
+window class names (`UIMusic`, `UIExplorer`, `UI*`) and `*` is a wildcard. The first matching rule wins.
+
+```toml
+[[window-rule]]
+match = ["UIMusic", "UIPhotos"]
+gaps = 12
+width = "70%"
+height = "80%"
+state = "floating"
+```
+
+| Property | Effect |
+| --- | --- |
+| `gaps` | dp kept on every side; the window is inset and nudged away from the screen edge |
+| `width`, `height` | Size as dp, px, or a percentage of the screen; `match` fills, `wrap` keeps the default |
+| `state` | `floating`, `maximized` or `fullscreen` |
+
+Wayland guest windows are placed by the compositor; these rules apply to the launcher's native windows
+(music, video, Photos, Files, Browser, Settings, Notepad, …).
+
+## `keys.toml`
+
+Global chords are listed one per `[[keybind]]`. A chord needs at least one modifier (`Super`, `Ctrl`, `Alt`,
+`Shift`) plus a letter, digit or named key (`Esc`, `Enter`, `Tab`, `Space`, `F1`–`F12`, arrow names). A bare
+key is never bound, so typing in a terminal or editor is untouched. Keys are caught on Bellatrix's home and
+in its windows; an app outside the launcher keeps its own keys.
+
+```toml
+version = 1
+
+[[keybind]]
+combo = "Super+T"
+action = "terminal"
+
+[[keybind]]
+combo = "Super+Shift+F"
+action = "files"
+```
+
+Actions: `terminal`, `files`, `settings`, `linux-settings`, `coding-agents`, `voice`, `close`.
+`close` closes the focused Wayland window, when there is one. Bad combos and unknown actions are reported in
+`errors.txt` and skipped.
 
 ## `ui.lua`
 

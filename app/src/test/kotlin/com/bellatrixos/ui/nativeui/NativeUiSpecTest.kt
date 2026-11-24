@@ -91,4 +91,29 @@ class NativeUiSpecTest {
         assertTrue(parsed.spec.rules.isEmpty())
         assertTrue(parsed.problems.single().contains("line 1"))
     }
+
+    @Test fun readsWindowGeometryRules() {
+        val parsed =
+            NativeUiSpec.parse(
+                """
+                version = 1
+                [[window-rule]]
+                match = ["UIMusic", "UI*"]
+                gaps = 12
+                width = "70%"
+                height = 480
+                state = "floating"
+                """.trimIndent(),
+            )
+        assertEquals(emptyList<String>(), parsed.problems)
+        val rule = parsed.spec.windowRules.single()
+        assertTrue(rule.matches("UIMusic"))
+        assertTrue(rule.matches("UIPhotos"))
+        assertFalse(rule.matches("MainActivity"))
+        assertFalse(rule.matches(null))
+        assertEquals(12f, rule.gaps ?: -1f)
+        assertEquals(NativeUiSpec.Dim(70f, NativeUiSpec.Dim.Kind.PERCENT), rule.width)
+        assertEquals(NativeUiSpec.Dim(480f, NativeUiSpec.Dim.Kind.DP), rule.height)
+        assertEquals("floating", rule.state)
+    }
 }

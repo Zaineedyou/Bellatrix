@@ -103,6 +103,7 @@ import com.bellatrixos.taskbar.utils.HorizontalDragCallback
 import com.bellatrixos.taskbar.utils.ObservableList
 import com.bellatrixos.ui.BrowserPages
 import com.bellatrixos.ui.WidgetAsks
+import com.bellatrixos.ui.nativeui.GlobalKeys
 import com.bellatrixos.ui.keyPressed
 import com.bellatrixos.ui.keysFocused
 import com.bellatrixos.ui.keysStartAgain
@@ -1398,6 +1399,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     // Lint flags super.dispatchKeyEvent: ComponentActivity marks its override @RestrictTo, but Activity's is public API.
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (GlobalKeys.dispatch(event)) return true
         val down = event.action == KeyEvent.ACTION_DOWN
         if (down) keyPressed(window.decorView)
         if (down && movesFocus(event.keyCode) && keysStartAgain(window.decorView)) return true

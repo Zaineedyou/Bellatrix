@@ -56,8 +56,10 @@ import com.bellatrixos.ui.home.TerminalTiles
 import com.bellatrixos.ui.WindowManager
 import com.bellatrixos.ui.bitmapMask
 import com.bellatrixos.ui.Palette
+import com.bellatrixos.ui.nativeui.GlobalKeys
 import com.bellatrixos.ui.nativeui.NativeUiLook
 import com.bellatrixos.ui.nativeui.NativeUiStore
+import com.bellatrixos.windows.WindowSize
 import com.bellatrixos.ui.decodeImageIcon
 import com.bellatrixos.ui.decodeSvgIcon
 import com.bellatrixos.upgrade.Provisioner
@@ -387,6 +389,41 @@ class Runtime(
         terminalFont.sync(family, text)
     }
 
+    /** Runs a binding from native-ui/keys.toml through the actions Bellatrix already has. */
+    private fun runGlobalAction(action: String): Boolean =
+        when (action) {
+            "terminal" -> {
+                terminal(null, "Terminal")
+                true
+            }
+            "files" -> {
+                openFiles()
+                true
+            }
+            "settings" -> {
+                showNativeSettings()
+                true
+            }
+            "linux-settings" -> {
+                showLinuxSettings()
+                true
+            }
+            "coding-agents" -> {
+                showCodingAgents()
+                true
+            }
+            "voice" -> {
+                openVoice()
+                true
+            }
+            "close" ->
+                wm.focused?.let { focused ->
+                    wm.close(focused)
+                    true
+                } ?: false
+            else -> false
+        }
+
     /** The launcher first (it never waits for Linux), then Linux if it's installed or an install was started. */
     fun start() {
         if (started) return
@@ -404,6 +441,12 @@ class Runtime(
             widgets.start()
             themes.load()
             style.start()
+            // One key dispatcher and one set of window rules, both fed by the guest-editable native-ui files.
+            nativeUi.onKeysChange = { bindings -> GlobalKeys.bindings = bindings }
+            nativeUi.onWindowRulesChange = { rules -> WindowSize.setRules(rules) }
+            GlobalKeys.handler = { action -> runGlobalAction(action) }
+            GlobalKeys.bindings = nativeUi.bindings
+            WindowSize.setRules(nativeUi.windowRules)
             nativeUi.start()
             if (bootstrap.wanted) runLinux { bootstrap.run() } else bootstrap.run()
         }

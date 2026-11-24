@@ -8,6 +8,7 @@ import android.widget.FrameLayout
 import com.bellatrixos.R
 import com.bellatrixos.UIFragment
 import com.bellatrixos.interfaces.MainActivityIn
+import com.bellatrixos.ui.nativeui.NativeUiSpec
 import com.bellatrixos.variables.Global
 import com.bellatrixos.widgets.FloatingLayout
 import com.bellatrixos.widgets.TitleBar
@@ -30,6 +31,29 @@ object WindowSize {
     @JvmField var f4877k: Int = 0
     @JvmField var l: Int = 0
     @JvmField var m: Int = -1
+
+    /** From native-ui/look.toml; applied where a window's bounds are computed. */
+    @JvmField var rules: List<NativeUiSpec.WindowRule> = emptyList()
+
+    fun setRules(newRules: List<NativeUiSpec.WindowRule>) {
+        rules = newRules
+    }
+
+    /** A dp size, a percentage of the screen, or a fixed size kept as-is. */
+    private fun dimension(
+        dim: NativeUiSpec.Dim?,
+        screen: Int,
+        computed: Int,
+        density: Float,
+    ): Int =
+        when (dim?.kind) {
+            null -> computed
+            NativeUiSpec.Dim.Kind.PERCENT -> (screen * dim.value / 100f).toInt().coerceAtLeast(1)
+            NativeUiSpec.Dim.Kind.DP -> (dim.value * density).toInt().coerceAtLeast(1)
+            NativeUiSpec.Dim.Kind.PX -> dim.value.toInt().coerceAtLeast(1)
+            NativeUiSpec.Dim.Kind.MATCH -> -1
+            NativeUiSpec.Dim.Kind.WRAP -> computed
+        }
 
     class ResizeState {
         @JvmField var f4878a: Float = 0.0f
@@ -114,6 +138,12 @@ object WindowSize {
 
     @JvmStatic
     fun d(view: View, layout: FloatingLayout?, window: Window) {
+        val rule = rules.firstOrNull { it.matches(window.tag) }
+        if (rule?.state == "maximized" || rule?.state == "fullscreen") {
+            if (window.c != 0) window.a(0)
+        } else if (rule?.state == "floating" && window.c == 0) {
+            window.a(if (window.f4869d == 0) 1 else window.f4869d)
+        }
         if (window.c != 0) {
             if (f4871a != -1) {
                 view.post { applySize(view, layout, window, window.c) }
@@ -135,6 +165,7 @@ object WindowSize {
     }
 
     private fun applySize(view: View, layout: FloatingLayout?, window: Window, style: Int) {
+        val rule = rules.firstOrNull { it.matches(window.tag) }
         var width = g
         var height = f4875h
         if (Global.f4836a == 2) {
@@ -147,6 +178,16 @@ object WindowSize {
                     width = (f4871a * 0.6).toInt()
                     height = (b * 0.74).toInt()
                 }
+            }
+        }
+        val density = view.resources.displayMetrics.density
+        val gap = (rule?.gaps ?: 0f).let { if (it > 0f) (it * density).toInt() else 0 }
+        if (rule != null) {
+            width = dimension(rule.width, f4871a, width, density)
+            height = dimension(rule.height, b, height, density)
+            if (gap > 0) {
+                if (width > gap * 2 + 1) width -= gap * 2
+                if (height > gap * 2 + 1) height -= gap * 2
             }
         }
         val params: ViewGroup.LayoutParams = view.layoutParams
@@ -181,6 +222,11 @@ object WindowSize {
             view.x = window.f4868a
             view.y = window.b
         }
+        // Gaps nudge the view without rewriting the remembered position, so a resize can't stack them up.
+        if (gap > 0) {
+            view.x += gap
+            view.y += gap
+        }
         if (layout != null) {
             layout.y = view.x
             layout.z = view.y
@@ -197,6 +243,7 @@ object WindowSize {
         activity: MainActivityIn,
         fragment: UIFragment
     ) {
+        window.tag = fragment.javaClass.simpleName
         view.bringToFront()
         var offsetX = 0.0f
         var offsetY = 0.0f

@@ -9,6 +9,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+### Added
+
+- Global key chords are configured in `~/.config/bellatrix/native-ui/keys.toml`: bind Super, Ctrl, Alt and Shift combinations to Terminal, Files, Settings, Linux settings, Coding Agents, Voice or close-window. A bare key is never bound, so typing is untouched.
+- `look.toml` now accepts `[[window-rule]]` blocks to set gaps, size and floating/maximized state for Bellatrix's own app windows.
+
 ### Fixed
 
 - Music, video and Photos now understand guest paths, the Android paths behind them and content Uris, instead of treating every one as a plain file and reporting it missing.

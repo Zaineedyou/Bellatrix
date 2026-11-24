@@ -22,6 +22,7 @@ import com.bellatrixos.ui.keysRoot
 import com.bellatrixos.ui.keysFocused
 import com.bellatrixos.ui.keysStartAgain
 import com.bellatrixos.ui.movesFocus
+import com.bellatrixos.ui.nativeui.GlobalKeys
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,6 +80,7 @@ abstract class InstantActivity : ComponentActivity() {
      */
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (GlobalKeys.dispatch(event)) return true
         val down = event.action == KeyEvent.ACTION_DOWN
         if (down) keyPressed(window.decorView)
         if (down && movesFocus(event.keyCode) && keysStartAgain(window.decorView)) return true

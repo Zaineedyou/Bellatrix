@@ -77,9 +77,38 @@ object NativeUiSpec {
         ) = appliesTo(surface) && selectors.any { it.matches(surface, idName, className, text) }
     }
 
+    /**
+     * Geometry for a Bellatrix window. [patterns] are matched against the
+     * window's class (UIMusic, UIExplorer, …); gaps and sizes are in dp unless
+     * a size says otherwise, so a rule reads the same on every density.
+     */
+    data class WindowRule(
+        val patterns: List<String>,
+        val gaps: Float? = null,
+        val width: Dim? = null,
+        val height: Dim? = null,
+        val state: String? = null,
+    ) {
+        fun matches(name: String?): Boolean {
+            if (name == null) return false
+            return patterns.any { pattern ->
+                val regex =
+                    buildString {
+                        append('^')
+                        for (c in pattern) {
+                            if (c == '*') append(".*") else append(Regex.escape(c.toString()))
+                        }
+                        append('$')
+                    }
+                Regex(regex, RegexOption.IGNORE_CASE).matches(name)
+            }
+        }
+    }
+
     data class Spec(
         val palette: Map<String, String> = emptyMap(),
         val rules: List<Rule> = emptyList(),
+        val windowRules: List<WindowRule> = emptyList(),
     ) {
         companion object {
             val EMPTY = Spec()
@@ -193,6 +222,13 @@ object NativeUiSpec {
         # background = "#202233"
         # radius = 8
         # padding = [6, 8]
+
+        # [[window-rule]]
+        # match = ["UIMusic", "UIPhotos"]
+        # gaps = 12
+        # width = "70%"
+        # height = "80%"
+        # state = "floating"
         """.trimIndent() + "\n"
 
     fun parse(text: String): Parsed {
@@ -272,7 +308,47 @@ object NativeUiSpec {
             }
             rules += Rule(surfaces, selectors, properties)
         }
-        return Parsed(Spec(palette, rules), problems)
+        val rawWindows: List<*> =
+            when (val value = table["window-rule"]) {
+                null -> emptyList<Any?>()
+                is List<*> -> value
+                else -> {
+                    problems += "window-rule must be a list of [[window-rule]] tables"
+                    emptyList<Any?>()
+                }
+            }
+
+        val windowRules = mutableListOf<WindowRule>()
+        rawWindows.forEachIndexed { index, item ->
+            if (item !is Map<*, *>) {
+                problems += "window-rule $index is not a table"
+                return@forEachIndexed
+            }
+            val patterns = strings(item["match"], "window-rule $index match", problems)
+            if (patterns.isEmpty()) {
+                problems += "window-rule $index needs a match such as UIMusic or UI*"
+                return@forEachIndexed
+            }
+            val rawGaps = item["gaps"]
+            val gaps =
+                when {
+                    rawGaps == null -> null
+                    rawGaps is Number -> rawGaps.toFloat()
+                    rawGaps is String -> Dim.of(rawGaps)?.takeIf { it.kind == Dim.Kind.DP }?.value
+                    else -> null
+                }
+            if (rawGaps != null && gaps == null) problems += "window-rule $index: gaps takes a number in dp"
+            val width = item["width"]?.let { Dim.of(it) }
+            val height = item["height"]?.let { Dim.of(it) }
+            if (item["width"] != null && width == null) problems += "window-rule $index: width takes a size such as 70%"
+            if (item["height"] != null && height == null) problems += "window-rule $index: height takes a size such as 80%"
+            val state = item["state"] as? String
+            if (state != null && state !in setOf("floating", "maximized", "fullscreen")) {
+                problems += "window-rule $index: state takes floating, maximized or fullscreen"
+            }
+            windowRules += WindowRule(patterns, gaps, width, height, state)
+        }
+        return Parsed(Spec(palette, rules, windowRules), problems)
     }
 
     /** Parses one selector token from a script or a file; bad tokens are reported by [parse]. */

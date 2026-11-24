@@ -24,6 +24,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.compose.ui.graphics.toArgb
 import com.bellatrixos.ui.Palette
 import com.bellatrixos.ui.WidgetAsks
+import com.bellatrixos.ui.nativeui.GlobalKeys
 import com.bellatrixos.wayland.ActiveLinuxBackend
 import com.bellatrixos.wayland.KeyBarView
 import com.bellatrixos.wayland.KeyboardSink
@@ -176,6 +177,7 @@ class LinuxWindowActivity : AppCompatActivity() {
             if (event.repeatCount == 0) finish()
             return true
         }
+        if (GlobalKeys.dispatch(event)) return true
         if (backend.keyboard.handle(event)) return true
         return super.dispatchKeyEvent(event)
     }

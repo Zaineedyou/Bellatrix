@@ -24,6 +24,7 @@ class NativeUiStore(
 ) {
     private val dir = LauncherData.nativeUiDir(context)
     private val scriptFile = File(dir, NativeScript.FILE)
+    private val keysFile = File(dir, NativeKeysSpec.FILE)
 
     private val look =
         SyncedFile(File(dir, NativeUiSpec.FILE), File(dir, NativeUiSpec.ERRORS), "the native UI") {
@@ -34,6 +35,8 @@ class NativeUiStore(
     private var scriptJob: Job? = null
     private var runner: NativeUiRunner? = null
     private var lookProblems = emptyList<String>()
+    private var keyProblems = emptyList<String>()
+    private var keyBindings: List<NativeKeysSpec.Binding> = emptyList()
     private var scriptProblems = emptyList<String>()
     private val hookProblems = LinkedHashSet<String>()
 
@@ -41,9 +44,17 @@ class NativeUiStore(
         private set
 
     val errors get() = look.errors
+    val windowRules get() = spec.windowRules
+    val bindings get() = keyBindings
 
     /** Called after an agent or the user edits either file; the applier uses the views already on screen. */
     var onExternalChange: (NativeUiSpec.Spec) -> Unit = {}
+
+    /** keys.toml is watched like look.toml; the Runtime turns actions into launcher calls. */
+    var onKeysChange: (List<NativeKeysSpec.Binding>) -> Unit = {}
+
+    /** Window geometry lives in look.toml, applied where window bounds are computed. */
+    var onWindowRulesChange: (List<NativeUiSpec.WindowRule>) -> Unit = {}
 
     init {
         val text = look.open()
@@ -62,6 +73,15 @@ class NativeUiStore(
                 syncProblems()
             }
         }
+        if (!keysFile.isFile) {
+            runCatching {
+                dir.mkdirs()
+                keysFile.writeText(NativeKeysSpec.defaults())
+            }.onFailure { error ->
+                keyProblems = listOf("keys.toml could not be created: ${error.message ?: "write failed"}")
+            }
+        }
+        readKeys(keysFile.takeIf { it.isFile }?.readText().orEmpty())
     }
 
     /** The Lua API is installed by NativeUiLook before start(), so the first script run can use it. */
@@ -92,6 +112,9 @@ class NativeUiStore(
             scope.launch {
                 watchFile(scriptFile).collect { text -> runScript(text) }
             }
+        scope.launch {
+            watchFile(keysFile).collect { text -> readKeys(text) }
+        }
     }
 
     private fun read(text: String) {
@@ -99,6 +122,15 @@ class NativeUiStore(
         look.readable = parsed.problems.isEmpty() || parsed.spec.rules.isNotEmpty()
         lookProblems = parsed.problems
         spec = parsed.spec
+        onWindowRulesChange(parsed.spec.windowRules)
+        syncProblems()
+    }
+
+    private fun readKeys(text: String) {
+        val parsed = NativeKeysSpec.parse(text)
+        keyProblems = parsed.problems
+        keyBindings = parsed.bindings
+        onKeysChange(parsed.bindings)
         syncProblems()
     }
 
@@ -109,6 +141,6 @@ class NativeUiStore(
     }
 
     private fun syncProblems() {
-        look.setProblems(lookProblems + scriptProblems + hookProblems.toList())
+        look.setProblems(lookProblems + keyProblems + scriptProblems + hookProblems.toList())
     }
 }
