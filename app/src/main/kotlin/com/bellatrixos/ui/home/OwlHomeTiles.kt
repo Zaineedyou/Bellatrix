@@ -3,12 +3,16 @@ package com.bellatrixos.ui.home
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -20,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
@@ -52,6 +57,7 @@ import com.bellatrixos.widgets.PixelRect
 import com.bellatrixos.widgets.WidgetItem
 import com.bellatrixos.widgets.editWidgetCommand
 import com.bellatrixos.widgets.render.WidgetContent
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlinx.coroutines.withTimeoutOrNull
@@ -252,6 +258,9 @@ private fun showNativeWidgetMenu(
  * place while the menu is open. A locked tile still opens on tap but cannot move or resize. Tiles may
  * overlap. Geometry is clipped to the native home view, with no visible boundary line.
  */
+/** Horizontal travel in px that turns a drag on empty home into a page change. */
+private const val PAGE_SWIPE_PX = 100f
+
 @Composable
 internal fun OwlHomeTiles(
     runtime: Runtime,
@@ -272,7 +281,10 @@ internal fun OwlHomeTiles(
     val removeLabel = stringResource(R.string.home_remove)
     var selected by remember { mutableStateOf<String?>(null) }
 
-    val items = engine.specs.filter(engine::onHome).map(::WidgetItem)
+    val pages = engine.pages
+    val page = engine.activePage.takeIf { it in pages } ?: pages.firstOrNull() ?: 1
+    // One page of widgets at a time; the native desktop icons stay where Android's launcher put them.
+    val items = engine.specs.filter(engine::onHome).map(::WidgetItem).filter { it.page == page }
     layout.geometry = Triple(grid.cellW, grid.cellH, grid.gapX.toInt())
     layout.pageSize = null
     layout.setGrid(grid.cols, grid.rows)
@@ -281,7 +293,38 @@ internal fun OwlHomeTiles(
     val absoluteMin = with(LocalDensity.current) { 56.dp.toPx() }.roundToInt()
 
     // No visible border: clipToBounds is the hard guarantee that no tile escapes into the taskbar.
-    Box(Modifier.fillMaxSize().clipToBounds()) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .clipToBounds()
+            .pointerInput(engine) {
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false)
+                    var dx = 0f
+                    var dy = 0f
+                    var taken = false
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Final)
+                        if (event.changes.all { !it.pressed }) break
+                        // A tile's own drag or a node's tap owns the gesture; don't page with it.
+                        if (event.changes.any { it.isConsumed }) {
+                            taken = true
+                            break
+                        }
+                        val delta = event.changes.first().positionChange()
+                        dx += delta.x
+                        dy += delta.y
+                        if (abs(dx) > abs(dy) && abs(dx) > PAGE_SWIPE_PX) break
+                    }
+                    if (taken || abs(dx) <= abs(dy) || abs(dx) < PAGE_SWIPE_PX) return@awaitEachGesture
+                    val ordered = engine.pages
+                    val index = ordered.indexOf(engine.activePage)
+                    val next = ordered.getOrNull(if (dx < 0) index + 1 else index - 1) ?: return@awaitEachGesture
+                    engine.activePage = next
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                }
+            },
+    ) {
         for (item in items) {
             val spec = item.spec
             val instance = engine.instance(spec)
@@ -465,6 +508,18 @@ internal fun OwlHomeTiles(
                     }
 
                     if (isSelected) Box(Modifier.fillMaxSize().border(1.dp, Palette.accent))
+                }
+            }
+        }
+        if (pages.size > 1) {
+            Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp)) {
+                for (candidate in pages) {
+                    Box(
+                        Modifier
+                            .padding(horizontal = 3.dp)
+                            .size(if (candidate == page) 8.dp else 5.dp)
+                            .background(Palette.accent.copy(alpha = if (candidate == page) 1f else 0.35f)),
+                    )
                 }
             }
         }

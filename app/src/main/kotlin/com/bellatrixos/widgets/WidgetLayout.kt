@@ -77,11 +77,8 @@ enum class Screen(
     UNFOLDED("unfolded", ownColumns = true),
     ;
 
-    /**
-     * Every screen has Bellatrix's one hard-coded home page. [page] is kept for old saved layouts and ignored.
-     */
-    @Suppress("UNUSED_PARAMETER")
-    fun fromMain(page: Int) = 1
+    /** A page number is the same on every screen; a saved layout keeps the page its items were on. */
+    fun fromMain(page: Int) = page.coerceAtLeast(1)
 }
 
 /**
@@ -90,21 +87,21 @@ enum class Screen(
  * with their own cells now. A tile that would land on one already there loses its cell (null), so the page places
  * it afresh at the least crowded spot. The old page number is ignored.
  */
-@Suppress("UNUSED_PARAMETER")
 fun seedUnfolded(
     main: List<Triple<String, Int, Cell?>>,
     mainColumns: Int,
     columns: Int,
     minWidth: (String) -> Int,
 ): Map<String, Pair<Int, Cell?>> {
-    val kept = ArrayList<Cell>()
-    return main.associate { (key, _, cell) ->
+    val kept = HashMap<Int, MutableList<Cell>>()
+    return main.associate { (key, page, cell) ->
+        val spots = kept.getOrPut(page) { ArrayList() }
         val placed =
             cell
                 ?.rescaled(mainColumns, columns, minWidth(key))
-                ?.takeIf { c -> kept.none { it.overlaps(c) } }
-                ?.also { kept += it }
-        key to (1 to placed)
+                ?.takeIf { c -> spots.none { it.overlaps(c) } }
+                ?.also { spots += it }
+        key to (page to placed)
     }
 }
 
@@ -264,37 +261,34 @@ class WidgetLayout(
         save()
     }
 
-    /** Always page 1 when [name] has a saved page; on [screen], the one shown unless said. */
+    /** The saved page of [name] on [screen], the one shown unless said; null when it has no saved page. */
     fun page(
         name: String,
         screen: Screen = this.screen,
-    ): Int? = pagesOf.getValue(screen)[name]?.let { 1 }
+    ): Int? = pagesOf.getValue(screen)[name]?.let(Screen::fromMain)
 
-    /**
-     * Bellatrix has one page: every saved page number reads as 1 (see [Screen.fromMain]). Kept so old layout files
-     * still load; it never puts a tile on a second page.
-     */
+    /** A page explicitly saved for [name] on this screen or, for a foldable, on main. */
     fun chosenPage(
         name: String,
         screen: Screen = this.screen,
     ): Int? =
-        if (pagesOf.getValue(screen).containsKey(name) || (screen != Screen.MAIN && pagesOf.getValue(Screen.MAIN).containsKey(name))) 1 else null
+        page(name, screen) ?: if (screen != Screen.MAIN) page(name, Screen.MAIN) else null
 
-    /** The page [name] is on on [screen]: as [chosenPage], else its file's [filePage] as it is on that screen (see [Screen.fromMain]). */
-    @Suppress("UNUSED_PARAMETER")
+    /** The page [name] is on on [screen]: its saved page, else the page its file asks for. */
     fun pageOn(
         name: String,
         filePage: Int,
         screen: Screen = this.screen,
-    ): Int = 1
+    ): Int = chosenPage(name, screen) ?: screen.fromMain(filePage)
 
     fun setPage(
         name: String,
         page: Int,
         screen: Screen = this.screen,
     ) {
-        // Hard-coded single page: every home item lands on Bellatrix's one page, whatever a file or layout says.
-        pagesOf.getValue(screen)[name] = 1
+        val target = page.coerceAtLeast(1)
+        if (pagesOf.getValue(screen)[name] == target) return
+        pagesOf.getValue(screen)[name] = target
         pageStamp++
         save()
     }
@@ -402,7 +396,8 @@ class WidgetLayout(
         var changed = false
         for (item in items) {
             if (cells[item.key] != null) continue
-            cells[item.key] = freeSpot(item, items, cols, rows) ?: crowdSpot(item, items, cols, rows)
+            val mates = items.filter { it.page == item.page }
+            cells[item.key] = freeSpot(item, mates, cols, rows) ?: crowdSpot(item, mates, cols, rows)
             changed = true
         }
         if (changed) save()
@@ -421,7 +416,8 @@ class WidgetLayout(
         val (cols, rows) = grid ?: return false
         val rest = others.filter { it.key != item.key }
         place(rest, cols, rows)
-        cells[item.key] = freeSpot(item, others, cols, rows) ?: crowdSpot(item, others, cols, rows)
+        val mates = others.filter { it.page == item.page }
+        cells[item.key] = freeSpot(item, mates, cols, rows) ?: crowdSpot(item, mates, cols, rows)
         save()
         return true
     }

@@ -68,14 +68,16 @@ object HomeFile {
 
     val HEADER =
         """
-        |# Bellatrix home is one hard-coded page of `columns` columns (home.columns in ../style/style.toml
-        |# sets the grid). Moving things on the phone rewrites this file, and home follows edits to it.
+        |# Bellatrix home has one or more pages of `columns` columns (home.columns in ../style/style.toml
+        |# sets the grid). Pages are `[[page]]` blocks in left-to-right order; swipe home to change page.
+        |# Moving things on the phone rewrites this file, and home follows edits to it.
         |# A tile is { widget = "file.owl" }, { face = "file.owl" }, { app = "…" } or { folder = "name", apps = [...] },
         |# at x, y (cells from the top left) and w, h wide and tall; without x and y it takes the first free spot.
-        |# A `page:` in an owl file is ignored; every tile lands here. A file left out stays where it is,
-        |# and a new one goes by its own order: and size:. An app left out comes off home. An app is a package,
-        |# "pkg/activity" (with "@profile" for a work profile's), "linux:<desktop id>" or "owl:<file>".
-        |# [cover] and [unfolded] can change this one page's grid on those screens; they cannot add pages.
+        |# A `page:` in an owl file puts its tile on that page; a page saved on the phone wins. A file left
+        |# out stays where it is, and a new one goes by its own order: and size:. An app left out comes off
+        |# home. An app is a package, "pkg/activity" (with "@profile" for a work profile's),
+        |# "linux:<desktop id>" or "owl:<file>".
+        |# [cover] and [unfolded] have their own columns and [[*.page]] blocks.
         |# What couldn't be read is in errors.txt next to this file.
         |
         """.trimMargin()
@@ -186,14 +188,14 @@ object HomeFile {
                 return@forEachIndexed
             }
             for (k in p.keys) if (k != "face" && k != "tiles") problems += "$where: $k isn't a page's; a page has a face or tiles"
-            // An old `face = "…"` page is read so the launcher can move that face onto the one home page.
+            // A `face = "…"` page fills a whole workspace with that face.
             val face = p["face"]
             if (face != null) {
                 if (face is String && face.isNotBlank()) pages += FacePage(face) else problems += "$where: face takes a widget file name in quotes"
             }
             val tiles = p["tiles"]
             if (tiles != null) {
-                if (face != null) problems += "$where: a face is now a tile on the one home page; its tiles were kept here too"
+                if (face != null) problems += "$where: a page takes a face or tiles, not both; its tiles were kept too"
                 if (tiles !is List<*>) {
                     problems += "$where: tiles takes a list, [ { widget = \"…\" }, … ]"
                 } else {

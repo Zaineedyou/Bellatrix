@@ -113,12 +113,11 @@ class HomeStore(
         // At the start, a widget deleted while the launcher was off isn't a mistake in the file: it's left out, quietly.
         if (atStart && gone) problems.removeAll { it.endsWith(MISSING) }
         synced.setProblems(problems)
-        // Rewrite old multi-page and face-page files to Bellatrix's one page, and save cells that came in on another grid.
-        val multiPage = { l: HomeLayout -> l.pages.size != 1 || l.pages.any { it is FacePage } }
+        // Multi-page and face-page files are now home's own layout, not something to flatten on sight.
+        // Only a missing widget at startup or a cell from another grid needs writing back.
         if (
             (atStart && gone) ||
-            multiPage(decoded.layout) ||
-            decoded.screens.any { (screen, l) -> multiPage(l) || l.columns != layout.columnsOf(screen) }
+            decoded.screens.any { (screen, l) -> l.columns != layout.columnsOf(screen) }
         ) {
             synced.save()
         }
@@ -130,7 +129,11 @@ class HomeStore(
         val byPage = engine.itemsByPageOn(screen)
         for (page in byPage.keys.sorted()) {
             val items = byPage.getValue(page)
-            // Faces are ordinary tiles on the one home page, with the same cells as widgets.
+            // A face alone on a page is written back as a face page; anything else is a grid of tiles.
+            if (items.size == 1 && items[0] is WidgetItem && items[0].isFace) {
+                pages += FacePage(items[0].key)
+                continue
+            }
             val tiles =
                 items
                     .sortedWith(compareBy({ layout.cell(it.key, screen)?.y ?: Int.MAX_VALUE }, { layout.cell(it.key, screen)?.x ?: Int.MAX_VALUE }))

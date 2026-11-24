@@ -54,8 +54,7 @@ private fun OwlKind.what() =
                 "says). The launcher shows ${WidgetEngine.KEYBAR}, so change that file rather than making a new one"
     }
 
-/** A session in the widgets dir that creates an owl file of [kind]; [page] is ignored: home is one page. */
-@Suppress("UNUSED_PARAMETER")
+/** A session in the widgets dir that creates an owl file of [kind], on [page] when one is named. */
 fun newOwlCommand(
     agentBin: String,
     kind: OwlKind,
@@ -63,7 +62,7 @@ fun newOwlCommand(
 ) = agentCommand(
     agentBin,
     "Read README.md, then ask me what to create: ${kind.what()}. " +
-        "Bellatrix home is one hard-coded page; ignore any `page:` in the file and put the tile there. " +
+        "Bellatrix home has pages; put the tile on page ${page ?: 1} (see docs/home.md). " +
         "$DEPENDENCIES $CHECK",
 )
 

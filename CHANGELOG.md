@@ -13,6 +13,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 - Global key chords are configured in `~/.config/bellatrix/native-ui/keys.toml`: bind Super, Ctrl, Alt and Shift combinations to Terminal, Files, Settings, Linux settings, Coding Agents, Voice or close-window. A bare key is never bound, so typing is untouched.
 - `look.toml` now accepts `[[window-rule]]` blocks to set gaps, size and floating/maximized state for Bellatrix's own app windows.
+- Home has workspaces again: `[[page]]` blocks in `layout.toml` are separate pages, swipe sideways on home to change page, and `page:` in an owl file places its tile. Saved layouts from the one-page version keep working.
 
 ### Fixed
 
