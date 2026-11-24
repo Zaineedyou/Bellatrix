@@ -247,20 +247,21 @@ private fun showNativeWidgetMenu(
     menu.showAt(anchor, x, y)
 }
 
+/** Horizontal travel in px that turns a drag on empty home into a page change. */
+private const val PAGE_SWIPE_PX = 100f
+
 /**
  * Declarative OWL tiles on Bellatrix's native home.
  *
  * A tile's starting rectangle comes from its root `Box`/`Flex`/`Anchor` props (`width`, `height`,
  * `size`, `fill`, `offset`, `anchor`), not from a grid. Hold a tile, then drag its body to move. The
  * bottom-right resize area is invisible: pressing it resizes immediately in any direction, with no
- * visible box or handle. A quick swipe never moves a tile, so taps keep working. Holding and releasing
- * opens Bellatrix's own native popup window with Edit, Lock/Unlock and Remove; the lock item swaps in
- * place while the menu is open. A locked tile still opens on tap but cannot move or resize. Tiles may
- * overlap. Geometry is clipped to the native home view, with no visible boundary line.
+ * visible box or handle. A quick swipe never moves a tile, so taps keep working. Swiping empty home
+ * moves between workspaces. Holding and releasing opens Bellatrix's own native popup window with Edit,
+ * Lock/Unlock and Remove; the lock item swaps in place while the menu is open. A locked tile still
+ * opens on tap but cannot move or resize. Tiles may overlap. Geometry is clipped to the native home
+ * view, with no visible boundary line.
  */
-/** Horizontal travel in px that turns a drag on empty home into a page change. */
-private const val PAGE_SWIPE_PX = 100f
-
 @Composable
 internal fun OwlHomeTiles(
     runtime: Runtime,
