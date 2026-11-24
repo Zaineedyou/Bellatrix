@@ -165,7 +165,14 @@ class GridAutofillLayoutManager(context: Context) : GridLayoutManager(context, 1
     @JvmField var P: Int = -1
     @JvmField var Q: Int = -1
 
+    /** Home's icon grid fills the screen; it must stay still instead of scrolling under a finger. */
+    @JvmField var fixed: Boolean = false
+
     init { r1(-1) }
+
+    override fun canScrollVertically(): Boolean = !fixed && super.canScrollVertically()
+
+    override fun canScrollHorizontally(): Boolean = !fixed && super.canScrollHorizontally()
 
     override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
         val widthSize = width

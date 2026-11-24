@@ -110,6 +110,8 @@ class c(@JvmField val v: MainActivity, @JvmField val u: Int) : Runnable {
                 gridAutofillLayoutManager.Q = -1
                 gridAutofillLayoutManager.M = mainActivity5
                 gridAutofillLayoutManager.r1(-1)
+                // Home is a fixed desktop, not a scrolling list: every icon lives in the cells on screen.
+                gridAutofillLayoutManager.fixed = true
                 filesRecyclerView.layoutManager = gridAutofillLayoutManager
                 filesRecyclerView.adapter = desktopAdapter
                 filesRecyclerView.itemAnimator = null

@@ -9,6 +9,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.46] - 2026-11-24
+
+### Fixed
+
+- Home's icon grid stays fixed on the screen; dragging a finger on it no longer scrolls the desktop up and down.
+
 ## [2.9.45] - 2026-11-24
 
 ### Fixed

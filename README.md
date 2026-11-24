@@ -146,7 +146,8 @@ decode them, with their own volume slider and the Video type staying selected on
 
 UiPhotos lists pictures already on the device from Android's media library once photo access is
 allowed; Browse opens the system photo picker for anything not indexed yet. Setting the taskbar
-alignment to Left also moves the app drawer to the bottom-left corner.
+alignment to Left also moves the app drawer to the bottom-left corner. Home's icon grid is a fixed
+desktop: it does not scroll up or down.
 
 If replacing a build signed with a different certificate, uninstall the old version first:
 
