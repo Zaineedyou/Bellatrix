@@ -51,6 +51,7 @@ object WindowSize {
             NativeUiSpec.Dim.Kind.PERCENT -> (screen * dim.value / 100f).toInt().coerceAtLeast(1)
             NativeUiSpec.Dim.Kind.DP -> (dim.value * density).toInt().coerceAtLeast(1)
             NativeUiSpec.Dim.Kind.PX -> dim.value.toInt().coerceAtLeast(1)
+            NativeUiSpec.Dim.Kind.SP -> (dim.value * density).toInt().coerceAtLeast(1)
             NativeUiSpec.Dim.Kind.MATCH -> -1
             NativeUiSpec.Dim.Kind.WRAP -> computed
         }
