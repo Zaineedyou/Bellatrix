@@ -265,7 +265,7 @@ class WidgetLayout(
     fun page(
         name: String,
         screen: Screen = this.screen,
-    ): Int? = pagesOf.getValue(screen)[name]?.let(Screen::fromMain)
+    ): Int? = pagesOf.getValue(screen)[name]?.let { screen.fromMain(it) }
 
     /** A page explicitly saved for [name] on this screen or, for a foldable, on main. */
     fun chosenPage(

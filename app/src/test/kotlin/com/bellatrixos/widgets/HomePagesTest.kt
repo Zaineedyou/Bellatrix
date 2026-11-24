@@ -6,9 +6,9 @@ import org.junit.Test
 /** The data model behind home's workspaces: page numbers survive a screen change and a regrid. */
 class HomePagesTest {
     @Test fun aPageNumberIsTheSameOnEveryScreen() {
-        assertEquals(1, Screen.fromMain(1))
-        assertEquals(3, Screen.fromMain(3))
-        assertEquals(1, Screen.fromMain(0))
+        assertEquals(1, Screen.MAIN.fromMain(1))
+        assertEquals(3, Screen.MAIN.fromMain(3))
+        assertEquals(1, Screen.MAIN.fromMain(0))
     }
 
     @Test fun seedingTheUnfoldedGridKeepsEachTilesPage() {
