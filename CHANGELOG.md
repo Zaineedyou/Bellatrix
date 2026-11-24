@@ -9,6 +9,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.47] - 2026-11-24
+
 ### Added
 
 - Global key chords are configured in `~/.config/bellatrix/native-ui/keys.toml`: bind Super, Ctrl, Alt and Shift combinations to Terminal, Files, Settings, Linux settings, Coding Agents, Voice or close-window. A bare key is never bound, so typing is untouched.
