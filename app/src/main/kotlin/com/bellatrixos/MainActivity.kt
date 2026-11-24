@@ -1757,23 +1757,23 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         val linearLayout2 = this.B0
         val coordinatorLayout = this.I0 ?: return
         var width = 0
-        if (i2 != 1) {
-            if (i2 == 0) {
-                val layoutParams2 = linearLayout.layoutParams as RelativeLayout.LayoutParams
-                layoutParams2.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE)
-                linearLayout.layoutParams = layoutParams2
-                val layoutParams = coordinatorLayout.layoutParams as ConstraintLayout.LayoutParams
-                layoutParams.startToStart = 0
-                layoutParams.endToEnd = 0
-            }
-        } else {
+        val drawerParams = coordinatorLayout.layoutParams as ConstraintLayout.LayoutParams
+        if (i2 == 1) {
             val layoutParams3 = linearLayout.layoutParams as RelativeLayout.LayoutParams
             layoutParams3.addRule(RelativeLayout.CENTER_HORIZONTAL, 0)
             linearLayout.layoutParams = layoutParams3
-            val layoutParams = coordinatorLayout.layoutParams as ConstraintLayout.LayoutParams
-            layoutParams.startToStart = ConstraintLayout.LayoutParams.UNSET
-            coordinatorLayout.layoutParams = layoutParams
+            // Left taskbar: anchor the app drawer to the bottom-left corner too. Leaving endToEnd
+            // pinned to the parent kept a fixed-width drawer on the right instead of moving it.
+            drawerParams.startToStart = 0
+            drawerParams.endToEnd = ConstraintLayout.LayoutParams.UNSET
+        } else {
+            val layoutParams2 = linearLayout.layoutParams as RelativeLayout.LayoutParams
+            layoutParams2.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE)
+            linearLayout.layoutParams = layoutParams2
+            drawerParams.startToStart = 0
+            drawerParams.endToEnd = 0
         }
+        coordinatorLayout.layoutParams = drawerParams
         width = linearLayout2?.width ?: 0
         val dimensionPixelSize = mainActivity.resources.getDimensionPixelSize(R.dimen.ui_3dp)
         linearLayout.setPadding(if (i2 == 0) width else 0, dimensionPixelSize, width, dimensionPixelSize)

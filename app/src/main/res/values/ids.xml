@@ -714,6 +714,8 @@
     <id name="peekHeight" />
     <id name="percent" />
     <id name="personalize" />
+    <id name="photo_grid" />
+    <id name="photo_hint" />
     <id name="pin" />
     <id name="playPauseBtn" />
     <id name="playerWallpaper" />

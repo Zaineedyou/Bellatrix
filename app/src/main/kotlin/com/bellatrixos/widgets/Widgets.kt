@@ -824,7 +824,8 @@ class UINavigationBar @JvmOverloads constructor(c: Context, a: AttributeSet? = n
         v = findViewById(com.bellatrixos.R.id.nav_items)
         y = c.resources.getDimensionPixelSize(com.bellatrixos.R.dimen.ui_220dp)
         z = c.resources.getDimensionPixelSize(com.bellatrixos.R.dimen.ui_60dp)
-        findViewById<ImageButton>(com.bellatrixos.R.id.nav_toggle).setOnClickListener {
+        // The shipped layout uses an ImageView here; only a click listener is needed, so don't cast to ImageButton.
+        findViewById<View>(com.bellatrixos.R.id.nav_toggle).setOnClickListener {
             if (w) c(false) else d()
         }
         post { a(this) }

@@ -9,6 +9,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.45] - 2026-11-24
+
+### Fixed
+
+- UiPhotos now finds pictures already in the phone's storage. With photo access granted it shows a thumbnail grid from Android's media library, and the Browse button opens the system photo picker for files that are not indexed yet.
+- With the taskbar set to the left, the app drawer now opens from the bottom-left corner as well instead of staying on the right.
+- Fixed a crash when opening the music player: the navigation bar no longer casts its toggle to the wrong button type while inflating.
+
 ## [2.9.44] - 2026-11-24
 
 ### Fixed

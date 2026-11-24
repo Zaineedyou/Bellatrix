@@ -3576,6 +3576,8 @@
     <public type="id" name="peekHeight" id="0x7f0a02c4" />
     <public type="id" name="percent" id="0x7f0a02c5" />
     <public type="id" name="personalize" id="0x7f0a02c6" />
+    <public type="id" name="photo_grid" id="0x7f0a0422" />
+    <public type="id" name="photo_hint" id="0x7f0a0423" />
     <public type="id" name="pin" id="0x7f0a02c7" />
     <public type="id" name="playPauseBtn" id="0x7f0a02c8" />
     <public type="id" name="playerWallpaper" id="0x7f0a02c9" />
@@ -4301,6 +4303,7 @@
     <public type="string" name="app_notepad_warning_file_lg_subtitle" id="0x7f120045" />
     <public type="string" name="app_package_name" id="0x7f120046" />
     <public type="string" name="app_photos_gallery_explore_title" id="0x7f120047" />
+    <public type="string" name="app_photos_gallery_permission_hint" id="0x7f1202d5" />
     <public type="string" name="app_photos_gallery_subtitle" id="0x7f120048" />
     <public type="string" name="app_photos_gallery_title" id="0x7f120049" />
     <public type="string" name="app_privacy_policy" id="0x7f12004a" />

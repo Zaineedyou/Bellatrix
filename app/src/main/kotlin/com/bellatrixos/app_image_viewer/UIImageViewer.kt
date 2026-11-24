@@ -1,6 +1,7 @@
 package com.bellatrixos.app_image_viewer
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -12,6 +13,9 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.R
 import com.bellatrixos.UIFragment
@@ -38,6 +42,21 @@ class UIImageViewer : UIFragment(), BackPressHandler {
     lateinit var A0: UITitleBarImage
     lateinit var B0: FloatingLayout
     @JvmField var C0: InstalledApp? = null
+
+    // Storage gallery shown on the placeholder when Photos opens without a file.
+    @JvmField var photoGrid: RecyclerView? = null
+    @JvmField var photoStrip: View? = null
+    @JvmField var placeholderView: View? = null
+    @JvmField var devicePhotos: List<DevicePhoto> = emptyList()
+
+    private val photoPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) loadDevicePhotos()
+        }
+    private val photoPicker =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) openPhotoUri(uri, uri.lastPathSegment ?: "Photo")
+        }
 
     // D0 dinyatakan non-null agar helper paket ini dapat memanggilnya langsung;
     // penunjuk aslinya dikosongkan lagi saat view dihancurkan.
@@ -88,7 +107,9 @@ class UIImageViewer : UIFragment(), BackPressHandler {
         } else {
             A0.C?.visibility = View.GONE
             E0.visibility = View.GONE
-            z0.inflate()
+            placeholderView = z0.inflate()
+            placeholderView?.findViewById<View>(R.id.btn_update)?.setOnClickListener { browsePhotos() }
+            loadDevicePhotos()
         }
         S0.f4870e = e(this, view)
         A0.setResizeBtnListener(d(this, 4))
@@ -145,6 +166,7 @@ class UIImageViewer : UIFragment(), BackPressHandler {
         // Opened without a path (the placeholder view): there is no current file to compare against yet.
         if (!::u0File.isInitialized) {
             if (str != null) {
+                hidePlaceholder()
                 contentView?.bringToFront()
                 s0(str)
                 R0 = true
@@ -160,6 +182,63 @@ class UIImageViewer : UIFragment(), BackPressHandler {
         contentView?.bringToFront()
         s0(str)
         R0 = true
+    }
+
+    /** Pictures from MediaStore can be opened by content Uri when the file path isn't directly readable. */
+    fun openPhotoUri(uri: Uri, name: String) {
+        u0File = File(name)
+        hidePlaceholder()
+        A0.setTitle(name)
+        val gif = name.endsWith(".gif", ignoreCase = true)
+        H0.visibility = if (gif) View.GONE else View.VISIBLE
+        x0.visibility = if (gif) View.VISIBLE else View.GONE
+        w0.visibility = if (gif) View.GONE else View.VISIBLE
+        if (gif) Glide.with(v0).asGif().load(uri).into(x0) else H0.setImage(ImageSource.uri(uri))
+    }
+
+    /** Once a picture is opened, the gallery placeholder must not stay on top of it. */
+    fun hidePlaceholder() {
+        placeholderView?.visibility = View.GONE
+        E0.visibility = View.VISIBLE
+    }
+
+    private fun browsePhotos() {
+        if (!PhotoLibrary.hasAccess(v0)) {
+            photoPermission.launch(PhotoLibrary.permission())
+            return
+        }
+        // Also works for folders the media library hasn't indexed yet.
+        photoPicker.launch("image/*")
+    }
+
+    private fun loadDevicePhotos() {
+        val context = v0
+        if (!PhotoLibrary.hasAccess(context)) {
+            placeholderView?.findViewById<TextView>(R.id.photo_hint)
+                ?.setText(R.string.app_photos_gallery_permission_hint)
+            photoPermission.launch(PhotoLibrary.permission())
+            return
+        }
+        AppExecutors.d().execute {
+            val found = PhotoLibrary.list(context)
+            AppExecutors.c().post { showDevicePhotos(found) }
+        }
+    }
+
+    private fun showDevicePhotos(found: List<DevicePhoto>) {
+        devicePhotos = found
+        val grid = photoGrid ?: return
+        if (found.isEmpty()) return
+        grid.adapter = PhotoGridAdapter(found) { photo ->
+            if (photo.path != null) {
+                hidePlaceholder()
+                s0(photo.path)
+            } else {
+                openPhotoUri(photo.uri, photo.name)
+            }
+        }
+        grid.visibility = View.VISIBLE
+        photoStrip?.visibility = View.GONE
     }
 
     fun p0(i2: Int): Int {
@@ -249,6 +328,9 @@ class UIImageViewer : UIFragment(), BackPressHandler {
         G0 = view.findViewById(R.id.btn_next)
         E0 = view.findViewById(R.id.img_footer_view)
         z0 = view.findViewById(R.id.img_placeholder)
+        photoGrid = view.findViewById(R.id.photo_grid)
+        photoStrip = view.findViewById(R.id.filmstrip)
+        photoGrid?.layoutManager = GridLayoutManager(context, 3)
         I0 = view.findViewById(R.id.btn_zoom_to_fit)
         J0 = view.findViewById(R.id.btn_info)
         y0 = view.findViewById(R.id.txt_dimension)

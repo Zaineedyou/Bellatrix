@@ -73,6 +73,7 @@
     <string name="app_notepad_warning_file_lg_subtitle">File size (%1$s) is larger than recommended. Saving may take some time.</string>
     <string name="app_package_name">com.bellatrixos</string>
     <string name="app_photos_gallery_explore_title">Explore images</string>
+    <string name="app_photos_gallery_permission_hint">Allow photo access to show pictures from this device.</string>
     <string name="app_photos_gallery_subtitle">Open photos to get started. All photos you open will appear here for quick and convenient access</string>
     <string name="app_photos_gallery_title">Gallery</string>
     <string name="app_privacy_policy">"Welcome to project Bellatrix 

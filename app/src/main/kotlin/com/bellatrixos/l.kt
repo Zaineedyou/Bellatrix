@@ -190,6 +190,8 @@ class l(@JvmField val v: Any, @JvmField val u: Int) : Runnable {
                             linearLayout.layoutParams = layoutParams3
                             val layoutParams4 = coordinatorLayout2.layoutParams as ConstraintLayout.LayoutParams
                             layoutParams4.topToTop = ConstraintLayout.LayoutParams.UNSET
+                            layoutParams4.startToStart = 0
+                            layoutParams4.endToEnd = ConstraintLayout.LayoutParams.UNSET
                             coordinatorLayout2.layoutParams = layoutParams4
                         }
                         val width = linearLayout2?.width ?: 0
@@ -209,6 +211,8 @@ class l(@JvmField val v: Any, @JvmField val u: Int) : Runnable {
                         linearLayout.layoutParams = layoutParams5
                         val layoutParams6 = coordinatorLayout2.layoutParams as ConstraintLayout.LayoutParams
                         layoutParams6.topToTop = ConstraintLayout.LayoutParams.UNSET
+                        layoutParams6.startToStart = 0
+                        layoutParams6.endToEnd = ConstraintLayout.LayoutParams.UNSET
                         coordinatorLayout2.layoutParams = layoutParams6
                     }
                     val width = linearLayout2?.width ?: 0

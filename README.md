@@ -144,6 +144,10 @@ so changing it in Android Settings shows there too. On Android 9+ animated image
 animate as the live wallpaper; video formats play through the system media player when the device can
 decode them, with their own volume slider and the Video type staying selected once set.
 
+UiPhotos lists pictures already on the device from Android's media library once photo access is
+allowed; Browse opens the system photo picker for anything not indexed yet. Setting the taskbar
+alignment to Left also moves the app drawer to the bottom-left corner.
+
 If replacing a build signed with a different certificate, uninstall the old version first:
 
 ```bash
