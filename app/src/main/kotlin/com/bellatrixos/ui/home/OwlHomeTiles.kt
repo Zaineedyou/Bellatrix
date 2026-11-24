@@ -248,7 +248,7 @@ private fun showNativeWidgetMenu(
 }
 
 /** Horizontal travel in px that turns a drag on empty home into a page change. */
-private const val PAGE_SWIPE_PX = 100f
+internal const val PAGE_SWIPE_PX = 100f
 
 /**
  * Declarative OWL tiles on Bellatrix's native home.
@@ -294,37 +294,13 @@ internal fun OwlHomeTiles(
     val absoluteMin = with(LocalDensity.current) { 56.dp.toPx() }.roundToInt()
 
     // No visible border: clipToBounds is the hard guarantee that no tile escapes into the taskbar.
+    // This Box must not carry a pointerInput of its own: the ComposeView sits over the whole native desktop,
+    // and a full-size pointer handler makes Compose swallow every touch, so the desktop icons underneath
+    // never get a tap or a long press. Page swipes are read from the native desktop (OwlNativeSurfaces).
     Box(
         Modifier
             .fillMaxSize()
-            .clipToBounds()
-            .pointerInput(engine) {
-                awaitEachGesture {
-                    awaitFirstDown(requireUnconsumed = false)
-                    var dx = 0f
-                    var dy = 0f
-                    var taken = false
-                    while (true) {
-                        val event = awaitPointerEvent(PointerEventPass.Final)
-                        if (event.changes.all { !it.pressed }) break
-                        // A tile's own drag or a node's tap owns the gesture; don't page with it.
-                        if (event.changes.any { it.isConsumed }) {
-                            taken = true
-                            break
-                        }
-                        val delta = event.changes.first().positionChange()
-                        dx += delta.x
-                        dy += delta.y
-                        if (abs(dx) > abs(dy) && abs(dx) > PAGE_SWIPE_PX) break
-                    }
-                    if (taken || abs(dx) <= abs(dy) || abs(dx) < PAGE_SWIPE_PX) return@awaitEachGesture
-                    val ordered = engine.pages
-                    val index = ordered.indexOf(engine.activePage)
-                    val next = ordered.getOrNull(if (dx < 0) index + 1 else index - 1) ?: return@awaitEachGesture
-                    engine.activePage = next
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                }
-            },
+            .clipToBounds(),
     ) {
         for (item in items) {
             val spec = item.spec

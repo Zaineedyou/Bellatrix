@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="linux_prompt_title">Pasang Linux?</string>
+    <string name="linux_prompt_message">Terminal membutuhkan Linux, yang belum terpasang. Pasang sekarang? Penyiapan berjalan di latar belakang dan butuh beberapa menit.</string>
+    <string name="linux_prompt_install">Pasang</string>
+    <string name="linux_prompt_cancel">Nanti saja</string>
+</resources>

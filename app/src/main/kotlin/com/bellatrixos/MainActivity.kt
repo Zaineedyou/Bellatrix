@@ -1296,6 +1296,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     }
 
     override fun onDestroy() {
+        linuxPrompt?.dismiss()
+        linuxPrompt = null
         (application as App).runtime.clearHomeHooks()
         val logonController = this.n1
         if (logonController != null) {
@@ -1514,7 +1516,30 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         runtime.openPackages = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "91") } }
         runtime.openPermissions = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "71") } }
         runtime.openNativeSettings = { page -> if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", page) } }
-        runtime.onLinuxUnavailable = { if (!isFinishing && !isDestroyed) runOnUiThread { c0("UISettings", "9") } }
+        // Terminal or a Linux app before Linux exists: ask first, in a glass card, instead of jumping into Settings.
+        runtime.onLinuxUnavailable = { if (!isFinishing && !isDestroyed) runOnUiThread { promptInstallLinux() } }
+    }
+
+    private var linuxPrompt: com.bellatrixos.ui.LinuxInstallDialog? = null
+
+    private fun promptInstallLinux() {
+        if (isFinishing || isDestroyed) return
+        val runtime = (application as App).runtime
+        // Already installing: show the progress page rather than asking again.
+        if (runtime.bootstrap.state.value is com.bellatrixos.linux.LinuxState.Installing) {
+            c0("UISettings", "9")
+            return
+        }
+        if (linuxPrompt?.isShowing == true) return
+        linuxPrompt =
+            com.bellatrixos.ui.LinuxInstallDialog(
+                this,
+                onInstall = {
+                    runtime.install()
+                    // Progress is on the Linux page (and in the notification).
+                    c0("UISettings", "9")
+                },
+            ).also { it.show() }
     }
 
     override fun onNewIntent(intent: Intent) {

@@ -9,6 +9,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+### Changed
+
+- Opening Terminal (or a Linux app) before Linux is installed now asks "Install Linux?" in a liquid glass card with Install / Not now, instead of jumping into Settings. The card blurs what is behind it (Android 12+), lights its edge with a shader that follows the phone's tilt and your finger (Android 13+), and springs in and out.
+- The app icon is now a gas-giant planet, centre-cropped 1:1 from the supplied artwork, as an adaptive icon plus sharp legacy icons.
+
+### Fixed
+
+- Home's desktop icons open, long-press and drag again. The page-swipe handler added in 2.9.47 sat on a full-size Compose layer over the desktop and swallowed every touch before the icons saw it; sideways page swipes are now read from the native desktop without consuming the touch.
+
 ## [2.9.48] - 2026-11-24
 
 ### Added

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="linux_prompt_title">Install Linux?</string>
+    <string name="linux_prompt_message">Terminal needs Linux, which isn\'t installed yet. Install it now? It sets up in the background and takes a few minutes.</string>
+    <string name="linux_prompt_install">Install</string>
+    <string name="linux_prompt_cancel">Not now</string>
+</resources>

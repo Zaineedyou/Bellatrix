@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="linux_prompt_title">¿Instalar Linux?</string>
+    <string name="linux_prompt_message">La terminal necesita Linux, que aún no está instalado. ¿Instalarlo ahora? Se configura en segundo plano y tarda unos minutos.</string>
+    <string name="linux_prompt_install">Instalar</string>
+    <string name="linux_prompt_cancel">Ahora no</string>
+</resources>

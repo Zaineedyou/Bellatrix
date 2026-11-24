@@ -1,5 +1,7 @@
 package com.bellatrixos.widgets
 
+import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -13,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.recyclerview.widget.RecyclerView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.bellatrixos.App
@@ -22,11 +25,13 @@ import com.bellatrixos.ui.Palette
 import com.bellatrixos.ui.home.NativeGrid
 import com.bellatrixos.ui.home.OwlHomeTiles
 import com.bellatrixos.ui.home.OwlSurface
+import com.bellatrixos.ui.home.PAGE_SWIPE_PX
 import com.bellatrixos.ui.home.WidgetScreenPanel
 import com.bellatrixos.widgets.render.Backdrop
 import com.bellatrixos.widgets.render.LocalBackdrop
 import com.bellatrixos.widgets.render.LocalHomeCovered
 import com.bellatrixos.widgets.render.LocalInputFocus
+import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.max
 
@@ -78,6 +83,53 @@ object OwlNativeSurfaces {
                 }
             }
         desktop.viewTreeObserver.addOnGlobalLayoutListener(gridListener)
+
+        // Sideways swipes on empty home change page. Read here, on the native desktop, and never consumed:
+        // a pointer handler over the whole home ComposeView would swallow taps and long presses meant for the icons.
+        (desktop as? RecyclerView)?.addOnItemTouchListener(
+            object : RecyclerView.OnItemTouchListener {
+                private var downX = 0f
+                private var downY = 0f
+                private var handled = true
+
+                override fun onInterceptTouchEvent(
+                    rv: RecyclerView,
+                    e: MotionEvent,
+                ): Boolean {
+                    when (e.actionMasked) {
+                        MotionEvent.ACTION_DOWN -> {
+                            downX = e.x
+                            downY = e.y
+                            handled = false
+                        }
+                        MotionEvent.ACTION_MOVE ->
+                            if (!handled) {
+                                val dx = e.x - downX
+                                val dy = e.y - downY
+                                if (abs(dx) > abs(dy) && abs(dx) > PAGE_SWIPE_PX) {
+                                    handled = true
+                                    val ordered = runtime.widgets.pages
+                                    val index = ordered.indexOf(runtime.widgets.activePage)
+                                    val next = ordered.getOrNull(if (dx < 0) index + 1 else index - 1)
+                                    if (next != null) {
+                                        runtime.widgets.activePage = next
+                                        rv.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                    }
+                                }
+                            }
+                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> handled = true
+                    }
+                    return false
+                }
+
+                override fun onTouchEvent(
+                    rv: RecyclerView,
+                    e: MotionEvent,
+                ) = Unit
+
+                override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) = Unit
+            },
+        )
 
         val home =
             ComposeView(activity).apply {

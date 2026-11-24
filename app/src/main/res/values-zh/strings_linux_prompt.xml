@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="linux_prompt_title">安装 Linux？</string>
+    <string name="linux_prompt_message">终端需要 Linux，但它尚未安装。现在安装吗？安装会在后台进行，需要几分钟。</string>
+    <string name="linux_prompt_install">安装</string>
+    <string name="linux_prompt_cancel">暂不</string>
+</resources>
