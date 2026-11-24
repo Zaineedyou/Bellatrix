@@ -1,6 +1,7 @@
 package com.bellatrixos.app_settings.fragments
 
 import android.view.View
+import android.widget.SeekBar
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.R
 import com.bellatrixos.database.SharedPrefs
@@ -32,14 +33,31 @@ class i(@JvmField val v: UIBackground, @JvmField val u: Int) : Runnable {
                 val context = background.t0 ?: return
                 val prefs = SharedPrefs.f4755a ?: return
 
-                if (!prefs.getBoolean("wallpaper_enabled", true)) {
+                val wallpaperEnabled = prefs.getBoolean("wallpaper_enabled", true)
+                if (!wallpaperEnabled) {
                     background.v0?.alpha = 0.5f
                     background.u0?.alpha = 0.5f
                     background.w0?.isEnabled = false
                 }
+                val type = prefs.getInt("wallpaper_type", 0)
                 background.z0?.setArray(R.array.settings_bg_img_type)
-                background.z0?.setSelection(prefs.getInt("wallpaper_type", 0))
+                background.z0?.setSelection(type)
                 background.z0?.setItemSelectListener(C0059h(background))
+                background.setVolumeEnabled(wallpaperEnabled && type == 1)
+                background.A1?.setProgressMax(100)
+                background.A1?.setProgressValue((prefs.getFloat("wallpaper_volume", 1f) * 100).toInt())
+                background.A1?.setItemSeekBarChangeListener(
+                    object : SeekBar.OnSeekBarChangeListener {
+                        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                            if (!fromUser) return
+                            background.A1?.setProgressTxt(progress)
+                            background.x0?.setWallpaperVolume(progress / 100f)
+                        }
+
+                        override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+                        override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+                    },
+                )
                 background.E0?.setArray(R.array.settings_bg_img_quality)
                 background.E0?.setSelection(prefs.getInt("wallpaper_quality", 0))
                 background.E0?.setItemSelectListener(n(2))

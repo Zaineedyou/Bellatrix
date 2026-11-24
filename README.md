@@ -139,8 +139,10 @@ The same settings page shows the current shell state.
 
 For a still or moving wallpaper, use **Settings → Personalize → Background**. The picker accepts
 any file; Bellatrix detects whether it is an image, an animated image or a video from the file
-itself. On Android 9+ animated images Android can decode animate as the live wallpaper, and video
-formats play through the system media player when the device can decode them.
+itself. A still picture becomes the phone's wallpaper, and Bellatrix's home draws that same wallpaper,
+so changing it in Android Settings shows there too. On Android 9+ animated images Android can decode
+animate as the live wallpaper; video formats play through the system media player when the device can
+decode them, with their own volume slider and the Video type staying selected once set.
 
 If replacing a build signed with a different certificate, uninstall the old version first:
 

@@ -636,4 +636,6 @@
     <string name="adb_shell_grant">Conceder acesso ao shell</string>
     <string name="adb_shell_install">Instalar com shell</string>
     <string name="adb_shell_install_failed">Falha na instalação com shell. Use o download do GitHub.</string>
+    <string name="settings_bg_volume_title">Volume do papel de parede</string>
+    <string name="settings_bg_volume_subtitle">Som para papéis de parede em vídeo</string>
 </resources>

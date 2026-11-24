@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bellatrixos.App
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.app_browser.files.b
+import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.wallpaper.WallpaperKind
 import com.bellatrixos.wallpaper.WallpaperVideoProcessor
 import com.bellatrixos.wallpaper.backgroundExtension
@@ -26,8 +27,11 @@ class C0059h(@JvmField val u: UIBackground) :
     ActivityResultCallback<Any?>,
     UISettingsCardSpinner.SpinnerCallback {
 
-    /** The type row is a hint only; the picked file decides how it is applied. */
-    override fun c(i2: Int) = Unit
+    /** Remember the chosen type, and only offer volume while it is Video. */
+    override fun c(i2: Int) {
+        SharedPrefs.f4755a?.edit()?.putInt("wallpaper_type", i2)?.apply()
+        u.setVolumeEnabled(SharedPrefs.f4755a?.getBoolean("wallpaper_enabled", true) != false && i2 == 1)
+    }
 
     override fun onActivityResult(result: Any?) {
         val activityResult = result as? ActivityResult ?: return
@@ -55,6 +59,12 @@ class C0059h(@JvmField val u: UIBackground) :
             }
         val detected = data.wallpaperKind(context)
         val useVideo = detected == WallpaperKind.VIDEO || (detected == WallpaperKind.UNKNOWN && hinted == WallpaperKind.VIDEO)
+        // A set video stays Video. The file's real kind wins over the row, so a clip picked with
+        // Picture selected still leaves the page saying Video once it has been applied.
+        val type = if (useVideo) 1 else 0
+        if (background.z0?.getSelectedPosition() != type) background.z0?.setSelection(type)
+        SharedPrefs.f4755a?.edit()?.putInt("wallpaper_type", type)?.apply()
+        background.setVolumeEnabled(SharedPrefs.f4755a?.getBoolean("wallpaper_enabled", true) != false && useVideo)
         if (!useVideo) {
             val quality = background.E0?.getSelectedPosition() ?: 0
             AppExecutors.d().execute(

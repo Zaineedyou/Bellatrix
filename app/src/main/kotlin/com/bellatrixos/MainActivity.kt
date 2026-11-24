@@ -3,6 +3,8 @@ package com.bellatrixos
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.app.WallpaperManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -85,6 +87,7 @@ import com.bellatrixos.startmenu.StartMenu
 import com.bellatrixos.startmenu.StartMenuAdapter
 import com.bellatrixos.startmenu.StartMenuItem
 import com.bellatrixos.startmenu.StartMenuRecommend
+import com.bellatrixos.system.registerNotExported
 import com.bellatrixos.startmenu.StartMenuViews
 import com.bellatrixos.startmenu.listeners.StartMenuTextWatcher
 import com.bellatrixos.taskbar.TaskBar
@@ -191,6 +194,9 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
     @JvmField var b1: TextView? = null
     @JvmField var c1: TextView? = null
     @JvmField var d0: ImageView? = null
+
+    /** Keeps home's background in step with Android's own wallpaper. */
+    private var wallpaperChanged: BroadcastReceiver? = null
     @JvmField var d1: TextView? = null
     @JvmField var e1: ActionCenter? = null
     @JvmField var f0: ViewGroup? = null
@@ -537,15 +543,9 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             wallpaperVideoManager.b.release()
             this.l1 = null
         }
-        this.d0?.setImageBitmap(bitmap)
-        Themes.a(this.W ?: this, G())
-        val cW = this.W ?: this
-        val r0v = this.r0
-        val x0v = this.X0
-        val d0v = this.d0
-        if (r0v != null && x0v != null && d0v != null) {
-            UIBlur.a(cW, r0v, x0v, d0v)
-        }
+        // The picked picture goes to the phone's wallpaper; home then draws that, not a Bellatrix copy.
+        if (bitmap != null) (application as? App)?.runtime?.themes?.setSystemWallpaper(bitmap)
+        applySystemWallpaper()
         StartMenu.f4780e?.a(true)
         val actionCenter = this.e1
         if (actionCenter != null) {
@@ -557,6 +557,25 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             widgetCenter.p = true
             widgetCenter.f4821e.setImageBitmap(null)
         }
+    }
+
+    /** Draws the phone's current wallpaper behind Bellatrix, wherever it was changed. */
+    private fun applySystemWallpaper() {
+        val view = this.d0 ?: return
+        val wallpapers = WallpaperManager.getInstance(this)
+        // A live wallpaper is already behind the translucent home window; a static preview drawn
+        // here would cover the moving one. Only mirror the phone's own image when there is one.
+        val drawable = if (wallpapers.wallpaperInfo != null) null else runCatching { wallpapers.drawable }.getOrNull()
+        view.setImageDrawable(drawable)
+        Themes.a(this.W ?: this, (drawable as? BitmapDrawable)?.bitmap)
+        val relative = this.r0
+        val blur = this.X0
+        if (relative != null && blur != null) UIBlur.a(this.W ?: this, relative, blur, view)
+    }
+
+    override fun setWallpaperVolume(volume: Float) {
+        SharedPrefs.f4755a?.edit()?.putFloat("wallpaper_volume", volume.coerceIn(0f, 1f))?.apply()
+        this.l1?.setVolume(volume)
     }
 
     override fun X(i2: Int, i3: Int) {
@@ -1192,29 +1211,6 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         }
         val imageView = findViewById<ImageView>(R.id.systemWallpaper)
         this.d0 = imageView
-        val mainActivity = this.W!!
-        if (SharedPrefs.f4755a?.getBoolean("wallpaper_enabled", true) ?: true) {
-            val stringPath = SharedPrefs.f4755a?.getString("wallpaper_path", "theme1") ?: "theme1"
-            var bitmapDecodeFile: Bitmap? = null
-            try {
-                if (Objects.equals(stringPath, "theme1")) {
-                    try {
-                        val dark = (mainActivity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-                        bitmapDecodeFile = if (dark) Default.a(mainActivity, "theme1") else Default.a(mainActivity, "theme2")
-                    } catch (_: Exception) {
-                    }
-                } else {
-                    val options = BitmapFactory.Options()
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888
-                    bitmapDecodeFile = BitmapFactory.decodeFile(stringPath, options)
-                }
-            } catch (_: Exception) {
-                bitmapDecodeFile = null
-            }
-            if (bitmapDecodeFile != null) {
-                imageView.setImageBitmap(bitmapDecodeFile)
-            }
-        }
         val viewGroup = findViewById<ViewGroup>(R.id.window)
         this.f0 = viewGroup
         val viewGroup2 = viewGroup.findViewById<ViewGroup>(R.id.window_main)
@@ -1290,6 +1286,12 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         }
         try { AppExecutors.b().execute(c(this, i3)) } catch (_: Throwable) {}
         this.f0?.viewTreeObserver?.addOnGlobalLayoutListener(AnonymousClass1(bundle))
+        wallpaperChanged =
+            registerNotExported(IntentFilter(Intent.ACTION_WALLPAPER_CHANGED)) {
+                (application as? App)?.runtime?.themes?.noteSystemWallpaperChanged()
+                applySystemWallpaper()
+            }
+        applySystemWallpaper()
     }
 
     override fun onDestroy() {
@@ -1330,6 +1332,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             }
             this.h1 = false
         }
+        wallpaperChanged?.let { receiver -> runCatching { unregisterReceiver(receiver) } }
+        wallpaperChanged = null
         if (UIContextMenu.f4743f != null) {
             UIContextMenu.f4743f = null
         }

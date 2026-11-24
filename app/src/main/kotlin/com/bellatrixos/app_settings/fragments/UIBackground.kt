@@ -16,6 +16,7 @@ import androidx.media3.common.util.UnstableApi
 import com.bellatrixos.R
 import com.bellatrixos.interfaces.MainActivityIn
 import com.bellatrixos.widgets.UIProgressCircular
+import com.bellatrixos.widgets.cards.UISettingsCardSeekBar
 import com.bellatrixos.widgets.cards.UISettingsCardSpinner
 import com.bellatrixos.widgets.cards.UISettingsCardSpinnerCompact
 
@@ -27,6 +28,7 @@ class UIBackground : Fragment() {
     @JvmField var C0: ImageView? = null
     @JvmField var D0: UIProgressCircular? = null
     @JvmField var E0: UISettingsCardSpinnerCompact? = null
+    @JvmField var A1: UISettingsCardSeekBar? = null
     @JvmField val F0 = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         C0059h(this).onActivityResult(result)
     }
@@ -65,6 +67,12 @@ class UIBackground : Fragment() {
         F0.launch(intent)
     }
 
+    /** The volume card only means something while the wallpaper is a video. */
+    fun setVolumeEnabled(video: Boolean) {
+        A1?.isEnabled = video
+        A1?.alpha = if (video) 1f else 0.5f
+    }
+
     fun b0(z: Boolean) {
         if (z) {
             C0?.visibility = View.GONE
@@ -99,6 +107,7 @@ class UIBackground : Fragment() {
         w0 = view.findViewById(R.id.btnSelectWallpaper)
         z0 = view.findViewById(R.id.spinnerImgType)
         E0 = view.findViewById(R.id.spinnerQuality)
+        A1 = view.findViewById(R.id.card_wallpaper_volume)
         return view
     }
 }

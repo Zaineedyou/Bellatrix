@@ -636,4 +636,6 @@
     <string name="adb_shell_grant">授予 Shell 访问权限</string>
     <string name="adb_shell_install">使用 Shell 安装</string>
     <string name="adb_shell_install_failed">Shell 安装失败，请改用 GitHub 下载。</string>
+    <string name="settings_bg_volume_title">壁纸音量</string>
+    <string name="settings_bg_volume_subtitle">视频壁纸的声音</string>
 </resources>

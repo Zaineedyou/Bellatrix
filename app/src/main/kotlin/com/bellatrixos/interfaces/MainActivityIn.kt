@@ -49,6 +49,10 @@ interface MainActivityIn {
     fun d(fragment: UIFragment?)
     fun d0(str: String, str2: String, str3: String, z: Boolean)
     fun e(file: File?, file2: File?)
+
+    /** Volume of the video wallpaper, 0 to 1. Hosts without a video player ignore it. */
+    fun setWallpaperVolume(volume: Float) = Unit
+
     fun e0(): Any?
     fun f(): Context?
     fun g0()

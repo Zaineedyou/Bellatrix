@@ -269,6 +269,7 @@
     <id name="cap_title" />
     <id name="card_app_volume" />
     <id name="card_device_volume" />
+    <id name="card_wallpaper_volume" />
     <id name="carryVelocity" />
     <id name="center" />
     <id name="center_horizontal" />

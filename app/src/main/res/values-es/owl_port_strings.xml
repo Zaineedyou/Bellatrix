@@ -636,4 +636,6 @@
     <string name="adb_shell_grant">Conceder acceso de shell</string>
     <string name="adb_shell_install">Instalar con shell</string>
     <string name="adb_shell_install_failed">Falló la instalación con shell. Usa la descarga de GitHub.</string>
+    <string name="settings_bg_volume_title">Volumen del fondo de pantalla</string>
+    <string name="settings_bg_volume_subtitle">Sonido para fondos de pantalla de vídeo</string>
 </resources>

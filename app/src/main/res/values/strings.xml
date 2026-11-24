@@ -497,6 +497,8 @@ We will share more once you're back online."</string>
     <string name="settings_bg_personalize_bg_subtitle">A picture background applies to your current desktop</string>
     <string name="settings_bg_quality">Wallpaper quality</string>
     <string name="settings_bg_recent_images">Images</string>
+    <string name="settings_bg_volume_subtitle">Sound for video wallpapers</string>
+    <string name="settings_bg_volume_title">Wallpaper volume</string>
     <string name="settings_colors_accent_color">Accent color</string>
     <string name="settings_colors_blur_effects">Transparency Blur effects</string>
     <string name="settings_colors_blur_effects_subtitle">Windows and surfaces appear blurred translucent</string>

@@ -643,4 +643,6 @@
     <string name="adb_shell_grant">Berikan akses shell</string>
     <string name="adb_shell_install">Pasang dengan shell</string>
     <string name="adb_shell_install_failed">Pemasangan dengan shell gagal. Gunakan unduhan GitHub saja.</string>
+    <string name="settings_bg_volume_title">Volume wallpaper</string>
+    <string name="settings_bg_volume_subtitle">Suara untuk wallpaper video</string>
 </resources>

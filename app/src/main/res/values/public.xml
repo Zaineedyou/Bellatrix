@@ -3134,6 +3134,7 @@
     <public type="id" name="cap_title" id="0x7f0a010b" />
     <public type="id" name="card_app_volume" id="0x7f0a010c" />
     <public type="id" name="card_device_volume" id="0x7f0a010d" />
+    <public type="id" name="card_wallpaper_volume" id="0x7f0a0421" />
     <public type="id" name="carryVelocity" id="0x7f0a010e" />
     <public type="id" name="center" id="0x7f0a010f" />
     <public type="id" name="center_horizontal" id="0x7f0a0110" />
@@ -4719,6 +4720,8 @@
     <public type="string" name="settings_bg_personalize_bg_subtitle" id="0x7f1201e8" />
     <public type="string" name="settings_bg_quality" id="0x7f1201e9" />
     <public type="string" name="settings_bg_recent_images" id="0x7f1201ea" />
+    <public type="string" name="settings_bg_volume_subtitle" id="0x7f1202d3" />
+    <public type="string" name="settings_bg_volume_title" id="0x7f1202d4" />
     <public type="string" name="settings_colors_accent_color" id="0x7f1201eb" />
     <public type="string" name="settings_colors_blur_effects" id="0x7f1201ec" />
     <public type="string" name="settings_colors_blur_effects_subtitle" id="0x7f1201ed" />

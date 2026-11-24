@@ -152,6 +152,12 @@ class ThemeStore(
         liveWallpaperPackage = WallpaperManager.getInstance(context).wallpaperInfo?.packageName
     }
 
+    /** Android's wallpaper changed outside us; home must re-center and re-read the active engine. */
+    fun noteSystemWallpaperChanged() {
+        liveWallpaperPackage = runCatching { WallpaperManager.getInstance(context).wallpaperInfo?.packageName }.getOrNull()
+        systemWallpaperVersion++
+    }
+
     /** Opens Android's live wallpaper preview with ours preselected. */
     fun requestLiveWallpaper() {
         val intent =
@@ -168,27 +174,37 @@ class ThemeStore(
             if (!liveWallpaperActive) requestLiveWallpaper()
             return
         }
-        if (liveWallpaperActive) return
-        val done =
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    val wallpapers = WallpaperManager.getInstance(context)
-                    if (!wallpapers.isWallpaperSupported || !wallpapers.isSetWallpaperAllowed) return@runCatching false
-                    val bitmap = decodeForSystemWallpaper(file, context) ?: return@runCatching false
-                    try {
-                        runCatching { wallpapers.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK) }
-                            .onFailure { wallpapers.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM) }
-                    } finally {
-                        bitmap.recycle()
-                    }
-                    true
-                }.onFailure { Log.w(TAG, "the phone's wallpaper wasn't set", it) }.getOrDefault(false)
-            }
+        // A still picture belongs to the phone, not to a second Bellatrix layer. Setting it here
+        // also retires our old live wallpaper, so home follows whatever Android shows next.
+        val bitmap = decodeForSystemWallpaper(file, context) ?: return
+        val done = writeSystemWallpaper(bitmap)
+        bitmap.recycle()
         if (done) {
             liveWallpaperPackage = null
             systemWallpaperVersion++
         }
     }
+
+    /** Applies a decoded picture as the phone's wallpaper; home then follows the phone, not a Bellatrix copy. */
+    fun setSystemWallpaper(bitmap: Bitmap) {
+        scope.launch {
+            if (writeSystemWallpaper(bitmap)) {
+                liveWallpaperPackage = null
+                systemWallpaperVersion++
+            }
+        }
+    }
+
+    private suspend fun writeSystemWallpaper(bitmap: Bitmap): Boolean =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val wallpapers = WallpaperManager.getInstance(context)
+                if (!wallpapers.isWallpaperSupported || !wallpapers.isSetWallpaperAllowed) return@runCatching false
+                runCatching { wallpapers.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK) }
+                    .onFailure { wallpapers.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM) }
+                true
+            }.onFailure { Log.w(TAG, "the phone's wallpaper wasn't set", it) }.getOrDefault(false)
+        }
 
     /** Whether [load] has finished; until then it may still replace the wallpaper. */
     var loaded by mutableStateOf(false)

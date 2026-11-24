@@ -14,10 +14,13 @@ object BlurTaskBar {
     @JvmStatic
     fun a(context: Context, view: View): Bitmap? {
         if (SharedPrefs.f4755a?.getBoolean("wallpaper_enabled", true) == true) {
-            return UIBlurImage.a(Bonds.a(view))
+            UIBlurImage.a(Bonds.a(view))?.let { return it }
         }
+        val wallpapers = WallpaperManager.getInstance(context)
+        // A live wallpaper is already blurred by the compositor; a static preview here would be stale.
+        if (wallpapers.wallpaperInfo != null) return null
         val taskbarHeight = context.resources.getDimensionPixelSize(R.dimen.taskbar_height)
-        val drawable = WallpaperManager.getInstance(context).drawable
+        val drawable = wallpapers.drawable
         val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return null
         val width = bitmap.width
         val height = bitmap.height

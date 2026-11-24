@@ -636,4 +636,6 @@
     <string name="adb_shell_grant">Shell-Zugriff erlauben</string>
     <string name="adb_shell_install">Mit Shell installieren</string>
     <string name="adb_shell_install_failed">Shell-Installation fehlgeschlagen. Nutze stattdessen den GitHub-Download.</string>
+    <string name="settings_bg_volume_title">Wallpaper-lautstärke</string>
+    <string name="settings_bg_volume_subtitle">Klang für video-wallpaper</string>
 </resources>

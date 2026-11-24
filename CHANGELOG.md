@@ -9,6 +9,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.44] - 2026-11-24
+
+### Fixed
+
+- Bellatrix's home now shows the phone's own wallpaper instead of a stale saved copy. A still picture picked in Background becomes the system wallpaper, and a wallpaper changed from Android Settings appears in Bellatrix right away.
+- Video wallpapers keep the Video type selected after they are applied. Video sound now comes from one player, so it is no longer doubled.
+- Added a wallpaper volume slider for video wallpapers in Settings → Personalize → Background.
+
 ## [2.9.43] - 2026-11-24
 
 ### Added
