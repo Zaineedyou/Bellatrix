@@ -28,6 +28,7 @@ import com.bellatrixos.widgets.UIProgressBarLinear
 import com.bellatrixos.widgets.UITitleBar
 import com.bellatrixos.windows.Window
 import com.bellatrixos.windows.WindowSize
+import com.bellatrixos.windows.files.MediaPaths
 import java.io.File
 import java.util.Locale
 
@@ -252,7 +253,7 @@ class UIVideo : UIFragment(), BackPressHandler {
         Q0 = str
         // A new media has new tracks: the old menu's group indices would point at the wrong stream.
         trackSelections.reset()
-        val uri = Uri.fromFile(File(str))
+        val uri = MediaPaths.uri(str) ?: Uri.fromFile(MediaPaths.host(str))
         val mediaItem = MediaItem.Builder().setUri(uri).build()
         D0?.setMediaItem(mediaItem)
         D0?.prepare()

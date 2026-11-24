@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.R
+import com.bellatrixos.windows.files.MediaPaths
 import com.bellatrixos.widgets.UINavigationBar
 
 /** Tugas inisialisasi, pemuatan metadata, dan daftar lagu. */
@@ -56,7 +57,8 @@ class a(
                 val music = v
                 val retriever = MediaMetadataRetriever()
                 try {
-                    retriever.setDataSource(path)
+                    val uri = MediaPaths.uri(path)
+                    if (uri != null) retriever.setDataSource(music.u0, uri) else retriever.setDataSource(MediaPaths.host(path).absolutePath)
                     AppExecutors.c().post(a(music, retriever.embeddedPicture, 4))
                 } catch (_: Exception) {
                 } finally {

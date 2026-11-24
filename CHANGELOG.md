@@ -9,6 +9,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+### Fixed
+
+- Music, video and Photos now understand guest paths, the Android paths behind them and content Uris, instead of treating every one as a plain file and reporting it missing.
+- Files hands documents to Android through the FileProvider authority the app actually declares, with a write grant for apps that edit in place.
+- Files opened from the desktop editor no longer stop at a thumbnail and a name: text of every extension is editable, and binary files open as a byte-preserving view that writes the same bytes back.
+
 ## [2.9.46] - 2026-11-24
 
 ### Fixed

@@ -10,10 +10,15 @@ internal const val EDITOR_MAX_BYTES = 1L shl 20
 
 /** A file as the editor reads it. */
 internal sealed interface EditorFile {
-    /** [text] has LF line endings; [crlf] says whether to write CRLF back. A missing file is empty text. */
+    /**
+     * [text] has LF line endings; [crlf] says whether to write CRLF back. [raw] keeps one byte per
+     * character, so a file Android calls binary (NULs, another encoding) can still be read and written
+     * instead of being waved away as a thumbnail. A missing file is empty text.
+     */
     data class Text(
         val text: String,
         val crlf: Boolean,
+        val raw: Boolean = false,
     ) : EditorFile
 
     data object TooBig : EditorFile
@@ -26,26 +31,36 @@ internal fun readEditorFile(file: File): EditorFile {
     if (!file.exists()) return EditorFile.Text("", crlf = false)
     if (file.length() > EDITOR_MAX_BYTES) return EditorFile.TooBig
     val bytes = file.readBytes()
-    if (bytes.any { it == 0.toByte() }) return EditorFile.Binary
+    val raw = bytes.any { it == 0.toByte() }
     val text =
-        try {
-            Charsets.UTF_8
-                .newDecoder()
-                .onMalformedInput(CodingErrorAction.REPORT)
-                .onUnmappableCharacter(CodingErrorAction.REPORT)
-                .decode(ByteBuffer.wrap(bytes))
-                .toString()
-        } catch (e: CharacterCodingException) {
-            return EditorFile.Binary
+        if (raw) {
+            // Latin-1 is a byte-for-byte view: every byte has a character and back again.
+            String(bytes, Charsets.ISO_8859_1)
+        } else {
+            try {
+                Charsets.UTF_8
+                    .newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+                    .decode(ByteBuffer.wrap(bytes))
+                    .toString()
+            } catch (e: CharacterCodingException) {
+                return EditorFile.Text(String(bytes, Charsets.ISO_8859_1), crlf = false, raw = true)
+            }
         }
     val crlf = "\r\n" in text
-    return EditorFile.Text(if (crlf) text.replace("\r\n", "\n") else text, crlf)
+    return EditorFile.Text(if (crlf) text.replace("\r\n", "\n") else text, crlf, raw)
 }
 
+/** Encodes with the file's own byte mapping, so a Latin-1 view writes the same bytes back. */
 internal fun encodeEditorText(
     text: String,
     crlf: Boolean,
-): ByteArray = (if (crlf) text.replace("\n", "\r\n") else text).toByteArray()
+    raw: Boolean = false,
+): ByteArray {
+    val withEndings = if (crlf) text.replace("\n", "\r\n") else text
+    return if (raw) withEndings.toByteArray(Charsets.ISO_8859_1) else withEndings.toByteArray(Charsets.UTF_8)
+}
 
 /**
  * What the tab key inserts: the file's own indent (a tab, or the narrowest run

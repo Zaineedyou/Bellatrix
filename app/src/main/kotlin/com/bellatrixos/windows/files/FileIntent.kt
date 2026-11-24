@@ -4,8 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
+import com.bellatrixos.App
+import com.bellatrixos.EditorActivity
 import com.bellatrixos.R
 import com.bellatrixos.app_explorer.files.Files
+import com.bellatrixos.ui.files.isText
 import com.bellatrixos.widgets.UINotification
 import java.io.File
 
@@ -35,9 +38,10 @@ object FileIntent {
                 } catch (_: Exception) {
                 }
             }
-            notifyNoApp(context)
+            // No app outside Bellatrix knows this extension: the editor can still read and write it.
+            openEditor(context, file)
         } catch (_: Exception) {
-            notifyNoApp(context)
+            openEditor(context, file)
         }
     }
 
@@ -60,6 +64,11 @@ object FileIntent {
             launcher.c0(tag, file.absolutePath)
             return
         }
+        // Text and extensionless configs are edited in Bellatrix, not just shown as a name and a thumbnail.
+        if (isText(file.name, file)) {
+            openEditor(context, file)
+            return
+        }
         try {
             val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext)
             if (mime != null) {
@@ -70,7 +79,22 @@ object FileIntent {
                 context.startActivity(intent)
                 return
             }
-            notifyNoApp(context)
+            // Unknown to Android too: still give the user a readable, writable document.
+            openEditor(context, file)
+        } catch (_: Exception) {
+            openEditor(context, file)
+        }
+    }
+
+    /**
+     * The editor takes a guest path; the legacy explorer hands us the host file
+     * behind it. Convert through the one runtime, as the Files screen does.
+     */
+    private fun openEditor(context: Context, file: File) {
+        try {
+            val guest = (context.applicationContext as? App)?.runtime?.proot?.guestPath(file) ?: file.absolutePath
+            val intent = EditorActivity.intent(context, guest).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
         } catch (_: Exception) {
             notifyNoApp(context)
         }

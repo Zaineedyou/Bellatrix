@@ -151,7 +151,7 @@ fun FilesScreen(
             if (share) {
                 Intent(Intent.ACTION_SEND).setType(mime).putExtra(Intent.EXTRA_STREAM, uri)
             } else {
-                Intent(Intent.ACTION_VIEW).setDataAndType(uri, mime)
+                Intent(Intent.ACTION_VIEW).setDataAndType(uri, mime).addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             }.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         try {
             context.startActivity(Intent.createChooser(intent, name).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -164,7 +164,7 @@ fun FilesScreen(
         // A file outside the folders in file_paths.xml (a link out of them) has no uri.
         val uri =
             try {
-                FileProvider.getUriForFile(context, context.packageName + ".files", file)
+                FileProvider.getUriForFile(context, context.packageName + ".provider", file)
             } catch (e: IllegalArgumentException) {
                 return toast(resources.getString(R.string.files_cant_hand_over, file.name))
             }

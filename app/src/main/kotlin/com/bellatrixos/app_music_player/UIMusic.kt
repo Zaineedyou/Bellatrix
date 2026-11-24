@@ -24,11 +24,11 @@ import com.bellatrixos.widgets.UISplashLayout
 import com.bellatrixos.widgets.UITitleBar
 import com.bellatrixos.windows.Window
 import com.bellatrixos.windows.WindowSize
+import com.bellatrixos.windows.files.MediaPaths
 import com.bellatrixos.windows.installed_apps.AppsDatabase
 import com.bellatrixos.windows.installed_apps.InstalledAppsDB
 import com.bellatrixos.windows.installed_apps.models.InstalledApp
 import java.io.File
-import java.io.IOException
 
 /** Pemutar musik yang berjalan sebagai jendela mengambang. */
 class UIMusic : UIFragment(), BackPressHandler {
@@ -325,10 +325,11 @@ class UIMusic : UIFragment(), BackPressHandler {
         K0 = str
         try {
             if (::z0.isInitialized) {
-                z0.setDataSource(str)
+                val uri = MediaPaths.uri(str)
+                if (uri != null) z0.setDataSource(u0, uri) else z0.setDataSource(MediaPaths.host(str).absolutePath)
                 z0.prepareAsync()
             }
-        } catch (_: IOException) {
+        } catch (_: Exception) {
             AppExecutors.c().post(d(2, this))
         }
         AppExecutors.d().execute(a(this, str, 1))

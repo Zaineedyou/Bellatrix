@@ -192,7 +192,7 @@ private fun EditorBody(
                     // Written in place, so links, permissions and hard links stay as they were.
                     val host = fs.host(path)
                     host.parentFile?.mkdirs()
-                    host.writeBytes(encodeEditorText(text, file.crlf))
+                    host.writeBytes(encodeEditorText(text, file.crlf, file.raw))
                 }.exceptionOrNull()
             }
         if (error != null) {

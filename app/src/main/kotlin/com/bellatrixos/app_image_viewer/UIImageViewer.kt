@@ -28,6 +28,7 @@ import com.bellatrixos.windows.WindowSize
 import com.bellatrixos.windows.Windows
 import com.bellatrixos.windows.files.FileExtensions
 import com.bellatrixos.windows.files.FileMeta
+import com.bellatrixos.windows.files.MediaPaths
 import com.bellatrixos.windows.files.clipboard.ClipboardItem
 import com.bellatrixos.windows.files.clipboard.Clipboards
 import com.bellatrixos.windows.installed_apps.models.InstalledApp
@@ -269,11 +270,16 @@ class UIImageViewer : UIFragment(), BackPressHandler {
     fun s0(str: String?) {
         if (str == null) return
         AppExecutors.d().execute {
-            // androidx.core.content.res.a(this, 18, str): varian case 18 (i4 = 0).
-            val file = File(str)
+            // MediaStore picks and guest paths are both names for the same picture now.
+            val uri = MediaPaths.uri(str)
+            if (uri != null) {
+                AppExecutors.c().post { openPhotoUri(uri, uri.lastPathSegment ?: str.substringAfterLast('/')) }
+                return@execute
+            }
+            val file = MediaPaths.host(str)
             u0File = file
-            if (file.exists()) {
-                AppExecutors.c().post(c(this, file.name, str, 0))
+            if (file.isFile) {
+                AppExecutors.c().post(c(this, file.name, MediaPaths.guest(str) ?: str, 0))
             } else {
                 AppExecutors.c().post(b(this, 0))
             }
