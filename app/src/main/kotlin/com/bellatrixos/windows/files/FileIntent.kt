@@ -45,6 +45,17 @@ object FileIntent {
         }
     }
 
+    /** The Bellatrix app that shows [file] by its extension, or null when no app claims it. */
+    @JvmStatic
+    fun appTag(file: File): String? = when (FileExtensions.c(file.name)) {
+        "3gp", "mkv", "mp4", "mov", "mpg", "mpeg", "webm" -> "UIVideo"
+        "aac", "m4a", "mp3", "ogg", "wav" -> "UIMusic"
+        "bmp", "gif", "jpg", "png", "jpeg", "webp" -> "UIPhotos"
+        "htm", "svg", "html" -> "UIBrowser"
+        "txt" -> "UINotepad"
+        else -> null
+    }
+
     @JvmStatic
     fun b(context: Context, file: File, launcher: AppLauncher) {
         if (!file.exists()) {
@@ -52,21 +63,15 @@ object FileIntent {
             return
         }
         val ext = FileExtensions.c(file.name)
-        val tag = when (ext) {
-            "3gp", "mkv", "mp4", "mov", "mpg", "mpeg", "webm" -> "UIVideo"
-            "aac", "m4a", "mp3", "ogg", "wav" -> "UIMusic"
-            "bmp", "gif", "jpg", "png", "jpeg", "webp" -> "UIPhotos"
-            "htm", "svg", "html" -> "UIBrowser"
-            "txt" -> "UINotepad"
-            else -> null
-        }
+        val tag = appTag(file)
         if (tag != null) {
             launcher.c0(tag, file.absolutePath)
             return
         }
-        // Text and extensionless configs are edited in Bellatrix, not just shown as a name and a thumbnail.
+        // Text and extensionless configs open in Notepad's window, which edits and saves them in place. The separate
+        // editor activity needs the Linux runtime and takes the whole screen, so it is only the fallback below.
         if (isText(file.name, file)) {
-            openEditor(context, file)
+            launcher.c0("UINotepad", file.absolutePath)
             return
         }
         try {

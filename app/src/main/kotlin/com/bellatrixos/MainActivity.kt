@@ -275,6 +275,8 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             WindowSize.f4877k = mainActivity3.resources.getDimensionPixelSize(R.dimen.app_window_margin)
             mainActivity3.resources.getDimensionPixelSize(R.dimen.ui_12dp)
             WindowSize.m = (WindowSize.b + Windows.f4880a) - WindowSize.l
+            // Floating windows follow the window layer from here on, including when the phone turns.
+            WindowSize.follow(viewGroup)
             if (Global.f4840h && Global.g) {
                 ViewCompat.setOnApplyWindowInsetsListener(mainActivity.f0!!, null)
             }
@@ -729,8 +731,11 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         startMenuAdapter?.F(i2, true)
     }
 
-    override fun c0(str: String, str2: String?) {
+    override fun c0(str: String, rawExtra: String?) {
         // App drawer, taskbar, pinned shortcut and start menu all come through here.
+        // MainActivity.M has a non-null extra, so "no file" arrives as "". Windows treat any extra as a file to open:
+        // Music tried to play "" and Photos looked for it ("Failed to open file", "File not found").
+        val str2 = rawExtra?.takeIf { it.isNotEmpty() }
         if (str == "UITerminal") {
             openOrFocusTerminal()
             return

@@ -9,13 +9,59 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.54] - 2026-11-25
+
 ### Changed
+
+- Explorer's editor now covers the whole Explorer window below its title bar instead of half of it, and gives the window back on close.
+- Explorer opens files like a file manager does, by what they are: videos, music and photos in their apps; text and code in the editor; documents, archives, packages, fonts and databases in whichever app takes them; a file with an extension nobody knows is looked into, and text goes to the editor. `.html`, `.htm` and `.svg` open in the editor too ("Open with" still shows them in a browser).
+- The editor colours code for its language (Kotlin, Java, Gradle, JavaScript, TypeScript, Python, C, C++, C#, Go, Rust, PHP, Ruby, shell, SQL, Lua, Swift, Dart, CSS, JSON, HTML/XML, YAML, config files, Markdown, diffs), by extension or, for a file without a known name, by its first line (a `#!` line, `<?xml`, `{`). Code is shown unwrapped with line numbers and prose is wrapped; a Wrap button switches between them. Colours follow light and dark mode. Files over 120,000 characters stay plain so typing stays smooth.
+
+## [2.9.53] - 2026-11-25
+
+### Added
+
+- Explorer has its own editor, inside its window: opening a file in Explorer shows it in the file area (back arrow, name with a dot while unsaved, Save, Ctrl+S, Esc), and going to another folder, or opening another file, asks first when there are unsaved changes. Any extension opens as text, with line endings, a UTF-8 byte order mark and a non-UTF-8 encoding kept so saving rewrites nothing that was not edited. Files that are not text or are over 2 MB go to the system's apps instead. "Edit" in an item's menu opens any file this way.
+
+### Changed
+
+- Opening a text file or `.txt` from Explorer no longer goes to Notepad or the separate editor activity. Videos, music, photos, `.htm`, `.html` and `.svg` still open in their own apps.
+
+## [2.9.52] - 2026-11-25
+
+### Fixed
+
+- Tapping a file or folder in Explorer opens it. The listener behind a tap was a stub that did nothing, so only the long-press menu's Open worked.
+- Text files and configs without an extension that Explorer opens now open in Notepad's window, which edits and saves in place, instead of the separate full-screen editor (which also needs the Linux runtime and closes without it).
+
+## [2.9.51] - 2026-11-25
+
+### Fixed
+
+- The on-screen keyboard now appears when you tap a text field in Chromium and Electron apps such as Vesktop. They turn text input on but report an empty cursor rectangle, which Bellatrix read as "no text cursor"; a tap anywhere in a window with text input on now counts as a tap on text. Terminals that report a real cursor row behave as before.
+- Bellatrix now answers every text-input commit with `done`, as `zwp_text_input_v3` requires and Chromium waits for, and no longer drops a cursor rectangle sent before `enable`.
+
+## [2.9.50] - 2026-11-25
+
+### Fixed
+
+- Music and Photos no longer open with "Failed to open file" / "File not found". Opening an app with no file reached the window as an empty path, and Music tried to play it and Photos looked for it. An empty extra now means no file.
+- Explorer's long-press menus work: on an icon (Open, Edit, Open with, Cut, Copy, Paste, Rename, Delete, Share, Select all) and on empty space (New folder, Paste, Select all). The operations behind them were already ported, but both menus were empty stubs, so Explorer could only browse.
+
+## [2.9.49] - 2026-11-25
+
+### Changed
+
+- Home's icons now fill down the first column from the top left, then continue at the top of the next column. A new app takes the first empty cell in that order. Saved layouts are packed once (same order, gaps closed) so they start at the top left.
 
 - Opening Terminal (or a Linux app) before Linux is installed now asks "Install Linux?" in a liquid glass card with Install / Not now, instead of jumping into Settings. The card blurs what is behind it (Android 12+), lights its edge with a shader that follows the phone's tilt and your finger (Android 13+), and springs in and out.
 - The app icon is now a gas-giant planet, centre-cropped 1:1 from the supplied artwork, as an adaptive icon plus sharp legacy icons.
 
 ### Fixed
 
+- Long-pressing an icon on home always opens its menu. The icon's drag now starts from that long press instead of racing it on a separate timer that could cancel the menu, and moving an icon no longer leaves the rearrange flag on, which made every long press on home and the taskbar do nothing.
+- Turning the phone no longer scrambles home: the icon list keeps its order and only re-wraps, empty cells are rebuilt for the new screen on every layout change, and gaps close up first when the new orientation has fewer cells so no icon ends up off screen.
+- Floating windows follow the screen when the phone turns. The screen size is measured again whenever the window layer changes, open floating windows are scaled to the new shape, and a window can no longer be sized or placed past the taskbar.
 - Home's desktop icons open, long-press and drag again. The page-swipe handler added in 2.9.47 sat on a full-size Compose layer over the desktop and swallowed every touch before the icons saw it; sideways page swipes are now read from the native desktop without consuming the touch.
 
 ## [2.9.48] - 2026-11-24

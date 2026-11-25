@@ -47,24 +47,14 @@ class AllDirectionsDragCallback(@JvmField val f4762d: DesktopAdapter) : ItemTouc
             adapter.notifyItemChanged(from)
             adapter.notifyItemChanged(to)
             DesktopDB.c(list)
-            if (!adapter.y) {
-                adapter.C?.let {
-                    adapter.y = true
-                    it.j()
-                    adapter.B()
-                }
-            }
+            // Moving an icon is saved at once. It used to also turn on MainActivity's rearrange mode (b0), which
+            // nothing on home ever turned off again, and which makes every long press on home return early.
+            adapter.B()
         } else {
             Collections.swap(list, from, to)
             adapter.notifyItemMoved(from, to)
             DesktopDB.c(list)
-            if (!adapter.y) {
-                adapter.C?.let {
-                    adapter.y = true
-                    it.j()
-                    adapter.B()
-                }
-            }
+            adapter.B()
         }
         g = -1
         f4765h = -1
@@ -72,6 +62,13 @@ class AllDirectionsDragCallback(@JvmField val f4762d: DesktopAdapter) : ItemTouc
     }
 
     override fun getMoveThreshold(viewHolder: RecyclerView.ViewHolder): Float = 0.4f
+
+    /**
+     * The drag starts from the icon's own long press, right after its menu opens (see DesktopAdapter.dragStarter).
+     * Left on, ItemTouchHelper picked the icon up on its own timer and took the rest of the touch from the icon,
+     * which cancels the icon's long click whenever it wins that race.
+     */
+    override fun isLongPressDragEnabled(): Boolean = false
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         val position = viewHolder.bindingAdapterPosition

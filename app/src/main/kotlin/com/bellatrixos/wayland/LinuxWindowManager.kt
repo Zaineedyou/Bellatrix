@@ -172,11 +172,16 @@ class LinuxWindowManager : WindowManagerHooks, WindowViewManager {
 
     override fun touchUp(id: Int) = server.postInput { touchUp(id) }
 
-    /** Whether [hit] is on the row where its client last said its text cursor is: a terminal's prompt line. */
+    /**
+     * Whether a tap at [hit] is a tap on text: on the row of the text cursor a client reported (a terminal's prompt
+     * line), or anywhere in a window whose client has text input on but reports no usable cursor rectangle, which is
+     * what Chromium and Electron (Vesktop) do.
+     */
     override fun onTextCursorRow(hit: SurfaceHit) =
         synchronized(server) {
-            val (_, y, _, height) = server.input.textCursor(hit.surface) ?: return@synchronized false
-            hit.y >= y && hit.y < y + height
+            val rect = server.input.textCursor(hit.surface)
+            if (rect == null || rect[2] <= 0 || rect[3] <= 0) return@synchronized server.input.hasEnabledTextInput(hit.surface)
+            hit.y >= rect[1] && hit.y < rect[1] + rect[3]
         }
 
     override fun scrollStop() = server.postInput { pointerAxisStop() }

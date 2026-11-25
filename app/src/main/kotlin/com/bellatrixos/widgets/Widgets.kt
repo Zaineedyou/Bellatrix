@@ -168,6 +168,17 @@ class GridAutofillLayoutManager(context: Context) : GridLayoutManager(context, 1
     /** Home's icon grid fills the screen; it must stay still instead of scrolling under a finger. */
     @JvmField var fixed: Boolean = false
 
+    /**
+     * Home's icons fill a column from the top down, then continue at the top of the next column to its right.
+     * The manager is horizontal and each span is a row, so the span count is how many rows fit.
+     */
+    @JvmField var columnFlow: Boolean = false
+
+    companion object {
+        /** A row's height as a multiple of an icon's width, for [columnFlow]. */
+        const val ROW_RATIO: Float = 1.25f
+    }
+
     init { r1(-1) }
 
     override fun canScrollVertically(): Boolean = !fixed && super.canScrollVertically()
@@ -180,12 +191,13 @@ class GridAutofillLayoutManager(context: Context) : GridLayoutManager(context, 1
         if (widthSize > 0 && heightSize > 0 && N > 0.0f &&
             (widthSize != P || heightSize != Q || N != O)
         ) {
-            val available = if (orientation == RecyclerView.VERTICAL) {
-                widthSize - paddingLeft - paddingRight
-            } else {
+            val available = if (columnFlow || orientation != RecyclerView.VERTICAL) {
                 heightSize - paddingTop - paddingBottom
+            } else {
+                widthSize - paddingLeft - paddingRight
             }
-            spanCount = maxOf(1, kotlin.math.floor(available / N).toInt())
+            val cell = if (columnFlow) N * ROW_RATIO else N
+            spanCount = maxOf(1, kotlin.math.floor(available / cell).toInt())
             O = N
             P = widthSize
             Q = heightSize

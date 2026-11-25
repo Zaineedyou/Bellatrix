@@ -15,6 +15,7 @@ import com.bellatrixos.widgets.TitleBar
 import com.bellatrixos.windows.installed_apps.models.InstalledApp
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 /** Mengelola ukuran, posisi, dan drag jendela aplikasi. */
 object WindowSize {
@@ -55,6 +56,83 @@ object WindowSize {
             NativeUiSpec.Dim.Kind.MATCH -> -1
             NativeUiSpec.Dim.Kind.WRAP -> computed
         }
+
+    /** Sets the screen-sized values from the window layer's size now; MainActivity's first layout pass sets the same ones. */
+    @JvmStatic
+    fun measure(container: View) {
+        val width = container.width
+        val height = container.height
+        if (width <= 0 || height <= 0) return
+        val taskbar = Windows.f4880a.coerceAtLeast(0)
+        f4871a = width
+        b = height
+        f4873e = 0.95f * height - taskbar
+        f4874f = 0.9f * height - taskbar
+        g = (width * 0.82).toInt()
+        f4875h = (height * 0.86).toInt()
+        m = (b + taskbar) - l
+    }
+
+    /**
+     * Keeps floating windows in step with the window layer: when it changes size (the phone turned) the screen
+     * values are measured again and every floating window is scaled to the new shape and kept above the taskbar.
+     * Until now they were measured once, so a window kept the other orientation's size and position.
+     */
+    @JvmStatic
+    fun follow(container: ViewGroup) {
+        container.addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            val width = right - left
+            val height = bottom - top
+            if (width <= 0 || height <= 0) return@addOnLayoutChangeListener
+            // A window layer that was empty before is compared with what the screen values last held.
+            val oldWidth = (oldRight - oldLeft).takeIf { it > 0 } ?: f4871a
+            val oldHeight = (oldBottom - oldTop).takeIf { it > 0 } ?: b
+            if (width == oldWidth && height == oldHeight && width == f4871a && height == b) return@addOnLayoutChangeListener
+            container.post {
+                measure(container)
+                refit(container, oldWidth, oldHeight)
+            }
+        }
+    }
+
+    private fun refit(
+        container: ViewGroup,
+        oldWidth: Int,
+        oldHeight: Int,
+    ) {
+        val width = container.width
+        val height = container.height
+        if (width <= 0 || height <= 0 || oldWidth <= 0 || oldHeight <= 0) return
+        val scaleX = width.toFloat() / oldWidth
+        val scaleY = height.toFloat() / oldHeight
+        val windows = Windows.f4881d?.fragments.orEmpty().filterIsInstance<UIFragment>()
+        for (fragment in windows) {
+            val view = fragment.contentView ?: continue
+            if (view.parent !== container) continue
+            val params = view.layoutParams ?: continue
+            // A maximised window is match-parent both ways and follows the layer by itself.
+            if (params.width <= 0 && params.height <= 0) continue
+            if (params.width > 0) params.width = (params.width * scaleX).toInt().coerceIn(1, width)
+            if (params.height > 0) params.height = (params.height * scaleY).toInt().coerceIn(1, height)
+            view.layoutParams = params
+            val w = if (params.width > 0) params.width else width
+            val h = if (params.height > 0) params.height else height
+            view.x = (view.x * scaleX).coerceIn(0f, max(0, width - w).toFloat())
+            view.y = (view.y * scaleY).coerceIn(0f, max(0, height - h).toFloat())
+            floatingIn(view)?.let {
+                it.y = view.x
+                it.z = view.y
+                it.invalidate()
+            }
+        }
+    }
+
+    private fun floatingIn(view: View): FloatingLayout? {
+        if (view is FloatingLayout) return view
+        if (view !is ViewGroup) return null
+        for (i in 0 until view.childCount) floatingIn(view.getChildAt(i))?.let { return it }
+        return null
+    }
 
     class ResizeState {
         @JvmField var f4878a: Float = 0.0f
@@ -166,6 +244,8 @@ object WindowSize {
     }
 
     private fun applySize(view: View, layout: FloatingLayout?, window: Window, style: Int) {
+        // A window restored after the phone turned can get here before the new orientation was measured.
+        (view.parent as? ViewGroup)?.let { if (it.width > 0 && it.height > 0 && (it.width != f4871a || it.height != b)) measure(it) }
         val rule = rules.firstOrNull { it.matches(window.tag) }
         var width = g
         var height = f4875h
@@ -191,6 +271,9 @@ object WindowSize {
                 if (height > gap * 2 + 1) height -= gap * 2
             }
         }
+        // Never larger than the layer above the taskbar, whatever size an earlier orientation left behind.
+        if (width > 0 && f4871a > 0) width = min(width, f4871a)
+        if (height > 0 && b > 0) height = min(height, b)
         val params: ViewGroup.LayoutParams = view.layoutParams
         params.width = width
         params.height = height
@@ -227,6 +310,13 @@ object WindowSize {
         if (gap > 0) {
             view.x += gap
             view.y += gap
+        }
+        // The remembered position may be from the other orientation: keep the window inside the layer.
+        if (f4871a > 0 && b > 0) {
+            val w = if (width > 0) width else f4871a
+            val h = if (height > 0) height else b
+            view.x = view.x.coerceIn(0f, max(0, f4871a - w).toFloat())
+            view.y = view.y.coerceIn(0f, max(0, b - h).toFloat())
         }
         if (layout != null) {
             layout.y = view.x
