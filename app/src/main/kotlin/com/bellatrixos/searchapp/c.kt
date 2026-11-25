@@ -10,12 +10,8 @@ class c(@JvmField val f4776a: Int, @JvmField val b: Any) : OnItemClickListener<A
         if (f4776a == 0) {
             (b as? OnSettingsItemClickListener)?.b(obj as? String ?: "")
         } else {
-            // UIExplorer.u0(FileMeta) belum tersedia di port Kotlin; lewati pembukaan berkas.
-            if (b is UIExplorer && obj is FileMeta) {
-                val file = obj.file
-                // biarkan pemanggil yang membuka melalui jalur lain bila tersedia
-                file.exists()
-            }
+            // A tap (or double tap, per the input setting) on a file or folder in Explorer.
+            if (b is UIExplorer && obj is FileMeta) b.u0(obj)
         }
     }
 }

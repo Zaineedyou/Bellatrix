@@ -424,6 +424,10 @@ class UIExplorer : UIFragment(), BackPressHandler {
     }
 
     override fun b(): Boolean {
+        editor?.let {
+            it.requestClose(null)
+            return true
+        }
         if (U0.isEmpty()) {
             J0?.A(tag ?: "")
             return true
@@ -435,6 +439,7 @@ class UIExplorer : UIFragment(), BackPressHandler {
     override fun f0(): Boolean = e1
 
     override fun h0(i2: Int, keyEvent: KeyEvent) {
+        editor?.let { if (it.handleKey(i2, keyEvent)) return }
         val zIsCtrlPressed = keyEvent.isCtrlPressed
         val zIsShiftPressed = keyEvent.isShiftPressed
         O0?.setShiftPressed(zIsShiftPressed)
@@ -518,6 +523,8 @@ class UIExplorer : UIFragment(), BackPressHandler {
     }
 
     fun s0(file: File) {
+        // Going to another folder closes the editor, asking first if it has unsaved changes.
+        editor?.let { if (!it.requestClose { s0(file) }) return }
         E0?.F()
         if (file.exists() && file.isDirectory()) {
             try {
@@ -562,6 +569,26 @@ class UIExplorer : UIFragment(), BackPressHandler {
         }
     }
 
+    /** The editor open in this window, if any. */
+    @JvmField var editor: ExplorerEditor? = null
+
+    /**
+     * Opens [file] in the editor, which covers this whole window below its title bar. An editor already open is
+     * closed first, after asking about unsaved changes.
+     */
+    fun openEditor(file: File) {
+        val host = B0 ?: return
+        editor?.let { open ->
+            if (open.file == file) return
+            if (!open.requestClose { openEditor(file) }) return
+        }
+        editor = ExplorerEditor(this, host, A0?.height ?: 0, file).also { it.show() }
+    }
+
+    fun editorClosed(closed: ExplorerEditor) {
+        if (editor === closed) editor = null
+    }
+
     fun u0(fileMeta: FileMeta) {
         try {
             val z = fileMeta.linkFile
@@ -586,7 +613,15 @@ class UIExplorer : UIFragment(), BackPressHandler {
             } else if (!file.isDirectory) {
                 val ctx = v0 ?: return
                 val act = J0 ?: return
-                FileIntent.b(ctx, file, FileIntent.AppLauncher { tag, extra -> act.c0(tag, extra) })
+                // Like a file manager: media in its app, text and code in the editor of this window, documents,
+                // archives and packages in whichever app takes them, and an unknown extension by what is inside.
+                val tag = FileIntent.appTag(file)
+                when {
+                    tag != null && tag != "UINotepad" && tag != "UIBrowser" ->
+                        FileIntent.b(ctx, file, FileIntent.AppLauncher { t, extra -> act.c0(t, extra) })
+                    FileKinds.route(file.name) == FileKinds.Route.EXTERNAL -> FileIntent.a(ctx, file)
+                    else -> openEditor(file)
+                }
                 return
             }
             s0(file)

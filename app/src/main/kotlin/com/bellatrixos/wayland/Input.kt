@@ -103,6 +103,12 @@ class Input(
         return textInputsOf(surface.client).firstNotNullOfOrNull { it.cursor }
     }
 
+    /** Whether [surface]'s client has text input on while [surface] has the keyboard, whatever it says about a cursor. */
+    fun hasEnabledTextInput(surface: Surface): Boolean {
+        if (keyboardFocus !== surface) return false
+        return textInputsOf(surface.client).any { it.isEnabled }
+    }
+
     private fun pointersOf(client: Client) = client.all(PointerResource::class.java)
 
     fun setKeyboardFocus(surface: Surface?) {

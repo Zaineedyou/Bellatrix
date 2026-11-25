@@ -8,7 +8,6 @@ import com.bellatrixos.app_explorer.files.FileAdapter
 import com.bellatrixos.app_explorer.files.Files
 import com.bellatrixos.context_menu.UIContextMenu
 import com.bellatrixos.context_menu.UIMenuItem
-import com.bellatrixos.ui.files.isText
 import com.bellatrixos.windows.dialogs.UIDialog
 import com.bellatrixos.windows.files.FileIntent
 import com.bellatrixos.windows.files.FileMeta
@@ -59,7 +58,7 @@ internal object ExplorerMenu {
         val menu = UIContextMenu(context)
         val items = menu.f4745d
         if (single) items.add(entry(context, OPEN, R.string.context_menu_open, bold = true))
-        if (single && !meta.isDirectory && isText(meta.file.name, meta.file)) {
+        if (single && !meta.isDirectory) {
             items.add(entry(context, EDIT, R.string.context_menu_edit_in_notepad, R.drawable.menu_ic_edit_20_regular))
         }
         if (single && !meta.isDirectory) items.add(entry(context, OPEN_WITH, R.string.context_menu_open_with))
@@ -76,7 +75,8 @@ internal object ExplorerMenu {
         menu.d(
             UIContextMenu.OnMenuItemClickListener { _, id ->
                 when (id) {
-                    OPEN, EDIT -> explorer.u0(meta)
+                    OPEN -> explorer.u0(meta)
+                    EDIT -> explorer.openEditor(meta.file)
                     OPEN_WITH -> FileIntent.a(context, meta.file)
                     CUT -> cut(adapter, files)
                     COPY -> copy(files)
