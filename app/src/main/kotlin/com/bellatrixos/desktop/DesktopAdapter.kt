@@ -51,7 +51,9 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
                     }
                 },
                 // Supplier klik: harus mengembalikan OnItemClickListener (w), bukan item desktop.
-                { w }
+                { w },
+                // The drag starts here, after the menu, so a long press always opens the menu first.
+                { (bindingAdapter as? DesktopAdapter)?.dragStarter?.invoke(this) }
             )
         }
 
@@ -153,6 +155,12 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
         @JvmField var spanCount: Int = 1
     }
 
+    /** Starts dragging an icon: set by the home setup, called from an icon's long press once its menu is up. */
+    @JvmField var dragStarter: ((RecyclerView.ViewHolder) -> Unit)? = null
+
+    /** How many cells fit on screen (rows x columns), known after the first layout; 0 before. */
+    @JvmField var capacity: Int = 0
+
     @JvmField var A: OnContextMenuListener? = null
     @JvmField var B: OnContextMenuListener? = null
     @JvmField var C: OnItemsMovedListener? = null
@@ -202,18 +210,20 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
             B()
             return
         }
-        // Letakkan di bawah ikon terakhir bilapossible, bukan di samping kanannya.
-        val lastFilled = E.indexOfLast { it.c() != -1 }
-        val below = lastFilled + spanCount
-        val target = when {
-            lastFilled < 0 -> 0
-            below in E.indices && E[below].c() == -1 -> below
-            else -> E.indices.firstOrNull { E[it].c() == -1 } ?: -1
-        }
+        // The first empty cell in reading order: down the first column, then from the top of the next one.
+        val target = E.indexOfFirst { it.c() == -1 }
         if (target != -1) {
             E[target] = item
             notifyItemChanged(target)
             DesktopDB.b(target, item)
+            B()
+            return
+        }
+        // Cells are only made once the screen has been measured; a full list with room left grows by one.
+        if (E.size < capacity) {
+            E.add(item)
+            notifyItemInserted(E.size - 1)
+            DesktopDB.c(E)
             B()
             return
         }
@@ -222,20 +232,32 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
 
     /**
      * Pastikan ada slot kosong untuk penempatan bebas saat auto-arrange mati.
-     * Dipanggil setelah tinggi grid diketahui, jadi jumlah baris/kolom nyata.
+     * Called whenever home's layout changes (first layout, the phone turning): [rows] cells down, [cols] across.
+     * The list is read down each column, so turning the phone only re-wraps it and the order never changes; if
+     * the new screen has fewer cells, gaps between icons close up first so nothing ends up off screen.
      */
     fun ensureFreeCells(rows: Int, cols: Int) {
-        if (H) return
         spanCount = cols.coerceAtLeast(1)
-        val target = kotlin.math.max(0, rows * cols)
-        if (E.size >= target) return
-        val start = E.size
+        val target = kotlin.math.max(0, rows) * spanCount
+        capacity = target
+        if (H || target <= 0) return
+        val drop = DesktopSlots.blanksToDrop(E.map { it.c() == -1 }, target)
+        var changed = drop.isNotEmpty()
+        for (index in drop.asReversed()) E.removeAt(index)
+        while (E.size > target && E.last().c() == -1) {
+            E.removeAt(E.lastIndex)
+            changed = true
+        }
         while (E.size < target) {
             E.add(DesktopItem(-1, "", "blank_${E.size}"))
+            changed = true
         }
-        notifyItemRangeInserted(start, E.size - start)
+        if (!changed) return
+        // Blanks are named by their cell, and cells have moved.
+        for (i in E.indices) if (E[i].c() == -1) E[i] = DesktopItem(-1, "", "blank_$i")
         DesktopDB.c(E)
         B()
+        notifyDataSetChanged()
     }
 
     /** Bangun ulang peta data -> posisi. */

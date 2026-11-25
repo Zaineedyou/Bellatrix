@@ -195,7 +195,10 @@ object OwlNativeSurfaces {
         val cellW = across / cols.toFloat()
         // A real icon is the best measure of a row. Before the grid has children, use the icon's usual aspect.
         val rowHeight = desktop.getChildAt(0)?.height?.toFloat()?.takeIf { it > 0f } ?: (iconWidth * 1.25f)
-        val rows = max(1, floor(down / rowHeight).toInt())
+        // Home's icons flow down columns in a horizontal grid whose span count is its row count, and rows are
+        // sized from that count: measuring one icon's height would just read the row back.
+        val flow = ((desktop as? RecyclerView)?.layoutManager as? GridAutofillLayoutManager)?.takeIf { it.columnFlow }
+        val rows = flow?.spanCount?.coerceAtLeast(1) ?: max(1, floor(down / rowHeight).toInt())
         val cellH = down / rows.toFloat()
         return NativeGrid(
             // attach() runs before the first layout pass on some devices (and on every relaunch),

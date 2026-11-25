@@ -2,6 +2,7 @@ package com.bellatrixos
 
 import android.os.Build
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import com.bellatrixos.context_menu.ContextMenuGesture
 import com.bellatrixos.context_menu.OnItemClickListener
 import com.bellatrixos.context_menu.UIContextMenu
@@ -10,6 +11,7 @@ import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.desktop.DesktopAdapter
 import com.bellatrixos.desktop.DesktopDB
 import com.bellatrixos.desktop.DesktopItem
+import com.bellatrixos.desktop.DesktopSlots
 import com.bellatrixos.desktop.interfaces.AllDirectionsDragCallback
 import com.bellatrixos.desktop.utils.HoverAwareItemTouchHelper
 import com.bellatrixos.variables.Global
@@ -89,6 +91,19 @@ class c(@JvmField val v: MainActivity, @JvmField val u: Int) : Runnable {
                         .putBoolean("desktop_free_place_migrated", true)
                         .apply()
                 }
+                // Once: icons used to flow along rows and sit wherever they were dropped, with gaps that moved when the
+                // phone turned. Home now reads down each column, so pack the saved icons (same order) from the top left.
+                if (!desktopPrefs.getBoolean("desktop_column_flow_migrated", false)) {
+                    val packed =
+                        runCatching {
+                            DesktopSlots.packed(DesktopDB.a()) { it.c() == -1 }
+                                .map { DesktopItem(it.c(), it.b(), it.a()) }
+                        }.getOrNull()
+                    if (packed != null) {
+                        if (packed.isNotEmpty()) DesktopDB.c(packed)
+                        desktopPrefs.edit().putBoolean("desktop_column_flow_migrated", true).apply()
+                    }
+                }
                 Global.q = desktopPrefs.getInt("desktop_icon_size", 1)
                 Global.r = desktopPrefs.getBoolean("desktop_icon_show", true)
                 DesktopAdapter.H = desktopPrefs.getBoolean("desktop_icons_arrange_auto", false)
@@ -112,6 +127,9 @@ class c(@JvmField val v: MainActivity, @JvmField val u: Int) : Runnable {
                 gridAutofillLayoutManager.r1(-1)
                 // Home is a fixed desktop, not a scrolling list: every icon lives in the cells on screen.
                 gridAutofillLayoutManager.fixed = true
+                // Icons fill the first column from the top down, then the top of the next column.
+                gridAutofillLayoutManager.orientation = RecyclerView.HORIZONTAL
+                gridAutofillLayoutManager.columnFlow = true
                 filesRecyclerView.layoutManager = gridAutofillLayoutManager
                 filesRecyclerView.adapter = desktopAdapter
                 filesRecyclerView.itemAnimator = null
@@ -126,17 +144,21 @@ class c(@JvmField val v: MainActivity, @JvmField val u: Int) : Runnable {
                 filesRecyclerView.setOnEmptyLongPressListener(
                     FilesRecyclerView.OnEmptyLongPressListener { iArr -> emptyLongPress.e(iArr) }
                 )
-                HoverAwareItemTouchHelper(AllDirectionsDragCallback(desktopAdapter)).i(filesRecyclerView)
+                val touchHelper = HoverAwareItemTouchHelper(AllDirectionsDragCallback(desktopAdapter))
+                touchHelper.i(filesRecyclerView)
+                desktopAdapter.dragStarter = { holder -> touchHelper.startDrag(holder) }
                 // Isi slot kosong setelah ukuran grid diketahui agar drag bebas langsung bisa dipakai.
-                filesRecyclerView.post {
-                    val cell = filesRecyclerView.resources
-                        .getDimensionPixelSize(R.dimen.explorer_file_width)
-                        .coerceAtLeast(1)
-                    desktopAdapter.ensureFreeCells(
-                        filesRecyclerView.height / cell,
-                        filesRecyclerView.width / cell,
-                    )
+                // Rows come from the layout manager (what actually fits on screen), and again each time home's size
+                // changes, so turning the phone re-wraps the same list instead of leaving cells for the old shape.
+                val syncCells = {
+                    val across = filesRecyclerView.width - filesRecyclerView.paddingLeft - filesRecyclerView.paddingRight
+                    val cols = (across / gridAutofillLayoutManager.N).toInt().coerceAtLeast(1)
+                    desktopAdapter.ensureFreeCells(gridAutofillLayoutManager.spanCount, cols)
                 }
+                filesRecyclerView.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+                    if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) v.post { syncCells() }
+                }
+                filesRecyclerView.post { syncCells() }
                 if (Global.p == 1) {
                     desktopAdapter.z = true
                 }

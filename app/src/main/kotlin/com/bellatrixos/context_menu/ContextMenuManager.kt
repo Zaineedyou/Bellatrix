@@ -17,7 +17,9 @@ object ContextMenuManager {
         view: View,
         supplier: Supplier<*>,
         callback: ContextMenuCallback<*>?,
-        supplier2: Supplier<*>
+        supplier2: Supplier<*>,
+        /** Runs after a long press has opened the menu, not for a right click: home's icons start their drag here. */
+        afterLongClick: ((View) -> Unit)? = null
     ) {
         if (i2 == 0) view.setOnClickListener(d(supplier, 1, supplier2))
         view.setOnTouchListener { _, event ->
@@ -45,6 +47,7 @@ object ContextMenuManager {
                     view.isFocusableInTouchMode = false
                 }, 50L)
             }
+            afterLongClick?.invoke(view)
             true
         }
         view.setOnGenericMotionListener { _, event ->

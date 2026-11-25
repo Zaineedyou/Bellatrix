@@ -1151,21 +1151,14 @@ private class ExplorerEmptyPress(val explorer: UIExplorer) : FilesRecyclerView.O
 }
 
 private class ExplorerEmptyLongPress(val explorer: UIExplorer) : FilesRecyclerView.OnEmptyLongPressListener {
-    override fun e(iArr: IntArray) {
-        // Menu konteks area kosong belum sepenuhnya diport; placeholder aman.
-        val ctx = explorer.v0 ?: return
-        val anchor = explorer.u0 ?: return
-        val adapter = explorer.E0 ?: return
-        val files = explorer.O0 ?: return
-        val act = explorer.J0 ?: return
-        // Delegasi ke ContextMenuFE/ContextMenuDT bila tersedia; diam jika tidak.
-    }
+    override fun e(iArr: IntArray) = ExplorerMenu.forEmpty(explorer, iArr)
 }
 
 private class ExplorerContextMenu(val explorer: UIExplorer) :
     com.bellatrixos.app_explorer.files.interfaces.OnContextMenuListener<Any> {
     override fun d(iArr: IntArray, obj: Any) {
-        // Placeholder aman: konteks file ditangani adapter/ContextMenuFE.
+        val meta = obj as? FileMeta ?: return
+        ExplorerMenu.forItem(explorer, iArr, meta)
     }
 }
 

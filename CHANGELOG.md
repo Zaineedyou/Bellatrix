@@ -9,13 +9,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [2.9.50] - 2026-11-25
+
+### Fixed
+
+- Music and Photos no longer open with "Failed to open file" / "File not found". Opening an app with no file reached the window as an empty path, and Music tried to play it and Photos looked for it. An empty extra now means no file.
+- Explorer's long-press menus work: on an icon (Open, Edit, Open with, Cut, Copy, Paste, Rename, Delete, Share, Select all) and on empty space (New folder, Paste, Select all). The operations behind them were already ported, but both menus were empty stubs, so Explorer could only browse.
+
+## [2.9.49] - 2026-11-25
+
 ### Changed
+
+- Home's icons now fill down the first column from the top left, then continue at the top of the next column. A new app takes the first empty cell in that order. Saved layouts are packed once (same order, gaps closed) so they start at the top left.
 
 - Opening Terminal (or a Linux app) before Linux is installed now asks "Install Linux?" in a liquid glass card with Install / Not now, instead of jumping into Settings. The card blurs what is behind it (Android 12+), lights its edge with a shader that follows the phone's tilt and your finger (Android 13+), and springs in and out.
 - The app icon is now a gas-giant planet, centre-cropped 1:1 from the supplied artwork, as an adaptive icon plus sharp legacy icons.
 
 ### Fixed
 
+- Long-pressing an icon on home always opens its menu. The icon's drag now starts from that long press instead of racing it on a separate timer that could cancel the menu, and moving an icon no longer leaves the rearrange flag on, which made every long press on home and the taskbar do nothing.
+- Turning the phone no longer scrambles home: the icon list keeps its order and only re-wraps, empty cells are rebuilt for the new screen on every layout change, and gaps close up first when the new orientation has fewer cells so no icon ends up off screen.
+- Floating windows follow the screen when the phone turns. The screen size is measured again whenever the window layer changes, open floating windows are scaled to the new shape, and a window can no longer be sized or placed past the taskbar.
 - Home's desktop icons open, long-press and drag again. The page-swipe handler added in 2.9.47 sat on a full-size Compose layer over the desktop and swallowed every touch before the icons saw it; sideways page swipes are now read from the native desktop without consuming the touch.
 
 ## [2.9.48] - 2026-11-24
