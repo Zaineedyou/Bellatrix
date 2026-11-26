@@ -85,7 +85,7 @@ This is also not Windows 365 cloud PC."</string>
     <string name="app_privacy_policy_ok_before">OK, I understand (%ss)</string>
     <string name="app_settings">UiSettings</string>
     <string name="app_start">Start</string>
-    <string name="app_ui_version">2.9.18</string>
+    <string name="app_ui_version">3.0.0</string>
     <string name="app_video">UiVideo</string>
     <string name="app_web_cache_enabled">Cache enabled</string>
     <string name="app_web_link_copied">Link Copied</string>
@@ -646,6 +646,7 @@ We will share more once you're back online."</string>
     <string name="settings_update_dialog_changelog">Changelog</string>
     <string name="settings_update_dialog_current">Versi terpasang: %1$s</string>
     <string name="settings_update_dialog_failed">Gagal mengecek rilis GitHub. Coba lagi nanti.</string>
+    <string name="settings_update_dialog_install">Download &amp; Install</string>
     <string name="settings_update_dialog_download_github">Download From Github</string>
     <string name="adb_shell_title">Shell access</string>
     <string name="adb_shell_status_checking">Checking shell access…</string>

@@ -2,23 +2,36 @@ package com.bellatrixos.app_settings.fragments
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
+import com.bellatrixos.App
 import com.bellatrixos.R
+import com.bellatrixos.theme.isVideoBackground
+import com.bellatrixos.ui.decodeSampled
+import com.bellatrixos.ui.videoPoster
 import com.bellatrixos.interfaces.MainActivityIn
 import com.bellatrixos.widgets.UIProgressCircular
 import com.bellatrixos.widgets.cards.UISettingsCardSeekBar
 import com.bellatrixos.widgets.cards.UISettingsCardSpinner
 import com.bellatrixos.widgets.cards.UISettingsCardSpinnerCompact
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 /** Halaman wallpaper latar. */
 @UnstableApi
@@ -41,8 +54,14 @@ class UIBackground : Fragment() {
     @JvmField var y0: ImageView? = null
     @JvmField var z0: UISettingsCardSpinner? = null
 
+    /** The row of pictures the user added, under the default two. */
+    private var addedScroll: HorizontalScrollView? = null
+    private var addedRow: LinearLayout? = null
+
     override fun onDestroyView() {
         super.onDestroyView()
+        addedScroll = null
+        addedRow = null
         x0 = null
         A0?.setOnClickListener(null)
         B0?.setOnClickListener(null)
@@ -55,6 +74,94 @@ class UIBackground : Fragment() {
         y0?.clipToOutline = true
         y0?.setImageBitmap(x0?.G())
         view.postDelayed(i(this, 2), 380L)
+        renderAdded()
+    }
+
+    private fun px(dp: Int) = (dp * resources.displayMetrics.density + 0.5f).toInt()
+
+    /** A small picture of [file]: a frame of a video, otherwise the image itself, cut down to thumbnail size. */
+    private fun thumbnail(file: File): Bitmap? =
+        runCatching {
+            if (file.isVideoBackground()) {
+                videoPoster(file)
+            } else {
+                decodeSampled(file, 256) ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ImageDecoder.decodeBitmap(ImageDecoder.createSource(file)) { decoder, _, _ ->
+                        decoder.setTargetSize(256, 256)
+                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                    }
+                } else {
+                    null
+                }
+            }
+        }.getOrNull()
+
+    /**
+     * Shows every picture or video the user added to this theme as a preview after the default two: tap one to use it,
+     * hold it to remove it. Called when the page opens and again after a new one is added.
+     */
+    fun renderAdded() {
+        val context = t0 ?: return
+        val runtime = (context.applicationContext as? App)?.runtime ?: return
+        val anchor = v0 ?: return
+        val parent = anchor.parent as? ViewGroup ?: return
+        if (addedScroll == null) {
+            val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
+            val scroll =
+                HorizontalScrollView(context).apply {
+                    isHorizontalScrollBarEnabled = false
+                    visibility = View.GONE
+                    addView(row, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+                }
+            parent.addView(
+                scroll,
+                parent.indexOfChild(anchor) + 1,
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    topMargin = px(10)
+                    bottomMargin = px(6)
+                },
+            )
+            addedRow = row
+            addedScroll = scroll
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            val items =
+                withContext<List<Pair<File, Bitmap?>>>(Dispatchers.IO) {
+                    val theme = runtime.themes.current ?: return@withContext emptyList()
+                    theme.backgrounds().filter(theme::isExtraBackground).map { it to thumbnail(it) }
+                }
+            val row = addedRow ?: return@launch
+            val scroll = addedScroll ?: return@launch
+            row.removeAllViews()
+            scroll.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+            for ((file, bitmap) in items) {
+                val size = px(84)
+                val tile =
+                    ImageView(context).apply {
+                        setBackgroundResource(R.drawable.shape_rounded_corner_8)
+                        foreground = context.getDrawable(R.drawable.ui_browser_btn_subtle)
+                        clipToOutline = true
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        isClickable = true
+                        isFocusable = true
+                        contentDescription = file.name
+                        setImageBitmap(bitmap)
+                        setOnClickListener {
+                            y0?.setImageBitmap(bitmap)
+                            x0?.v(bitmap)
+                            viewLifecycleOwner.lifecycleScope.launch { runtime.themes.setBackground(file) }
+                        }
+                        setOnLongClickListener {
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                runtime.themes.removeBackground(file)
+                                renderAdded()
+                            }
+                            true
+                        }
+                    }
+                row.addView(tile, LinearLayout.LayoutParams(size, size).apply { marginEnd = px(10) })
+            }
+        }
     }
 
     fun a0() {

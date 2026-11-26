@@ -1143,6 +1143,8 @@ class WidgetEngine(
             proot: Proot,
         ): List<Managed> =
             listOf("AGENTS.md", "CLAUDE.md").map { Managed.text(File(proot.home, it), Policy.Seeded) { AGENT_POINTER } } +
+                // The map of every editable file and how not to break one; updated while the user hasn't changed it.
+                Managed.asset(context, "ricing.md", File(proot.home, "RICING.md"), Policy.Seeded) +
                 listOf("owl-check", "owl-send").map { bin ->
                     Managed.asset(context, "$bin.sh", File(proot.rootfs, "usr/local/bin/$bin"), Policy.Owned, executable = true)
                 }
@@ -1188,7 +1190,8 @@ class WidgetEngine(
 
         private const val AGENT_POINTER =
             "# bellatrix\n\nThis Void Linux system runs inside an Android launcher, bellatrix; its source is at " +
-                "https://github.com/Zaineedyou/Bellatrix, should you need to understand how the launcher works.\n\n" +
+                "https://github.com/Zaineedyou/Bellatrix, should you need to understand how the launcher works. RICING.md next to this file " +
+                "maps every file you can edit to change the launcher's look and what keeps an edit from breaking it: read it first.\n\n" +
                 "It's Void Linux (glibc, aarch64) under proot, not a booted system: you are root already (no sudo needed), and there is " +
                 "no systemd (systemctl, services and timers don't work), no cron, no Docker and no kernel modules. Install " +
                 "packages with xbps (xbps-install -S <name>, xbps-query -Rs <word> to search), command-line tools with mise. /sdcard is the phone's own storage, but it shows only " +

@@ -75,10 +75,18 @@ class ExplorerEditor(
     private var closed = false
     private var lineCount = 0
 
+    /** A big file or one with very long lines (minified code): no colours, no line numbers, always wrapped. */
+    private var lite = false
+    private var wrapLocked = false
+
     /** Counts every edit, so colours computed for older text are thrown away instead of applied. */
     private var textVersion = 0
+    private var tokens: List<SyntaxHighlighter.Token> = emptyList()
     private val applied = ArrayList<SyntaxSpan>()
     private val rehighlight = Runnable { highlight() }
+    private val repaint = Runnable { paintVisible() }
+
+    private class Loaded(val text: String, val longestLine: Int)
 
     private fun dp(value: Int) = (value * context.resources.displayMetrics.density).toInt()
 
@@ -146,6 +154,8 @@ class ExplorerEditor(
                 override fun afterTextChanged(s: Editable?) {
                     if (loading) return
                     textVersion++
+                    // Token positions are for the text before this edit; scrolling must not paint with them.
+                    tokens = emptyList()
                     if (!dirty) {
                         dirty = true
                         refreshBar()
@@ -161,6 +171,8 @@ class ExplorerEditor(
         row.addView(edit, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
         vScroll.isFillViewport = true
         hScroll.isFillViewport = true
+        // Colours are only put on what is on screen, so scrolling repaints after it settles.
+        vScroll.setOnScrollChangeListener { _, _, _, _, _ -> schedulePaint() }
         root.addView(vScroll, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
 
         val params = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -186,7 +198,7 @@ class ExplorerEditor(
         hScroll.removeAllViews()
         vScroll.removeAllViews()
         edit.setHorizontallyScrolling(!on)
-        gutter.visibility = if (on) View.GONE else View.VISIBLE
+        gutter.visibility = if (on || lite) View.GONE else View.VISIBLE
         if (on) {
             vScroll.addView(row, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         } else {
@@ -204,6 +216,7 @@ class ExplorerEditor(
     }
 
     private fun updateGutter() {
+        if (lite) return
         val text = edit.text
         var lines = 1
         for (i in 0 until text.length) if (text[i] == '\n') lines++
@@ -228,12 +241,21 @@ class ExplorerEditor(
                     return@post
                 }
                 // An unknown name is told by its first line; the language also decides whether to wrap.
-                language = FileKinds.languageOf(file.name, loaded.substringBefore('\n'))
+                language = FileKinds.languageOf(file.name, loaded.text.substringBefore('\n'))
+                lite = loaded.longestLine > LONG_LINE || loaded.text.length > MAX_FULL
+                wrapLocked = loaded.longestLine > LONG_LINE
+                wrapButton.visibility = if (wrapLocked) View.GONE else View.VISIBLE
                 loading = true
-                edit.setText(loaded)
+                try {
+                    edit.setText(loaded.text)
+                } catch (_: OutOfMemoryError) {
+                    loading = false
+                    fallBack()
+                    return@post
+                }
                 edit.isEnabled = true
                 loading = false
-                applyWrap(!language.code)
+                applyWrap(wrapLocked || !language.code)
                 refreshBar()
                 updateGutter()
                 scheduleHighlight(0)
@@ -243,7 +265,7 @@ class ExplorerEditor(
     }
 
     /** The file as text, or null when it is not text or too big to edit here. */
-    private fun read(): String? {
+    private fun read(): Loaded? {
         if (!file.isFile || file.length() > MAX_BYTES) return null
         var bytes = file.readBytes()
         for (i in 0 until minOf(bytes.size, PROBE)) if (bytes[i] == 0.toByte()) return null
@@ -264,7 +286,18 @@ class ExplorerEditor(
                 String(bytes, Charsets.ISO_8859_1)
             }
         crlf = text.contains("\r\n")
-        return if (crlf) text.replace("\r\n", "\n") else text
+        val plain = if (crlf) text.replace("\r\n", "\n") else text
+        var longest = 0
+        var run = 0
+        for (c in plain) {
+            if (c == '\n') {
+                if (run > longest) longest = run
+                run = 0
+            } else {
+                run++
+            }
+        }
+        return Loaded(plain, maxOf(longest, run))
     }
 
     private fun fallBack() {
@@ -313,29 +346,69 @@ class ExplorerEditor(
             Kind.REMOVED -> 0xFFA31515
         }
 
-    /** Colours the text on a worker and applies the result unless the text changed meanwhile. */
+    /** Splits the text into tokens on a worker; what is on screen is then painted from them. */
     private fun highlight() {
-        if (closed || loading || language.style == SyntaxStyle.NONE) return
+        if (closed || loading || lite || language.style == SyntaxStyle.NONE) return
         val editable = edit.text
         if (editable.length > MAX_HIGHLIGHT) {
+            tokens = emptyList()
             clearColours(editable)
             return
         }
         val snapshot = editable.toString()
         val version = textVersion
         AppExecutors.b().execute {
-            val tokens = SyntaxHighlighter.tokens(snapshot, language)
+            val found = SyntaxHighlighter.tokens(snapshot, language)
             AppExecutors.c().post {
                 if (closed || version != textVersion) return@post
-                val current = edit.text
-                clearColours(current)
-                for (token in tokens) {
-                    if (token.end > current.length || token.start >= token.end) continue
-                    val span = SyntaxSpan(colorOf(token.kind))
-                    current.setSpan(span, token.start, token.end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                    applied.add(span)
-                }
+                tokens = found
+                paintVisible()
             }
+        }
+    }
+
+    private fun schedulePaint() {
+        if (tokens.isEmpty()) return
+        val handler = AppExecutors.c()
+        handler.removeCallbacks(repaint)
+        handler.postDelayed(repaint, PAINT_DELAY)
+    }
+
+    /** Puts colours on the lines in view and a screenful either side, so spans stay few however long the file is. */
+    private fun paintVisible() {
+        if (closed || loading) return
+        val layout = edit.layout
+        if (layout == null) {
+            edit.post { paintVisible() }
+            return
+        }
+        val editable = edit.text
+        clearColours(editable)
+        if (tokens.isEmpty() || layout.lineCount == 0) return
+        val margin = vScroll.height
+        val top = maxOf(0, vScroll.scrollY - margin)
+        val bottom = vScroll.scrollY + vScroll.height + margin
+        val from = layout.getLineStart(layout.getLineForVertical(top))
+        val to = layout.getLineEnd(layout.getLineForVertical(bottom).coerceAtMost(layout.lineCount - 1))
+        // Tokens never overlap, so their ends are in order too: the first one still reaching [from] is found by halving.
+        var low = 0
+        var high = tokens.size
+        while (low < high) {
+            val mid = (low + high) ushr 1
+            if (tokens[mid].end > from) high = mid else low = mid + 1
+        }
+        var count = 0
+        var i = low
+        while (i < tokens.size && count < MAX_SPANS) {
+            val token = tokens[i]
+            if (token.start >= to) break
+            if (token.end <= editable.length && token.start < token.end) {
+                val span = SyntaxSpan(colorOf(token.kind))
+                editable.setSpan(span, token.start, token.end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                applied.add(span)
+                count++
+            }
+            i++
         }
     }
 
@@ -414,18 +487,29 @@ class ExplorerEditor(
         if (closed) return
         closed = true
         AppExecutors.c().removeCallbacks(rehighlight)
+        AppExecutors.c().removeCallbacks(repaint)
         host.removeView(root)
         explorer.editorClosed(this)
     }
 
     private companion object {
         /** Past this a file is not edited in a text field. */
-        const val MAX_BYTES = 2L * 1024 * 1024
+        const val MAX_BYTES = 1L * 1024 * 1024
 
-        /** Past this many characters nothing is coloured: applying thousands of spans would stall typing. */
-        const val MAX_HIGHLIGHT = 120_000
+        /** Past this many characters a file is shown plain: no colours, no line numbers, wrapped. */
+        const val MAX_FULL = 250_000
+
+        /** A line longer than this (minified code) makes the file plain and wrapped: one very wide line stalls and crashes drawing. */
+        const val LONG_LINE = 800
+
+        /** Past this many characters nothing is split into tokens. */
+        const val MAX_HIGHLIGHT = 250_000
+
+        /** At most this many colour spans are on the text at once. */
+        const val MAX_SPANS = 4000
 
         const val HIGHLIGHT_DELAY = 350L
+        const val PAINT_DELAY = 80L
 
         /** How much of a file is looked at for a zero byte, which text never has. */
         const val PROBE = 8000

@@ -5,7 +5,11 @@ import java.util.Locale
 
 /** Metadata ringan untuk pengurutan dan pencarian berkas. */
 class FileMeta(@JvmField val file: File) {
-    @JvmField val isDirectory: Boolean = file.isDirectory
+    /**
+     * A folder: [File.isDirectory], or, when the system will not say what an entry is (it is neither a file nor a
+     * folder to `stat`), an entry that still lists. Such folders were shown and opened as unreadable files.
+     */
+    @JvmField val isDirectory: Boolean = file.isDirectory || (!file.isFile && file.canRead() && file.list() != null)
     @JvmField val modified: Long = file.lastModified()
     @JvmField val size: Long = file.length()
     @JvmField val lowerName: String = file.name.lowercase(Locale.ROOT)

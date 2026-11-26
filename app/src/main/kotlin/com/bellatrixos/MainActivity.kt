@@ -562,15 +562,15 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         }
     }
 
-    /** Draws the phone's current wallpaper behind Bellatrix, wherever it was changed. */
+    /**
+     * Android's own wallpaper shows through the transparent home window (windowShowWallpaper), so it is always the phone's
+     * real wallpaper, live or still. WallpaperManager.getDrawable() must not be drawn here: its documentation says to use
+     * FLAG_SHOW_WALLPAPER instead, and it returns the default wallpaper on Android 13 and throws on Android 14+.
+     */
     private fun applySystemWallpaper() {
         val view = this.d0 ?: return
-        val wallpapers = WallpaperManager.getInstance(this)
-        // A live wallpaper is already behind the translucent home window; a static preview drawn
-        // here would cover the moving one. Only mirror the phone's own image when there is one.
-        val drawable = if (wallpapers.wallpaperInfo != null) null else runCatching { wallpapers.drawable }.getOrNull()
-        view.setImageDrawable(drawable)
-        Themes.a(this.W ?: this, (drawable as? BitmapDrawable)?.bitmap)
+        view.setImageDrawable(null)
+        Themes.a(this.W ?: this, null)
         val relative = this.r0
         val blur = this.X0
         if (relative != null && blur != null) UIBlur.a(this.W ?: this, relative, blur, view)
@@ -964,14 +964,12 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         val strB = desktopItem.b() ?: ""
         val file = File(strA)
         fileOperationsC.f(fileOperationsC.f4924a.getString(R.string.msg_files_title_delete), strB)
-        try {
-            val cls = Class.forName("androidx.core.content.res.a")
-            val ctor = cls.constructors.firstOrNull { it.parameterCount == 3 }
-            val r = ctor?.newInstance(fileOperationsC, 28, file) as? Runnable
-            if (r != null) FileOperations.f4923i?.execute(r)
-        } catch (_: Throwable) {}
+        // The callbacks are set before the delete starts, so a fast delete can't finish with nobody listening.
         fileOperationsC.c = com.bellatrixos.desktop.e(desktopAdapter, desktopItem)
         fileOperationsC.f4925d = com.bellatrixos.desktop.e(desktopAdapter, desktopItem)
+        // The deleter closes the progress dialog and reports back; the old reflective lookup of a class that
+        // doesn't exist left the file in place and the dialog open.
+        FileOperations.f4923i?.execute(com.bellatrixos.windows.files.operations.g(fileOperationsC, listOf(file), 0))
     }
 
     override fun n() {

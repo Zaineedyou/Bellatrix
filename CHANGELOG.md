@@ -9,6 +9,33 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-11-26
+
+### Added
+
+- PC Update now downloads and installs the new release inside the launcher: the main button is **Download & Install**, which fetches the release's APK and hands it to Android's installer (Android asks once to allow installs from Bellatrix). "Buka di Chrome" stays as the fallback beside it, and the shell install through Shizuku/Sui or root is unchanged. A release without an APK still opens its GitHub page.
+- Settings → Personalize → Background shows every picture or video you add as a preview under Images, after the two default ones. Tap one to use it, hold it to remove it. It appears as soon as the file is saved.
+- `/root/RICING.md` in the Linux system: a map of every file that can be edited to change the launcher (widgets, `style.toml`, home and taskbar layouts, native-ui `look.toml`, `ui.lua` and `keys.toml`, themes and backgrounds, the terminal and tool configs), which ones must not be edited, and the rules that keep an edit from breaking anything. AGENTS.md and CLAUDE.md point to it. It is seeded like the other defaults: updated while unchanged, never brought back once deleted.
+
+### Fixed
+
+- The version shown in Settings → System → About and at the top of PC Update now follows the release (it was stuck at 2.9.18).
+- Home's wallpaper is now Android's own wallpaper showing through the transparent window, always. The launcher no longer paints `WallpaperManager.getDrawable()` over it, which showed the default wallpaper on Android 13 and threw on Android 14 and later; Android's documentation says to use the window's wallpaper flag instead.
+- Deleting a file from the desktop now deletes it and closes the progress dialog. It called a class that does not exist, so nothing was deleted and the dialog stayed open.
+
+## [2.9.56] - 2026-11-26
+
+### Added
+
+- PC Update has Check and Update buttons for the Linux system. Check looks for updated packages and tools now; Update runs `xbps-install -Suy` for the system's packages, then upgrades the tools mise installed and the coding agents, and checks again. The "System updates" card shows what is happening (updating, checking, how many are waiting, up to date, or why it failed) and opens a drop-down listing every package and tool waiting. The buttons are greyed while a job runs, and Update while nothing is waiting. Until now the update job existed but nothing started it, and the card only reopened the desktop.
+
+## [2.9.55] - 2026-11-26
+
+### Fixed
+
+- Opening a JavaScript file in Explorer's editor no longer crashes. Code is now coloured only on the lines in view (plus a screenful either side) instead of every token in the file, and minified files and files over 250,000 characters open in a plain, wrapped mode without colours or line numbers, because one very wide line stalled and crashed drawing. Files over 1 MB go to another app instead of an edit field.
+- Folders Explorer could not tell from files (it showed them with a file icon and sent them to the editor, which gave up and opened a system chooser) are now recognised: an entry that is neither a file nor a folder to `stat` but can be listed is a folder. Tapping anything that is not a regular file now opens it as a folder instead of as data.
+
 ## [2.9.54] - 2026-11-25
 
 ### Changed

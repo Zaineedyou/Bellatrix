@@ -122,10 +122,18 @@ class LauncherUpdates(
     }
 
     /** Downloads this fork's APK and hands it to Android's installer without leaving the launcher. */
-    fun install(targetContext: Context = context) {
-        val release = info ?: return
+    fun install(
+        targetContext: Context = context,
+        onFinished: (() -> Unit)? = null,
+    ) {
+        val release = info
+        if (release == null) {
+            onFinished?.invoke()
+            return
+        }
         if (release.apk.isBlank()) {
             openRelease(targetContext)
+            onFinished?.invoke()
             return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !targetContext.packageManager.canRequestPackageInstalls()) {
@@ -135,9 +143,13 @@ class LauncherUpdates(
                     Uri.parse("package:${targetContext.packageName}"),
                 ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             runCatching { targetContext.startActivity(permission) }
+            onFinished?.invoke()
             return
         }
-        if (installing) return
+        if (installing) {
+            onFinished?.invoke()
+            return
+        }
         installing = true
         lastError = null
         scope.launch {
@@ -159,7 +171,10 @@ class LauncherUpdates(
                 Log.w(TAG, "installing the launcher update failed", e)
                 lastError = targetContext.getString(R.string.settings_update_dialog_install_failed)
             } finally {
-                withContext(Dispatchers.Main) { installing = false }
+                withContext(Dispatchers.Main) {
+                    installing = false
+                    onFinished?.invoke()
+                }
             }
         }
     }

@@ -53,7 +53,7 @@ using Bellatrix UI — there is no second home screen or parallel desktop to swi
 - Themes, wallpapers, colors, icon packs, fonts, taskbar, and home gestures
 - Guest-editable native UI scripting (look.toml + embedded ui.lua) for the taskbar, start menu, action center, Settings cards, windows and home tiles
 - OWL widget engine with native schemas and live-data previews
-- PC Update with GitHub Release changelog, a **Download From Github** button, Chrome fallback, and an optional shell install through Shizuku/Sui
+- PC Update with GitHub Release changelog, an in-launcher **Download & Install** button, Chrome fallback, and an optional shell install through Shizuku/Sui
 
 ### Reliability
 

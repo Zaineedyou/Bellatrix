@@ -654,9 +654,17 @@ class Runtime(
         if (on) scope.launch { gpu.turnOn() } else gpu.turnOff()
     }
 
+    /** Whether the Linux system is installed and running, so there are packages to check and update. */
+    val linuxInstalled: Boolean get() = linux
+
+    /** Checks the Linux packages and tools for updates now, on the runtime's scope: leaving settings doesn't cancel it. */
+    fun checkSystemUpdates() {
+        if (linux) scope.launch { updates.check(force = true) }
+    }
+
     /** Checks for updates now, on the runtime's scope: leaving settings doesn't cancel it. */
     fun checkUpdates() {
-        if (linux) scope.launch { updates.check(force = true) }
+        checkSystemUpdates()
         launcherUpdates.check(force = true)
     }
 

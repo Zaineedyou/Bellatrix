@@ -526,7 +526,7 @@ class UIExplorer : UIFragment(), BackPressHandler {
         // Going to another folder closes the editor, asking first if it has unsaved changes.
         editor?.let { if (!it.requestClose { s0(file) }) return }
         E0?.F()
-        if (file.exists() && file.isDirectory()) {
+        if (file.isDirectory() || file.list() != null) {
             try {
                 if (f1 && Global.w?.a() == file.absolutePath) {
                     A0(0)
@@ -610,7 +610,9 @@ class UIExplorer : UIFragment(), BackPressHandler {
                     3 -> file = File(str)
                     else -> return
                 }
-            } else if (!file.isDirectory) {
+            } else if (file.isFile && !fileMeta.isDirectory) {
+                // Only a regular file is opened as one: anything else is tried as a folder below, not sent to the
+                // editor or another app as if it were unreadable data.
                 val ctx = v0 ?: return
                 val act = J0 ?: return
                 // Like a file manager: media in its app, text and code in the editor of this window, documents,

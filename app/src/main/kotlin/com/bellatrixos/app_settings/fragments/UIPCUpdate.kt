@@ -4,11 +4,14 @@ import android.app.AlertDialog
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -19,6 +22,7 @@ import com.bellatrixos.adb.ShellStatus
 import com.bellatrixos.LauncherUpdates
 import com.bellatrixos.R
 import com.bellatrixos.database.SharedPrefs
+import com.bellatrixos.linux.JobState
 import com.bellatrixos.variables.Global
 import com.bellatrixos.widgets.UIProgressBarLinear
 import com.bellatrixos.widgets.cards.UISettingsCard
@@ -60,12 +64,99 @@ class UIPCUpdate : Fragment() {
     private val launcherUpdates: LauncherUpdates?
         get() = (s0?.applicationContext as? App)?.runtime?.launcherUpdates
 
+    private val runtime get() = (s0?.applicationContext as? App)?.runtime
+
+    private var systemList: LinearLayout? = null
+    private var systemCheck: TextView? = null
+    private var systemUpdate: TextView? = null
+    private var listOpen = false
+    private var shown: List<String>? = null
+    private val ui = Handler(Looper.getMainLooper())
+
+    /** The runtime's update state is read, not observed: it changes from a background job, so it is polled while this page is up. */
+    private val poll =
+        object : Runnable {
+            override fun run() {
+                renderSystem()
+                ui.postDelayed(this, 500L)
+            }
+        }
+
+    override fun onStart() {
+        super.onStart()
+        ui.post(poll)
+    }
+
+    override fun onStop() {
+        ui.removeCallbacks(poll)
+        super.onStop()
+    }
+
+    /** Shows what the Linux packages are doing: updating, checking, what is pending, or that they are current. */
+    private fun renderSystem() {
+        val card = systemUpdates ?: return
+        val runtime = runtime ?: return
+        if (!runtime.linuxInstalled) {
+            card.setSubtitle(getString(R.string.settings_system_updates_subtitle))
+            systemCheck?.isEnabled = false
+            systemUpdate?.isEnabled = false
+            systemCheck?.alpha = 0.4f
+            systemUpdate?.alpha = 0.4f
+            return
+        }
+        val updates = runtime.updates
+        val job = updates.job
+        val working = job is JobState.Working
+        val busy = working || updates.checking
+        val pending = updates.pending
+        val error = pending?.error
+        val count = pending?.count ?: 0
+        card.setSubtitle(
+            when {
+                working -> getString(R.string.linux_job_updating)
+                updates.checking -> getString(R.string.settings_update_pending_updates)
+                // The last line of a failed update says what went wrong.
+                job is JobState.Failed && job.log.isNotEmpty() -> job.log.last()
+                error != null -> getString(error)
+                count > 0 -> "$count"
+                pending != null -> getString(R.string.settings_update_up_to_date_title)
+                else -> getString(R.string.settings_system_updates_subtitle)
+            },
+        )
+        systemCheck?.isEnabled = !busy
+        systemCheck?.alpha = if (busy) 0.4f else 1f
+        systemUpdate?.isEnabled = !busy && count > 0
+        systemUpdate?.alpha = if (!busy && count > 0) 1f else 0.4f
+        // The drop-down: every package and tool waiting, one per line.
+        val lines = pending?.let { it.packages + it.tools.map { tool -> "${tool.name} ${tool.current} → ${tool.latest}" } }.orEmpty()
+        val list = systemList ?: return
+        list.visibility = if (listOpen && lines.isNotEmpty()) View.VISIBLE else View.GONE
+        if (lines == shown) return
+        shown = lines
+        list.removeAllViews()
+        for (line in lines) {
+            val row = TextView(list.context)
+            row.text = line
+            row.textSize = 13f
+            row.setTextColor(ContextCompat.getColor(list.context, R.color.text_default))
+            row.setPadding(0, 4, 0, 4)
+            list.addView(row)
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         u0?.setOnClickListener(null)
         B0?.setOnClickListener(null)
         A0?.setOnClickListener(null)
         systemUpdates?.setOnCardClickListener(null)
+        systemCheck?.setOnClickListener(null)
+        systemUpdate?.setOnClickListener(null)
+        ui.removeCallbacks(poll)
+        systemList = null
+        systemCheck = null
+        systemUpdate = null
+        shown = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -75,9 +166,18 @@ class UIPCUpdate : Fragment() {
         A0?.setOnCardClickListener(w(this, 1))
         B0?.setOnCardClickListener(w(this, 2))
         systemUpdates = view.findViewById(R.id.update_system)
+        systemList = view.findViewById(R.id.update_system_list)
+        systemCheck = view.findViewById(R.id.btn_system_check)
+        systemUpdate = view.findViewById(R.id.btn_system_update)
+        // The card opens and closes the list of what is waiting.
         systemUpdates?.setOnCardClickListener {
-            (s0?.applicationContext as? App)?.runtime?.showNativeSettings()
+            listOpen = !listOpen
+            shown = null
+            renderSystem()
         }
+        systemCheck?.setOnClickListener { runtime?.checkSystemUpdates() }
+        systemUpdate?.setOnClickListener { runtime?.updateSystem() }
+        renderSystem()
         if (Global.B == 1) c0()
         C0?.setOnSwitchCheckedChangeListener(com.bellatrixos.app_settings.fragments.u(2))
     }
@@ -128,12 +228,22 @@ class UIPCUpdate : Fragment() {
                         getString(R.string.settings_update_dialog_latest)
                     },
                 ).setMessage(message)
-        builder.setPositiveButton(R.string.settings_update_dialog_download_github) { _, _ -> launcher.openRelease(context) }
+        if (release != null && release.apk.isNotBlank()) {
+            // Download the APK inside the launcher and hand it to Android's installer.
+            builder.setPositiveButton(R.string.settings_update_dialog_install) { _, _ ->
+                b0(true)
+                launcher.install(context) { b0(false) }
+            }
+        } else {
+            builder.setPositiveButton(R.string.settings_update_dialog_download_github) { _, _ -> launcher.openRelease(context) }
+        }
         if (release != null && adb?.ready == true) {
             builder.setNegativeButton(R.string.adb_shell_install) { _, _ ->
                 b0(true)
                 launcher.installWithShell(context) { b0(false) }
             }
+        } else if (release != null) {
+            builder.setNegativeButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
         } else {
             builder.setNegativeButton(android.R.string.cancel, null)
         }

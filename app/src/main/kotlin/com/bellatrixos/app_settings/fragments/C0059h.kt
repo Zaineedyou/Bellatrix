@@ -20,6 +20,7 @@ import com.bellatrixos.wallpaper.wallpaperKind
 import com.bellatrixos.widgets.cards.UISettingsCardSpinner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /** Hasil pemilih wallpaper dan callback spinner jenis gambar. */
@@ -48,6 +49,10 @@ class C0059h(@JvmField val u: UIBackground) :
         (context.applicationContext as? App)?.runtime?.let { runtime ->
             background.viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                 runCatching { runtime.themes.addBackground(data) }
+                // The new picture joins the previews under Images as soon as it is saved.
+                withContext(Dispatchers.Main) {
+                    if (background.isAdded && background.view != null) background.renderAdded()
+                }
             }
         }
 
