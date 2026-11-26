@@ -14,6 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 ### Fixed
 
 - The release build compiles again: a stray closing brace in the Explorer ended its class early, and `$EDITOR` in the Linux agent notes was read as a Kotlin variable.
+- Restored the light and dark vector Bellatrix launcher logos in place of the gas-giant planet artwork.
 
 ## [3.1.2] - 2026-11-26
 
