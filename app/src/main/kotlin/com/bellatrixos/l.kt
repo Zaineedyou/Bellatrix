@@ -37,7 +37,6 @@ import com.bellatrixos.taskbar.utils.ObservableList
 import com.bellatrixos.taskbar.utils.TaskBarItemAnimator
 import com.bellatrixos.variables.Global
 import com.bellatrixos.widgets.TaskbarBtn
-import com.bellatrixos.widgets.UINotification
 import com.bellatrixos.windows.Updates
 import com.bellatrixos.windows.WinLogoDrawable
 import com.bellatrixos.windows.WindowSize
@@ -342,8 +341,6 @@ class l(@JvmField val v: Any, @JvmField val u: Int) : Runnable {
                 })
                 // NavigationControl belum di-port; pertahankan perilaku inti back/start-menu/toast.
                 val callback = object : OnBackPressedCallback(true) {
-                    private var exitArmed = false
-                    private val resetExit = Runnable { exitArmed = false }
                     override fun handleOnBackPressed() {
                         // A widget's screen { } is a native panel over this activity: Back closes it,
                         // not the launcher, before the start menu and window handlers below.
@@ -360,22 +357,8 @@ class l(@JvmField val v: Any, @JvmField val u: Int) : Runnable {
                         if (fragment is BackPressHandler && fragment.b()) {
                             return
                         }
-                        if (!Global.j) {
-                            if (!exitArmed) {
-                                UINotification.a(
-                                    act7,
-                                    act7.getString(R.string.toast_app_exit),
-                                    null
-                                )
-                                exitArmed = true
-                                AppExecutors.c().removeCallbacks(resetExit)
-                                AppExecutors.c().postDelayed(resetExit, 2800L)
-                                return
-                            }
-                            exitArmed = false
-                        }
-                        isEnabled = false
-                        mainActivity7.onBackPressedDispatcher.onBackPressed()
+                        // Nothing left to close: a launcher has no exit. Finishing the home activity ends the process's
+                        // work and Android starts the home again, so Back at the bottom of the home does nothing.
                     }
                 }
                 mainActivity7.j1 = callback

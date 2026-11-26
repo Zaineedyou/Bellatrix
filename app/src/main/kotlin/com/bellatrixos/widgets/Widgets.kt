@@ -1026,6 +1026,18 @@ class UIProgressBarLinear @JvmOverloads constructor(c: Context, a: AttributeSet?
         b()
         invalidate()
     }
+
+    /** Fills the bar to [percent] (0 to 100) and stops the sliding; a negative [percent] goes back to sliding. */
+    fun setProgress(percent: Int) {
+        if (percent < 0) {
+            setAnimating(true)
+            return
+        }
+        C = false
+        F?.cancel()
+        v.set(0.0f, 0.0f, w * percent.coerceAtMost(100) / 100.0f, x.toFloat())
+        invalidate()
+    }
 }
 
 class UIProgressCircular @JvmOverloads constructor(c: Context, a: AttributeSet? = null) :

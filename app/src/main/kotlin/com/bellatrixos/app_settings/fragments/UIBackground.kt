@@ -9,10 +9,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -48,20 +46,20 @@ class UIBackground : Fragment() {
     @JvmField var s0: View? = null
     @JvmField var t0: Context? = null
     @JvmField var u0: LinearLayout? = null
-    @JvmField var v0: RelativeLayout? = null
+    @JvmField var v0: LinearLayout? = null
     @JvmField var w0: TextView? = null
     @JvmField var x0: MainActivityIn? = null
     @JvmField var y0: ImageView? = null
     @JvmField var z0: UISettingsCardSpinner? = null
 
-    /** The row of pictures the user added, under the default two. */
-    private var addedScroll: HorizontalScrollView? = null
-    private var addedRow: LinearLayout? = null
+    /** The row of tiles under Images: the default two, the pictures the user added, then the add button. */
+    private var wallpaperRow: LinearLayout? = null
+    private val addedTiles = mutableListOf<View>()
 
     override fun onDestroyView() {
         super.onDestroyView()
-        addedScroll = null
-        addedRow = null
+        wallpaperRow = null
+        addedTiles.clear()
         x0 = null
         A0?.setOnClickListener(null)
         B0?.setOnClickListener(null)
@@ -97,43 +95,25 @@ class UIBackground : Fragment() {
         }.getOrNull()
 
     /**
-     * Shows every picture or video the user added to this theme as a preview after the default two: tap one to use it,
-     * hold it to remove it. Called when the page opens and again after a new one is added.
+     * Shows every picture or video the user added to this theme as a tile in the same row as the default two,
+     * between them and the add button: tap one to use it, hold it to remove it. Called when the page opens and
+     * again after a new one is added.
      */
     fun renderAdded() {
         val context = t0 ?: return
         val runtime = (context.applicationContext as? App)?.runtime ?: return
-        val anchor = v0 ?: return
-        val parent = anchor.parent as? ViewGroup ?: return
-        if (addedScroll == null) {
-            val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
-            val scroll =
-                HorizontalScrollView(context).apply {
-                    isHorizontalScrollBarEnabled = false
-                    visibility = View.GONE
-                    addView(row, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-                }
-            parent.addView(
-                scroll,
-                parent.indexOfChild(anchor) + 1,
-                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                    topMargin = px(10)
-                    bottomMargin = px(6)
-                },
-            )
-            addedRow = row
-            addedScroll = scroll
-        }
+        val row = wallpaperRow ?: v0?.findViewById<LinearLayout>(R.id.wallpaper_row)?.also { wallpaperRow = it } ?: return
         viewLifecycleOwner.lifecycleScope.launch {
             val items =
                 withContext<List<Pair<File, Bitmap?>>>(Dispatchers.IO) {
                     val theme = runtime.themes.current ?: return@withContext emptyList()
                     theme.backgrounds().filter(theme::isExtraBackground).map { it to thumbnail(it) }
                 }
-            val row = addedRow ?: return@launch
-            val scroll = addedScroll ?: return@launch
-            row.removeAllViews()
-            scroll.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+            if (wallpaperRow !== row) return@launch
+            for (tile in addedTiles) row.removeView(tile)
+            addedTiles.clear()
+            // Right after the second default picture, so the add button stays last.
+            var at = row.indexOfChild(B0) + 1
             for ((file, bitmap) in items) {
                 val size = px(84)
                 val tile =
@@ -159,7 +139,8 @@ class UIBackground : Fragment() {
                             true
                         }
                     }
-                row.addView(tile, LinearLayout.LayoutParams(size, size).apply { marginEnd = px(10) })
+                row.addView(tile, at++, LinearLayout.LayoutParams(size, size).apply { marginStart = px(10) })
+                addedTiles.add(tile)
             }
         }
     }

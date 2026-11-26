@@ -5,6 +5,13 @@ import java.io.File
 /** Key a guest `.desktop` entry carries in Bellatrix's existing drawer, before its desktop id. */
 const val LINUX_APP_PREFIX = "linux:"
 
+/**
+ * Window tag (and so taskbar/Recents key) of a guest GUI app such as Vesktop, followed by its Wayland app_id. Like a
+ * coding agent's [LINUX_AGENT_TAG_PREFIX], it keeps the app off the pinned Terminal button: Terminal opens and focuses
+ * only terminals, so an app and a terminal can be open together.
+ */
+const val LINUX_APP_TAG_PREFIX = "LinuxApp."
+
 data class LinuxApp(
     val name: String,
     /** The command, without the terminal wrapper for terminal apps. */

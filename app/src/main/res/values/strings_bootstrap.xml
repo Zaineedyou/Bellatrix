@@ -15,7 +15,9 @@
     <string name="linux_step_fonts">Installing fonts</string>
     <string name="linux_step_packages">Installing packages</string>
     <string name="linux_step_keymap">Compiling keymap</string>
+    <string name="linux_step_nano">Installing nano, the text editor</string>
     <string name="linux_step_cliamp">Installing cliamp</string>
+    <string name="linux_step_alsa">Connecting ALSA apps to the sound server</string>
     <string name="linux_step_agent">Installing %1$s</string>
     <string name="linux_step_downloaded">%1$d of %2$d MB</string>
     <string name="linux_step_downloaded_unknown">%1$d MB</string>

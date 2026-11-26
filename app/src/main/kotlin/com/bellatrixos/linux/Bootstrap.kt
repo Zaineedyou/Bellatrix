@@ -223,6 +223,26 @@ class Bootstrap(
                 // must be fetched again as well: the drawer only lists Cliamp if it runs.
                 isDone = { File(proot.rootfs, "usr/local/bin/cliamp").isFile },
             ) { installCliamp() },
+            // Cliamp plays through ALSA; the guest only has PulseAudio, so without this it finds no
+            // output device and quits, and its window goes with it.
+            Step(
+                "alsa-pulse-1",
+                Stage.Packages,
+                R.string.linux_step_alsa,
+                network = true,
+                optional = true,
+                isDone = { hasAlsaPulsePlugin() && File(proot.rootfs, "etc/asound.conf").readTextOrNull() == ASOUND_CONF },
+            ) { installAlsaPulse() },
+            // The editor everywhere is nano (EDITOR, Explorer's Edit, the Editor entry). Installs made when micro
+            // was the editor get it here; new ones have it in the package list already.
+            Step(
+                "nano-1",
+                Stage.Packages,
+                R.string.linux_step_nano,
+                network = true,
+                optional = true,
+                isDone = { File(proot.rootfs, "usr/bin/nano").exists() },
+            ) { guest("xbps-install -Sy nano") },
         )
 
     private fun Step.done() = isDone?.invoke() ?: (id in journal)
@@ -667,6 +687,19 @@ class Bootstrap(
         }
     }
 
+    /** Whether ALSA's PulseAudio plugin is in the guest, wherever its libraries are. */
+    private fun hasAlsaPulsePlugin() =
+        File(proot.rootfs, "usr/lib").walkTopDown().maxDepth(2).any { it.name == "libasound_module_pcm_pulse.so" }
+
+    /** ALSA apps (Cliamp) play through PulseAudio, so through the bridge to the phone. */
+    private fun installAlsaPulse() {
+        if (!hasAlsaPulsePlugin()) {
+            guest("xbps-install -Sy alsa-lib && { xbps-install -y alsa-plugins-pulseaudio || xbps-install -y alsa-plugins-pulse; }")
+            check(hasAlsaPulsePlugin()) { "ALSA's PulseAudio plugin isn't in the guest after installing it" }
+        }
+        writeAtomically(File(proot.rootfs, "etc/asound.conf"), ASOUND_CONF.toByteArray())
+    }
+
     private fun checkForks() {
         val process = proot.process("echo forks | cat").start()
         val output = StringBuffer()
@@ -695,6 +728,19 @@ class Bootstrap(
     }
 
     companion object {
+        /** ALSA's default device is PulseAudio, which is where the audio bridge listens. */
+        val ASOUND_CONF =
+            """
+            # Written by Bellatrix: ALSA apps (such as Cliamp) play through the PulseAudio that feeds the phone.
+            pcm.!default {
+                type pulse
+                hint.description "Phone audio (PulseAudio)"
+            }
+            ctl.!default {
+                type pulse
+            }
+            """.trimIndent() + "\n"
+
         val FOOT_INI =
             """
             [main]

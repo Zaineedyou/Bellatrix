@@ -5,9 +5,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.system.ErrnoException
-import android.system.Os
-import android.system.OsConstants
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -41,9 +38,6 @@ import com.bellatrixos.Runtime
 import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.interfaces.BackPressHandler
 import com.bellatrixos.interfaces.MainActivityIn
-import com.bellatrixos.linux.shellQuote
-import com.bellatrixos.ui.files.EditorHome
-import com.bellatrixos.ui.files.EditorScreen
 import com.bellatrixos.ui.files.FilesScreen
 import com.bellatrixos.variables.Global
 import com.bellatrixos.widgets.ExplorerFilesInfoView
@@ -78,23 +72,10 @@ class UIExplorer : UIFragment(), BackPressHandler {
 
         private const val GUEST_PREFIX = "guest:"
         private const val GUEST_FILES = GUEST_PREFIX + "files"
-        private const val GUEST_EDITOR = GUEST_PREFIX + "editor"
-        private const val GUEST_EDITOR_HOME = GUEST_PREFIX + "editor-home"
         private const val GUEST_SEPARATOR = "\u001f"
 
         /** Encodes a guest Files request in the one string argument the window system carries. */
         fun filesArg(path: String?): String = GUEST_FILES + GUEST_SEPARATOR + path.orEmpty()
-
-        /** Encodes a guest Editor request and the FIFO its shim waits on. */
-        fun editorArg(
-            path: String?,
-            done: String? = null,
-        ): String =
-            if (path == null) {
-                GUEST_EDITOR_HOME
-            } else {
-                GUEST_EDITOR + GUEST_SEPARATOR + path + GUEST_SEPARATOR + done.orEmpty()
-            }
     }
 
     @JvmField var A0: UITitleBar? = null
@@ -133,12 +114,9 @@ class UIExplorer : UIFragment(), BackPressHandler {
     @JvmField var z0: EditText? = null
     @JvmField var C0: String? = null
 
-    /** Set when this Explorer instance hosts the ported guest Files/Editor instead of the legacy browser. */
-    private var guestMode: String? = null
+    /** Set when this Explorer instance hosts the ported guest Files instead of the legacy browser. */
     private var guestPath: String? = null
-    private var guestDone: String? = null
     private lateinit var guestRuntime: Runtime
-    private val waiting = mutableListOf<String>()
     private var guestClosing = false
 
     @JvmField val N0: Window = Window(0)
@@ -234,7 +212,6 @@ class UIExplorer : UIFragment(), BackPressHandler {
     }
 
     override fun onDestroy() {
-        if (guestMode != null && !guestClosing) answer("ok")
         super.onDestroy()
     }
 
@@ -243,25 +220,18 @@ class UIExplorer : UIFragment(), BackPressHandler {
         super.onDetach()
     }
 
-    /** Replaces the legacy file browser with the ported guest Files/Editor inside this Bellatrix window. */
+    /** Replaces the legacy file browser with the ported guest Files inside this Bellatrix window. */
     private fun installGuest(view: View, raw: String) {
-        // A reused window may still hold the previous editor's reply FIFO; never drop it.
-        answer("ok")
         guestClosing = false
-        val parts = raw.split(GUEST_SEPARATOR, limit = 3)
-        guestMode = parts.firstOrNull()
+        val parts = raw.split(GUEST_SEPARATOR, limit = 2)
         guestPath = parts.getOrNull(1)?.takeIf { it.isNotEmpty() }
-        guestDone = parts.getOrNull(2)?.takeIf { it.isNotEmpty() }?.also(waiting::add)
         guestRuntime = (requireContext().applicationContext as? App)?.runtime ?: return
 
         val floating = B0 ?: return
         val title = A0 ?: return
         val path = guestPath
         title.setTitle(
-            when (guestMode) {
-                GUEST_FILES -> getString(R.string.guest_files_title)
-                else -> getString(R.string.guest_editor_title)
-            },
+            getString(R.string.guest_files_title),
         )
 
         view.findViewById<View>(R.id.explorer_top_navigation)?.visibility = View.GONE
@@ -303,55 +273,20 @@ class UIExplorer : UIFragment(), BackPressHandler {
         floating.setOnFocusListener(focusResize)
         title.setResizeBtnListener { WindowSize.c(N0) }
         title.setMinimizeBtnListener { J0?.A(tag ?: "") }
-        title.setCloseBtnListener { closeGuest("ok") }
+        title.setCloseBtnListener { closeGuest() }
 
         val runtime = guestRuntime
         compose.setContent {
             CompositionLocalProvider(LocalActivityResultRegistryOwner provides requireActivity()) {
-                when (guestMode) {
-                    GUEST_FILES -> FilesScreen(runtime, path ?: "/root", onExit = { closeGuest("ok") })
-                    GUEST_EDITOR_HOME -> EditorHome(runtime, onExit = { closeGuest("ok") })
-                    else -> EditorScreen(runtime, path.orEmpty(), onFallback = ::fallbackGuestEditor, onExit = { closeGuest("ok") })
-                }
+                FilesScreen(runtime, path ?: "/root", onExit = ::closeGuest)
             }
         }
     }
 
-    /** The editor shim waits for a reply; answer it before this window goes away. */
-    private fun closeGuest(reply: String) {
+    private fun closeGuest() {
         if (guestClosing) return
         guestClosing = true
-        answer(reply)
         p0()
-    }
-
-    /** Files the touch editor can't take go to micro, as they did in the old Editor task. */
-    private fun fallbackGuestEditor() {
-        val path = guestPath
-        if (path.isNullOrEmpty()) return closeGuest("ok")
-        if (waiting.isNotEmpty()) {
-            answer("micro")
-        } else {
-            guestRuntime.terminal("micro ${shellQuote(path)}", path.substringAfterLast('/'))
-        }
-        guestClosing = true
-        p0()
-    }
-
-    private fun answer(reply: String) {
-        for (fifo in waiting) {
-            try {
-                val fd = Os.open(fifo, OsConstants.O_WRONLY or OsConstants.O_NONBLOCK, 0)
-                try {
-                    Os.write(fd, "$reply\n".toByteArray(), 0, reply.length + 1)
-                } finally {
-                    Os.close(fd)
-                }
-            } catch (_: ErrnoException) {
-                // Nobody is waiting any more.
-            }
-        }
-        waiting.clear()
     }
 
     fun A() {
@@ -424,10 +359,6 @@ class UIExplorer : UIFragment(), BackPressHandler {
     }
 
     override fun b(): Boolean {
-        editor?.let {
-            it.requestClose(null)
-            return true
-        }
         if (U0.isEmpty()) {
             J0?.A(tag ?: "")
             return true
@@ -439,7 +370,6 @@ class UIExplorer : UIFragment(), BackPressHandler {
     override fun f0(): Boolean = e1
 
     override fun h0(i2: Int, keyEvent: KeyEvent) {
-        editor?.let { if (it.handleKey(i2, keyEvent)) return }
         val zIsCtrlPressed = keyEvent.isCtrlPressed
         val zIsShiftPressed = keyEvent.isShiftPressed
         O0?.setShiftPressed(zIsShiftPressed)
@@ -505,7 +435,7 @@ class UIExplorer : UIFragment(), BackPressHandler {
     }
 
     fun p0() {
-        // The shell X button must really close every Explorer/Editor/Files window,
+        // The shell X button must really close every Explorer/Files window,
         // not just hide it and leave a dead taskbar entry and stale focus behind.
         J0?.closeWindow(this)
         if (Windows.f4883f == this) Windows.f4883f = null
@@ -523,8 +453,6 @@ class UIExplorer : UIFragment(), BackPressHandler {
     }
 
     fun s0(file: File) {
-        // Going to another folder closes the editor, asking first if it has unsaved changes.
-        editor?.let { if (!it.requestClose { s0(file) }) return }
         E0?.F()
         if (file.isDirectory() || file.list() != null) {
             try {
@@ -569,24 +497,10 @@ class UIExplorer : UIFragment(), BackPressHandler {
         }
     }
 
-    /** The editor open in this window, if any. */
-    @JvmField var editor: ExplorerEditor? = null
-
-    /**
-     * Opens [file] in the editor, which covers this whole window below its title bar. An editor already open is
-     * closed first, after asking about unsaved changes.
-     */
+    /** Edits [file] in nano, in a terminal window. */
     fun openEditor(file: File) {
-        val host = B0 ?: return
-        editor?.let { open ->
-            if (open.file == file) return
-            if (!open.requestClose { openEditor(file) }) return
-        }
-        editor = ExplorerEditor(this, host, A0?.height ?: 0, file).also { it.show() }
-    }
-
-    fun editorClosed(closed: ExplorerEditor) {
-        if (editor === closed) editor = null
+        val runtime = (v0?.applicationContext as? App)?.runtime ?: return
+        runtime.edit(runtime.proot.guestPath(file) ?: file.absolutePath)
     }
 
     fun u0(fileMeta: FileMeta) {

@@ -12,7 +12,11 @@ import androidx.collection.LruCache
 import androidx.core.content.ContextCompat
 import com.bellatrixos.R
 import com.bellatrixos.database.SharedPrefs
+import com.bellatrixos.App
 import com.bellatrixos.linux.LINUX_AGENT_TAG_PREFIX
+import com.bellatrixos.linux.LINUX_APP_TAG_PREFIX
+import com.bellatrixos.linux.matches
+import androidx.compose.ui.graphics.asAndroidBitmap
 import com.bellatrixos.windows.installed_apps.AppsDatabase
 import java.io.File
 import java.util.Collections
@@ -40,6 +44,16 @@ class IconEngine(context: Context) {
             return if (id == 0) null else ContextCompat.getDrawable(c, id)
         }
 
+        /** A guest GUI app's own icon in the taskbar and Recents, found from its Wayland app_id; null until it is loaded. */
+        private fun linuxAppDrawable(base: String): Drawable? {
+            val appId = base.removePrefix(LINUX_APP_TAG_PREFIX).replace('_', ' ')
+            if (appId.isEmpty()) return null
+            val catalog = (c.applicationContext as? App)?.runtime?.linuxApps ?: return null
+            val app = catalog.apps.firstOrNull { it.matches(appId) || it.matches(appId.replace(' ', '_')) } ?: return null
+            val icon = catalog.icons[app.id] ?: return null
+            return BitmapDrawable(c.resources, icon.asAndroidBitmap())
+        }
+
         override fun run() {
             val pack = g
             val pm = c.packageManager
@@ -51,6 +65,7 @@ class IconEngine(context: Context) {
                 val appPkg = com.bellatrixos.apps.IconPack.appfilterComponent(pkg)?.first ?: base.substringBefore('/').trim()
                 var drawable: Drawable? = when {
                     base.startsWith(LINUX_AGENT_TAG_PREFIX) -> agentDrawable(base)
+                    base.startsWith(LINUX_APP_TAG_PREFIX) -> linuxAppDrawable(base)
                     base == "UIInstaller" -> ContextCompat.getDrawable(c, R.drawable.img_app_installer)
                     base == "UINotepad" -> ContextCompat.getDrawable(c, R.drawable.img_app_notepad)
                     base == "UITerminal" || base == "UILinuxWindow" ->

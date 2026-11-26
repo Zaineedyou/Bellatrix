@@ -171,7 +171,7 @@ enum class Distro(
         private const val VOID_CORE = "bash coreutils grep sed gawk findutils curl wget ca-certificates tar xz git less fontconfig"
         private const val VOID_EXTRAS =
             "foot foot-terminfo dejavu-fonts-ttf btop fastfetch neovim starship eza bat fd ripgrep " +
-                "fzf zoxide tmux gum jq tealdear man-db dua-cli inxi whois bash-completion pulseaudio micro libxkbcommon-tools xkeyboard-config " +
+                "fzf zoxide tmux gum jq tealdear man-db dua-cli inxi whois bash-completion pulseaudio nano libxkbcommon-tools xkeyboard-config " +
                 "vulkan-loader Vulkan-Tools mesa-dri mesa-vulkan-lavapipe libatomic libstdc++ libgcc"
         private const val VOID_GPU_PACKAGES =
             "mesa mesa-dri vulkan-loader Vulkan-Tools mesa-demos libglvnd mesa-vulkan-lavapipe libdrm wayland libX11 libxcb " +

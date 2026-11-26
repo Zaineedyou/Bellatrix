@@ -41,7 +41,14 @@ class AllDirectionsDragCallback(@JvmField val f4762d: DesktopAdapter) : ItemTouc
         val list = adapter.E
         val from = g
         val to = f4765h
-        if (list.getOrNull(to)?.c() == -1) {
+        // The cells can change under a drag (the phone turning): a stale position must not swap or crash.
+        if (from !in list.indices || to !in list.indices) {
+            g = -1
+            f4765h = -1
+            f4766i = false
+            return
+        }
+        if (list[to].c() == -1) {
             list[to] = list[from]
             list[from] = DesktopItem(-1, "", "blank_$from")
             adapter.notifyItemChanged(from)

@@ -12,7 +12,6 @@ import com.bellatrixos.app_notepad.b
 import com.bellatrixos.context_menu.UIContextMenu
 import com.bellatrixos.context_menu.UIMenuItem
 import com.bellatrixos.desktop.DesktopAdapter
-import com.bellatrixos.desktop.DesktopItem
 import com.bellatrixos.interfaces.MainActivityIn
 import com.bellatrixos.startmenu.StartMenuAdapter
 import com.bellatrixos.startmenu.StartMenuItem
@@ -170,7 +169,6 @@ class d : DriveAdapter.OnItemClickListener, UIContextMenu.OnMenuItemClickListene
                 items.add(arrange)
                 items.add(UIMenuItem(0, 120, if (Global.r) R.drawable.menu_ic_checkmark_20_filled else R.drawable.menu_ic_blank_20_regular, context.getString(R.string.context_menu_desktop_ic_show)))
                 val desktopAdapter = x as DesktopAdapter
-                val recyclerView = y as FilesRecyclerView
                 menu.c = UIContextMenu.OnMenuItemClickListener { _, which ->
                     when (which) {
                         120 -> {
@@ -184,15 +182,9 @@ class d : DriveAdapter.OnItemClickListener, UIContextMenu.OnMenuItemClickListene
                         124 -> {
                             DesktopAdapter.H = !DesktopAdapter.H
                             val arrayList = desktopAdapter.E
-                            if (!DesktopAdapter.H) {
-                                val dimen = recyclerView.resources.getDimensionPixelSize(R.dimen.explorer_file_width).coerceAtLeast(1)
-                                val cols = recyclerView.width / dimen
-                                DesktopAdapter.spanCount = cols.coerceAtLeast(1)
-                                val size = (recyclerView.height / dimen) * cols - arrayList.size
-                                if (size > 0) repeat(size) { arrayList.add(DesktopItem(-1, "", "blank_" + arrayList.size)) }
-                            } else {
-                                arrayList.removeAll { it.c() == -1 }
-                            }
+                            // The cells to add come from the grid home actually laid out; the sizes worked out here
+                            // (explorer_file_width, no row ratio) differed from it and left too many or too few.
+                            if (!DesktopAdapter.H) desktopAdapter.refit() else arrayList.removeAll { it.c() == -1 }
                             desktopAdapter.notifyDataSetChanged()
                             com.bellatrixos.desktop.DesktopDB.c(arrayList)
                             desktopAdapter.B()

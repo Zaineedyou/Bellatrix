@@ -184,7 +184,8 @@ class UIPermissions : Fragment() {
 
     private fun permissionCard(row: Row): UISettingsCard {
         val card = UISettingsCard(requireContext())
-        card.layoutParams = cardParams()
+        card.layoutParams = cardParams(4)
+        card.spreadText()
         card.setImage(R.drawable.ic_lock_closed_24_regular)
         card.setTitle(getString(row.title))
         card.setSubtitle(getString(if (row.granted) R.string.permissions_on else R.string.permissions_off, getString(row.uses)))

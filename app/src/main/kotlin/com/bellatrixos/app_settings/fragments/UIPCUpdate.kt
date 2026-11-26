@@ -13,6 +13,7 @@ import android.view.ViewStub
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bellatrixos.App
@@ -232,7 +233,7 @@ class UIPCUpdate : Fragment() {
             // Download the APK inside the launcher and hand it to Android's installer.
             builder.setPositiveButton(R.string.settings_update_dialog_install) { _, _ ->
                 b0(true)
-                launcher.install(context) { b0(false) }
+                launcher.install(context, onProgress = this::showDownload) { finishInstall(launcher) }
             }
         } else {
             builder.setPositiveButton(R.string.settings_update_dialog_download_github) { _, _ -> launcher.openRelease(context) }
@@ -240,7 +241,7 @@ class UIPCUpdate : Fragment() {
         if (release != null && adb?.ready == true) {
             builder.setNegativeButton(R.string.adb_shell_install) { _, _ ->
                 b0(true)
-                launcher.installWithShell(context) { b0(false) }
+                launcher.installWithShell(context, onProgress = this::showDownload) { finishInstall(launcher) }
             }
         } else if (release != null) {
             builder.setNegativeButton(R.string.settings_update_dialog_browser) { _, _ -> launcher.openRelease(context) }
@@ -291,6 +292,29 @@ class UIPCUpdate : Fragment() {
         D0?.setAnimating(z)
         D0?.visibility = if (z) View.VISIBLE else View.GONE
         y0?.visibility = if (z) View.GONE else View.VISIBLE
+        // A download shows its percent in the version line; once it is over the version comes back.
+        if (!z && isAdded) y0?.text = "${getString(R.string.settings_about_version)} ${BuildConfig.VERSION_NAME}"
+    }
+
+    /** The download or install is over: the page goes back to normal and a failure is said, since the dialog closed long ago. */
+    private fun finishInstall(launcher: LauncherUpdates) {
+        b0(false)
+        val error = launcher.lastError ?: return
+        if (isAdded) Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
+    }
+
+    /** The APK is downloading: the bar fills and the version line says how far it is. [percent] is -1 when the size is unknown. */
+    private fun showDownload(percent: Int) {
+        if (!isAdded) return
+        D0?.visibility = View.VISIBLE
+        D0?.setProgress(percent)
+        y0?.visibility = View.VISIBLE
+        y0?.text =
+            if (percent >= 0) {
+                getString(R.string.settings_update_downloading, percent)
+            } else {
+                getString(R.string.settings_update_downloading_unknown)
+            }
     }
 
     fun c0() {

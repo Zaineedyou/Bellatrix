@@ -5,7 +5,6 @@ import android.content.Intent
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import com.bellatrixos.App
-import com.bellatrixos.EditorActivity
 import com.bellatrixos.R
 import com.bellatrixos.app_explorer.files.Files
 import com.bellatrixos.ui.files.isText
@@ -97,9 +96,8 @@ object FileIntent {
      */
     private fun openEditor(context: Context, file: File) {
         try {
-            val guest = (context.applicationContext as? App)?.runtime?.proot?.guestPath(file) ?: file.absolutePath
-            val intent = EditorActivity.intent(context, guest).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+            val runtime = (context.applicationContext as? App)?.runtime ?: return notifyNoApp(context)
+            runtime.edit(runtime.proot.guestPath(file) ?: file.absolutePath)
         } catch (_: Exception) {
             notifyNoApp(context)
         }

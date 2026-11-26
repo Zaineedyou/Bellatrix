@@ -10,7 +10,7 @@ const val FILES_COMMAND = "bellatrix-files"
 /** Exec of the Voice entry; the launcher opens its voice screen for it (see OpenBridge's shim). */
 const val VOICE_COMMAND = "bellatrix-voice"
 
-/** Exec of the Editor entry and Linux's $EDITOR; the launcher's own editor (see OpenBridge's shim). */
+/** Exec of the Editor entry; the shim just runs nano (see OpenBridge's shim). */
 const val EDIT_COMMAND = "bellatrix-edit"
 
 private fun entry(
@@ -53,6 +53,7 @@ private val HIDDEN =
         "footclient",
         "foot-server",
         "micro",
+        "nano",
         "bellatrix-files",
         "bellatrix-voice",
         "vim",

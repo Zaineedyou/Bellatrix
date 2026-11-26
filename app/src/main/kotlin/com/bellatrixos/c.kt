@@ -150,7 +150,10 @@ class c(@JvmField val v: MainActivity, @JvmField val u: Int) : Runnable {
                 // Isi slot kosong setelah ukuran grid diketahui agar drag bebas langsung bisa dipakai.
                 // Rows come from the layout manager (what actually fits on screen), and again each time home's size
                 // changes, so turning the phone re-wraps the same list instead of leaving cells for the old shape.
-                val syncCells = {
+                val syncCells = sync@{
+                    // Before home is measured the grid is 1 x 1; fitting to that closed up every gap between the
+                    // icons and saved it, so the layout changed by itself.
+                    if (filesRecyclerView.width <= 0 || filesRecyclerView.height <= 0 || gridAutofillLayoutManager.P == -1) return@sync
                     val across = filesRecyclerView.width - filesRecyclerView.paddingLeft - filesRecyclerView.paddingRight
                     val cols = (across / gridAutofillLayoutManager.N).toInt().coerceAtLeast(1)
                     desktopAdapter.ensureFreeCells(gridAutofillLayoutManager.spanCount, cols)

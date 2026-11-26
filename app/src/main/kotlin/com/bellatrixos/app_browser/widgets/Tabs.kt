@@ -40,7 +40,7 @@ class Tabs(@JvmField val f4655a: android.content.Context, @JvmField val b: UIBro
             val fm2 = b.childFragmentManager
             val tx2 = fm2.beginTransaction()
             tx2.remove(tab)
-            tx2.commit()
+            tx2.commitAllowingStateLoss()
             @Suppress("UNCHECKED_CAST")
             val list2 = b.c1 as ArrayList<UIBrowserTab>
             list2.remove(tab)
@@ -76,11 +76,11 @@ class Tabs(@JvmField val f4655a: android.content.Context, @JvmField val b: UIBro
         if (current != null) {
             val tx = browser.childFragmentManager.beginTransaction()
             tx.hide(current)
-            tx.commit()
+            tx.commitAllowingStateLoss()
         }
         val tx2 = browser.childFragmentManager.beginTransaction()
         tx2.show(tab)
-        tx2.commit()
+        tx2.commitAllowingStateLoss()
         browser.z0 = tab
         browser.I0?.isSelected = false
         view.isSelected = true

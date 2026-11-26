@@ -75,6 +75,7 @@ import com.bellatrixos.context_menu.UIContextMenu
 import com.bellatrixos.database.SharedPrefs
 import com.bellatrixos.desktop.DesktopAdapter
 import com.bellatrixos.linux.LINUX_AGENT_TAG_PREFIX
+import com.bellatrixos.linux.LINUX_APP_TAG_PREFIX
 import com.bellatrixos.linux.LINUX_APP_PREFIX
 import com.bellatrixos.desktop.DesktopDB
 import com.bellatrixos.desktop.DesktopItem
@@ -416,7 +417,7 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
             return
         }
         // A coding-agent taskbar entry is a window tag, not an installed Android package.
-        if (str.startsWith(LINUX_AGENT_TAG_PREFIX)) {
+        if (str.startsWith(LINUX_AGENT_TAG_PREFIX) || str.startsWith(LINUX_APP_TAG_PREFIX)) {
             c0(str, null)
             return
         }
@@ -1500,12 +1501,9 @@ class MainActivity : AppCompatActivity(), MainActivityIn, OnVolumeChangeListener
         runtime.onAppsChanged = {
             if (!isFinishing && !isDestroyed) runOnUiThread { M0?.D(null) }
         }
-        // Guest Files and Editor use Bellatrix's Explorer window, never their old tasks.
+        // Guest Files uses Bellatrix's Explorer window, never their old tasks.
         runtime.openExplorer = { guestPath ->
             if (!isFinishing && !isDestroyed) runOnUiThread { c0("UIExplorer", UIExplorer.filesArg(guestPath)) }
-        }
-        runtime.openBellatrixEditor = { guestPath, done ->
-            if (!isFinishing && !isDestroyed) runOnUiThread { c0("UIExplorer", UIExplorer.editorArg(guestPath, done)) }
         }
         runtime.openVoiceWindow = {
             // A non-null marker makes an already hidden UIVoice call k0(): another mic tap

@@ -54,6 +54,7 @@ class UIPrivacy : Fragment() {
         permissions = view.findViewById(R.id.privacy_permissions)
         u0 = view.findViewById(R.id.btn_device_app_info)
         v0 = view.findViewById(R.id.btn_device_privacy_policy)
+        listOf(t0, permissions, u0, v0).forEach { it?.spreadText() }
         return view
     }
 }

@@ -9,16 +9,65 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.1.3] - 2026-11-26
+
+### Fixed
+
+- The release build compiles again: a stray closing brace in the Explorer ended its class early, and `$EDITOR` in the Linux agent notes was read as a Kotlin variable.
+
+## [3.1.2] - 2026-11-26
+
+### Changed
+
+- The editor is nano. Edit in the Explorer's menu, opening a text file in the Explorer or Files, the Editor entry and `$EDITOR` in Linux (`git commit` and the like) all open `nano` in a terminal window. The built-in touch editor (Editor window, Explorer editor, "Open in micro") is removed. nano is installed in Linux (new installs with the other packages, existing ones by an optional step the next time Linux updates); micro stays installed if you have it.
+
+### Fixed
+
+- Updating from PC Update shows its progress. Download & Install now fills the bar in the page header and the line under the version says "Downloading 45%", instead of only a thin bar sliding back and forth. The APK is streamed to a file in chunks, so the percent comes from the real download size (it says "Downloading…" if GitHub doesn't give one), and a half download is never handed to Android's installer.
+- A failed update download or install now says so in a message, instead of the page quietly going back to normal.
+- Download & Install says why it opened a screen when "Install unknown apps" isn't allowed yet: a message asks you to allow it and tap Download & Install again.
+- Settings → Privacy and Permissions have more room between a card's title and its text, and between the permission cards.
+- Pictures you add under Background → Images now appear in the same row as the two default wallpapers, before the add button, instead of in a second row underneath. The row scrolls sideways when there are many.
+- Home icons no longer swap, double or vanish by themselves. The icon list claimed stable item ids but never gave any, so every icon had the same id and RecyclerView could hand one icon's view to another position without rebinding it.
+- Home's grid no longer rearranges itself. Fitting the cells to the screen could run before home was measured (a 1 x 1 grid), closing every gap between icons and saving that; it now waits for a real size. Turning auto-arrange off now fits the cells to the grid home actually uses, and a drop on a stale cell after the phone turned no longer swaps the wrong icons or crashes.
+- Pinning an app that is already on home no longer adds a second icon, which made removing either one remove both.
+- Back on the home with nothing open no longer closes the launcher. It used to ask "Press again to exit" and then finish the home, which Android restarted at once: the launcher blinked and came back, and everything running (coding agents, Linux) was gone. Back at the bottom of the home now does nothing.
+- The Browser no longer crashes with "Can not perform this action after onSaveInstanceState" when a tab opens just as the window is being saved or closed. Showing, hiding and closing tabs now tolerates that, since tabs are rebuilt anyway.
+
+## [3.1.1] - 2026-11-26
+
+### Fixed
+
+- The power button in the Start Menu opens its menu again: Settings, Shut down, Reload and Install updates. Its click did nothing. Shut down stops Linux and closes the launcher, Reload restarts it, and Install updates opens PC Update.
+- Folders in the Explorer show the folder icon again. The icon grid and the details list picked an icon from the file name's extension only, so every folder showed the blank page icon.
+- A Linux GUI app such as Vesktop is its own taskbar and Recents entry, with its own icon, instead of sharing the Terminal button. Tapping Terminal used to focus the Vesktop window, so the two could not be open together; now Terminal opens and focuses only terminals, as it already did around coding agents.
+
+## [3.1.0] - 2026-11-26
+
+### Added
+
+- Microphone for Linux apps: PulseAudio's default source is now the phone's microphone ("Microphone"), so voice chat and recording apps in Linux hear you. The microphone runs only while something in Linux records from it (the Android indicator shows then), and uses Android's echo cancelling. It needs the launcher's microphone permission (Settings → Permissions); without it Linux gets silence. `cat /tmp/mic-status.txt` says what it is doing.
+
+### Fixed
+
+- Cliamp opens and plays instead of closing at once. It plays through ALSA and the system had only PulseAudio, so it found no output device and quit. A new optional step ("Connecting ALSA apps to the sound server") installs ALSA's PulseAudio plugin and makes it ALSA's default device in `/etc/asound.conf`; it runs by itself the first time Cliamp is opened. A Cliamp that stops with an error now keeps its window open with the error, instead of vanishing.
+
+## [3.0.2] - 2026-11-26
+
+### Fixed
+
+- Linux sound: the audio track holds 150 ms instead of 100, its thread runs at audio priority, and a read of the pipe that ends inside a sample no longer loses its last bytes.
+
+### Added
+
+- `/tmp/audio-stats.txt` in Linux says what the audio bridge saw in the last two seconds (pipe backlog, waits on PulseAudio, track underruns), for finding where sound breaks up: `cat /tmp/audio-stats.txt` while it does.
+
 ## [3.0.1] - 2026-11-26
 
 ### Added
 
 - Settings → Personalize → Font: pick the font of the launcher's text and widgets from Android's own or a font file (TTF, OTF, TTC) you add. It is kept in the launcher, needs no Linux, and is written as `font = "file:<name>"` in style.toml.
 - `bellatrix apps` in Linux lists what is on home as JSON: the desktop's icons and the taskbar's pinned apps, in the order shown, with their package and the phone's name for the app, and the path of home's layout file. Coding agents can read it; AGENTS.md tells them.
-
-### Fixed
-
-- Sound from Linux no longer crackles or breaks up, in voice calls and everywhere else. A read from PulseAudio's pipe that ended inside a sample had its last bytes thrown away, which put every sample after it out of step with its channel; they are now kept for the next read. The audio track also holds 150 ms instead of 100, and its thread runs at audio priority.
 
 ## [3.0.0] - 2026-11-26
 

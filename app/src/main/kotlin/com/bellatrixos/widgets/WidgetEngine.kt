@@ -1198,8 +1198,8 @@ class WidgetEngine(
                 "the files Linux put there itself: save files for the user's other apps in /sdcard/Download or /sdcard/Documents " +
                 "(pictures in /sdcard/Pictures). The user's other files are in the phone folders they let Linux reach, which have " +
                 "no path: `bellatrix folders` lists them, `bellatrix ls`, `get` and `put` list and copy files in and out, and " +
-                "`bellatrix pick` lets the user choose any file on the phone. xdg-open opens http(s) links in Android's browser; `bellatrix-edit <file>` opens a file in the " +
-                "launcher's editor and `bellatrix-files [folder]` its file manager; GUI apps (Wayland) open as windows on the launcher.\n\n" +
+                "`bellatrix pick` lets the user choose any file on the phone. xdg-open opens http(s) links in Android's browser; the editor is nano (`\$EDITOR`) and " +
+                "`bellatrix-files [folder]` opens the launcher's file manager; GUI apps (Wayland) open as windows on the launcher.\n\n" +
                 "Home-screen widgets are `.owl` files in " +
                 "~/$GUEST_DIR, written in a small declarative language documented in README.md there (and docs/ next to it); so are apps for the " +
                 "app drawer (`app \"name\" { }`) and panels that swiping up or down on home opens (`panel \"name\" { }`, picked with " +

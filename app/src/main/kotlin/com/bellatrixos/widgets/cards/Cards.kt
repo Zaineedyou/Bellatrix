@@ -79,6 +79,12 @@ open class UISettingsCard @JvmOverloads constructor(c: Context, a: AttributeSet?
         }
     }
 
+    /** More air between the title and the subtitle under it, and between the subtitle's own lines. */
+    fun spreadText() {
+        x.setPadding(x.paddingLeft, (3 * resources.displayMetrics.density).toInt(), x.paddingRight, x.paddingBottom)
+        x.setLineSpacing(0.0f, 1.15f)
+    }
+
     override fun setEnabled(z: Boolean) {
         super.setEnabled(z)
         v.isEnabled = z

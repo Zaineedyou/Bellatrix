@@ -287,7 +287,7 @@ class GuestThemeConfig(
         val BASHRC =
             """
             export BELLATRIX_PATH=${Proot.GUEST_HOME}/.local/share/bellatrix
-            export EDITOR=bellatrix-edit VISUAL=bellatrix-edit
+            export EDITOR=nano VISUAL=nano
             """.trimIndent() + "\n"
     }
 }

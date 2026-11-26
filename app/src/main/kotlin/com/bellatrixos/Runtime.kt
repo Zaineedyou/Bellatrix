@@ -38,6 +38,7 @@ import com.bellatrixos.linux.Proot
 import com.bellatrixos.linux.SystemUpdates
 import com.bellatrixos.linux.LauncherFont
 import com.bellatrixos.linux.LINUX_AGENT_TAG_PREFIX
+import com.bellatrixos.linux.LINUX_APP_TAG_PREFIX
 import com.bellatrixos.linux.TerminalFont
 import com.bellatrixos.linux.TerminalText
 import com.bellatrixos.linux.bundledIcons
@@ -125,8 +126,8 @@ class Runtime(
     val androidApps = AndroidAppCatalog(context)
     val usage = AppUsage(context)
     val themes = ThemeStore(context, proot, style, isLinux = { linux }, onConfigChanged = ::syncGuest)
-    private val audio = AudioBridge(proot)
-    private val openBridge = OpenBridge(context, proot, onOpenFiles = ::openFiles, onOpenVoice = ::openVoice, onEdit = ::edit)
+    private val audio = AudioBridge(proot, context)
+    private val openBridge = OpenBridge(context, proot, onOpenFiles = ::openFiles, onOpenVoice = ::openVoice)
     val agents = AgentStore(proot, text = { id, arg -> context.getString(id, arg) }, onChanged = ::syncGuest)
     val packages = Packages(proot)
 
@@ -239,11 +240,9 @@ class Runtime(
     @Volatile
     var openOwlAppWindow: ((String) -> Unit)? = null
 
-    /** Files, Editor and Voice from the guest port use Bellatrix's own windows, never their old tasks. */
+    /** Files and Voice from the guest port use Bellatrix's own windows, never their old tasks. */
     @Volatile
     var openExplorer: ((String?) -> Unit)? = null
-    @Volatile
-    var openBellatrixEditor: ((String?, String?) -> Unit)? = null
     @Volatile
     var openVoiceWindow: (() -> Unit)? = null
 
@@ -466,7 +465,6 @@ class Runtime(
         openFloatingWindow = null
         openOwlAppWindow = null
         openExplorer = null
-        openBellatrixEditor = null
         openVoiceWindow = null
         openCodingAgents = null
         openLinuxSettings = null
@@ -899,7 +897,10 @@ class Runtime(
                 refreshApps()
                 onAppsChanged?.invoke()
                 terminal(
-                    "if command -v cliamp >/dev/null 2>&1; then cliamp; else echo 'Cliamp is still not installed. Check Linux settings > process log.'; exec bash; fi",
+                    // A Cliamp that stops with an error keeps its window, so the error can be read.
+                    "if command -v cliamp >/dev/null 2>&1; then cliamp; s=\$?; " +
+                        "if [ \$s -ne 0 ]; then echo \"Cliamp stopped with code \$s; see the lines above.\"; exec bash; fi; " +
+                        "else echo 'Cliamp is still not installed. Check Linux settings > process log.'; exec bash; fi",
                     app.name,
                 )
             }
@@ -968,12 +969,15 @@ class Runtime(
     fun floatingWindowTag(handle: String): String {
         val window = wm.windowByHandle(handle) ?: return com.bellatrixos.linux.UILinuxWindow.TAG
         val agent = agentOf(window.appId, displayName(window.appId, window.title))
-        return if (agent == null) {
-            com.bellatrixos.linux.UILinuxWindow.TAG
-        } else {
-            LINUX_AGENT_TAG_PREFIX + agent.bin
-        }
+        if (agent != null) return LINUX_AGENT_TAG_PREFIX + agent.bin
+        // A GUI app (Vesktop, a browser...) is its own taskbar entry, not a second "Terminal".
+        if (isTerminalWindow(window.appId)) return com.bellatrixos.linux.UILinuxWindow.TAG
+        return LINUX_APP_TAG_PREFIX + window.appId.replace(Regex("\\s+"), "_")
     }
+
+    /** Whether a Wayland app_id is a foot terminal: plain foot, one we started with [terminal], or a home tile's. */
+    private fun isTerminalWindow(appId: String) =
+        appId.isEmpty() || appId == "foot" || launchedNames.containsKey(appId) || appId.startsWith(TerminalTiles.APP_ID_PREFIX)
 
     /** The drawer icon of the app called [name] (an agent's logo, say); null until loaded, or if it has none. */
     fun iconNamed(name: String): ImageBitmap? = linuxApps.apps.firstOrNull { it.name == name }?.let { linuxApps.icons[it.id] }
@@ -1060,20 +1064,10 @@ class Runtime(
         InstantActivity.startInstantly(context, Intent(context, FilesActivity::class.java).putExtra(FilesActivity.EXTRA_PATH, path))
     }
 
-    /**
-     * Opens [path] in Bellatrix's Explorer, in its guest editor mode. [done] is the
-     * editor shim's reply FIFO, which the Explorer window answers when it closes.
-     */
-    fun edit(
-        path: String? = null,
-        done: String? = null,
-    ) {
-        val inHome = openBellatrixEditor
-        if (inHome != null) {
-            inHome(path, done)
-            return
-        }
-        InstantActivity.startInstantly(context, EditorActivity.intent(context, path, done))
+    /** Edits the guest [path] in nano, in a terminal window; without a path, an empty nano. */
+    fun edit(path: String? = null) {
+        if (path.isNullOrEmpty()) return terminal("nano", "Nano")
+        terminal("nano ${shellQuote(path)}", path.substringAfterLast('/'))
     }
 
     /** Starts a command inside the guest; its output goes to logcat. Returns at once; [onExit] runs on the launch thread. */

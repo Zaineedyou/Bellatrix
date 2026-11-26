@@ -161,6 +161,9 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
     /** How many cells fit on screen (rows x columns), known after the first layout; 0 before. */
     @JvmField var capacity: Int = 0
 
+    private var lastRows = 0
+    private var lastCols = 0
+
     @JvmField var A: OnContextMenuListener? = null
     @JvmField var B: OnContextMenuListener? = null
     @JvmField var C: OnItemsMovedListener? = null
@@ -171,7 +174,8 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
     @JvmField var z: Boolean = false
 
     init {
-        setHasStableIds(true)
+        // No stable ids: this adapter has no getItemId, so every item had the same id (-1) and RecyclerView handed one
+        // icon's view to another position without rebinding it, which showed icons swapped, doubled or missing.
         val pins: MutableList<DesktopItemPins> = try {
             DesktopDB.a()
         } catch (_: Exception) {
@@ -199,6 +203,9 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
 
     /** Tambah item desktop; saat auto-arrange nonaktif isi slot kosong. */
     fun A(i2: Int, str: String, str2: String) {
+        // Pinning what is already on home again made two icons that shared one data string, and removing either
+        // one removed both (C matches by data).
+        if (E.any { it.c() != -1 && it.a() == str }) return
         val item = DesktopItem(i2, str2, str)
         if (H) {
             E.add(item)
@@ -238,6 +245,8 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
      */
     fun ensureFreeCells(rows: Int, cols: Int) {
         spanCount = cols.coerceAtLeast(1)
+        lastRows = rows
+        lastCols = cols
         val target = kotlin.math.max(0, rows) * spanCount
         capacity = target
         if (H || target <= 0) return
@@ -258,6 +267,11 @@ class DesktopAdapter(@JvmField val x: Context) : RecyclerView.Adapter<DesktopAda
         DesktopDB.c(E)
         B()
         notifyDataSetChanged()
+    }
+
+    /** Fits the cells to the last grid size [ensureFreeCells] was given, e.g. after auto-arrange is turned off. */
+    fun refit() {
+        if (lastRows > 0 && lastCols > 0) ensureFreeCells(lastRows, lastCols)
     }
 
     /** Bangun ulang peta data -> posisi. */

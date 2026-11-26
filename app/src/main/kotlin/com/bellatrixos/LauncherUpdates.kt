@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.compose.runtime.getValue
@@ -13,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.FileProvider
 import com.bellatrixos.adb.AdbBridge
-import com.bellatrixos.net.httpGet
 import com.bellatrixos.net.openHttp
 import com.bellatrixos.system.installerOf
 import com.bellatrixos.system.openUrl
@@ -74,6 +74,10 @@ class LauncherUpdates(
     var installing by mutableStateOf(false)
         private set
 
+    /** How much of the APK has downloaded, 0 to 100; -1 when its size isn't known or nothing is downloading. */
+    var progress by mutableStateOf(-1)
+        private set
+
     var lastError by mutableStateOf<String?>(null)
         private set
 
@@ -124,6 +128,7 @@ class LauncherUpdates(
     /** Downloads this fork's APK and hands it to Android's installer without leaving the launcher. */
     fun install(
         targetContext: Context = context,
+        onProgress: ((Int) -> Unit)? = null,
         onFinished: (() -> Unit)? = null,
     ) {
         val release = info
@@ -136,6 +141,7 @@ class LauncherUpdates(
             onFinished?.invoke()
             return
         }
+        lastError = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !targetContext.packageManager.canRequestPackageInstalls()) {
             val permission =
                 Intent(
@@ -143,6 +149,8 @@ class LauncherUpdates(
                     Uri.parse("package:${targetContext.packageName}"),
                 ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             runCatching { targetContext.startActivity(permission) }
+            // The permission screen alone doesn't say why it opened.
+            Toast.makeText(targetContext, R.string.settings_update_permission_needed, Toast.LENGTH_LONG).show()
             onFinished?.invoke()
             return
         }
@@ -156,9 +164,8 @@ class LauncherUpdates(
             try {
                 val file =
                     withContext(Dispatchers.IO) {
-                        val bytes = httpGet(release.apk, connectTimeout = 15_000, readTimeout = 60_000)
                         val dir = File(targetContext.cacheDir, "updates").apply { mkdirs() }
-                        File(dir, "Bellatrix-${release.version}.apk").apply { writeBytes(bytes) }
+                        File(dir, "Bellatrix-${release.version}.apk").also { download(release.apk, it, onProgress) }
                     }
                 val uri = FileProvider.getUriForFile(targetContext, "${targetContext.packageName}.provider", file)
                 val intent =
@@ -173,6 +180,7 @@ class LauncherUpdates(
             } finally {
                 withContext(Dispatchers.Main) {
                     installing = false
+                    progress = -1
                     onFinished?.invoke()
                 }
             }
@@ -186,6 +194,7 @@ class LauncherUpdates(
      */
     fun installWithShell(
         targetContext: Context = context,
+        onProgress: ((Int) -> Unit)? = null,
         onFinished: ((Boolean) -> Unit)? = null,
     ) {
         val release = info
@@ -211,14 +220,13 @@ class LauncherUpdates(
             try {
                 val apk =
                     withContext(Dispatchers.IO) {
-                        val bytes = httpGet(release.apk, connectTimeout = 15_000, readTimeout = 60_000)
                         // External app storage is readable by the shell user service; app cache is not.
                         val dir =
                             targetContext.getExternalFilesDir("updates")
                                 ?: File(targetContext.cacheDir, "updates").also { runCatching { it.setReadable(true, false) } }
                         dir.mkdirs()
                         File(dir, "Bellatrix-${release.version}.apk").apply {
-                            writeBytes(bytes)
+                            download(release.apk, this, onProgress)
                             runCatching { setReadable(true, false) }
                         }
                     }
@@ -230,6 +238,7 @@ class LauncherUpdates(
             } finally {
                 withContext(Dispatchers.Main) {
                     installing = false
+                    progress = -1
                     onFinished?.invoke(lastError == null)
                 }
             }
@@ -249,6 +258,49 @@ class LauncherUpdates(
 
     @Suppress("UNUSED_PARAMETER")
     fun onResult(resultCode: Int) {}
+
+    /**
+     * Streams [url] into [target], so the percent downloaded is known as it goes. [progress] and
+     * [onProgress] (on the main thread) get 0 to 100, or -1 once when the server doesn't say how big the
+     * file is. Anything but a 200, or a file cut short, is an [IOException]. Blocking.
+     */
+    private fun download(
+        url: String,
+        target: File,
+        onProgress: ((Int) -> Unit)?,
+    ) {
+        val connection = openHttp(url, 15_000, 60_000)
+        connection.useCaches = false
+        // Written to a side file first, so a half download is never offered to the installer.
+        val part = File(target.path + ".part")
+        try {
+            if (connection.responseCode != 200) throw IOException("HTTP ${connection.responseCode} for $url")
+            val total = connection.contentLengthLong
+            var done = 0L
+            var shown = -2
+            connection.inputStream.use { input ->
+                part.outputStream().use { output ->
+                    val buffer = ByteArray(64 * 1024)
+                    while (true) {
+                        val read = input.read(buffer)
+                        if (read < 0) break
+                        output.write(buffer, 0, read)
+                        done += read
+                        val percent = if (total > 0) (done * 100 / total).toInt().coerceIn(0, 100) else -1
+                        if (percent == shown) continue
+                        shown = percent
+                        progress = percent
+                        onProgress?.let { report -> scope.launch(Dispatchers.Main) { report(percent) } }
+                    }
+                }
+            }
+            if (total > 0 && done != total) throw IOException("download cut short: $done of $total bytes")
+            if (!part.renameTo(target)) throw IOException("cannot move ${part.name} to ${target.name}")
+        } finally {
+            connection.disconnect()
+            part.delete()
+        }
+    }
 
     private fun fetchReleases(): String {
         val connection = openHttp(RELEASES, 15_000, 30_000)

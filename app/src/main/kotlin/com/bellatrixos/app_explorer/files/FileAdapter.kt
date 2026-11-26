@@ -89,7 +89,7 @@ class FileAdapter(@JvmField val C: Context) : ListAdapter<Any, RecyclerView.View
         @JvmField val B: TextView = view.findViewById(R.id.size_view)
 
         override fun t(fileMeta: FileMeta) {
-            u.setImageResource(FileExtensions.e(fileMeta.file.name))
+            u.setImageResource(if (fileMeta.isDirectory) R.drawable.img_folder_default else FileExtensions.e(fileMeta.file.name))
             B.text = if (fileMeta.isDirectory) "" else formatSize(fileMeta.size)
             A.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Global.t?.format(Instant.ofEpochMilli(fileMeta.modified)) ?: ""
@@ -106,7 +106,7 @@ class FileAdapter(@JvmField val C: Context) : ListAdapter<Any, RecyclerView.View
         adapter: FileAdapter
     ) : BaseFileViewHolder(view, imageView, textView, adapter) {
         override fun t(fileMeta: FileMeta) {
-            u.setImageResource(FileExtensions.e(fileMeta.file.name))
+            u.setImageResource(if (fileMeta.isDirectory) R.drawable.img_folder_default else FileExtensions.e(fileMeta.file.name))
         }
     }
 

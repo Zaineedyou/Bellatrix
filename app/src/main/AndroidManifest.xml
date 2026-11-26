@@ -499,16 +499,6 @@
             android:exported="false"
             android:noHistory="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity
-            android:name=".EditorActivity"
-            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|density|uiMode"
-            android:documentLaunchMode="intoExisting"
-            android:exported="false"
-            android:icon="@drawable/editor"
-            android:label="@string/editor_title"
-            android:resizeableActivity="true"
-            android:theme="@style/Theme.Bellatrix"
-            android:windowSoftInputMode="adjustResize" />
 
         <service
             android:name=".theme.BellatrixWallpaperService"
