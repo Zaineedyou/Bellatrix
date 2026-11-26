@@ -34,6 +34,11 @@ usage: bellatrix location       {lat, lon, accuracy (metres), time}, approximate
        bellatrix folders        the phone folders you can reach: [{name}]; the
                                   user adds them in the launcher's settings
                                   (permissions)
+       bellatrix apps           what's on home: {desktop, taskbar, layout}; desktop
+                                  icons and pinned taskbar apps in the order
+                                  shown, each {position, kind, name, target,
+                                  label}; layout is the file of home's tiles
+                                  and widgets
        bellatrix ls [folder[/path]]
                                   what's in one: [{name, dir, size, modified}]
        bellatrix get <folder/path>... <dest>
@@ -99,7 +104,7 @@ while [ $# -gt 0 ]; do
 done
 set -- "$cmd" ${words[@]+"${words[@]}"}
 case $1 in
-  location | battery | version | folders) [ $# -eq 1 ] || usage ;;
+  location | battery | version | folders | apps) [ $# -eq 1 ] || usage ;;
   ls) [ $# -le 2 ] || usage ;;
   calendar) [ $# -le 2 ] || usage ;;
   airpods) [ $# -le 3 ] || usage ;;

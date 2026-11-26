@@ -21,7 +21,8 @@ import kotlin.math.abs
  * loaded from its files in the rootfs. The files found are remembered in
  * [cache], so the next start draws in it from the first frame without asking
  * fontconfig again. A family Linux doesn't have (or no Linux) falls back to
- * Android's. Either way, symbols the font lacks come from noto_symbols.ttf
+ * Android's. A font the user added in Settings → Personalize → Font is a file in [fontsDir], named as "file:<name>" in
+ * [Style.FONT]; it needs no Linux. Either way, symbols the font lacks come from noto_symbols.ttf
  * and nerd_symbols.ttf before Android's own fallback, so an agent's ⏵⏵ or ⏺
  * isn't a box. Main thread.
  */
@@ -31,6 +32,9 @@ class LauncherFont(
     private val resources: Resources,
 ) {
     private val cache = File(proot.filesDir, "launcher-font")
+
+    /** The font files the user added in settings. */
+    private val fontsDir = fontsIn(proot.filesDir)
 
     /** Android's monospace with the symbols; Android's alone if its file isn't where AOSP keeps it. */
     private val system: FontFamily by lazy {
@@ -49,6 +53,7 @@ class LauncherFont(
     /** Sets [LauncherStyle.font] from what [cache] remembers, without the guest; at start, before the first frame. */
     fun restore() {
         val family = style.style[Style.FONT]
+        if (isCustom(family)) return show(null, custom(family))
         show(if (family == Style.SYSTEM_FONT) null else cached(family), null)
     }
 
@@ -56,6 +61,12 @@ class LauncherFont(
     suspend fun apply() {
         val family = style.style[Style.FONT]
         if (family == Style.SYSTEM_FONT) return show(null, null)
+        if (isCustom(family)) {
+            val font = withContext(Dispatchers.IO) { custom(family) }
+            // The setting may have changed while the file was read.
+            if (style.style[Style.FONT] == family) show(null, font)
+            return
+        }
         val faces = withContext(Dispatchers.IO) { cached(family) ?: find(family).also { save(family, it) } }
         if (faces == shown) return
         val font = withContext(Dispatchers.IO) { load(faces) }
@@ -75,7 +86,9 @@ class LauncherFont(
 
     /** Back to Android's font, as Linux and its font files are deleted; the setting stays for when it's back. */
     fun forget() {
-        show(null, null)
+        // A font the user added is a file of the launcher's own: it stays.
+        val family = style.style[Style.FONT]
+        if (isCustom(family)) restore() else show(null, null)
         cache.delete()
         loaded.clear()
     }
@@ -90,6 +103,14 @@ class LauncherFont(
     suspend fun family(name: String): FontFamily? {
         if (name in loaded) return loaded[name]
         return withContext(Dispatchers.IO) { load(cached(name) ?: find(name)) }.also { loaded[name] = it }
+    }
+
+    /** The font file [family] names, "file:<name>", as a family; null when it's gone or Android can't read it. */
+    private fun custom(family: String): FontFamily? {
+        // Only a name: the setting is a text anyone can edit, and must not reach outside fontsDir.
+        val file = File(fontsDir, family.removePrefix(CUSTOM).substringAfterLast('/'))
+        if (!file.isFile) return null
+        return withSymbols(listOf(Face(400, false, file.path)), guestPaths = false)
     }
 
     /** The faces [family] has in the guest, as fontconfig lists them; empty without Linux or the family. */
@@ -176,6 +197,14 @@ class LauncherFont(
 
     companion object {
         private const val TAG = "launcher-font"
+
+        /** [Style.FONT]'s start for a font file the user added; what follows is its name in [fontsDir]. */
+        const val CUSTOM = "file:"
+
+        fun isCustom(family: String) = family.startsWith(CUSTOM)
+
+        /** Where the fonts the user added are kept. */
+        fun fontsIn(filesDir: File) = File(filesDir, "fonts")
 
         /** The file AOSP's fonts.xml names for "monospace". */
         private const val SYSTEM_MONO = "/system/fonts/DroidSansMono.ttf"

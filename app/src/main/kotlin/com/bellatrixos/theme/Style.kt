@@ -240,7 +240,7 @@ class Style(
         /** [FONT]'s value for Android's own monospace font. */
         const val SYSTEM_FONT = "system"
 
-        val FONT = Setting.Text("font", SYSTEM_FONT, "The font family of the launcher's text and widgets: \"system\" is Android's monospace; fc-list :spacing=100 lists those Linux has.")
+        val FONT = Setting.Text("font", SYSTEM_FONT, "The font family of the launcher's text and widgets: \"system\" is Android's monospace; fc-list :spacing=100 lists those Linux has; \"file:<name>\" is a font file added in Settings > Personalize > Font.")
         val TERMINAL_FONT = Setting.Text("terminal.font", "JetBrains Mono", "The terminals' font family; fc-list :spacing=100 lists those installed.")
         val TERMINAL_TEXT = Setting.Number("terminal.text", 12.0, 6.0..32.0, "The terminals' em size in dp, before Android's font size: 10 smaller, 12 default, 14 larger.")
         val TERMINAL_SUGGESTIONS = Setting.Flag("terminal.keyboard-suggestions", true,"The terminals' input as a normal text field, so the keyboard can suggest words and clipboard items, glide-type and dictate; false hides these but passes raw keys. Text reaches the terminal a word at a time. Takes effect when the keyboard next opens.")

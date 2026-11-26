@@ -1232,7 +1232,8 @@ class WidgetEngine(
                 "a `page:` in an owl file is ignored and the tile lands on that one page. docs/home.md in the widgets folder explains it.\n\n" +
                 "The phone's approximate location, its calendar, the AirPods connected to it and its battery are `bellatrix location`, " +
                 "`bellatrix calendar [days]`, `bellatrix airpods` and `bellatrix battery` (JSON; `bellatrix --help` says more), where the " +
-                "launcher was allowed them. `bellatrix notify <title> [text]` puts a notification on the phone, to tell the user something " +
+                "launcher was allowed them. `bellatrix apps` lists what is on home: the icons on the desktop and the apps pinned to the taskbar, with their " +
+                "names and packages, and the file of home's tiles and widgets (JSON). `bellatrix notify <title> [text]` puts a notification on the phone, to tell the user something " +
                 "they should know while away, such as a long task being done; `bellatrix share <file>...` opens Android's share sheet for " +
                 "files, to send them on with an app the user picks.\n"
     }

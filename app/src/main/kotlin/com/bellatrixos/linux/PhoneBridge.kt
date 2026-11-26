@@ -7,7 +7,14 @@ import com.bellatrixos.BuildConfig
 import com.bellatrixos.storage.PhoneFolders
 import com.bellatrixos.PickActivity
 import com.bellatrixos.R
+import com.bellatrixos.desktop.DesktopItemPins
+import com.bellatrixos.desktop.DesktopPinItemDeserializer
+import com.bellatrixos.taskbar.TaskBarItemPins
 import com.bellatrixos.ui.files.mimeOf
+import com.bellatrixos.widgets.HomeStore
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.bellatrixos.widgets.lang.Str
 import com.bellatrixos.widgets.runtime.battery
 import android.content.ActivityNotFoundException
@@ -113,6 +120,7 @@ class PhoneBridge(
                     "notify" -> notify(args.getOrNull(1).orEmpty(), args.getOrNull(2)?.takeIf { it.isNotEmpty() })
                     "airpods" -> airpods(args.getOrNull(1)?.takeIf { it.isNotEmpty() }, args.getOrNull(2))
                     "folders" -> withContext(Dispatchers.IO) { folders() }
+                    "apps" -> withContext(Dispatchers.IO) { apps() }
                     "ls" -> withContext(Dispatchers.IO) { ls(args.getOrNull(1).orEmpty()) }
                     "get" -> withContext(Dispatchers.IO) { get(args.drop(1)) }
                     "put" -> withContext(Dispatchers.IO) { put(args.drop(1)) }
@@ -196,6 +204,59 @@ class PhoneBridge(
         } catch (e: ActivityNotFoundException) {
             Answer.Error("share: no app to share with")
         }
+    }
+
+    /**
+     * What's on home: the icons on the desktop and the apps pinned to the taskbar, as the launcher saved them, in the
+     * order they're shown; [HOME_LAYOUT] is the file for the tiles and widgets on the home page. Names of Android apps
+     * come from the phone, so an agent can match what the user calls an app to its package.
+     */
+    private fun apps(): Answer {
+        val pm = context.packageManager
+
+        fun label(target: String?): String? =
+            target?.let { runCatching { pm.getApplicationLabel(pm.getApplicationInfo(it, 0)).toString() }.getOrNull() }
+
+        fun <T> saved(
+            gson: Gson,
+            prefs: String,
+            key: String,
+            type: java.lang.reflect.Type,
+        ): List<T> =
+            runCatching {
+                val json = context.getSharedPreferences(prefs, Context.MODE_PRIVATE).getString(key, "").orEmpty()
+                if (json.isEmpty()) emptyList() else gson.fromJson<List<T>>(json, type).orEmpty()
+            }.getOrDefault(emptyList())
+
+        // The launcher's own reading of the desktop, which also takes the type names older versions saved.
+        val desktopGson = GsonBuilder().registerTypeAdapter(DesktopItemPins::class.java, DesktopPinItemDeserializer()).create()
+        val desktop =
+            saved<DesktopItemPins>(desktopGson, "DesktopPrefs", "desktop_items", object : TypeToken<List<DesktopItemPins>>() {}.type)
+                .filter { it.type != -1 }
+                .sortedBy { it.position }
+                .map { pin ->
+                    // 0 This PC, 1 an app (data: its package, or the launcher's own app such as UIBrowser), 2 a file, 3 a folder.
+                    val kind =
+                        when (pin.type) {
+                            0 -> "this-pc"
+                            1 -> "app"
+                            3 -> "folder"
+                            else -> "file"
+                        }
+                    val fields = mutableMapOf<String, Value>("position" to Num(pin.position.toDouble()), "kind" to Str(kind), "name" to Str(pin.name.orEmpty()))
+                    pin.data?.let { fields["target"] = Str(it) }
+                    if (kind == "app") label(pin.data)?.let { fields["label"] = Str(it) }
+                    Obj(fields)
+                }
+        val taskbar =
+            saved<TaskBarItemPins>(Gson(), "TaskbarPrefs", "taskbar_apps", object : TypeToken<List<TaskBarItemPins>>() {}.type)
+                .sortedBy { it.position }
+                .map { pin ->
+                    val fields = mutableMapOf<String, Value>("position" to Num(pin.position.toDouble()), "target" to Str(pin.data))
+                    label(pin.data)?.let { fields["label"] = Str(it) }
+                    Obj(fields)
+                }
+        return Answer.Ok(Obj(mapOf("desktop" to Lst(desktop), "taskbar" to Lst(taskbar), "layout" to Str(HOME_LAYOUT))))
     }
 
     /** The phone folders Linux may reach, by the names the other commands take. */
@@ -334,7 +395,9 @@ class PhoneBridge(
         const val OLD_COMMAND = "phone"
         const val SCRIPT = "$COMMAND.sh"
         /** What this launcher's `bellatrix` answers, for `bellatrix version`. */
-        val COMMANDS = listOf("location", "calendar", "airpods", "battery", "notify", "share", "folders", "ls", "get", "put", "pick", "version")
+        val COMMANDS = listOf("location", "calendar", "airpods", "battery", "notify", "share", "folders", "apps", "ls", "get", "put", "pick", "version")
+        /** Where Linux sees the file of home's tiles and widgets. */
+        const val HOME_LAYOUT = "/root/${HomeStore.GUEST_DIR}/${HomeStore.FILE}"
         const val NOTIFY_CHANNEL = "linux"
         const val NO_NOTIFICATIONS = "the launcher may not post notifications; turn them on in its settings (permissions), or the \"agents and scripts\" ones in Android's"
         const val NOT_ALLOWED = "the launcher isn't allowed the %s; a widget that shows it asks, or Android's settings for the app"

@@ -85,7 +85,7 @@ This is also not Windows 365 cloud PC."</string>
     <string name="app_privacy_policy_ok_before">OK, I understand (%ss)</string>
     <string name="app_settings">UiSettings</string>
     <string name="app_start">Start</string>
-    <string name="app_ui_version">3.0.0</string>
+    <string name="app_ui_version">3.0.1</string>
     <string name="app_video">UiVideo</string>
     <string name="app_web_cache_enabled">Cache enabled</string>
     <string name="app_web_link_copied">Link Copied</string>
@@ -567,6 +567,12 @@ We will share more once you're back online."</string>
     <string name="settings_personalize_startmenu">Start</string>
     <string name="settings_personalize_startmenu_subtitle">Config StartMenu pattern and layout</string>
     <string name="settings_personalize_startmenu_title">StartMenu</string>
+    <string name="settings_personalize_font">Font</string>
+    <string name="settings_personalize_font_subtitle">Typeface of the launcher\'s text and widgets, or your own font file</string>
+    <string name="settings_font_system">System default</string>
+    <string name="settings_font_add">Add font file</string>
+    <string name="settings_font_added">Font added: %1$s</string>
+    <string name="settings_font_invalid">That file isn\'t a font Android can read (TTF, OTF or TTC).</string>
     <string name="settings_personalize_taskbar">Taskbar</string>
     <string name="settings_personalize_taskbar_subtitle">Taskbar behaviours, system pins</string>
     <string name="settings_privacy_app_info">App Info</string>

@@ -3,14 +3,19 @@ package com.bellatrixos.linux
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import java.io.File
+import java.io.IOException
 import kotlin.concurrent.thread
 
 private const val TAG = "audio"
 private const val RATE = 48000
 private const val FRAME_BYTES = 4 // s16le stereo
+
+/** How much the track holds before it underruns; more rides out the guest stalling for a moment (proot is slow), at the cost of delay. */
+private const val TRACK_BUFFER_MS = 150
 
 /** Restarts of a crashing PulseAudio back off up to this. */
 private const val MAX_BACKOFF_MS = 60_000L
@@ -58,7 +63,7 @@ class AudioBridge(
                     .setSampleRate(RATE)
                     .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
                     .build(),
-            ).setBufferSizeInBytes(maxOf(minBuffer, RATE * FRAME_BYTES / 10))
+            ).setBufferSizeInBytes(maxOf(minBuffer, RATE * FRAME_BYTES * TRACK_BUFFER_MS / 1000))
             .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
     }
@@ -104,8 +109,14 @@ class AudioBridge(
         }
     }
 
-    /** Copies the sink's FIFO into the track; PulseAudio (re)creates the FIFO when it loads the sink. */
+    /**
+     * Copies the sink's FIFO into the track; PulseAudio (re)creates the FIFO when it loads the sink. A read can stop
+     * inside a frame: PulseAudio's writes to a pipe that is nearly full are partial, and it carries on from the byte it
+     * reached. Such a read's last bytes are kept for the next one and written with it, as dropping them would put every
+     * later sample out of step with its channel, which sounds like crackle and noise.
+     */
     private fun pump() {
+        runCatching { Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO) }
         val buf = ByteArray(RATE * FRAME_BYTES / 50) // 20 ms
         while (true) {
             if (!fifo.exists()) {
@@ -115,8 +126,10 @@ class AudioBridge(
             try {
                 // Opening a FIFO for reading blocks until PulseAudio opens it for writing.
                 fifo.inputStream().use { input ->
+                    // Bytes at the start of buf that end a frame the last read began.
+                    var held = 0
                     while (true) {
-                        val n = input.read(buf)
+                        val n = input.read(buf, held, buf.size - held)
                         if (n < 0) break
                         if (n == 0) continue
                         lastData = SystemClock.uptimeMillis()
@@ -127,13 +140,31 @@ class AudioBridge(
                                 lock.notify()
                             }
                         }
-                        track.write(buf, 0, n - n % FRAME_BYTES)
+                        val total = held + n
+                        val whole = total - total % FRAME_BYTES
+                        writeFully(buf, whole)
+                        held = total - whole
+                        if (held > 0) System.arraycopy(buf, whole, buf, 0, held)
                     }
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "audio pipe failed", e)
                 Thread.sleep(1000)
             }
+        }
+    }
+
+    /** Writes the first [length] bytes of [buf] to the track, all of them: a blocking write can still come back short. */
+    private fun writeFully(
+        buf: ByteArray,
+        length: Int,
+    ) {
+        var offset = 0
+        while (offset < length) {
+            val written = track.write(buf, offset, length - offset)
+            if (written < 0) throw IOException("AudioTrack.write returned $written")
+            if (written == 0) Thread.sleep(2)
+            offset += written
         }
     }
 

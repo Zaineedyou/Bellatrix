@@ -9,6 +9,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-11-26
+
+### Added
+
+- Settings → Personalize → Font: pick the font of the launcher's text and widgets from Android's own or a font file (TTF, OTF, TTC) you add. It is kept in the launcher, needs no Linux, and is written as `font = "file:<name>"` in style.toml.
+- `bellatrix apps` in Linux lists what is on home as JSON: the desktop's icons and the taskbar's pinned apps, in the order shown, with their package and the phone's name for the app, and the path of home's layout file. Coding agents can read it; AGENTS.md tells them.
+
+### Fixed
+
+- Sound from Linux no longer crackles or breaks up, in voice calls and everywhere else. A read from PulseAudio's pipe that ended inside a sample had its last bytes thrown away, which put every sample after it out of step with its channel; they are now kept for the next read. The audio track also holds 150 ms instead of 100, and its thread runs at audio priority.
+
 ## [3.0.0] - 2026-11-26
 
 ### Added
