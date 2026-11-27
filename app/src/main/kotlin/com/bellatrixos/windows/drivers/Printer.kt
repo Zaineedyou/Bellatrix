@@ -111,14 +111,4 @@ object Printer {
             }
         }, null)
     }
-
-    @JvmStatic
-    fun d(context: Context, webView: WebView) {
-        val manager = context.getSystemService(Context.PRINT_SERVICE) as? PrintManager ?: return
-        manager.print(
-            "WebView Print Site",
-            webView.createPrintDocumentAdapter("WebView Print Site"),
-            PrintAttributes.Builder().build()
-        )
-    }
 }

@@ -10,6 +10,7 @@ import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoSessionSettings
 import org.mozilla.geckoview.GeckoView
+import org.mozilla.geckoview.WebRequestError
 import org.mozilla.geckoview.WebResponse
 
 /** The one Gecko runtime (the Firefox engine) every Browser tab shares; it can only be created once per process. */
@@ -91,6 +92,9 @@ class GeckoTabView
         /** The page asked to close its own window. */
         var onCloseRequest: (() -> Unit)? = null
 
+        /** The page itself could not be loaded; the argument is a [WebRequestError] code. Gecko still draws its error page. */
+        var onLoadError: ((Int) -> Unit)? = null
+
         init {
             addView(geckoView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
             attach(session)
@@ -164,6 +168,16 @@ class GeckoTabView
                         session: GeckoSession,
                         uri: String,
                     ): GeckoResult<GeckoSession>? = onNewWindow?.invoke(uri)
+
+                    override fun onLoadError(
+                        session: GeckoSession,
+                        uri: String?,
+                        error: WebRequestError,
+                    ): GeckoResult<String>? {
+                        onLoadError?.invoke(error.code)
+                        // null keeps Gecko's own error page.
+                        return null
+                    }
                 }
             s.contentDelegate =
                 object : GeckoSession.ContentDelegate {
@@ -243,6 +257,12 @@ class GeckoTabView
             lastQuery = null
             session.finder.clear()
         }
+
+        /** An inactive page stops running (timers, media), as a paused WebView did. */
+        fun setActive(active: Boolean) = session.setActive(active)
+
+        /** Leaves the full screen the page asked for. */
+        fun exitFullScreen() = session.exitFullScreen()
 
         /** Ends the tab's session; the view can't show a page again. */
         fun destroy() {

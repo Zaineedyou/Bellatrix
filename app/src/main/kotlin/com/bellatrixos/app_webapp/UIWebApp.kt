@@ -1,23 +1,15 @@
 package com.bellatrixos.app_webapp
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -28,34 +20,31 @@ import androidx.core.content.ContextCompat
 import androidx.core.util.Supplier
 import com.bellatrixos.R
 import com.bellatrixos.UIFragment
-import com.bellatrixos.app_browser.UIWebMount
+import com.bellatrixos.app_browser.GeckoEngine
+import com.bellatrixos.app_browser.GeckoPrompts
+import com.bellatrixos.app_browser.GeckoTabView
 import com.bellatrixos.app_browser.files.Downloader
 import com.bellatrixos.app_browser.files.Files
-import com.bellatrixos.app_browser.h
-import com.bellatrixos.app_browser.utils.Fullscreen
-import com.bellatrixos.app_browser.utils.Scaling
+import com.bellatrixos.app_browser.widgets.dialogs.FinderTarget
 import com.bellatrixos.app_browser.widgets.dialogs.UIDownloads
 import com.bellatrixos.app_browser.widgets.dialogs.UIFinder
+import com.bellatrixos.app_browser.widgets.dialogs.asFinderTarget
 import com.bellatrixos.interfaces.BackPressHandler
 import com.bellatrixos.interfaces.MainActivityIn
-import com.bellatrixos.variables.Global
 import com.bellatrixos.widgets.FloatingLayout
+import com.bellatrixos.widgets.UINotification
 import com.bellatrixos.widgets.UITitleBarApp
 import com.bellatrixos.windows.Window
 import com.bellatrixos.windows.WindowSize
-import com.bellatrixos.windows.drivers.Printer
 import com.bellatrixos.windows.icons.IconEngine
 import com.bellatrixos.windows.installed_apps.AppsDatabase
 import com.bellatrixos.windows.installed_apps.InstalledAppsDB
 import com.bellatrixos.windows.installed_apps.models.InstalledApp
-import kotlin.math.round
+import org.mozilla.geckoview.GeckoResult
+import org.mozilla.geckoview.GeckoSession
+import org.mozilla.geckoview.WebRequestError
 
-/** Skrip yang dipasang pada halaman untuk menangkap unduhan blob:. */
-private const val DOWNLOAD_INTERCEPTOR_JS =
-    "(function() {  if (window._downloadInterceptorAdded) return;  window._downloadInterceptorAdded = true;  document.addEventListener('click', function(e) {    var a = e.target.closest('a');    if (a && a.href && a.href.startsWith('blob:')) {      e.preventDefault();      var filename = a.download || ('file_' + Date.now() + '.bin');      fetch(a.href).then(r => r.blob()).then(blob => {        const reader = new FileReader();        reader.onloadend = function() {          const base64 = reader.result;          AndroidDownloader.downloadBase64File(base64, filename);        };        reader.readAsDataURL(blob);      });    }  }, true);})();"
-
-/** Aplikasi web yang berjalan di dalam sebuah jendela floating. */
-@SuppressLint("SetJavaScriptEnabled")
+/** Aplikasi web yang berjalan di dalam sebuah jendela floating, ditampilkan oleh mesin Firefox (GeckoView). */
 class UIWebApp : UIFragment(), BackPressHandler {
     lateinit var A0: ImageView
     lateinit var B0: FrameLayout
@@ -67,16 +56,14 @@ class UIWebApp : UIFragment(), BackPressHandler {
 
     // Helper app_webapp/c.kt dan e.kt mengakses F0 langsung (non-null).
     lateinit var F0: MainActivityIn
-    @JvmField var G0: WebChromeClient? = null
     lateinit var H0: FrameLayout
-    @JvmField var I0: ValueCallback<Array<Uri>>? = null
     lateinit var J0: ActivityResultLauncher<Intent>
     lateinit var Q0: UIFinder
     lateinit var R0: UIDownloads
     @JvmField var S0: UISettingsMenu? = null
     @JvmField var u0: String? = null
     lateinit var v0: View
-    lateinit var w0: WebView
+    lateinit var w0: GeckoTabView
     lateinit var x0: Context
     @JvmField var y0: String? = null
     lateinit var z0: TextView
@@ -88,14 +75,22 @@ class UIWebApp : UIFragment(), BackPressHandler {
     @JvmField var P0: Int = 0
     @JvmField val T0: Window = Window(0)
 
+
+    /** Whether the window shows the page full screen (a video, F11); Back and F11 leave it. */
+    private var fullScreen = false
+
+    /** The file chooser the page opened, answered when the picker closes. */
+    private var filePrompt: Pair<GeckoSession.PromptDelegate.FilePrompt, GeckoResult<GeckoSession.PromptDelegate.PromptResponse>>? = null
+
     override fun onDestroy() {
         super.onDestroy()
         S0?.dismiss()
         S0 = null
-        // Java juga menulis F0 = null di sini; helper memakai F0 sebagai lateinit non-null.
+        filePrompt?.let { (prompt, answer) -> answer.complete(prompt.dismiss()) }
+        filePrompt = null
+        if (fullScreen && ::F0.isInitialized) F0.Z(true)
         if (::w0.isInitialized) {
             w0.stopLoading()
-            w0.webChromeClient = null
             w0.destroy()
         }
         if (::R0.isInitialized) {
@@ -121,12 +116,12 @@ class UIWebApp : UIFragment(), BackPressHandler {
 
     override fun onPause() {
         super.onPause()
-        if (::w0.isInitialized) w0.pauseTimers()
+        if (::w0.isInitialized) w0.setActive(false)
     }
 
     override fun onResume() {
         super.onResume()
-        if (::w0.isInitialized) w0.resumeTimers()
+        if (::w0.isInitialized) w0.setActive(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -153,104 +148,13 @@ class UIWebApp : UIFragment(), BackPressHandler {
         v0.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 v0.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                UIWebMount.b(w0, E0?.h() ?: true, E0)
-                w0.webViewClient = object : WebViewClient() {
-                    override fun onPageCommitVisible(view: WebView?, url: String?) {
-                        super.onPageCommitVisible(view, url)
-                        if (view != null) Scaling.b(view, E0)
-                    }
-
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        super.onPageFinished(view, url)
-                        C0.setLoading(false)
-                        view?.evaluateJavascript(DOWNLOAD_INTERCEPTOR_JS, null)
-                    }
-
-                    override fun onReceivedError(
-                        view: WebView?,
-                        request: WebResourceRequest,
-                        error: WebResourceError
-                    ) {
-                        if (request.isForMainFrame) {
-                            val code = error.errorCode
-                            if (code == -2 || code == -6 || code == -8) {
-                                N0 = true
-                                q0(true)
-                            }
-                        }
-                    }
-
-                    override fun shouldOverrideUrlLoading(
-                        view: WebView?,
-                        request: WebResourceRequest
-                    ): Boolean {
-                        C0.setLoading(true)
-                        return false
-                    }
-                }
-
-                val chromeClient = object : WebChromeClient() {
-                    var customView: View? = null
-                    var customViewCallback: CustomViewCallback? = null
-                    val scale = FloatArray(1)
-
-                    override fun onHideCustomView() {
-                        val view = customView ?: return
-                        Fullscreen.b(this@UIWebApp, w0, view, customViewCallback, scale)
-                        customView = null
-                        customViewCallback = null
-                    }
-
-                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                        if (newProgress > 60 && !N0) q0(false)
-                    }
-
-                    override fun onReceivedIcon(view: WebView?, icon: Bitmap?) {
-                        val str = K0
-                        if (str == null || str.trim().isEmpty()) {
-                            val bitmap = icon ?: return
-                            val old = M0
-                            if (old != null && bitmap.width * bitmap.height <= old.height * old.width) {
-                                return
-                            }
-                            M0 = bitmap
-                            val engine = IconEngine.b(x0)
-                            engine.f4948a.put("$y0|${IconEngine.g}", bitmap)
-                            F0.d(this@UIWebApp)
-                        }
-                    }
-
-                    override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
-                        if (customView != null) {
-                            callback?.onCustomViewHidden()
-                            return
-                        }
-                        customView = view
-                        customViewCallback = callback
-                        if (view != null) Fullscreen.a(this@UIWebApp, w0, view, scale)
-                    }
-
-                    override fun onShowFileChooser(
-                        webView: WebView?,
-                        filePathCallback: ValueCallback<Array<Uri>>?,
-                        fileChooserParams: FileChooserParams?
-                    ): Boolean {
-                        I0?.onReceiveValue(null)
-                        I0 = filePathCallback
-                        if (fileChooserParams != null) Files.b(x0, fileChooserParams, J0)
-                        return true
-                    }
-                }
-                G0 = chromeClient
-                w0.webChromeClient = chromeClient
-
-                u0?.let { url ->
-                    R0 = UIDownloads(x0)
-                    w0.loadUrl(url)
-                    Downloader.a(x0, w0, R0, C0.getBtnMore(), viewLifecycleOwner)
-                }
-                Q0 = UIFinder(Supplier<WebView?> { w0 })
+                // Gecko has one text size for the whole engine: it follows this app's saved zoom.
+                GeckoEngine.zoom(x0, E0?.g() ?: 100)
+                R0 = UIDownloads(x0)
+                wire(w0)
+                Q0 = UIFinder(Supplier<FinderTarget?> { w0.asFinderTarget() })
                 Q0.f4670d = v0.findViewById<FrameLayout>(R.id.overlay_container)
+                u0?.let { url -> w0.loadUrl(url) }
             }
         })
 
@@ -275,9 +179,114 @@ class UIWebApp : UIFragment(), BackPressHandler {
         WindowSize.b(view, D0)
     }
 
+    /** Hooks the page's events to this window: its loading, errors, downloads, dialogs and full screen. */
+    private fun wire(web: GeckoTabView) {
+        web.onProgress = { progress -> if (progress > 60 && !N0) q0(false) }
+        web.onPageStart = { C0.setLoading(true) }
+        web.onPageStop = { C0.setLoading(false) }
+        // No connection to the site (unknown host, refused, timed out, offline) shows the retry splash.
+        web.onLoadError = { code ->
+            if (code == WebRequestError.ERROR_UNKNOWN_HOST ||
+                code == WebRequestError.ERROR_CONNECTION_REFUSED ||
+                code == WebRequestError.ERROR_NET_TIMEOUT ||
+                code == WebRequestError.ERROR_OFFLINE
+            ) {
+                N0 = true
+                q0(true)
+            }
+        }
+        web.onFullScreen = { on -> setFullScreen(on) }
+        // target=_blank and window.open land in this window: a web app has nowhere to put another one.
+        web.onNewWindow = { uri ->
+            web.loadUrl(uri)
+            null
+        }
+        web.onDownload = { response ->
+            Downloader.handle(x0, response, R0, C0.getBtnMore(), viewLifecycleOwner)
+        }
+        GeckoPrompts.install(web.session, { if (isAdded) x0 else null }) { prompt -> chooseFiles(prompt) }
+        // Nothing the page asks for (camera, microphone, location, notifications) is granted, as before;
+        // only the key system the player needs for protected video is allowed.
+        web.session.permissionDelegate =
+            object : GeckoSession.PermissionDelegate {
+                override fun onContentPermissionRequest(
+                    session: GeckoSession,
+                    perm: GeckoSession.PermissionDelegate.ContentPermission,
+                ): GeckoResult<Int>? =
+                    GeckoResult.fromValue(
+                        if (perm.permission == GeckoSession.PermissionDelegate.PERMISSION_MEDIA_KEY_SYSTEM_ACCESS) {
+                            GeckoSession.PermissionDelegate.ContentPermission.VALUE_ALLOW
+                        } else {
+                            GeckoSession.PermissionDelegate.ContentPermission.VALUE_DENY
+                        },
+                    )
+
+                override fun onMediaPermissionRequest(
+                    session: GeckoSession,
+                    uri: String,
+                    video: Array<out GeckoSession.PermissionDelegate.MediaSource>?,
+                    audio: Array<out GeckoSession.PermissionDelegate.MediaSource>?,
+                    callback: GeckoSession.PermissionDelegate.MediaCallback,
+                ) {
+                    callback.reject()
+                }
+            }
+    }
+
+    private fun chooseFiles(
+        prompt: GeckoSession.PromptDelegate.FilePrompt,
+    ): GeckoResult<GeckoSession.PromptDelegate.PromptResponse> {
+        // A second chooser replaces the first, which is answered with nothing.
+        filePrompt?.let { (old, answer) -> answer.complete(old.dismiss()) }
+        val answer = GeckoResult<GeckoSession.PromptDelegate.PromptResponse>()
+        filePrompt = prompt to answer
+        Files.c(
+            x0,
+            prompt.type == GeckoSession.PromptDelegate.FilePrompt.Type.MULTIPLE,
+            prompt.mimeTypes,
+            J0,
+        )
+        return answer
+    }
+
+    /** Answers the page's file chooser with what the picker returned (null when cancelled). */
+    fun onFilesChosen(result: ActivityResult?) {
+        val (prompt, answer) = filePrompt ?: return
+        filePrompt = null
+        val uris = Files.uris(result)
+        answer.complete(
+            when {
+                uris == null -> prompt.dismiss()
+                uris.size == 1 -> prompt.confirm(x0, uris[0])
+                else -> prompt.confirm(x0, uris)
+            },
+        )
+    }
+
+    /**
+     * The page fills the window: the title bar steps aside and the window leaves the system bars, as the
+     * custom view did over the WebView. Gecko draws the page's own full screen inside its view.
+     */
+    private fun setFullScreen(on: Boolean) {
+        if (fullScreen == on || !::w0.isInitialized) return
+        fullScreen = on
+        if (on && e0() != 0) l0()
+        (w0.layoutParams as? ViewGroup.MarginLayoutParams)?.let { params ->
+            params.topMargin = if (on) 0 else x0.resources.getDimensionPixelSize(R.dimen.app_titlebar_height)
+            w0.layoutParams = params
+        }
+        C0.visibility = if (on) View.GONE else View.VISIBLE
+        F0.Z(!on)
+    }
+
     override fun a0(): FrameLayout? = if (::H0.isInitialized) H0 else null
 
     override fun b(): Boolean {
+        if (fullScreen) {
+            w0.exitFullScreen()
+            setFullScreen(false)
+            return true
+        }
         if (!::w0.isInitialized || !w0.canGoBack()) {
             F0.A(tag ?: "")
             return true
@@ -299,18 +308,12 @@ class UIWebApp : UIFragment(), BackPressHandler {
                 return
             }
             if (i2 != 44) return
-            val context = F0.f() ?: return
-            Printer.d(context, w0)
+            UINotification.a(x0, "Printing isn't available in this browser yet", null)
             return
         }
         if (keyEvent.keyCode == 141 && w0.isLaidOut) {
-            val isFullscreen = H0.visibility == View.VISIBLE
-            F0.Z(!isFullscreen)
-            if (isFullscreen) {
-                G0?.onHideCustomView()
-                return
-            }
-            G0?.onShowCustomView(w0, h())
+            if (fullScreen) w0.exitFullScreen()
+            setFullScreen(!fullScreen)
         }
     }
 
@@ -333,19 +336,6 @@ class UIWebApp : UIFragment(), BackPressHandler {
         z0.visibility = View.GONE
         N0 = false
         if (O0) {
-            val installedApp = E0
-            if (installedApp == null) {
-                val base = Global.f4838e
-                var fRound = 0.0f
-                if (P0 > 0) {
-                    fRound = round(100.0f / base).toFloat() * (P0 / 100.0f)
-                } else if (base <= 0.8f) {
-                    fRound = 100.0f / base
-                }
-                w0.setInitialScale(round(fRound).toInt())
-            } else {
-                UIWebMount.a(w0, installedApp)
-            }
             S0?.let { menu ->
                 menu.m = false
                 menu.f4735i?.let { textView ->

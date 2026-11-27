@@ -18,8 +18,24 @@ import com.bellatrixos.AppExecutors
 import com.bellatrixos.R
 import com.bellatrixos.app_browser.utils.Clipboard
 
-/** Panel pencarian teks pada halaman WebView. */
-class UIFinder(@JvmField val f4671e: Supplier<GeckoTabView?>) {
+/** Target pencarian teks: halaman Gecko (Browser dan WebApp). */
+interface FinderTarget {
+    fun find(query: String)
+    fun findNext(forward: Boolean)
+    fun clearMatches()
+}
+
+fun GeckoTabView.asFinderTarget(): FinderTarget {
+    val tab = this
+    return object : FinderTarget {
+        override fun find(query: String) = tab.find(query)
+        override fun findNext(forward: Boolean) = tab.findNext(forward)
+        override fun clearMatches() = tab.clearMatches()
+    }
+}
+
+/** Panel pencarian teks pada halaman web. */
+class UIFinder(@JvmField val f4671e: Supplier<FinderTarget?>) {
     @JvmField var f4669a: View? = null
     @JvmField var b: Animation? = null
     @JvmField var c: Animation? = null

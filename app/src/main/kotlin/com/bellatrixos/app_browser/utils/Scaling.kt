@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
-import android.webkit.WebView
 import android.widget.TextView
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.app_browser.GeckoEngine
@@ -48,38 +47,12 @@ class Scaling {
             }
         }
 
-        @JvmStatic
-        fun b(webView: WebView, app: InstalledApp?) {
-            val zoom = percent(app?.g() ?: 100)
-            if (zoom != 100) webView.evaluateJavascript("document.body.style.zoom = '$zoom%';", null)
-        }
-
-        /** Sets the Browser's text zoom to [zoom] percent and keeps it for [app], as [c] does for a WebView. */
+        /** Sets the Browser's text zoom to [zoom] percent and keeps it for [app]. */
         @JvmStatic
         fun d(context: Context, app: InstalledApp?, zoom: Int) {
             val value = percent(zoom)
             GeckoEngine.zoom(context, value)
             val handler = AppExecutors.c()
-            saveZoomRunnable?.let { handler.removeCallbacks(it) }
-            val pending = object : Runnable {
-                override fun run() {
-                    if (saveZoomRunnable === this) saveZoomRunnable = null
-                    if (app != null) {
-                        app.n(value)
-                        InstalledAppsDB.e(app.c(), app)
-                    }
-                }
-            }
-            saveZoomRunnable = pending
-            handler.postDelayed(pending, 1500L)
-        }
-
-        @JvmStatic
-        fun c(webView: WebView, app: InstalledApp?, zoom: Int) {
-            val value = percent(zoom)
-            webView.evaluateJavascript("document.body.style.zoom = '$value%';", null)
-            val handler = AppExecutors.c()
-            // Supersede only the previous save: clearing the whole main Handler drops unrelated app callbacks.
             saveZoomRunnable?.let { handler.removeCallbacks(it) }
             val pending = object : Runnable {
                 override fun run() {

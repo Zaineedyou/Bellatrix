@@ -35,7 +35,9 @@ import com.bellatrixos.app_browser.widgets.Tabs
 import com.bellatrixos.app_browser.widgets.dialogs.DialogInstaller
 import com.bellatrixos.app_browser.widgets.dialogs.DialogSettings
 import com.bellatrixos.app_browser.widgets.dialogs.UIDownloads
+import com.bellatrixos.app_browser.widgets.dialogs.FinderTarget
 import com.bellatrixos.app_browser.widgets.dialogs.UIFinder
+import com.bellatrixos.app_browser.widgets.dialogs.asFinderTarget
 import com.bellatrixos.interfaces.BackPressHandler
 import com.bellatrixos.interfaces.MainActivityIn
 import com.bellatrixos.widgets.FloatingLayout
@@ -270,7 +272,7 @@ class UIBrowser : UIFragment(), BackPressHandler {
             val downloads = UIDownloads(context)
             a1 = downloads
             downloads.f4665a = BrowserCallback(2)
-            val finder = UIFinder(Supplier<GeckoTabView?> { z0?.y0 })
+            val finder = UIFinder(Supplier<FinderTarget?> { z0?.y0?.asFinderTarget() })
             b1 = finder
             finder.f4670d = v0?.findViewById<FrameLayout>(R.id.overlay_container)
 

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import com.bellatrixos.R
@@ -29,20 +28,6 @@ object Files {
             intent.data != null -> arrayOf(intent.data!!)
             else -> null
         }
-    }
-
-    @JvmStatic
-    fun b(
-        context: Context,
-        fileChooserParams: WebChromeClient.FileChooserParams,
-        activityResultLauncher: ActivityResultLauncher<Intent>
-    ) {
-        c(
-            context,
-            fileChooserParams.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE,
-            fileChooserParams.acceptTypes,
-            activityResultLauncher,
-        )
     }
 
     /** Opens the picker for a page's file input: [multiple] files, of the [acceptTypes] it lists. */

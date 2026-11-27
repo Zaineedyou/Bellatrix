@@ -21,6 +21,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 - Printing from the Browser, until the Firefox engine's PDF output is wired to Android's print dialog. Web apps still print.
 
+### Fixed
+
+- Browser-backed WebApps now use GeckoView tab and finder types consistently after the engine migration.
+
 ## [3.1.3] - 2026-11-26
 
 ### Changed
