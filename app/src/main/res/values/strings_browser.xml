@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="site_settings">Site settings</string>
+    <string name="site_allow">Allow</string>
+    <string name="site_block">Block</string>
+    <string name="site_save">Save</string>
+    <string name="site_forget_all">Forget all</string>
+    <string name="site_clear">Clear</string>
+    <string name="site_ask_location">wants to know your location</string>
+    <string name="site_ask_notifications">wants to show notifications</string>
+    <string name="site_ask_storage">wants to store data on this device permanently</string>
+    <string name="site_ask_camera">wants to use your camera</string>
+    <string name="site_ask_microphone">wants to use your microphone</string>
+    <string name="site_ask_camera_microphone">wants to use your camera and microphone</string>
+    <string name="site_kind_location">Location</string>
+    <string name="site_kind_notifications">Notifications</string>
+    <string name="site_kind_storage">Persistent storage</string>
+    <string name="site_kind_camera">Camera</string>
+    <string name="site_kind_microphone">Microphone</string>
+    <string name="site_menu_permissions">Site permissions</string>
+    <string name="site_menu_clear_cache">Clear cache</string>
+    <string name="site_menu_clear_cookies">Clear cookies and site data</string>
+    <string name="site_menu_cache_on">Cache: on (tap to turn off)</string>
+    <string name="site_menu_cache_off">Cache: off (tap to turn on)</string>
+    <string name="site_permissions_none">No saved site permissions</string>
+    <string name="site_permissions_title">Checked: allowed, unchecked: blocked</string>
+    <string name="site_cookies_confirm_title">Clear cookies and site data?</string>
+    <string name="site_cookies_confirm_message">You will be signed out of every site, Google included.</string>
+    <string name="site_cache_cleared">Cache cleared</string>
+    <string name="site_cookies_cleared">Cookies and site data cleared</string>
+    <string name="site_cache_turned_on">Cache turned on</string>
+    <string name="site_cache_turned_off">Cache turned off</string>
+    <string name="browser_print_unavailable">Printing isn\'t available in this browser yet</string>
+</resources>

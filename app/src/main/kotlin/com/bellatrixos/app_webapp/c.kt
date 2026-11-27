@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import com.bellatrixos.R
+import com.bellatrixos.app_browser.SiteSettings
 import com.bellatrixos.app_browser.utils.Scaling
 import com.bellatrixos.widgets.UINotification
 import com.bellatrixos.widgets.UIToast
@@ -23,7 +24,7 @@ class c(@JvmField val u: UIWebApp) :
         when (i2) {
             1 -> Scaling.d(app.x0, app.E0, i3)
             2 -> {
-                UINotification.a(app.x0, "Printing isn't available in this browser yet", null)
+                UINotification.a(app.x0, app.x0.getString(R.string.browser_print_unavailable), null)
             }
             3 -> {
                 val context: Context = app.x0
@@ -41,6 +42,7 @@ class c(@JvmField val u: UIWebApp) :
             }
             8 -> if (app.w0.isLaidOut) app.Q0.b(app.x0)
             9 -> app.R0.a(app.C0.getBtnMore(), null, 3)
+            12 -> SiteSettings.show(app.x0, app.E0) { enabled -> app.w0.bypassCache = !enabled }
             else -> {
                 if (i2 == 11) {
                     app.P0 = i3

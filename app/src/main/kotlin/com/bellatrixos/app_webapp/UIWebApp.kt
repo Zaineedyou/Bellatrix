@@ -21,7 +21,9 @@ import androidx.core.util.Supplier
 import com.bellatrixos.R
 import com.bellatrixos.UIFragment
 import com.bellatrixos.app_browser.GeckoEngine
+import com.bellatrixos.app_browser.GeckoPopup
 import com.bellatrixos.app_browser.GeckoPrompts
+import com.bellatrixos.app_browser.SitePermissionDelegate
 import com.bellatrixos.app_browser.GeckoTabView
 import com.bellatrixos.app_browser.files.Downloader
 import com.bellatrixos.app_browser.files.Files
@@ -75,6 +77,16 @@ class UIWebApp : UIFragment(), BackPressHandler {
     @JvmField var P0: Int = 0
     @JvmField val T0: Window = Window(0)
 
+
+    private var androidPermissions: GeckoSession.PermissionDelegate.Callback? = null
+
+    private val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            val callback = androidPermissions ?: return@registerForActivityResult
+            androidPermissions = null
+            // Gecko asked for them together; one refusal is a refusal.
+            if (result.values.all { it }) callback.grant() else callback.reject()
+        }
 
     /** Whether the window shows the page full screen (a video, F11); Back and F11 leave it. */
     private var fullScreen = false
@@ -151,6 +163,7 @@ class UIWebApp : UIFragment(), BackPressHandler {
                 // Gecko has one text size for the whole engine: it follows this app's saved zoom.
                 GeckoEngine.zoom(x0, E0?.g() ?: 100)
                 R0 = UIDownloads(x0)
+                w0.bypassCache = E0?.h() == false
                 wire(w0)
                 Q0 = UIFinder(Supplier<FinderTarget?> { w0.asFinderTarget() })
                 Q0.f4670d = v0.findViewById<FrameLayout>(R.id.overlay_container)
@@ -196,40 +209,23 @@ class UIWebApp : UIFragment(), BackPressHandler {
             }
         }
         web.onFullScreen = { on -> setFullScreen(on) }
-        // target=_blank and window.open land in this window: a web app has nowhere to put another one.
+        // Sign-in popups (window.open) get a window of their own so they can answer the page; other links open here.
         web.onNewWindow = { uri ->
-            web.loadUrl(uri)
-            null
+            if (GeckoPopup.wantsPopup(uri)) {
+                GeckoPopup.open(x0)
+            } else {
+                web.loadUrl(uri)
+                null
+            }
         }
         web.onDownload = { response ->
             Downloader.handle(x0, response, R0, C0.getBtnMore(), viewLifecycleOwner)
         }
         GeckoPrompts.install(web.session, { if (isAdded) x0 else null }) { prompt -> chooseFiles(prompt) }
-        // Nothing the page asks for (camera, microphone, location, notifications) is granted, as before;
-        // only the key system the player needs for protected video is allowed.
         web.session.permissionDelegate =
-            object : GeckoSession.PermissionDelegate {
-                override fun onContentPermissionRequest(
-                    session: GeckoSession,
-                    perm: GeckoSession.PermissionDelegate.ContentPermission,
-                ): GeckoResult<Int>? =
-                    GeckoResult.fromValue(
-                        if (perm.permission == GeckoSession.PermissionDelegate.PERMISSION_MEDIA_KEY_SYSTEM_ACCESS) {
-                            GeckoSession.PermissionDelegate.ContentPermission.VALUE_ALLOW
-                        } else {
-                            GeckoSession.PermissionDelegate.ContentPermission.VALUE_DENY
-                        },
-                    )
-
-                override fun onMediaPermissionRequest(
-                    session: GeckoSession,
-                    uri: String,
-                    video: Array<out GeckoSession.PermissionDelegate.MediaSource>?,
-                    audio: Array<out GeckoSession.PermissionDelegate.MediaSource>?,
-                    callback: GeckoSession.PermissionDelegate.MediaCallback,
-                ) {
-                    callback.reject()
-                }
+            SitePermissionDelegate({ if (isAdded) x0 else null }) { permissions, callback ->
+                androidPermissions = callback
+                permissionLauncher.launch(permissions)
             }
     }
 
@@ -308,7 +304,7 @@ class UIWebApp : UIFragment(), BackPressHandler {
                 return
             }
             if (i2 != 44) return
-            UINotification.a(x0, "Printing isn't available in this browser yet", null)
+            UINotification.a(x0, x0.getString(R.string.browser_print_unavailable), null)
             return
         }
         if (keyEvent.keyCode == 141 && w0.isLaidOut) {

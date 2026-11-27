@@ -43,6 +43,7 @@ class c(@JvmField val u: UIBrowser) :
             6 -> browser.p0()
             7 -> browser.w0?.a("https://translate.google.com/")
             8 -> if (browser.q0()) browser.b1?.b(browser.u0 ?: return)
+            12 -> SiteSettings.show(browser.u0 ?: return, null) { }
             else -> Unit
         }
     }

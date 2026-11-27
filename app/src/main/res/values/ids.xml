@@ -1062,4 +1062,5 @@
     <id name="zero_corner_chip" />
     <id name="zoom" />
     <id name="zoomContainer" />
+    <id name="btnSiteSettings" />
 </resources>

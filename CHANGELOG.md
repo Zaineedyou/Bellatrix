@@ -9,6 +9,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-11-27
+
+### Added
+
+- Site permissions. A site that asks for your location, notifications, permanent storage, camera or microphone now shows an Allow / Block question, and Bellatrix remembers the answer for that site. Site settings in the Browser and web app menus lists the saved answers so you can change or forget them, and clears the cache or the cookies and site data (which signs you out of every site).
+- Sign-in popups. A site's "Sign in with Google" window now opens over the page that asked for it and closes itself when done, so the Google account chooser works and you pick an account instead of typing it. Other links that open a new window still load in the same tab.
+- Your phone's password manager can now offer a saved account on sign-in forms, once an autofill service is chosen in Android Settings.
+- A cache switch for web apps in Site settings. With it off, every load and reload of the page goes to the network.
+
+### Changed
+
+- Web apps now run on Firefox's engine (GeckoView) like the Browser, instead of Android's WebView. File choosers, downloads (including blob and data downloads), alerts, full screen video and Find in page work as in the Browser. A web app can now use the camera and microphone once you allow it for the site; before, they were always refused.
+- Text zoom in a web app now follows the engine-wide setting, so the last window you set wins.
+
+### Removed
+
+- Printing from web apps, until the Firefox engine's PDF output is wired to Android's print dialog (the Browser lost it in 3.2.0).
+- In web apps: the page's own icon as the window icon, the page scale setting, and the cache-first mode that WebView offered. The icon you gave the app and its zoom still apply.
+
+### Fixed
+
+- The release build compiles again: the page finder was typed for the Browser's engine only and failed when a web app used it.
+
 ## [3.2.0] - 2026-11-27
 
 ### Changed
@@ -20,10 +43,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 ### Removed
 
 - Printing from the Browser, until the Firefox engine's PDF output is wired to Android's print dialog. Web apps still print.
-
-### Fixed
-
-- Browser-backed WebApps now use GeckoView tab and finder types consistently after the engine migration.
 
 ## [3.1.3] - 2026-11-26
 

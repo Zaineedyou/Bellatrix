@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="site_settings">Website-Einstellungen</string>
+    <string name="site_allow">Erlauben</string>
+    <string name="site_block">Blockieren</string>
+    <string name="site_save">Speichern</string>
+    <string name="site_forget_all">Alle vergessen</string>
+    <string name="site_clear">Löschen</string>
+    <string name="site_ask_location">möchte auf deinen Standort zugreifen</string>
+    <string name="site_ask_notifications">möchte Benachrichtigungen anzeigen</string>
+    <string name="site_ask_storage">möchte dauerhaft Daten auf diesem Gerät speichern</string>
+    <string name="site_ask_camera">möchte deine Kamera verwenden</string>
+    <string name="site_ask_microphone">möchte dein Mikrofon verwenden</string>
+    <string name="site_ask_camera_microphone">möchte deine Kamera und dein Mikrofon verwenden</string>
+    <string name="site_kind_location">Standort</string>
+    <string name="site_kind_notifications">Benachrichtigungen</string>
+    <string name="site_kind_storage">Dauerhafter Speicher</string>
+    <string name="site_kind_camera">Kamera</string>
+    <string name="site_kind_microphone">Mikrofon</string>
+    <string name="site_menu_permissions">Website-Berechtigungen</string>
+    <string name="site_menu_clear_cache">Cache leeren</string>
+    <string name="site_menu_clear_cookies">Cookies und Websitedaten löschen</string>
+    <string name="site_menu_cache_on">Cache: an (tippen zum Ausschalten)</string>
+    <string name="site_menu_cache_off">Cache: aus (tippen zum Einschalten)</string>
+    <string name="site_permissions_none">Keine gespeicherten Website-Berechtigungen</string>
+    <string name="site_permissions_title">Markiert: erlaubt, nicht markiert: blockiert</string>
+    <string name="site_cookies_confirm_title">Cookies und Websitedaten löschen?</string>
+    <string name="site_cookies_confirm_message">Du wirst von allen Websites abgemeldet, auch bei Google.</string>
+    <string name="site_cache_cleared">Cache geleert</string>
+    <string name="site_cookies_cleared">Cookies und Websitedaten gelöscht</string>
+    <string name="site_cache_turned_on">Cache eingeschaltet</string>
+    <string name="site_cache_turned_off">Cache ausgeschaltet</string>
+    <string name="browser_print_unavailable">Drucken ist in diesem Browser noch nicht verfügbar</string>
+</resources>

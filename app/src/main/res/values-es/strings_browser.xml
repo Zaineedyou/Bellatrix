@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="site_settings">Ajustes del sitio</string>
+    <string name="site_allow">Permitir</string>
+    <string name="site_block">Bloquear</string>
+    <string name="site_save">Guardar</string>
+    <string name="site_forget_all">Olvidar todo</string>
+    <string name="site_clear">Borrar</string>
+    <string name="site_ask_location">quiere saber tu ubicación</string>
+    <string name="site_ask_notifications">quiere mostrar notificaciones</string>
+    <string name="site_ask_storage">quiere guardar datos de forma permanente en este dispositivo</string>
+    <string name="site_ask_camera">quiere usar tu cámara</string>
+    <string name="site_ask_microphone">quiere usar tu micrófono</string>
+    <string name="site_ask_camera_microphone">quiere usar tu cámara y tu micrófono</string>
+    <string name="site_kind_location">Ubicación</string>
+    <string name="site_kind_notifications">Notificaciones</string>
+    <string name="site_kind_storage">Almacenamiento persistente</string>
+    <string name="site_kind_camera">Cámara</string>
+    <string name="site_kind_microphone">Micrófono</string>
+    <string name="site_menu_permissions">Permisos del sitio</string>
+    <string name="site_menu_clear_cache">Borrar caché</string>
+    <string name="site_menu_clear_cookies">Borrar cookies y datos de sitios</string>
+    <string name="site_menu_cache_on">Caché: activada (toca para desactivar)</string>
+    <string name="site_menu_cache_off">Caché: desactivada (toca para activar)</string>
+    <string name="site_permissions_none">No hay permisos de sitios guardados</string>
+    <string name="site_permissions_title">Marcado: permitido, sin marcar: bloqueado</string>
+    <string name="site_cookies_confirm_title">¿Borrar cookies y datos de sitios?</string>
+    <string name="site_cookies_confirm_message">Se cerrará tu sesión en todos los sitios, incluido Google.</string>
+    <string name="site_cache_cleared">Caché borrada</string>
+    <string name="site_cookies_cleared">Cookies y datos de sitios borrados</string>
+    <string name="site_cache_turned_on">Caché activada</string>
+    <string name="site_cache_turned_off">Caché desactivada</string>
+    <string name="browser_print_unavailable">La impresión aún no está disponible en este navegador</string>
+</resources>

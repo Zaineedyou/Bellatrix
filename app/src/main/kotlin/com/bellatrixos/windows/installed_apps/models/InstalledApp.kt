@@ -70,4 +70,8 @@ class InstalledApp(
     fun n(i2: Int) {
         zoom = i2
     }
+
+    fun o(enabled: Boolean) {
+        cacheEnabled = enabled
+    }
 }

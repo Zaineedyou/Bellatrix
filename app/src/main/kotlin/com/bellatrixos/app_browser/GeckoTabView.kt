@@ -95,8 +95,13 @@ class GeckoTabView
         /** The page itself could not be loaded; the argument is a [WebRequestError] code. Gecko still draws its error page. */
         var onLoadError: ((Int) -> Unit)? = null
 
+        /** Every load and reload goes to the network instead of the cache (a web app with its cache turned off). */
+        var bypassCache = false
+
         init {
             addView(geckoView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+            // Lets the phone's password manager offer the saved account on a sign-in form.
+            geckoView.setAutofillEnabled(true)
             attach(session)
         }
 
@@ -220,8 +225,10 @@ class GeckoTabView
             geckoView.setSession(s)
         }
 
+        private fun cacheFlags(): Int = if (bypassCache) GeckoSession.LOAD_FLAGS_BYPASS_CACHE else GeckoSession.LOAD_FLAGS_NONE
+
         fun loadUrl(link: String) {
-            session.loadUri(link)
+            session.load(GeckoSession.Loader().uri(link).flags(cacheFlags()))
         }
 
         fun canGoBack(): Boolean = backAvailable
@@ -232,7 +239,7 @@ class GeckoTabView
 
         fun goForward() = session.goForward()
 
-        fun reload() = session.reload()
+        fun reload() = session.reload(cacheFlags())
 
         fun stopLoading() = session.stop()
 

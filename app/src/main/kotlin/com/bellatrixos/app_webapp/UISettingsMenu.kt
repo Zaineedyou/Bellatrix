@@ -46,6 +46,7 @@ class UISettingsMenu(context: Context, installedApp: InstalledApp?) : PopupWindo
         val copyUrl = view.findViewById<TextView>(R.id.btnCopyURL)
         val downloads = view.findViewById<TextView>(R.id.btnDownloads)
         val search = view.findViewById<TextView>(R.id.btnSearch)
+        val siteSettings = view.findViewById<TextView>(R.id.btnSiteSettings)
         j = view.findViewById(R.id.menuContainer)
         f4736k = view.findViewById(R.id.zoomContainer)
         contentView = view
@@ -60,6 +61,7 @@ class UISettingsMenu(context: Context, installedApp: InstalledApp?) : PopupWindo
         print.setOnClickListener(a(this, 2))
         downloads.setOnClickListener(a(this, 3))
         search.setOnClickListener(a(this, 4))
+        siteSettings.setOnClickListener { dismiss(); f4731d?.a(12, 0) }
         f4732e = context.resources.getDimensionPixelOffset(R.dimen.ui_4dp)
         c.setOnClickListener(a(this, 5))
     }

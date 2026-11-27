@@ -51,6 +51,7 @@ class DialogSettings(context: Context, installedApp: InstalledApp?) : PopupWindo
         val print = view.findViewById<TextView>(R.id.btnPrint)
         val search = view.findViewById<TextView>(R.id.btnSearch)
         val translate = view.findViewById<TextView>(R.id.btnTranslate)
+        val siteSettings = view.findViewById<TextView>(R.id.btnSiteSettings)
         j = view.findViewById(R.id.menuContainer)
         f4663k = view.findViewById(R.id.zoomContainer)
 
@@ -70,6 +71,7 @@ class DialogSettings(context: Context, installedApp: InstalledApp?) : PopupWindo
         print.setOnClickListener(com.bellatrixos.app_browser.widgets.dialogs.b(this, 4))
         search.setOnClickListener(com.bellatrixos.app_browser.widgets.dialogs.b(this, 5))
         translate.setOnClickListener(com.bellatrixos.app_browser.widgets.dialogs.b(this, 6))
+        siteSettings.setOnClickListener { dismiss(); f4658d?.a(12, 0) }
         f4657a = context.resources.getDimensionPixelSize(R.dimen.ui_12dp)
         g.setOnClickListener(com.bellatrixos.app_browser.widgets.dialogs.b(this, 7))
     }

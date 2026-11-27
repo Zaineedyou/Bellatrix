@@ -158,10 +158,15 @@ class UIBrowserTab : Fragment() {
             // The window's title bar steps aside for a full-screen page and comes back after it.
             w0?.m0(!on)
         }
-        // target=_blank and window.open land in this tab: a window of its own has nowhere to live in a tab.
+        // Sign-in popups (window.open) get a window of their own so they can answer the page; other links open in this tab.
         web.onNewWindow = { uri ->
-            web.loadUrl(uri)
-            null
+            val context = s0
+            if (context != null && GeckoPopup.wantsPopup(uri)) {
+                GeckoPopup.open(context)
+            } else {
+                web.loadUrl(uri)
+                null
+            }
         }
         web.onCloseRequest = { w0?.navigate("about:blank") }
         web.onDownload = { response ->
@@ -170,39 +175,9 @@ class UIBrowserTab : Fragment() {
         }
         GeckoPrompts.install(web.session, { s0 }) { prompt -> chooseFiles(prompt) }
         web.session.permissionDelegate =
-            object : GeckoSession.PermissionDelegate {
-                override fun onAndroidPermissionsRequest(
-                    session: GeckoSession,
-                    permissions: Array<out String>?,
-                    callback: GeckoSession.PermissionDelegate.Callback,
-                ) {
-                    androidPermissions = callback
-                    permissionLauncher.launch(permissions?.let { Array(it.size) { i -> it[i] } } ?: emptyArray())
-                }
-
-                // Camera and microphone are the page's to ask for; the rest (location, notifications, storage) stays
-                // refused, as it was in the WebView. The key system the player needs for protected video is allowed.
-                override fun onContentPermissionRequest(
-                    session: GeckoSession,
-                    perm: GeckoSession.PermissionDelegate.ContentPermission,
-                ): GeckoResult<Int>? =
-                    GeckoResult.fromValue(
-                        if (perm.permission == GeckoSession.PermissionDelegate.PERMISSION_MEDIA_KEY_SYSTEM_ACCESS) {
-                            GeckoSession.PermissionDelegate.ContentPermission.VALUE_ALLOW
-                        } else {
-                            GeckoSession.PermissionDelegate.ContentPermission.VALUE_DENY
-                        },
-                    )
-
-                override fun onMediaPermissionRequest(
-                    session: GeckoSession,
-                    uri: String,
-                    video: Array<out GeckoSession.PermissionDelegate.MediaSource>?,
-                    audio: Array<out GeckoSession.PermissionDelegate.MediaSource>?,
-                    callback: GeckoSession.PermissionDelegate.MediaCallback,
-                ) {
-                    callback.grant(video?.firstOrNull(), audio?.firstOrNull())
-                }
+            SitePermissionDelegate({ s0 }) { permissions, callback ->
+                androidPermissions = callback
+                permissionLauncher.launch(permissions)
             }
     }
 

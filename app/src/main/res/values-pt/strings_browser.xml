@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="site_settings">Configurações do site</string>
+    <string name="site_allow">Permitir</string>
+    <string name="site_block">Bloquear</string>
+    <string name="site_save">Salvar</string>
+    <string name="site_forget_all">Esquecer tudo</string>
+    <string name="site_clear">Limpar</string>
+    <string name="site_ask_location">quer saber sua localização</string>
+    <string name="site_ask_notifications">quer mostrar notificações</string>
+    <string name="site_ask_storage">quer armazenar dados permanentemente neste dispositivo</string>
+    <string name="site_ask_camera">quer usar sua câmera</string>
+    <string name="site_ask_microphone">quer usar seu microfone</string>
+    <string name="site_ask_camera_microphone">quer usar sua câmera e seu microfone</string>
+    <string name="site_kind_location">Localização</string>
+    <string name="site_kind_notifications">Notificações</string>
+    <string name="site_kind_storage">Armazenamento persistente</string>
+    <string name="site_kind_camera">Câmera</string>
+    <string name="site_kind_microphone">Microfone</string>
+    <string name="site_menu_permissions">Permissões do site</string>
+    <string name="site_menu_clear_cache">Limpar cache</string>
+    <string name="site_menu_clear_cookies">Limpar cookies e dados de sites</string>
+    <string name="site_menu_cache_on">Cache: ativado (toque para desativar)</string>
+    <string name="site_menu_cache_off">Cache: desativado (toque para ativar)</string>
+    <string name="site_permissions_none">Nenhuma permissão de site salva</string>
+    <string name="site_permissions_title">Marcado: permitido, desmarcado: bloqueado</string>
+    <string name="site_cookies_confirm_title">Limpar cookies e dados de sites?</string>
+    <string name="site_cookies_confirm_message">Você será desconectado de todos os sites, inclusive do Google.</string>
+    <string name="site_cache_cleared">Cache limpo</string>
+    <string name="site_cookies_cleared">Cookies e dados de sites limpos</string>
+    <string name="site_cache_turned_on">Cache ativado</string>
+    <string name="site_cache_turned_off">Cache desativado</string>
+    <string name="browser_print_unavailable">A impressão ainda não está disponível neste navegador</string>
+</resources>
