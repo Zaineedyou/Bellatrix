@@ -3,7 +3,7 @@ package com.bellatrixos.app_browser.utils
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.View
-import android.webkit.WebView
+import com.bellatrixos.app_browser.GeckoTabView
 import androidx.core.util.Consumer
 import com.bellatrixos.AppExecutors
 import com.bellatrixos.R
@@ -30,7 +30,7 @@ class a : DialogInstaller.OnInstallClickListener, UIContextMenu.OnMenuItemClickL
         x = menu
     }
 
-    constructor(webView: WebView, context: Context, activity: MainActivityIn?, consumer: Consumer<Any?>) {
+    constructor(webView: GeckoTabView, context: Context, activity: MainActivityIn?, consumer: Consumer<Any?>) {
         v = webView
         u = context
         w = activity
@@ -38,7 +38,7 @@ class a : DialogInstaller.OnInstallClickListener, UIContextMenu.OnMenuItemClickL
     }
 
     override fun a(drawable: Drawable?, str: String?, str2: String?) {
-        val webView = v as? WebView
+        val webView = v as? GeckoTabView
         val context = u ?: return
         val installed = webView?.url?.let { InstalledAppsDB.b.containsKey(it) } == true
         if (installed) {

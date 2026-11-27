@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The Bellatrix logo (a chevron and a bar) inside the adaptive icon's 66dp safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="172"
-    android:viewportHeight="184">
+    android:viewportWidth="108"
+    android:viewportHeight="108">
     <path
-        android:fillColor="@android:color/transparent"
-        android:strokeColor="#000000"
-        android:strokeWidth="7"
+        android:pathData="M37.43,39.7L49.13,54L37.43,68.3"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.55"
         android:strokeLineCap="butt"
-        android:strokeLineJoin="miter"
-        android:pathData="M59,69 L77,91 L59,113" />
+        android:strokeLineJoin="miter" />
     <path
-        android:fillColor="#000000"
-        android:pathData="M85,60h25v62h-25z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M54.33,33.85h16.25v40.3h-16.25z" />
 </vector>

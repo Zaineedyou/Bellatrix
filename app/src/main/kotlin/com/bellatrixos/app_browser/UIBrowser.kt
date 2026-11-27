@@ -16,7 +16,6 @@ import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.webkit.ValueCallback
-import android.webkit.WebView
 import android.widget.AdapterView
 import android.widget.FilterQueryProvider
 import android.widget.FrameLayout
@@ -46,7 +45,6 @@ import com.bellatrixos.windows.Window
 import com.bellatrixos.windows.WindowSize
 import com.bellatrixos.windows.Windows
 import com.bellatrixos.windows.drivers.Display
-import com.bellatrixos.windows.drivers.Printer
 import com.bellatrixos.windows.installed_apps.models.InstalledApp
 import java.net.URLEncoder
 
@@ -87,6 +85,9 @@ class UIBrowser : UIFragment(), BackPressHandler {
     @JvmField var X0: Boolean = false
     @JvmField var Y0: Boolean = true
     @JvmField var Z0: Boolean = false
+
+    /** Whether F11 has hidden the window's title bar. */
+    private var chromeHidden = false
     @JvmField val c1: ArrayList<Any?> = ArrayList()
     @JvmField val d1: Window = Window(0)
 
@@ -269,7 +270,7 @@ class UIBrowser : UIFragment(), BackPressHandler {
             val downloads = UIDownloads(context)
             a1 = downloads
             downloads.f4665a = BrowserCallback(2)
-            val finder = UIFinder(Supplier<WebView?> { z0?.y0 })
+            val finder = UIFinder(Supplier<GeckoTabView?> { z0?.y0 })
             b1 = finder
             finder.f4670d = v0?.findViewById<FrameLayout>(R.id.overlay_container)
 
@@ -384,17 +385,12 @@ class UIBrowser : UIFragment(), BackPressHandler {
     override fun a0(): FrameLayout? = G0
 
     override fun b(): Boolean {
-        val fullscreen = G0
-        if (fullscreen != null && fullscreen.visibility == View.VISIBLE) {
-            D0?.Z(true)
-            val tab = z0 ?: return false
-            if (tab.y0 == null) return false
-            if (tab.w0 != null && tab.A0 != null) {
-                tab.A0?.onHideCustomView()
-            }
+        val current = z0
+        // A full-screen page is left first, then the history is.
+        if (current != null && current.fullScreen) {
+            current.y0?.session?.exitFullScreen()
             return true
         }
-        val current = z0
         val currentWeb = current?.y0
         if (current == null || currentWeb == null || !currentWeb.canGoBack()) {
             D0?.A(tag ?: "")
@@ -418,9 +414,8 @@ class UIBrowser : UIFragment(), BackPressHandler {
                     return
                 }
                 44 -> {
-                    val context = D0?.f()
-                    val web = z0?.y0
-                    if (context != null && web != null) Printer.d(context, web)
+                    val context = u0
+                    if (context != null && q0()) UINotification.a(context, "Printing isn't available in this browser yet", null)
                     return
                 }
                 48 -> {
@@ -431,17 +426,9 @@ class UIBrowser : UIFragment(), BackPressHandler {
             }
         }
         if (keyEvent.keyCode != 141 || z0 == null) return
-        val fullscreen = G0?.visibility == View.VISIBLE
-        D0?.Z(!fullscreen)
-        val tab = z0 ?: return
-        if (fullscreen) {
-            if (tab.y0 == null || tab.w0 == null || tab.A0 == null) return
-            tab.A0?.onHideCustomView()
-            return
-        }
-        val web = tab.y0 ?: return
-        if (tab.w0 == null || tab.A0 == null) return
-        tab.A0?.onShowCustomView(web, com.bellatrixos.app_browser.h())
+        // F11: the window's title bar goes away or comes back.
+        chromeHidden = !chromeHidden
+        D0?.Z(!chromeHidden)
     }
 
     override fun j0(z: Boolean) {
@@ -485,7 +472,7 @@ class UIBrowser : UIFragment(), BackPressHandler {
             UINotification.a(context, "Page not loaded yet", null)
             return
         }
-        val dialog = DialogInstaller(context, title, url, web.favicon)
+        val dialog = DialogInstaller(context, title, url, null)
         dialog.b = com.bellatrixos.app_browser.utils.a(
             web,
             context,
@@ -519,10 +506,7 @@ class UIBrowser : UIFragment(), BackPressHandler {
             M0?.setImageResource(R.drawable.ui_browser_ic_reload_20)
             M0?.contentDescription = getString(R.string.nav_reload)
         }
-        if (Z0) {
-            Z0 = false
-            tab.y0?.let { UIWebMount.a(it, B0) }
-        }
+        Z0 = false
     }
 
     private fun toolbarNav(index: Int) {

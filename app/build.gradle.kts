@@ -52,10 +52,11 @@ android {
 
     defaultConfig {
         applicationId = "com.bellatrixos"
-        minSdk = 23
+        // GeckoView 145 and newer need Android 8.
+        minSdk = 26
         targetSdk = 36
-        versionCode = 96
-        versionName = "3.1.3"
+        versionCode = 97
+        versionName = "3.2.0"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
@@ -233,6 +234,8 @@ dependencies {
     implementation("org.jetbrains.compose.foundation:foundation:1.11.1")
     implementation("org.jetbrains.compose.ui:ui:1.11.1")
     implementation("com.caverock:androidsvg-aar:1.4")
+    // The Browser app's engine: Firefox's Gecko. The app is arm64-only, so only that build is pulled in.
+    implementation("org.mozilla.geckoview:geckoview-arm64-v8a:150.0.20260511200624")
     testImplementation("junit:junit:4.13.2")
     // android.jar only has stubs of org.json.
     testImplementation("org.json:json:20260814")

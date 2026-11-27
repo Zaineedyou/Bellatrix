@@ -9,12 +9,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-11-27
+
+### Changed
+
+- The Browser now runs on Firefox's engine (GeckoView) instead of Android's WebView, so pages no longer depend on the phone's System WebView version. It still presents itself as a desktop browser. Alerts, confirms, text boxes, drop-down lists and file choosers are drawn by the app; links that open a new window load in the same tab.
+- Bellatrix now needs Android 8 or newer (GeckoView's own minimum since Firefox 145). The APK is larger by the size of the engine.
+- Text zoom in the Browser now follows the Browser's setting for every tab at once.
+
+### Removed
+
+- Printing from the Browser, until the Firefox engine's PDF output is wired to Android's print dialog. Web apps still print.
+
 ## [3.1.3] - 2026-11-26
+
+### Changed
+
+- The app icon is now the Bellatrix logo (chevron and bar) on the dark background, with a monochrome layer so Android 13+ themed icons work.
 
 ### Fixed
 
 - The release build compiles again: a stray closing brace in the Explorer ended its class early, and `$EDITOR` in the Linux agent notes was read as a Kotlin variable.
-- Restored the light and dark vector Bellatrix launcher logos in place of the gas-giant planet artwork.
 
 ## [3.1.2] - 2026-11-26
 

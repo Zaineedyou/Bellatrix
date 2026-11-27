@@ -15,20 +15,20 @@ object Files {
     @JvmStatic
     fun a(activityResult: ActivityResult?, valueCallback: ValueCallback<Array<Uri>>?) {
         if (valueCallback == null) return
+        valueCallback.onReceiveValue(uris(activityResult))
+    }
+
+    /** The files a picker returned, or null when it was cancelled. */
+    @JvmStatic
+    fun uris(activityResult: ActivityResult?): Array<Uri>? {
         val intent = activityResult?.data
-        val uris: Array<Uri>? = if (activityResult == null ||
-            activityResult.resultCode != Activity.RESULT_OK || intent == null
-        ) {
-            null
-        } else {
-            val clip = intent.clipData
-            when {
-                clip != null -> Array(clip.itemCount) { i -> clip.getItemAt(i).uri }
-                intent.data != null -> arrayOf(intent.data!!)
-                else -> null
-            }
+        if (activityResult == null || activityResult.resultCode != Activity.RESULT_OK || intent == null) return null
+        val clip = intent.clipData
+        return when {
+            clip != null -> Array(clip.itemCount) { i -> clip.getItemAt(i).uri }
+            intent.data != null -> arrayOf(intent.data!!)
+            else -> null
         }
-        valueCallback.onReceiveValue(uris)
     }
 
     @JvmStatic
@@ -37,8 +37,22 @@ object Files {
         fileChooserParams: WebChromeClient.FileChooserParams,
         activityResultLauncher: ActivityResultLauncher<Intent>
     ) {
-        val multiple = fileChooserParams.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE
-        val acceptTypes = fileChooserParams.acceptTypes
+        c(
+            context,
+            fileChooserParams.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE,
+            fileChooserParams.acceptTypes,
+            activityResultLauncher,
+        )
+    }
+
+    /** Opens the picker for a page's file input: [multiple] files, of the [acceptTypes] it lists. */
+    @JvmStatic
+    fun c(
+        context: Context,
+        multiple: Boolean,
+        acceptTypes: Array<out String>?,
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+    ) {
         var wantsImage = false
         if (acceptTypes != null) {
             for (type in acceptTypes) {

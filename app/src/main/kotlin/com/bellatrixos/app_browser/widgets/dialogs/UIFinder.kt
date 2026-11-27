@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.webkit.WebView
+import com.bellatrixos.app_browser.GeckoTabView
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -19,7 +19,7 @@ import com.bellatrixos.R
 import com.bellatrixos.app_browser.utils.Clipboard
 
 /** Panel pencarian teks pada halaman WebView. */
-class UIFinder(@JvmField val f4671e: Supplier<WebView?>) {
+class UIFinder(@JvmField val f4671e: Supplier<GeckoTabView?>) {
     @JvmField var f4669a: View? = null
     @JvmField var b: Animation? = null
     @JvmField var c: Animation? = null
@@ -64,7 +64,7 @@ class UIFinder(@JvmField val f4671e: Supplier<WebView?>) {
                     f4672f?.let { AppExecutors.c().removeCallbacks(it) }
                     val task = Runnable {
                         val webView = f4671e.get() ?: return@Runnable
-                        if (query.isEmpty()) webView.clearMatches() else webView.findAllAsync(query)
+                        webView.find(query)
                     }
                     f4672f = task
                     AppExecutors.c().postDelayed(task, 300L)

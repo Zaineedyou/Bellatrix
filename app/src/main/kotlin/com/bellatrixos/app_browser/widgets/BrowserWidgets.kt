@@ -4,11 +4,8 @@ import android.content.Context
 import android.graphics.Rect
 import android.net.Uri
 import android.util.AttributeSet
-import android.view.KeyEvent
-import android.webkit.WebView
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import com.bellatrixos.app_browser.widgets.dialogs.a
-import com.bellatrixos.windows.Windows
 
 /** Address bar browser dengan tampilan URL terformat dan perilaku fokus. */
 class AddressBarView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -73,25 +70,5 @@ class AddressBarView @JvmOverloads constructor(context: Context, attrs: Attribut
         y = str ?: ""
         setText(a(y))
         z = false
-    }
-}
-
-/** WebView tab browser yang meneruskan shortcut Ctrl ke jendela aktif. */
-class ShortcutWebView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    WebView(context, attrs) {
-
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val isCtrlShortcut = event.action == KeyEvent.ACTION_DOWN &&
-            event.isCtrlPressed &&
-            (event.keyCode == 34 || event.keyCode == 44 || event.keyCode == 48)
-        val isF11 = event.keyCode == 141
-        if (isCtrlShortcut || isF11) {
-            val fragment = Windows.f4882e
-            if (fragment != null && fragment.f0()) {
-                fragment.h0(event.keyCode, event)
-                return true
-            }
-        }
-        return super.dispatchKeyEvent(event)
     }
 }

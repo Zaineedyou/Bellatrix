@@ -1,109 +1,89 @@
 package com.bellatrixos.app_browser
 
-import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
-import android.os.Message
-import android.os.SystemClock
-import android.view.Choreographer
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.webkit.PermissionRequest
-import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.util.Consumer
 import androidx.fragment.app.Fragment
 import com.bellatrixos.R
 import com.bellatrixos.app_browser.files.Downloader
 import com.bellatrixos.app_browser.files.Files
-import com.bellatrixos.app_browser.utils.Fullscreen
-import com.bellatrixos.app_browser.utils.Scaling
-import com.bellatrixos.app_browser.widgets.ShortcutWebView
 import com.bellatrixos.app_explorer.picker.FilePicker
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import org.mozilla.geckoview.GeckoResult
+import org.mozilla.geckoview.GeckoSession
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-/** Satu tab WebView pada browser. */
+/** What a press-and-hold on a page landed on: [kind] 7 is a link, 5 an image; [extra] is its address. */
+class ContextHit(
+    @JvmField val kind: Int,
+    @JvmField val extra: String,
+)
+
+/** Satu tab pada browser, ditampilkan oleh mesin Firefox (GeckoView). */
 class UIBrowserTab : Fragment() {
-    @JvmField var A0: WebChromeClient? = null
     @JvmField var B0: Boolean = false
-    @JvmField var C0: MotionEvent? = null
-    @JvmField var D0: WebView.HitTestResult? = null
-    @JvmField var E0: PermissionRequest? = null
-    @JvmField var F0: ActivityResultLauncher<Array<String>>? = null
+    @JvmField var D0: ContextHit? = null
     @JvmField var s0: Context? = null
     @JvmField var t0: View? = null
     @JvmField var u0: String? = null
     @JvmField var v0: Runnable? = null
     @JvmField var w0: UIBrowser? = null
     @JvmField var x0: TextView? = null
-    @JvmField var y0: ShortcutWebView? = null
+    @JvmField var y0: GeckoTabView? = null
     @JvmField var z0: android.widget.ProgressBar? = null
 
-    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    /** Whether the page is full screen (a video, say); Back and F11 leave it. */
+    @JvmField var fullScreen: Boolean = false
 
-    /** WebView opened by target="_blank" or window.open(), hosted in [popupDialog] until the page closes it. */
-    private var popupWebView: WebView? = null
-    private var popupDialog: AlertDialog? = null
+    /** The file chooser the page opened, answered when the picker closes. */
+    private var filePrompt: Pair<GeckoSession.PromptDelegate.FilePrompt, GeckoResult<GeckoSession.PromptDelegate.PromptResponse>>? = null
 
-    /** WebView resources the pending request asked for, so a partial Android grant can be mapped back to them. */
-    @JvmField var permissionResources: List<String>? = null
+    private var androidPermissions: GeckoSession.PermissionDelegate.Callback? = null
 
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-            val request = E0 ?: return@registerForActivityResult
-            val wanted = permissionResources ?: request.resources.toList()
-            // Grant each resource independently: refusing the microphone must not also revoke an allowed camera.
-            val granted = wanted.filter { resource ->
-                when (resource) {
-                    PermissionRequest.RESOURCE_VIDEO_CAPTURE -> permitted(Manifest.permission.CAMERA, result)
-                    PermissionRequest.RESOURCE_AUDIO_CAPTURE -> permitted(Manifest.permission.RECORD_AUDIO, result)
-                    else -> true
-                }
-            }
-            if (granted.isNotEmpty()) request.grant(granted.toTypedArray()) else request.deny()
-            E0 = null
-            permissionResources = null
+            val callback = androidPermissions ?: return@registerForActivityResult
+            androidPermissions = null
+            // Gecko asked for them together; one refusal is a refusal.
+            if (result.values.all { it }) callback.grant() else callback.reject()
         }
-
-    private fun permitted(permission: String, result: Map<String, Boolean>): Boolean {
-        val context = s0 ?: return false
-        return result[permission] == true ||
-            ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
-    }
 
     private val fileLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            Files.a(result, filePathCallback)
-            filePathCallback = null
+            val (prompt, answer) = filePrompt ?: return@registerForActivityResult
+            filePrompt = null
+            val context = s0
+            val uris = Files.uris(result)
+            answer.complete(
+                when {
+                    context == null || uris == null -> prompt.dismiss()
+                    uris.size == 1 -> prompt.confirm(context, uris[0])
+                    else -> prompt.confirm(context, uris)
+                },
+            )
         }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val view = inflater.inflate(R.layout.app_browser_tab, container, false)
         s0 = view.context
@@ -111,62 +91,134 @@ class UIBrowserTab : Fragment() {
         return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         w0 = parentFragment as? UIBrowser ?: activity as? UIBrowser
         val web = y0 ?: return
-        UIWebMount.b(web, true, w0?.b0())
-        F0 = permissionLauncher
+        w0?.b0()?.let { GeckoEngine.zoom(view.context, it.g()) }
+        wire(web)
 
-        view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                view.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                val url = savedInstanceState?.getString("lastUrl", "about:blank")
-                if (url != null) {
-                    u0 = url
-                    web.loadUrl(url)
+        view.viewTreeObserver.addOnGlobalLayoutListener(
+            object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    val url = savedInstanceState?.getString("lastUrl", "about:blank")
+                    if (url != null) {
+                        u0 = url
+                        web.loadUrl(url)
+                    }
+                    v0?.run()
                 }
-                v0?.run()
+            },
+        )
+    }
 
-                web.setOnTouchListener { _, event ->
-                    C0 = event
-                    false
+    /** Hooks the page's events to this tab: its progress, title and address, its dialogs, downloads and permissions. */
+    private fun wire(web: GeckoTabView) {
+        web.onProgress = { progress -> z0?.visibility = if (progress < 100) View.VISIBLE else View.GONE }
+        web.onTitle = { title -> x0?.text = title }
+        web.onPageStart = {
+            B0 = true
+            w0?.s0(this, true)
+        }
+        web.onPageStop = {
+            B0 = false
+            u0 = web.url ?: u0
+            w0?.s0(this, false)
+        }
+        web.onLocation = { url ->
+            u0 = url
+            if (w0?.z0 === this) w0?.C0?.setAddress(url)
+        }
+        web.onHistory = {
+            if (w0?.z0 === this) {
+                w0?.K0?.isEnabled = web.canGoBack()
+                w0?.L0?.isEnabled = web.canGoForward()
+            }
+        }
+        web.onContext = { element, x, y ->
+            val context = s0
+            val src = element.srcUri
+            val link = element.linkUri
+            val hit =
+                when {
+                    src != null && element.type == GeckoSession.ContentDelegate.ContextElement.TYPE_IMAGE -> ContextHit(5, src)
+                    link != null -> ContextHit(7, link)
+                    else -> null
                 }
-                web.setOnLongClickListener {
-                    val hit = web.hitTestResult
-                    val context = s0
-                    if (context != null) {
-                        ContextMenuBR.a(
-                            context,
-                            hit,
-                            C0,
-                            Consumer<Any?> { value -> (value as? Int)?.let { a0(it, hit) } }
-                        )
-                    }
-                    false
+            if (context != null && hit != null) {
+                D0 = hit
+                ContextMenuBR.a(context, hit.kind, x, y, Consumer<Any?> { value -> (value as? Int)?.let { a0(it, hit) } })
+            }
+        }
+        web.onFullScreen = { on ->
+            fullScreen = on
+            // The window's title bar steps aside for a full-screen page and comes back after it.
+            w0?.m0(!on)
+        }
+        // target=_blank and window.open land in this tab: a window of its own has nowhere to live in a tab.
+        web.onNewWindow = { uri ->
+            web.loadUrl(uri)
+            null
+        }
+        web.onCloseRequest = { w0?.navigate("about:blank") }
+        web.onDownload = { response ->
+            val context = s0
+            if (context != null) Downloader.handle(context, response, null, null, viewLifecycleOwner)
+        }
+        GeckoPrompts.install(web.session, { s0 }) { prompt -> chooseFiles(prompt) }
+        web.session.permissionDelegate =
+            object : GeckoSession.PermissionDelegate {
+                override fun onAndroidPermissionsRequest(
+                    session: GeckoSession,
+                    permissions: Array<out String>?,
+                    callback: GeckoSession.PermissionDelegate.Callback,
+                ) {
+                    androidPermissions = callback
+                    permissionLauncher.launch(permissions?.let { Array(it.size) { i -> it[i] } } ?: emptyArray())
                 }
-                web.setOnGenericMotionListener { _, event ->
-                    if (event.buttonState and 2 != 0 && event.action == 11) {
-                        val x = event.x
-                        val y = event.y
-                        val now = SystemClock.uptimeMillis()
-                        val down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x, y, 0)
-                        val up = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, x, y, 0)
-                        web.dispatchTouchEvent(down)
-                        web.dispatchTouchEvent(up)
-                        down.recycle()
-                        up.recycle()
-                        Choreographer.getInstance().postFrameCallback(j(this@UIBrowserTab, 0, event))
-                    }
-                    false
+
+                // Camera and microphone are the page's to ask for; the rest (location, notifications, storage) stays
+                // refused, as it was in the WebView. The key system the player needs for protected video is allowed.
+                override fun onContentPermissionRequest(
+                    session: GeckoSession,
+                    perm: GeckoSession.PermissionDelegate.ContentPermission,
+                ): GeckoResult<Int>? =
+                    GeckoResult.fromValue(
+                        if (perm.permission == GeckoSession.PermissionDelegate.PERMISSION_MEDIA_KEY_SYSTEM_ACCESS) {
+                            GeckoSession.PermissionDelegate.ContentPermission.VALUE_ALLOW
+                        } else {
+                            GeckoSession.PermissionDelegate.ContentPermission.VALUE_DENY
+                        },
+                    )
+
+                override fun onMediaPermissionRequest(
+                    session: GeckoSession,
+                    uri: String,
+                    video: Array<out GeckoSession.PermissionDelegate.MediaSource>?,
+                    audio: Array<out GeckoSession.PermissionDelegate.MediaSource>?,
+                    callback: GeckoSession.PermissionDelegate.MediaCallback,
+                ) {
+                    callback.grant(video?.firstOrNull(), audio?.firstOrNull())
                 }
             }
-        })
+    }
 
-        val chrome = Chrome()
-        A0 = chrome
-        web.webChromeClient = chrome
-        web.webViewClient = Client()
-        Downloader.a(s0 ?: return, web, null, null, viewLifecycleOwner)
+    private fun chooseFiles(prompt: GeckoSession.PromptDelegate.FilePrompt): GeckoResult<GeckoSession.PromptDelegate.PromptResponse> {
+        val context = s0 ?: return GeckoResult.fromValue(prompt.dismiss())
+        // A second chooser replaces the first, which is answered with nothing.
+        filePrompt?.let { (old, answer) -> answer.complete(old.dismiss()) }
+        val answer = GeckoResult<GeckoSession.PromptDelegate.PromptResponse>()
+        filePrompt = prompt to answer
+        Files.c(
+            context,
+            prompt.type == GeckoSession.PromptDelegate.FilePrompt.Type.MULTIPLE,
+            prompt.mimeTypes,
+            fileLauncher,
+        )
+        return answer
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -175,40 +227,21 @@ class UIBrowserTab : Fragment() {
     }
 
     override fun onDestroy() {
-        closePopup()
-        y0?.let { web ->
-            web.stopLoading()
-            web.webChromeClient = null
-            web.destroy()
-        }
+        filePrompt?.let { (prompt, answer) -> answer.complete(prompt.dismiss()) }
+        filePrompt = null
+        y0?.destroy()
         t0?.isSelected = false
         t0 = null
         w0 = null
         super.onDestroy()
     }
 
-    /** Closes a window.open() WebView, whether the page, the dialog or fragment destruction asked for it. */
-    private fun closePopup() {
-        val dialog = popupDialog
-        popupDialog = null
-        if (dialog != null) {
-            dialog.setOnDismissListener(null)
-            if (dialog.isShowing) dialog.dismiss()
-        }
-        val web = popupWebView
-        popupWebView = null
-        if (web != null) {
-            (web.parent as? ViewGroup)?.removeView(web)
-            web.stopLoading()
-            web.webChromeClient = null
-            web.webViewClient = object : WebViewClient() {}
-            web.destroy()
-        }
-    }
-
-    /** Jalankan aksi menu konteks pada hasil hit-test. */
-    fun a0(num: Int?, hitTestResult: WebView.HitTestResult) {
-        val extra = hitTestResult.extra ?: return
+    /** Jalankan aksi menu konteks pada hasil sentuhan tahan. */
+    fun a0(
+        num: Int?,
+        hit: ContextHit,
+    ) {
+        val extra = hit.extra
         if (extra.isEmpty()) return
         when (num) {
             1, 5 -> w0?.navigate(extra)
@@ -262,132 +295,5 @@ class UIBrowserTab : Fragment() {
 
                 override fun onLoadCleared(placeholder: Drawable?) = Unit
             })
-    }
-
-    private inner class Chrome : WebChromeClient() {
-        var customView: View? = null
-        var callback: CustomViewCallback? = null
-        val scale = FloatArray(1)
-
-        override fun onCreateWindow(
-            view: WebView,
-            isDialog: Boolean,
-            isUserGesture: Boolean,
-            resultMsg: Message
-        ): Boolean {
-            val ctx = context ?: return false
-            val transport = resultMsg.obj as? WebView.WebViewTransport ?: return false
-            // A second WebView with no host leaks its renderer. Host it in a dialog we own and can close and destroy.
-            closePopup()
-            val popup = WebView(ctx)
-            UIWebMount.b(popup, true, w0?.b0())
-            // No nesting: another window.open() in the popup would have no dialog of its own.
-            popup.webChromeClient =
-                object : WebChromeClient() {
-                    override fun onCreateWindow(
-                        view: WebView,
-                        isDialog: Boolean,
-                        isUserGesture: Boolean,
-                        resultMsg: Message,
-                    ): Boolean = false
-                }
-            val dialog = AlertDialog.Builder(ctx).setView(popup).setOnDismissListener { closePopup() }.create()
-            popupWebView = popup
-            popupDialog = dialog
-            dialog.show()
-            transport.webView = popup
-            resultMsg.sendToTarget()
-            return true
-        }
-
-        override fun onCloseWindow(window: WebView) {
-            if (window === popupWebView) closePopup() else super.onCloseWindow(window)
-        }
-
-        override fun onHideCustomView() {
-            val view = customView ?: return
-            val web = y0
-            if (web != null) Fullscreen.b(w0 ?: return, web, view, callback, scale)
-            customView = null
-            callback = null
-        }
-
-        override fun onPermissionRequest(request: PermissionRequest) {
-            n(this@UIBrowserTab, 0, request).run()
-        }
-
-        override fun onProgressChanged(view: WebView, newProgress: Int) {
-            z0?.visibility = if (newProgress < 100) View.VISIBLE else View.GONE
-        }
-
-        override fun onReceivedTitle(view: WebView, title: String) {
-            super.onReceivedTitle(view, title)
-            x0?.text = title
-        }
-
-        override fun onShowCustomView(view: View, cb: CustomViewCallback) {
-            if (customView != null) {
-                cb.onCustomViewHidden()
-                return
-            }
-            customView = view
-            callback = cb
-            val web = y0 ?: return
-            val browser = w0 ?: return
-            Fullscreen.a(browser, web, view, scale)
-        }
-
-        override fun onShowFileChooser(
-            webView: WebView,
-            filePathCallback: ValueCallback<Array<Uri>>,
-            fileChooserParams: FileChooserParams
-        ): Boolean {
-            this@UIBrowserTab.filePathCallback?.onReceiveValue(null)
-            this@UIBrowserTab.filePathCallback = filePathCallback
-            val ctx = context ?: return false
-            Files.b(ctx, fileChooserParams, fileLauncher)
-            return true
-        }
-    }
-
-    private inner class Client : WebViewClient() {
-        override fun onPageCommitVisible(view: WebView, url: String) {
-            super.onPageCommitVisible(view, url)
-            Scaling.b(view, w0?.b0())
-            view.evaluateJavascript(DOWNLOAD_INTERCEPTOR, null)
-        }
-
-        override fun onPageFinished(view: WebView, url: String) {
-            super.onPageFinished(view, url)
-            u0 = url
-            view.evaluateJavascript(DOWNLOAD_INTERCEPTOR, null)
-            B0 = false
-        }
-
-        override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
-            super.onPageStarted(view, url, favicon)
-            B0 = true
-        }
-    }
-
-    companion object {
-        private const val DOWNLOAD_INTERCEPTOR = "(function() {" +
-            "if (window._downloadInterceptorAdded) return;" +
-            "window._downloadInterceptorAdded = true;" +
-            "document.addEventListener('click', function(e) {" +
-            "var a = e.target.closest('a');" +
-            "if (a && a.href && a.href.startsWith('blob:')) {" +
-            "e.preventDefault();" +
-            "var filename = a.download || ('file_' + Date.now() + '.bin');" +
-            "fetch(a.href).then(r => r.blob()).then(blob => {" +
-            "const reader = new FileReader();" +
-            "reader.onloadend = function() {" +
-            "AndroidDownloader.downloadBase64File(reader.result, filename);" +
-            "};" +
-            "reader.readAsDataURL(blob);" +
-            "});" +
-            "}" +
-            "}, true);" +
-            "})();"
     }
 }

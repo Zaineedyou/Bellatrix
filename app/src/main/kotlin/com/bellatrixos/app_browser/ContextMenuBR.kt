@@ -1,8 +1,6 @@
 package com.bellatrixos.app_browser
 
 import android.content.Context
-import android.view.MotionEvent
-import android.webkit.WebView
 import androidx.core.util.Consumer
 import com.bellatrixos.R
 import com.bellatrixos.context_menu.UIContextMenu
@@ -12,22 +10,22 @@ import com.bellatrixos.interfaces.MainActivityIn
 /** Menu konteks untuk hasil hit-test WebView pada browser. */
 class ContextMenuBR {
     companion object {
+        /** Opens the menu at ([x], [y]) on screen for a [kind] of target: 7 is a link, 5 an image. */
         @JvmStatic
         fun a(
             context: Context,
-            hitTestResult: WebView.HitTestResult,
-            motionEvent: MotionEvent?,
+            kind: Int,
+            x: Int,
+            y: Int,
             consumer: Consumer<Any?>
         ) {
-            if (motionEvent == null) return
             val activity = context as? MainActivityIn ?: return
             val anchor = activity.a0() ?: return
-            anchor.x = motionEvent.rawX.toInt().toFloat()
-            anchor.y = motionEvent.rawY.toInt().toFloat()
-
+            anchor.x = x.toFloat()
+            anchor.y = y.toFloat()
             val menu = activity.l0() as? UIContextMenu ?: return
             menu.f4745d.clear()
-            when (hitTestResult.type) {
+            when (kind) {
                 0 -> return
                 7 -> {
                     menu.f4745d.add(

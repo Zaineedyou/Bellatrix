@@ -115,7 +115,7 @@ replacement renderer: the views being changed are Bellatrix's own.
 | Kotlin | 2.3.20 |
 | Android Gradle Plugin | 8.9.2 |
 
-- Minimum SDK: **23** (Android 6.0)
+- Minimum SDK: **26** (Android 8.0)
 - Target SDK: **36**
 - Primary ABI: **arm64-v8a** — bundled guest binaries are arm64 only
 - Application ID: `com.bellatrixos`
