@@ -9,6 +9,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.3.2] - 2026-11-27
+
+### Changed
+
+- The Browser is now called UiFirefox, with the Firefox logo, in the start menu, on the desktop and in the taskbar. It still said UiChrome with Chrome's logo after the move to Firefox's engine.
+
+### Fixed
+
+- Linux apps open again after the Browser has been used. Firefox's engine runs in processes of its own (content, GPU, network and more), and Android started a whole launcher runtime in each of them. Each one took over the Wayland socket, so Linux apps, terminals and coding agents opened nothing, with no message, until Reload. Only the launcher's main process starts the runtime now.
+
 ## [3.3.0] - 2026-11-27
 
 ### Added

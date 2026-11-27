@@ -23,6 +23,15 @@ import kotlin.system.exitProcess
 private const val TAG = "BellatrixCrash"
 
 /**
+ * Whether [processName] is the launcher's main process, the only one that owns the runtime. An unknown name counts as
+ * the main process, so a failed lookup keeps the launcher working as it did.
+ */
+internal fun isMainProcess(
+    processName: String?,
+    packageName: String,
+): Boolean = processName == null || processName == packageName
+
+/**
  * Application global yang memasang handler crash.
  *
  * Saat ada exception yang tidak tertangkap, log error langsung disalin ke clipboard
@@ -34,6 +43,11 @@ class BellatrixApplication : App() {
         super.onCreate()
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler(CrashClipboardHandler(this, previous))
+        // Android runs this onCreate in every process of the app, and Gecko (the Browser's engine) starts its own:
+        // :tab0, :gpu, :socket, :rdd, :utility and more. Each would start a second runtime, whose Wayland server
+        // unlinks and re-binds wayland-0, so Linux apps could no longer connect to the launcher's compositor after
+        // the Browser had opened. Only the main process owns the runtime.
+        if (!isMainProcess(currentProcessName(), packageName)) return
         // One runtime for the whole process: it owns proot, Wayland, widgets and the OWL home
         // rendered inside the launcher's own MainActivity. No second compositor, ever.
         runtime.start()
@@ -45,6 +59,14 @@ class BellatrixApplication : App() {
                 .sync(WidgetEngine.guestManaged(this, proot))
         }.onFailure { Log.w(TAG, "could not seed guest widget files", it) }
     }
+
+    /** This process's name: the package name for the main process, `<package>:tab0` and the like for Gecko's. */
+    private fun currentProcessName(): String? =
+        if (Build.VERSION.SDK_INT >= 28) {
+            Application.getProcessName()
+        } else {
+            runCatching { File("/proc/self/cmdline").readText().trim { it <= ' ' } }.getOrNull()
+        }
 
     private class CrashClipboardHandler(
         private val app: Application,
