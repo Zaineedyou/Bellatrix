@@ -292,6 +292,21 @@ class GeckoTabView
         /** An inactive page stops running (timers, media), as a paused WebView did. */
         fun setActive(active: Boolean) = session.setActive(active)
 
+        /**
+         * [setActive], and the view lets go of the page while it is not [shown], taking it back when it is. Gecko draws
+         * into a SurfaceView, whose surface the system shows again when the launcher's window does (coming back from the
+         * phone's recent apps) even though a window minimised above it hid the view: the page then stays drawn over the
+         * desktop. A view with no session has no surface to show. The page itself keeps loading in its session.
+         */
+        fun setShown(shown: Boolean) {
+            session.setActive(shown)
+            if (shown) {
+                if (geckoView.session == null && session.isOpen) geckoView.setSession(session)
+            } else if (geckoView.session != null) {
+                geckoView.releaseSession()
+            }
+        }
+
         /** Leaves the full screen the page asked for. */
         fun exitFullScreen() = session.exitFullScreen()
 

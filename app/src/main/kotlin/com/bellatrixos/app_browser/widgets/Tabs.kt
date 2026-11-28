@@ -82,8 +82,8 @@ class Tabs(@JvmField val f4655a: android.content.Context, @JvmField val b: UIBro
         current?.y0?.session?.let { Extensions.setTabActive(it, false) }
         tab.y0?.session?.let { Extensions.setTabActive(it, true) }
         // Only the tab in front draws: Gecko wants a session that is not on screen to be inactive.
-        if (current !== tab) current?.y0?.setActive(false)
-        tab.y0?.setActive(browser.showsPages())
+        if (current !== tab) current?.y0?.setShown(false)
+        tab.y0?.setShown(browser.showsPages())
         if (current != null) {
             val tx = browser.childFragmentManager.beginTransaction()
             tx.hide(current)

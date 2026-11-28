@@ -376,9 +376,12 @@ class UIBrowser : UIFragment(), BackPressHandler {
     /** Whether the window is on screen: not minimised and not behind another Activity (the recent apps, say). */
     fun showsPages(): Boolean = isResumed && !isHidden
 
-    /** Gecko draws into a surface of its own, so a page of a minimised or stopped window must stop drawing. */
+    /**
+     * Gecko draws into a surface of its own, so a page of a minimised or stopped window must stop drawing, and is let go
+     * of by its view (see [GeckoTabView.setShown]) while the window is minimised.
+     */
     private fun syncPages() {
-        z0?.y0?.setActive(showsPages())
+        z0?.y0?.setShown(showsPages())
     }
 
     override fun onHiddenChanged(hidden: Boolean) {

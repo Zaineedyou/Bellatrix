@@ -9,6 +9,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.4.4] - 2026-11-28
+
+### Fixed
+
+- Downloads in the Browser. A video (or any file from a site that checks cookies or the referrer) could come out as a `.bin` file with nothing in it, or not at all: the file was asked for a second time by Android's DownloadManager, without what the page had sent. The file Firefox's engine already fetched is now saved as it is, with its type's extension when the name has none, and a name that is taken gets "(1)", "(2)" instead of being replaced.
+- The Browser's page still stayed drawn on the desktop after the window was minimised and the phone's recent apps were opened and closed: the fix in 3.4.3, making the page inactive, was not enough. Gecko draws into a SurfaceView, which the system shows again with the launcher's window even though the minimised window above it had hidden it. The minimised window's page is now also let go of by its view, and taken back when the window comes back (the page keeps its place: it is not reloaded).
+
 ## [3.4.3] - 2026-11-28
 
 ### Added
