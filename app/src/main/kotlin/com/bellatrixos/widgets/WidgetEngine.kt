@@ -1234,7 +1234,8 @@ class WidgetEngine(
                 "`bellatrix calendar [days]`, `bellatrix airpods` and `bellatrix battery` (JSON; `bellatrix --help` says more), where the " +
                 "launcher was allowed them. `bellatrix apps` lists what is on home: the icons on the desktop and the apps pinned to the taskbar, with their " +
                 "names and packages, and the file of home's tiles and widgets (JSON). `bellatrix notify <title> [text]` puts a notification on the phone, to tell the user something " +
-                "they should know while away, such as a long task being done; `bellatrix share <file>...` opens Android's share sheet for " +
+                "they should know while away, such as a long task being done; `bellatrix notify --reply <title> [text]` adds a Reply button and waits up to 110 seconds for " +
+                "what the user types, which it prints as JSON ({\"reply\": \"...\"}), so you can ask a question and read the answer (it exits 1 when it is dismissed or not answered); `bellatrix share <file>...` opens Android's share sheet for " +
                 "files, to send them on with an app the user picks.\n"
     }
 }

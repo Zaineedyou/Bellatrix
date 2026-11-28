@@ -158,6 +158,7 @@
     <string name="linux_stop_body">Closes Linux apps, terminals and coding agents, and ends whatever they were doing. Nothing is deleted. Widgets and apps that need Linux wait until you start it here again.</string>
     <string name="linux_stop_confirm">Stop</string>
     <string name="linux_notify_channel">Agents and scripts</string>
+    <string name="linux_notify_reply">回复</string>
     <string name="share_in_saving">Saving to Linux…</string>
     <string name="share_in_saved">Saved to ~/Downloads</string>
     <string name="share_in_failed">Couldn\'t save it to Linux</string>

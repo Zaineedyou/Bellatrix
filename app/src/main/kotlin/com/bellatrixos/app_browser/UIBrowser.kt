@@ -373,6 +373,29 @@ class UIBrowser : UIFragment(), BackPressHandler {
         super.onDestroy()
     }
 
+    /** Whether the window is on screen: not minimised and not behind another Activity (the recent apps, say). */
+    fun showsPages(): Boolean = isResumed && !isHidden
+
+    /** Gecko draws into a surface of its own, so a page of a minimised or stopped window must stop drawing. */
+    private fun syncPages() {
+        z0?.y0?.setActive(showsPages())
+    }
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        syncPages()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        z0?.y0?.setActive(false)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        syncPages()
+    }
+
     /** Nama asli hasil dekompilasi: C(). */
     fun C() {
         if (Extensions.browser?.get() === this) Extensions.browser = null

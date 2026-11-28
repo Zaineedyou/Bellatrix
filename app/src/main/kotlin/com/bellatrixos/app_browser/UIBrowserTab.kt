@@ -175,7 +175,8 @@ class UIBrowserTab : Fragment() {
         web.onCloseRequest = { w0?.navigate("about:blank") }
         web.onDownload = { response ->
             val context = s0
-            if (context != null) Downloader.handle(context, response, null, null, viewLifecycleOwner)
+            // The browser's own download popup and button, as the web app passes its own: with null the popup never showed.
+            if (context != null) Downloader.handle(context, response, w0?.a1, w0?.T0, viewLifecycleOwner)
         }
         GeckoPrompts.install(web.session, { s0 }) { prompt -> chooseFiles(prompt) }
         web.session.permissionDelegate =

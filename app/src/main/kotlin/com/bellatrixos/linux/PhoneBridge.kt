@@ -23,7 +23,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.PowerManager
 import androidx.core.content.FileProvider
+import com.bellatrixos.system.NotifyReply
 import com.bellatrixos.system.postNotification
+import com.bellatrixos.system.postReplyNotification
 import com.bellatrixos.upgrade.Managed
 import com.bellatrixos.upgrade.Policy
 import com.bellatrixos.upgrade.writeAtomically
@@ -117,7 +119,7 @@ class PhoneBridge(
                     "battery" -> battery()
                     "share" -> share(args.drop(1).filter { it.isNotEmpty() })
                     "version" -> Answer.Ok(Obj(mapOf("version" to Str(BuildConfig.VERSION_NAME), "versionCode" to Num(BuildConfig.VERSION_CODE.toDouble()), "commands" to Lst(COMMANDS.map(::Str)))))
-                    "notify" -> notify(args.getOrNull(1).orEmpty(), args.getOrNull(2)?.takeIf { it.isNotEmpty() })
+                    "notify" -> notify(args.getOrNull(1).orEmpty(), args.getOrNull(2)?.takeIf { it.isNotEmpty() }, args.getOrNull(3) == "reply")
                     "airpods" -> airpods(args.getOrNull(1)?.takeIf { it.isNotEmpty() }, args.getOrNull(2))
                     "folders" -> withContext(Dispatchers.IO) { folders() }
                     "apps" -> withContext(Dispatchers.IO) { apps() }
@@ -155,14 +157,26 @@ class PhoneBridge(
         return Answer.Ok(Lst(events))
     }
 
-    /** A notification on the phone, which opens the home screen; posted, it prints nothing. */
-    private fun notify(
+    /**
+     * A notification on the phone, which opens the home screen; posted, it prints nothing. With [reply] it has a Reply
+     * button and waits up to [REPLY_MS] for what the user types, which it prints as {reply}.
+     */
+    private suspend fun notify(
         title: String,
         text: String?,
+        reply: Boolean,
     ): Answer {
         if (title.isBlank()) return Answer.Usage("notify: a title")
-        val posted = context.postNotification(NOTIFY_CHANNEL, context.getString(R.string.linux_notify_channel), title, text)
-        return if (posted) Answer.Ok(null) else Answer.Denied(NO_NOTIFICATIONS)
+        val channelName = context.getString(R.string.linux_notify_channel)
+        if (!reply) {
+            val posted = context.postNotification(NOTIFY_CHANNEL, channelName, title, text)
+            return if (posted) Answer.Ok(null) else Answer.Denied(NO_NOTIFICATIONS)
+        }
+        return when (val r = context.postReplyNotification(NOTIFY_CHANNEL, channelName, title, text, context.getString(R.string.linux_notify_reply), REPLY_MS)) {
+            is NotifyReply.Typed -> Answer.Ok(Obj(mapOf("reply" to Str(r.text))))
+            NotifyReply.Unanswered -> Answer.Error("no reply: the notification was dismissed, or not answered within ${REPLY_MS / 1000} s")
+            NotifyReply.Off -> Answer.Denied(NO_NOTIFICATIONS)
+        }
     }
 
     /** android.battery's fields, and whether the phone is saving power. */
@@ -406,6 +420,8 @@ class PhoneBridge(
         const val CONTROL_MS = 2_000L
         /** Under the script's 2 minutes, so a picker left open says nothing was picked. */
         const val PICK_MS = 110_000L
+        /** Under the script's 2 minutes too, so a notification left unanswered says so. */
+        const val REPLY_MS = 110_000L
         const val DOWNLOADS = "/root/Downloads"
         const val DAYS = 14
         const val MAX_DAYS = 366

@@ -9,6 +9,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.4.3] - 2026-11-28
+
+### Added
+
+- Notifications that take a reply. `bellatrix notify --reply <title> [text]` posts the notification with a Reply button, as a messaging app's has, and waits up to 110 seconds for what the user types, which it prints as `{"reply": "..."}`, so an agent or a script in Linux can ask a question and read the answer. It exits 1 when the notification is dismissed or not answered, and 3 when the launcher may not post notifications, as `notify` does. The agents' `AGENTS.md` in the phone's Linux tells them about it.
+
+### Fixed
+
+- The Browser now shows its download popup, and the download button changes, when a download finishes or fails, as the web apps already did. The Browser passed none of them to the downloader, so a file still arrived in the phone's Download folder but with nothing to say so.
+- The Browser's page no longer stays drawn on the desktop after the window is minimised and the phone's recent apps are opened and closed. A page now stops drawing (Gecko's inactive state) while its window is minimised, in the background, or on a tab that is not in front, and draws again when it comes back.
+
 ## [3.4.2] - 2026-11-28
 
 ### Changed

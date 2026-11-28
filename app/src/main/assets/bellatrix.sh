@@ -28,6 +28,10 @@ usage: bellatrix location       {lat, lon, accuracy (metres), time}, approximate
        bellatrix notify <title> [text]
                                   a notification on the phone (tapped, it opens
                                   the home screen); prints nothing
+       bellatrix notify --reply <title> [text]
+                                  the same with a Reply button, waiting up to
+                                  110 s for what the user types: {reply}; exits
+                                  1 when it is dismissed or not answered
        bellatrix share <file>...
                                   Android's share sheet for the files, for the
                                   user to pick an app; prints nothing
@@ -82,10 +86,11 @@ case $1 in
   -h | --help | help) usage help ;;
   --version) set -- version ;;
 esac
-# No command has options yet: one given is refused, so adding some later breaks no script.
+# Only notify has an option (--reply); any other given is refused, so adding some later breaks no script.
 cmd=$1
 shift
 words=()
+reply=
 while [ $# -gt 0 ]; do
   case $1 in
     --)
@@ -94,6 +99,13 @@ while [ $# -gt 0 ]; do
       break
       ;;
     -h | --help) usage help ;;
+    --reply)
+      if [ "$cmd" != notify ]; then
+        echo "bellatrix: $cmd has no option $1 (put -- before a word that starts with -)" >&2
+        exit 2
+      fi
+      reply=1
+      ;;
     -?*)
       echo "bellatrix: $cmd has no option $1 (put -- before a word that starts with -)" >&2
       exit 2
@@ -108,7 +120,11 @@ case $1 in
   ls) [ $# -le 2 ] || usage ;;
   calendar) [ $# -le 2 ] || usage ;;
   airpods) [ $# -le 3 ] || usage ;;
-  notify) [ $# -ge 2 ] && [ $# -le 3 ] && [ -n "$2" ] || usage ;;
+  notify)
+    [ $# -ge 2 ] && [ $# -le 3 ] && [ -n "$2" ] || usage
+    # A fourth word tells the launcher to wait for a typed reply.
+    [ -z "$reply" ] || set -- notify "$2" "${3-}" reply
+    ;;
   share)
     [ $# -ge 2 ] || usage
     args=(share)

@@ -55,8 +55,8 @@ android {
         // GeckoView 145 and newer need Android 8.
         minSdk = 26
         targetSdk = 36
-        versionCode = 102
-        versionName = "3.4.2"
+        versionCode = 103
+        versionName = "3.4.3"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 

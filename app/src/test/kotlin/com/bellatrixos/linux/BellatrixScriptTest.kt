@@ -114,6 +114,34 @@ class BellatrixScriptTest {
         assertEquals(listOf("notify", "-5 degrees", "--out"), received)
     }
 
+    /** `--reply` is notify's one option: it asks the launcher to wait for a typed reply, with a fourth word. */
+    @Test fun notifyReplyAsksTheLauncherForTheTypedReply() {
+        answer = { "ok\n{\"reply\":\"ship it\"}" }
+        val r = run("notify", "--reply", "ship it?", "tests passed")
+        assertEquals(r.err, 0, r.code)
+        assertEquals("{\"reply\":\"ship it\"}\n", r.out)
+        assertEquals(listOf("notify", "ship it?", "tests passed", "reply"), received)
+        assertEquals(0, run("notify", "--reply", "--", "-5 degrees").code)
+        assertEquals(listOf("notify", "-5 degrees", "", "reply"), received)
+    }
+
+    @Test fun noReplyExitsOne() {
+        answer = { "error: no reply: the notification was dismissed" }
+        val r = run("notify", "--reply", "ok?")
+        assertEquals(1, r.code)
+        assertEquals("", r.out)
+        assertEquals("bellatrix: no reply: the notification was dismissed\n", r.err)
+    }
+
+    @Test fun replyBelongsToNotifyOnly() {
+        for (args in listOf(arrayOf("battery", "--reply"), arrayOf("share", "--reply", "a.txt"), arrayOf("notify", "--reply"), arrayOf("notify", "--reply", ""))) {
+            val r = run(*args)
+            assertEquals(args.joinToString(" "), 2, r.code)
+            assertEquals("", r.out)
+        }
+        assertEquals(null, received)
+    }
+
     @Test fun textSpansLines() {
         assertEquals(0, run("notify", "build", "line one\nline two").code)
         assertEquals(listOf("notify", "build", "line one\nline two"), received)

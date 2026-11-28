@@ -158,6 +158,7 @@
     <string name="linux_stop_body">Closes Linux apps, terminals and coding agents, and ends whatever they were doing. Nothing is deleted. Widgets and apps that need Linux wait until you start it here again.</string>
     <string name="linux_stop_confirm">Stop</string>
     <string name="linux_notify_channel">Agents and scripts</string>
+    <string name="linux_notify_reply">Reply</string>
     <string name="packages_title">Packages</string>
     <string name="packages_search">Search packages</string>
     <string name="packages_intro">Void Linux packages via xbps. Installing also updates the system, so it can take a while.</string>
