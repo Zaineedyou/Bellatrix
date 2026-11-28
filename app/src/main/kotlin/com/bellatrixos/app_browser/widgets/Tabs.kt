@@ -11,14 +11,20 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.bellatrixos.R
 import com.bellatrixos.app_browser.UIBrowser
+import com.bellatrixos.app_browser.Extensions
 import com.bellatrixos.app_browser.UIBrowserTab
 import com.bellatrixos.app_browser.utils.Actions
 import com.bellatrixos.windows.Windows
+import org.mozilla.geckoview.GeckoSession
 
 /** Pengelola tab pada UIBrowser. */
 class Tabs(@JvmField val f4655a: android.content.Context, @JvmField val b: UIBrowser) {
 
-    fun a(str: String) {
+    /**
+     * Opens [str] in a new tab. With [ready] the tab loads nothing itself and hands its session over instead, for
+     * a page an extension opens: Gecko loads that one into the session.
+     */
+    fun a(str: String, ready: ((GeckoSession) -> Unit)? = null) {
         val tab = UIBrowserTab()
         val fm: FragmentManager = b.childFragmentManager
         val tx: FragmentTransaction = fm.beginTransaction()
@@ -63,7 +69,7 @@ class Tabs(@JvmField val f4655a: android.content.Context, @JvmField val b: UIBro
         tab.x0 = item.findViewById(R.id.tabTitle)
         Actions.a(b.H0, b.x0)
         tab.v0 = Runnable {
-            tab.y0?.loadUrl(str)
+            if (ready == null) tab.y0?.loadUrl(str) else tab.y0?.session?.let(ready)
             b(tab, item)
         }
     }
@@ -73,6 +79,8 @@ class Tabs(@JvmField val f4655a: android.content.Context, @JvmField val b: UIBro
         if (tab == null || view == null) return
         if (!browser.isAdded || !tab.isAdded) return
         val current = browser.z0
+        current?.y0?.session?.let { Extensions.setTabActive(it, false) }
+        tab.y0?.session?.let { Extensions.setTabActive(it, true) }
         if (current != null) {
             val tx = browser.childFragmentManager.beginTransaction()
             tx.hide(current)

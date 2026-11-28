@@ -246,6 +246,23 @@
     <color name="ui_browser_titlebar_bg">#ffffff</color>
     <color name="ui_browser_txt_primary">#251e47</color>
     <color name="ui_browser_ui_tint">#0b57d0</color>
+    <!-- Firefox (Proton) browser chrome -->
+    <color name="ff_frame">#f0f0f4</color>
+    <color name="ff_toolbar">#f9f9fb</color>
+    <color name="ff_tab_selected">#ffffff</color>
+    <color name="ff_tab_border">#dcdce2</color>
+    <color name="ff_tab_hover">#1215141a</color>
+    <color name="ff_field">#f0f0f4</color>
+    <color name="ff_field_hover">#e0e0e6</color>
+    <color name="ff_field_focus">#ffffff</color>
+    <color name="ff_accent">#0061e0</color>
+    <color name="ff_icon">#5b5b66</color>
+    <color name="ff_text">#15141a</color>
+    <color name="ff_text_secondary">#5b5b66</color>
+    <color name="ff_border">#cfcfd8</color>
+    <color name="ff_menu_bg">#ffffff</color>
+    <color name="ff_btn_hover">#1415141a</color>
+    <color name="ff_btn_pressed">#2115141a</color>
     <color name="ui_card_bg">#99ffffff</color>
     <color name="ui_card_bg_dark">#ccf4f4f4</color>
     <color name="ui_card_border">#e5e5e5</color>

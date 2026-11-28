@@ -85,7 +85,7 @@ This is also not Windows 365 cloud PC."</string>
     <string name="app_privacy_policy_ok_before">OK, I understand (%ss)</string>
     <string name="app_settings">UiSettings</string>
     <string name="app_start">Start</string>
-    <string name="app_ui_version">3.3.2</string>
+    <string name="app_ui_version">3.4.0</string>
     <string name="app_video">UiVideo</string>
     <string name="app_web_cache_enabled">Cache enabled</string>
     <string name="app_web_link_copied">Link Copied</string>
@@ -98,7 +98,7 @@ This is also not Windows 365 cloud PC."</string>
     <string name="bottom_sheet_behavior">com.google.android.material.bottomsheet.BottomSheetBehavior</string>
     <string name="bottomsheet_action_expand_halfway">Expand halfway</string>
     <string name="browser_app_installed_success">App installed successfully</string>
-    <string name="browser_ct_menu_about">About Chromium</string>
+    <string name="browser_ct_menu_about">About UiFirefox</string>
     <string name="browser_ct_menu_exit">Exit</string>
     <string name="browser_ct_menu_find">Find in page</string>
     <string name="browser_ct_menu_translate">Translate</string>
@@ -108,7 +108,7 @@ This is also not Windows 365 cloud PC."</string>
     <string name="browser_dialog_permission_info">Microphone and camera access is required to use this feature.</string>
     <string name="browser_installer_title">Install as App</string>
     <string name="browser_scale_info">Default scale factor</string>
-    <string name="browser_search_hint">Search or type a URL</string>
+    <string name="browser_search_hint">Search or enter address</string>
     <string name="browser_tab_close">Close this tab</string>
     <string name="browser_tab_new">New tab</string>
     <string name="browser_zoom_value">Zoom: %1$d%%  </string>

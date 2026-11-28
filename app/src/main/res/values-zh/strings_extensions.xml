@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ext_button_desc">扩展</string>
+    <string name="ext_panel_title">扩展</string>
+    <string name="ext_none">尚未安装扩展</string>
+    <string name="ext_manage">管理扩展</string>
+    <string name="ext_find_more">查找更多附加组件</string>
+    <string name="ext_menu_addons">附加组件</string>
+    <string name="ext_manager_title">附加组件</string>
+    <string name="ext_options">选项</string>
+    <string name="ext_enable">启用</string>
+    <string name="ext_disable">停用</string>
+    <string name="ext_remove">移除</string>
+    <string name="ext_version">版本 %1$s</string>
+    <string name="ext_disabled">已停用</string>
+    <string name="ext_remove_title">移除 %1$s？</string>
+    <string name="ext_remove_message">这也会删除该扩展保存的数据。</string>
+    <string name="ext_add_title">添加 %1$s？</string>
+    <string name="ext_add">添加</string>
+    <string name="ext_update_title">更新 %1$s？</string>
+    <string name="ext_update">更新</string>
+    <string name="ext_optional_title">%1$s 请求更多权限</string>
+    <string name="ext_allow">允许</string>
+    <string name="ext_prompt_intro">此扩展可以：</string>
+    <string name="ext_prompt_none">此扩展不需要特殊权限。</string>
+    <string name="ext_prompt_all_sites">访问你在所有网站上的数据</string>
+    <string name="ext_prompt_some_sites">访问你在以下网站上的数据：%1$s</string>
+    <string name="ext_installed">已添加 %1$s</string>
+    <string name="ext_removed">已移除 %1$s</string>
+    <string name="ext_install_failed">无法添加该扩展（错误 %1$d）</string>
+    <string name="browser_tabs_list">列出所有标签页</string>
+</resources>

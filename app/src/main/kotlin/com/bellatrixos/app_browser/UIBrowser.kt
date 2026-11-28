@@ -22,6 +22,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.util.Supplier
@@ -48,7 +49,9 @@ import com.bellatrixos.windows.WindowSize
 import com.bellatrixos.windows.Windows
 import com.bellatrixos.windows.drivers.Display
 import com.bellatrixos.windows.installed_apps.models.InstalledApp
+import java.lang.ref.WeakReference
 import java.net.URLEncoder
+import org.mozilla.geckoview.GeckoSession
 
 /** Browser WebView bawaan, port lengkap dari kelas UIBrowser hasil dekompilasi. */
 class UIBrowser : UIFragment(), BackPressHandler {
@@ -68,6 +71,10 @@ class UIBrowser : UIFragment(), BackPressHandler {
     @JvmField var M0: ImageButton? = null
     @JvmField var N0: ImageButton? = null
     @JvmField var O0: ImageButton? = null
+
+    /** Firefox's Extensions button; the popup of an extension opens under it. */
+    @JvmField var extensionsButton: ImageButton? = null
+    private var listTabsButton: ImageButton? = null
     @JvmField var P0: ImageButton? = null
     @JvmField var Q0: ImageButton? = null
     @JvmField var R0: ImageButton? = null
@@ -282,6 +289,8 @@ class UIBrowser : UIFragment(), BackPressHandler {
             S0?.setOnClickListener { toolbarAction(3) }
             T0?.setOnClickListener { toolbarAction(4) }
             O0?.setOnClickListener { toolbarAction(5) }
+            extensionsButton?.setOnClickListener { button -> ExtensionUi.showPanel(button.context, button) }
+            listTabsButton?.setOnClickListener { showTabList() }
 
             if (Clipboard.b == null || Clipboard.c == null) {
                 val manager = context.getSystemService("clipboard") as? ClipboardManager ?: return
@@ -324,6 +333,8 @@ class UIBrowser : UIFragment(), BackPressHandler {
         T0 = view.findViewById(R.id.btn_downloads)
         J0 = view.findViewById(R.id.btn_downloads_circle)
         O0 = view.findViewById(R.id.btn_install_ext)
+        extensionsButton = view.findViewById(R.id.btn_extensions)
+        listTabsButton = view.findViewById(R.id.btn_list_tabs)
         H0 = view.findViewById(R.id.tabScrollView)
         F0 = view.findViewById(R.id.overlay_container)
         G0 = view.findViewById(R.id.fullscreen_container)
@@ -342,6 +353,7 @@ class UIBrowser : UIFragment(), BackPressHandler {
         val floating = y0 ?: return
         WindowSize.e(view, floating, d1, A0 ?: view, activity, this)
         B0 = Windows.d(d1, "UIBrowser")
+        Extensions.browser = WeakReference(this)
         val resizeListener = com.bellatrixos.app_browser.b(this, view)
         d1.f4870e = resizeListener
         view.viewTreeObserver.addOnGlobalLayoutListener(AnonymousClass1(view))
@@ -363,6 +375,7 @@ class UIBrowser : UIFragment(), BackPressHandler {
 
     /** Nama asli hasil dekompilasi: C(). */
     fun C() {
+        if (Extensions.browser?.get() === this) Extensions.browser = null
         val settings = E0
         if (settings != null && settings.isShowing) settings.dismiss()
         val finder = b1
@@ -435,6 +448,7 @@ class UIBrowser : UIFragment(), BackPressHandler {
 
     override fun j0(z: Boolean) {
         Y0 = z
+        if (z) Extensions.browser = WeakReference(this)
         y0?.setFocusState(z)
     }
 
@@ -442,6 +456,29 @@ class UIBrowser : UIFragment(), BackPressHandler {
     override fun k0(str: String?) {
         w0?.a(str ?: DEFAULT_URL)
         contentView?.bringToFront()
+    }
+
+    /** Opens a tab for an extension (tabs.create); [ready] gets its session, which Gecko then loads the page into. */
+    fun openExtensionTab(ready: (GeckoSession) -> Unit) {
+        w0?.a("about:blank", ready)
+        contentView?.bringToFront()
+    }
+
+    /** Firefox's "List all tabs": a menu of the open tabs, to jump to one. */
+    private fun showTabList() {
+        val anchor = listTabsButton ?: return
+        val context = u0 ?: return
+        val open = c1.filterIsInstance<UIBrowserTab>()
+        val menu = PopupMenu(context, anchor)
+        open.forEachIndexed { index, tab ->
+            val title = tab.x0?.text?.toString().orEmpty()
+            menu.menu.add(0, index, index, title.ifBlank { context.getString(R.string.browser_tab_new) })
+        }
+        menu.setOnMenuItemClickListener { item ->
+            open.getOrNull(item.itemId)?.let { w0?.b(it, it.t0) }
+            true
+        }
+        menu.show()
     }
 
     override fun m0(z: Boolean) {

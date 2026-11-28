@@ -7,6 +7,7 @@ import android.widget.FrameLayout
 import com.bellatrixos.windows.Windows
 import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoRuntime
+import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoSessionSettings
 import org.mozilla.geckoview.GeckoView
@@ -19,7 +20,19 @@ object GeckoEngine {
 
     /** Main thread only. */
     fun runtime(context: Context): GeckoRuntime =
-        runtime ?: GeckoRuntime.create(context.applicationContext).also { runtime = it }
+        runtime ?: createRuntime(context.applicationContext).also { runtime = it }
+
+    private fun createRuntime(app: Context): GeckoRuntime {
+        // addons.mozilla.org's "Add to Firefox" button reaches the engine through mozAddonManager, which is off unless asked for.
+        // Extensions run in a process of their own, as in Firefox for Android.
+        val settings =
+            GeckoRuntimeSettings
+                .Builder()
+                .extensionsWebAPIEnabled(true)
+                .extensionsProcessEnabled(true)
+                .build()
+        return GeckoRuntime.create(app, settings).also { Extensions.attach(it) }
+    }
 
     /** The pages' text size in percent. Gecko has one for the whole engine, so every tab follows the last one set. */
     fun zoom(
@@ -103,6 +116,17 @@ class GeckoTabView
             // Lets the phone's password manager offer the saved account on a sign-in form.
             geckoView.setAutofillEnabled(true)
             attach(session)
+            Extensions.onSession(this)
+        }
+
+        /** An extension asked to close this tab (tabs.remove); set by the tab that owns the view. */
+        var onExtensionClose: (() -> Unit)? = null
+
+        /** Closes the tab for an extension. False when nothing here can close it. */
+        fun closeFromExtension(): Boolean {
+            val close = onExtensionClose ?: return false
+            close()
+            return true
         }
 
         private fun newSession(): GeckoSession =

@@ -40,7 +40,7 @@ using Bellatrix UI — there is no second home screen or parallel desktop to swi
 ### Workspace apps
 
 - **File Explorer** — browse, edit, share, and open files in guest apps
-- **Browser** — tabs, downloads, finder, and address-bar search
+- **Browser** — Firefox-style tabs, downloads, finder, address-bar search, and Firefox add-ons from addons.mozilla.org
 - **Notepad**, **music**, **video**, and **image viewer**
 - **Installer** for Android packages
 - **Terminal** with one taskbar window and reuse-on-tap behavior

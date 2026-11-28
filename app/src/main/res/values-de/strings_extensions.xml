@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ext_button_desc">Erweiterungen</string>
+    <string name="ext_panel_title">Erweiterungen</string>
+    <string name="ext_none">Keine Erweiterungen installiert</string>
+    <string name="ext_manage">Erweiterungen verwalten</string>
+    <string name="ext_find_more">Weitere Add-ons finden</string>
+    <string name="ext_menu_addons">Add-ons</string>
+    <string name="ext_manager_title">Add-ons</string>
+    <string name="ext_options">Optionen</string>
+    <string name="ext_enable">Aktivieren</string>
+    <string name="ext_disable">Deaktivieren</string>
+    <string name="ext_remove">Entfernen</string>
+    <string name="ext_version">Version %1$s</string>
+    <string name="ext_disabled">Deaktiviert</string>
+    <string name="ext_remove_title">%1$s entfernen?</string>
+    <string name="ext_remove_message">Damit werden auch die Daten gelöscht, die die Erweiterung gespeichert hat.</string>
+    <string name="ext_add_title">%1$s hinzufügen?</string>
+    <string name="ext_add">Hinzufügen</string>
+    <string name="ext_update_title">%1$s aktualisieren?</string>
+    <string name="ext_update">Aktualisieren</string>
+    <string name="ext_optional_title">%1$s möchte weitere Berechtigungen</string>
+    <string name="ext_allow">Erlauben</string>
+    <string name="ext_prompt_intro">Diese Erweiterung kann:</string>
+    <string name="ext_prompt_none">Diese Erweiterung braucht keine besonderen Berechtigungen.</string>
+    <string name="ext_prompt_all_sites">Auf deine Daten auf allen Websites zugreifen</string>
+    <string name="ext_prompt_some_sites">Auf deine Daten auf diesen Websites zugreifen: %1$s</string>
+    <string name="ext_installed">%1$s hinzugefügt</string>
+    <string name="ext_removed">%1$s entfernt</string>
+    <string name="ext_install_failed">Die Erweiterung konnte nicht hinzugefügt werden (Fehler %1$d)</string>
+    <string name="browser_tabs_list">Alle Tabs auflisten</string>
+</resources>

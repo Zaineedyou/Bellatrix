@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:background="@drawable/ui_browser_btn_subtle" android:paddingStart="16.0dp" android:paddingEnd="8.0dp" android:paddingTop="6.0dp" android:paddingBottom="6.0dp" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@+id/ext_icon" android:layout_width="32.0dp" android:layout_height="32.0dp" android:src="@drawable/ff_ic_extensions" android:scaleType="fitCenter" android:padding="2.0dp" android:contentDescription="@null" />
+    <LinearLayout android:orientation="vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0" android:layout_marginStart="12.0dp" android:layout_marginEnd="8.0dp">
+        <TextView android:textSize="14.0sp" android:textColor="@color/ff_text" android:ellipsize="end" android:id="@+id/ext_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="1" />
+        <TextView android:textSize="12.0sp" android:textColor="@color/ff_text_secondary" android:ellipsize="end" android:id="@+id/ext_sub" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="2" />
+    </LinearLayout>
+    <TextView android:textSize="11.0sp" android:textColor="#ffffff" android:id="@+id/ext_badge" android:background="@drawable/ff_badge_bg" android:paddingStart="6.0dp" android:paddingEnd="6.0dp" android:paddingTop="1.0dp" android:paddingBottom="1.0dp" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="1" android:layout_marginEnd="4.0dp" />
+    <androidx.appcompat.widget.SwitchCompat android:id="@+id/ext_switch" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="4.0dp" android:contentDescription="@string/ext_enable" />
+    <ImageButton android:id="@+id/ext_more" android:background="@drawable/ff_btn_toolbar" android:padding="5.0dp" android:layout_width="32.0dp" android:layout_height="32.0dp" android:src="@drawable/ic_nav_more_vertical_18_regular" android:scaleType="centerInside" android:contentDescription="@string/ext_manage" />
+</LinearLayout>

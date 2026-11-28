@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:paddingTop="12.0dp" android:paddingBottom="6.0dp" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="16.0sp" android:textStyle="bold" android:textColor="@color/ff_text" android:paddingStart="16.0dp" android:paddingEnd="16.0dp" android:paddingBottom="8.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ext_panel_title" />
+    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:scrollbars="none">
+        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:id="@+id/extensions_list" android:layout_width="match_parent" android:layout_height="wrap_content" />
+            <TextView android:textSize="13.0sp" android:textColor="@color/ff_text_secondary" android:id="@+id/extensions_empty" android:paddingStart="16.0dp" android:paddingEnd="16.0dp" android:paddingTop="8.0dp" android:paddingBottom="12.0dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ext_none" />
+        </LinearLayout>
+    </ScrollView>
+    <View android:background="@color/ff_border" android:layout_width="match_parent" android:layout_height="1.0dp" android:layout_marginTop="4.0dp" android:layout_marginBottom="4.0dp" />
+    <TextView android:textSize="14.0sp" android:textColor="@color/ff_text" android:id="@+id/extensions_manage" android:background="@drawable/ui_browser_btn_subtle" android:paddingStart="16.0dp" android:paddingEnd="16.0dp" android:paddingTop="10.0dp" android:paddingBottom="10.0dp" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ext_manage" />
+    <TextView android:textSize="14.0sp" android:textColor="@color/ff_text" android:id="@+id/extensions_find" android:background="@drawable/ui_browser_btn_subtle" android:paddingStart="16.0dp" android:paddingEnd="16.0dp" android:paddingTop="10.0dp" android:paddingBottom="10.0dp" android:focusable="true" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ext_find_more" />
+</LinearLayout>

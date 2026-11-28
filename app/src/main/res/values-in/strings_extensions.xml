@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ext_button_desc">Ekstensi</string>
+    <string name="ext_panel_title">Ekstensi</string>
+    <string name="ext_none">Belum ada ekstensi terpasang</string>
+    <string name="ext_manage">Kelola ekstensi</string>
+    <string name="ext_find_more">Cari add-on lainnya</string>
+    <string name="ext_menu_addons">Add-on</string>
+    <string name="ext_manager_title">Add-on</string>
+    <string name="ext_options">Opsi</string>
+    <string name="ext_enable">Aktifkan</string>
+    <string name="ext_disable">Nonaktifkan</string>
+    <string name="ext_remove">Hapus</string>
+    <string name="ext_version">Versi %1$s</string>
+    <string name="ext_disabled">Nonaktif</string>
+    <string name="ext_remove_title">Hapus %1$s?</string>
+    <string name="ext_remove_message">Data yang disimpan ekstensi ini juga akan dihapus.</string>
+    <string name="ext_add_title">Tambahkan %1$s?</string>
+    <string name="ext_add">Tambahkan</string>
+    <string name="ext_update_title">Perbarui %1$s?</string>
+    <string name="ext_update">Perbarui</string>
+    <string name="ext_optional_title">%1$s meminta izin tambahan</string>
+    <string name="ext_allow">Izinkan</string>
+    <string name="ext_prompt_intro">Ekstensi ini dapat:</string>
+    <string name="ext_prompt_none">Ekstensi ini tidak meminta izin khusus.</string>
+    <string name="ext_prompt_all_sites">Mengakses data kamu di semua situs web</string>
+    <string name="ext_prompt_some_sites">Mengakses data kamu di: %1$s</string>
+    <string name="ext_installed">%1$s ditambahkan</string>
+    <string name="ext_removed">%1$s dihapus</string>
+    <string name="ext_install_failed">Ekstensi tidak dapat ditambahkan (kesalahan %1$d)</string>
+    <string name="browser_tabs_list">Daftar semua tab</string>
+</resources>

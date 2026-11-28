@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.net.Uri
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
+import com.bellatrixos.R
 import com.bellatrixos.app_browser.widgets.dialogs.a
 
 /** Address bar browser dengan tampilan URL terformat dan perilaku fokus. */
@@ -19,7 +20,7 @@ class AddressBarView @JvmOverloads constructor(context: Context, attrs: Attribut
         fun a(str: String?): String {
             if (str.isNullOrEmpty()) return ""
             val uri = Uri.parse(str)
-            var host = uri.host
+            val host = uri.host
             val path = uri.path
             val query = uri.query
             if ("www.google.com".equals(host, ignoreCase = true) &&
@@ -27,10 +28,9 @@ class AddressBarView @JvmOverloads constructor(context: Context, attrs: Attribut
             ) {
                 return ""
             }
-            if (host != null && host.startsWith("www.")) {
-                host = host.substring(4)
-            }
+            // Firefox keeps "www." and a plain http:// in the address bar, and drops only https://.
             val sb = StringBuilder()
+            if ("http".equals(uri.scheme, ignoreCase = true)) sb.append("http://")
             if (host != null) sb.append(host)
             if (path != null && path != "/") sb.append(path)
             if (!query.isNullOrEmpty()) {
@@ -52,8 +52,21 @@ class AddressBarView @JvmOverloads constructor(context: Context, attrs: Attribut
         setOnClickListener(a(6, this))
     }
 
+    /** A magnifier while typing, otherwise a lock for https, an "i" for http, a magnifier for the rest. */
+    private fun updateIdentity(editing: Boolean) {
+        val icon =
+            when {
+                editing -> R.drawable.ff_ic_search
+                AddressIdentity.of(y) == AddressIdentity.SECURE -> R.drawable.ff_ic_lock
+                AddressIdentity.of(y) == AddressIdentity.INSECURE -> R.drawable.ff_ic_info
+                else -> R.drawable.ff_ic_search
+            }
+        setCompoundDrawablesRelativeWithIntrinsicBounds(icon, 0, 0, 0)
+    }
+
     override fun onFocusChanged(focused: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect)
+        updateIdentity(focused)
         if (focused) {
             post {
                 setSelection(0, text?.length ?: 0)
@@ -70,5 +83,6 @@ class AddressBarView @JvmOverloads constructor(context: Context, attrs: Attribut
         y = str ?: ""
         setText(a(y))
         z = false
+        updateIdentity(hasFocus())
     }
 }

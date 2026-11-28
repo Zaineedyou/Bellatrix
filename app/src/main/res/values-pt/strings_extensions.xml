@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ext_button_desc">Extensões</string>
+    <string name="ext_panel_title">Extensões</string>
+    <string name="ext_none">Nenhuma extensão instalada</string>
+    <string name="ext_manage">Gerenciar extensões</string>
+    <string name="ext_find_more">Encontrar mais complementos</string>
+    <string name="ext_menu_addons">Complementos</string>
+    <string name="ext_manager_title">Complementos</string>
+    <string name="ext_options">Opções</string>
+    <string name="ext_enable">Ativar</string>
+    <string name="ext_disable">Desativar</string>
+    <string name="ext_remove">Remover</string>
+    <string name="ext_version">Versão %1$s</string>
+    <string name="ext_disabled">Desativada</string>
+    <string name="ext_remove_title">Remover %1$s?</string>
+    <string name="ext_remove_message">Isso também remove os dados que a extensão salvou.</string>
+    <string name="ext_add_title">Adicionar %1$s?</string>
+    <string name="ext_add">Adicionar</string>
+    <string name="ext_update_title">Atualizar %1$s?</string>
+    <string name="ext_update">Atualizar</string>
+    <string name="ext_optional_title">%1$s pede mais permissões</string>
+    <string name="ext_allow">Permitir</string>
+    <string name="ext_prompt_intro">Esta extensão pode:</string>
+    <string name="ext_prompt_none">Esta extensão não pede permissões especiais.</string>
+    <string name="ext_prompt_all_sites">Acessar seus dados em todos os sites</string>
+    <string name="ext_prompt_some_sites">Acessar seus dados em: %1$s</string>
+    <string name="ext_installed">%1$s adicionada</string>
+    <string name="ext_removed">%1$s removida</string>
+    <string name="ext_install_failed">Não foi possível adicionar a extensão (erro %1$d)</string>
+    <string name="browser_tabs_list">Listar todas as abas</string>
+</resources>

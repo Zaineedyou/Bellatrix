@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -117,6 +118,8 @@ class UIBrowserTab : Fragment() {
 
     /** Hooks the page's events to this tab: its progress, title and address, its dialogs, downloads and permissions. */
     private fun wire(web: GeckoTabView) {
+        // An extension closing the tab is the person pressing its close button.
+        web.onExtensionClose = { t0?.findViewById<ImageButton>(R.id.btn_close_tab)?.performClick() }
         web.onProgress = { progress -> z0?.visibility = if (progress < 100) View.VISIBLE else View.GONE }
         web.onTitle = { title -> x0?.text = title }
         web.onPageStart = {

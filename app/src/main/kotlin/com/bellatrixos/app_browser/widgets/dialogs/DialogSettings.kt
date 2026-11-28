@@ -52,6 +52,7 @@ class DialogSettings(context: Context, installedApp: InstalledApp?) : PopupWindo
         val search = view.findViewById<TextView>(R.id.btnSearch)
         val translate = view.findViewById<TextView>(R.id.btnTranslate)
         val siteSettings = view.findViewById<TextView>(R.id.btnSiteSettings)
+        val addons = view.findViewById<TextView>(R.id.btnAddons)
         j = view.findViewById(R.id.menuContainer)
         f4663k = view.findViewById(R.id.zoomContainer)
 
@@ -59,7 +60,7 @@ class DialogSettings(context: Context, installedApp: InstalledApp?) : PopupWindo
         windowLayoutType = 1002
         elevation = 12.0f
         isFocusable = true
-        setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.ui_browser_bg_settings))
+        setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.ff_bg_menu))
 
         b = round((installedApp?.e() ?: Global.f4838e) * 100.0f).toInt()
         c = installedApp?.g() ?: 100
@@ -72,6 +73,7 @@ class DialogSettings(context: Context, installedApp: InstalledApp?) : PopupWindo
         search.setOnClickListener(com.bellatrixos.app_browser.widgets.dialogs.b(this, 5))
         translate.setOnClickListener(com.bellatrixos.app_browser.widgets.dialogs.b(this, 6))
         siteSettings.setOnClickListener { dismiss(); f4658d?.a(12, 0) }
+        addons.setOnClickListener { dismiss(); f4658d?.a(13, 0) }
         f4657a = context.resources.getDimensionPixelSize(R.dimen.ui_12dp)
         g.setOnClickListener(com.bellatrixos.app_browser.widgets.dialogs.b(this, 7))
     }

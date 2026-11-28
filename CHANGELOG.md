@@ -9,6 +9,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-11-28
+
+### Added
+
+- Firefox add-ons in the Browser. Install them from addons.mozilla.org with "Add to Firefox" (the page asks which permissions the add-on wants first), then use them from the new Extensions button next to the menu: it lists each add-on and opens its popup. "Manage extensions" turns add-ons on or off, opens their options and removes them, and "Find more add-ons" opens addons.mozilla.org. Add-ons run in their own process, as in Firefox for Android, and stay installed across restarts, and the pages they open or close in tabs work.
+- "Add-ons" in the Browser's menu, and a "List all tabs" button at the end of the tab strip, as in Firefox.
+
+### Changed
+
+- The Browser looks like Firefox instead of Chrome: rounded tabs on the window frame, a rounded address bar with a lock (https), an "i" (http) or a magnifier, flat toolbar buttons with Firefox's own colours in light and dark, and the hamburger menu. The address bar keeps "www." and "http://" as Firefox does, and the menu says "About UiFirefox" and "Search or enter address".
+
+### Fixed
+
+- The Browser no longer closes when you open Site settings (or any other list dialog or snackbar). Four layouts copied from the app libraries had lost the "$" in the name of a class nested in another one, so Android could not find `AlertController_RecycleListView` and crashed (`ClassNotFoundException`). They are named correctly again.
+
 ## [3.3.2] - 2026-11-27
 
 ### Changed
