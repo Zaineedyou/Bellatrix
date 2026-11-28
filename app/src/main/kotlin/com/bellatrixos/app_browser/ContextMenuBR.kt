@@ -10,7 +10,7 @@ import com.bellatrixos.interfaces.MainActivityIn
 /** Menu konteks untuk hasil hit-test WebView pada browser. */
 class ContextMenuBR {
     companion object {
-        /** Opens the menu at ([x], [y]) on screen for a [kind] of target: 7 is a link, 5 an image. */
+        /** Opens the menu at ([x], [y]) on screen for a [kind] of target: 7 is a link, 5 an image, 9 a video or sound. */
         @JvmStatic
         fun a(
             context: Context,
@@ -48,6 +48,11 @@ class ContextMenuBR {
                     menu.f4745d.add(
                         UIMenuItem(0, 3, 0, context.getString(R.string.context_menu_copy_img_address))
                     )
+                }
+                9 -> {
+                    menu.f4745d.add(UIMenuItem(0, 1, 0, context.getString(R.string.context_menu_open_link_new_tab)))
+                    menu.f4745d.add(UIMenuItem(0, 6, 0, context.getString(R.string.context_menu_save_as)))
+                    menu.f4745d.add(UIMenuItem(0, 4, 0, context.getString(R.string.context_menu_copy_link_address)))
                 }
                 8 -> {
                     menu.f4745d.add(UIMenuItem(0, 5, 0, "Open image in new tab"))

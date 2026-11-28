@@ -9,6 +9,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.4.5] - 2026-11-28
+
+### Fixed
+
+- Downloads in the Browser. A file now goes into Downloads through MediaStore (no "All files access" needed), then the File API, then Android's DownloadManager, so a download no longer fails silently. It is announced by the browser's popup, a toast and a system notification, and errors are logged under "Downloader".
+- "Save image as" did nothing; it now saves the image. Press-and-hold on a video or a sound now offers Save as.
+- The download button disappeared after the first download started, so the popup had nothing to open under.
+- "Open in new tab" (links, images, videos) loaded the address over the tab that was open. It now opens a new tab.
+- "Copy image" closed the app with nothing in the log. The clip it put on the clipboard contained itself, so writing it recursed until the app died. The image is now written off the main thread, the clip no longer contains itself, and a failure is logged under "CopyImage".
+
 ## [3.4.4] - 2026-11-28
 
 ### Fixed

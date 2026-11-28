@@ -74,8 +74,13 @@ class UIDownloads(context: Context) : PopupWindow(context) {
             update()
             return
         }
+        if (!view.isAttachedToWindow || view.windowToken == null) return
         b.measure(0, 0)
-        showAsDropDown(view, -(b.measuredWidth - view.width), 0)
+        try {
+            showAsDropDown(view, -(b.measuredWidth - view.width), 0)
+        } catch (e: Exception) {
+            android.util.Log.e("UIDownloads", "Popup could not show", e)
+        }
     }
 
     fun b(view: View, str: String?, i2: Int) {

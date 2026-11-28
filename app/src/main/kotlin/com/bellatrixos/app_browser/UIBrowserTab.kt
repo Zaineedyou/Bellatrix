@@ -7,6 +7,9 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +24,6 @@ import androidx.fragment.app.Fragment
 import com.bellatrixos.R
 import com.bellatrixos.app_browser.files.Downloader
 import com.bellatrixos.app_browser.files.Files
-import com.bellatrixos.app_explorer.picker.FilePicker
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -148,6 +150,11 @@ class UIBrowserTab : Fragment() {
             val hit =
                 when {
                     src != null && element.type == GeckoSession.ContentDelegate.ContextElement.TYPE_IMAGE -> ContextHit(5, src)
+                    src != null &&
+                        (
+                            element.type == GeckoSession.ContentDelegate.ContextElement.TYPE_VIDEO ||
+                                element.type == GeckoSession.ContentDelegate.ContextElement.TYPE_AUDIO
+                        ) -> ContextHit(9, src)
                     link != null -> ContextHit(7, link)
                     else -> null
                 }
@@ -224,7 +231,8 @@ class UIBrowserTab : Fragment() {
         val extra = hit.extra
         if (extra.isEmpty()) return
         when (num) {
-            1, 5 -> w0?.navigate(extra)
+            // A new tab, as the menu says: navigate() would load the address over the tab that is open.
+            1, 5 -> w0?.k0(extra)
             2 -> copyImage(extra)
             3, 4 -> {
                 val context = s0
@@ -234,8 +242,9 @@ class UIBrowserTab : Fragment() {
                 }
             }
             6 -> {
-                FilePicker.f4692a = extra
-                // Membuka UIExplorer membutuhkan MainActivityIn pada UIBrowser.
+                // Save image / video / sound: fetched and written to Downloads, with the popup, toast and notification.
+                val context = s0
+                if (context != null) Downloader.saveUrl(context, extra, null, null, w0?.a1, w0?.T0, viewLifecycleOwner)
             }
             else -> Unit
         }
@@ -246,31 +255,44 @@ class UIBrowserTab : Fragment() {
         Glide.with(context).asBitmap().load(url)
             .into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    try {
-                        val dir = File(context.cacheDir, "clipboard")
-                        if (!dir.exists()) dir.mkdirs()
-                        val image = File(dir, "img_${System.currentTimeMillis()}.png")
-                        FileOutputStream(image).use { out ->
-                            resource.compress(Bitmap.CompressFormat.PNG, 100, out)
+                    // Written off the main thread; the clipboard is set back on it.
+                    Thread {
+                        try {
+                            val dir = File(context.cacheDir, "clipboard")
+                            if (!dir.exists()) dir.mkdirs()
+                            // Older copies are cleared so the cache does not fill up.
+                            dir.listFiles()?.forEach { if (it.name.startsWith("img_")) it.delete() }
+                            val image = File(dir, "img_${System.currentTimeMillis()}.png")
+                            FileOutputStream(image).use { out ->
+                                resource.compress(Bitmap.CompressFormat.PNG, 100, out)
+                            }
+                            val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", image)
+                            val clip = ClipData.newUri(context.contentResolver, "image", uri)
+                            // A FileProvider URI is meaningless to the pasting app without a read grant. The clipboard
+                            // grants the URIs of its items, and an Intent item's data too. That Intent must not carry
+                            // this clip (it once did): the clip then contained itself and writing it to the clipboard
+                            // recursed until the app died, with nothing in the log.
+                            val grant = Intent(Intent.ACTION_VIEW).apply {
+                                setData(uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            clip.addItem(ClipData.Item(grant))
+                            Handler(Looper.getMainLooper()).post {
+                                try {
+                                    val manager = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                                    manager?.setPrimaryClip(clip)
+                                } catch (e: Exception) {
+                                    Log.e("CopyImage", "Clipboard refused the image", e)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("CopyImage", "Could not copy the image", e)
                         }
-                        val uri = FileProvider.getUriForFile(
-                            context,
-                            "${context.packageName}.provider",
-                            image
-                        )
-                        val manager = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-                        val clip = ClipData.newUri(context.contentResolver, "image", uri)
-                        // A FileProvider URI is meaningless to the pasting app without a read grant. Keep the URI
-                        // item for normal pastes and carry the grant in an Intent item beside it.
-                        val grant = Intent(Intent.ACTION_VIEW).apply {
-                            setData(uri)
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            clipData = clip
-                        }
-                        clip.addItem(ClipData.Item(grant))
-                        manager?.setPrimaryClip(clip)
-                    } catch (_: IOException) {
-                    }
+                    }.start()
+                }
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    Log.e("CopyImage", "Could not load $url")
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) = Unit

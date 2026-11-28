@@ -137,10 +137,20 @@ class UIBrowser : UIFragment(), BackPressHandler {
                         .alpha(0.4f)
                         .setDuration(600L)
                         .setInterpolator(AccelerateDecelerateInterpolator())
-                        .withEndAction { button.visibility = View.GONE }
+                        .withEndAction {
+                            // Back in the toolbar where it was: the popup is anchored to this button.
+                            button.translationX = 0f
+                            button.translationY = 0f
+                            button.scaleX = 1f
+                            button.scaleY = 1f
+                            button.alpha = 1f
+                            button.visibility = View.VISIBLE
+                        }
                         .start()
                 }
                 button.setImageResource(R.drawable.ui_browser_ic_downloading)
+            } else if (i2 == 1) {
+                T0?.setImageResource(R.drawable.ui_browser_ic_downloads)
             } else if (i2 == 2) {
                 X0 = true
                 T0?.setImageResource(R.drawable.ui_browser_ic_downloaded)
