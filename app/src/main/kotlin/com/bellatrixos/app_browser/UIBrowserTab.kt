@@ -161,13 +161,14 @@ class UIBrowserTab : Fragment() {
             // The window's title bar steps aside for a full-screen page and comes back after it.
             w0?.m0(!on)
         }
-        // Sign-in popups (window.open) get a window of their own so they can answer the page; other links open in this tab.
+        // Sign-in popups (window.open) get a window of their own so they can answer the page; other links open in a new tab.
         web.onNewWindow = { uri ->
             val context = s0
+            val browser = w0
             if (context != null && GeckoPopup.wantsPopup(uri)) {
                 GeckoPopup.open(context)
             } else {
-                web.loadUrl(uri)
+                if (browser != null) browser.k0(uri) else web.loadUrl(uri)
                 null
             }
         }

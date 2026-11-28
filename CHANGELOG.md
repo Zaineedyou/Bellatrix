@@ -9,6 +9,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Bel
 
 ## [Unreleased]
 
+## [3.4.2] - 2026-11-28
+
+### Changed
+
+- Links that open a new window (a link with "open in a new tab", or a page's own `window.open`) now open in a new tab, as in Firefox, instead of replacing the page you were on. Sign-in windows still open over the page that asked for them.
+
+## [3.4.1] - 2026-11-28
+
+### Fixed
+
+- The Browser no longer closes when you press the Extensions button (or open any menu, switch or checkbox that uses the app libraries' own drawables). Fifteen drawables copied from the app libraries had lost their images in the decompile (`@null` in place of the picture), so Android refused to draw the switch and crashed with "`<item>` tag requires a 'drawable' attribute". The broken copies are gone and the libraries' own drawables are used again.
+
 ## [3.4.0] - 2026-11-28
 
 ### Added
